@@ -28,3 +28,13 @@ a.active hr{
         color: white;
     }
   }
+
+.slick-prev, 
+.slick-next {
+  background-color: darkblue; /* Change this to your desired color */
+}
+
+.slick-prev:hover, 
+.slick-next:hover {
+  background-color: darkblue; /* Change color on hover */
+}
