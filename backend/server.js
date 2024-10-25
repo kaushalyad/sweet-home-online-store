@@ -16,7 +16,14 @@ connectCloudinary()
 
 // middlewares
 app.use(express.json())
-app.use(cors())
+const corsOptions = {
+    origin: 'https://sweethome-store.com/', // Replace with your frontend URL
+    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
+    credentials: true,
+    optionsSuccessStatus: 204
+  };
+  
+  app.use(cors(corsOptions));
 
 // api endpoints
 app.use('/api/user',userRouter)
