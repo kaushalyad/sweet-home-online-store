@@ -16,13 +16,25 @@ connectCloudinary()
 
 // middlewares
 app.use(express.json())
+const allowedOrigins = [
+    'https://sweethome-store.com/', // First origin
+    'https://sweet-home-online-store.onrender.com/'  // Second origin
+  ];
 const corsOptions = {
-    origin: 'https://sweethome-store.com/', // Replace with your frontend URL
+    origin: (origin, callback) => {
+      // Allow requests with no origin (like mobile apps, Postman)
+      if (!origin || allowedOrigins.indexOf(origin) !== -1) {
+        callback(null, true);
+      } else {
+        callback(new Error('Not allowed by CORS'));
+      }
+    },
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
     credentials: true,
     optionsSuccessStatus: 204
   };
   
+  // Use the CORS middleware
   app.use(cors(corsOptions));
 
 // api endpoints
