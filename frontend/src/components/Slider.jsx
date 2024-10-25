@@ -18,7 +18,7 @@ const NextArrow = (props) => {
       }}
       onClick={onClick}
     >
-      <BiChevronRight size={50} color="blue" /> {/* Custom icon */}
+      <BiChevronRight size={40} color="blue" /> {/* Custom icon */}
     </div>
   );
 };
@@ -39,38 +39,54 @@ const PrevArrow = (props) => {
       }}
       onClick={onClick}
     >
-      <BiChevronLeft size={50} color="blue" /> {/* Custom icon */}
+      <BiChevronLeft size={40} color="blue" /> {/* Custom icon */}
     </div>
   );
 };
 
 const Slider = () => {
-  var settings = {
+  const settings = {
     dots: true,
     infinite: true,
     speed: 500,
-    slidesToShow: 3,
+    slidesToShow: 3, // Default number of slides to show
     slidesToScroll: 1,
-    nextArrow: <NextArrow />, // Add custom next arrow
-    prevArrow: <PrevArrow />, // Add custom prev arrow
+    prevArrow: <PrevArrow />, // Assign custom left arrow
+    nextArrow: <NextArrow />,
+    responsive: [
+      {
+        breakpoint: 390, // Screen width below 350px
+        settings: {
+          slidesToShow: 1, // Show only 1 slide
+          slidesToScroll: 1,
+        },
+      },
+      {
+        breakpoint: 768, // Example for larger screens (you can add more breakpoints)
+        settings: {
+          slidesToShow: 2, // Show 2 slides on medium-sized screens
+          slidesToScroll: 1,
+        },
+      },
+    ],
   };
 
   return (
     <>
       <section className="hero">
-        <div className="hero-container">
+        <div className="min-h-48">
           <SliderSlick {...settings}>
             <div>
-              <img src={assets.slider1} />
+              <img src={assets.slider1} className="min-h-44" />
             </div>
             <div>
-              <img src={assets.slider2} />
+              <img src={assets.slider2} className="min-h-44" />
             </div>
             <div>
-              <img src={assets.slider3} />
+              <img src={assets.slider3} className="min-h-44" />
             </div>
             <div>
-              <img src={assets.slider4} />
+              <img src={assets.slider4} className="min-h-44" />
             </div>
           </SliderSlick>
         </div>
