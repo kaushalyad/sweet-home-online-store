@@ -5,6 +5,7 @@
   "type": "module",
   "scripts": {
     "start": "node server.js",
+    "build": "vite build",
     "server": "nodemon server.js"
   },
   "author": "",

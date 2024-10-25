@@ -8,14 +8,20 @@ const Footer = () => {
         <div>
           <img src={assets.logo} className="mb-5 w-14" alt="" />
           <p className="w-full md:w-2/3 text-gray-600">
-            At Sweet Home, we specialize in delightful sweets made
-            exclusively from <span className="font-bold text-lg text-red-800">pure cow milk</span>. Our artisanal treats combine
-            traditional recipes with the rich, creamy flavor of high-quality
-            milk, ensuring every bite is a taste of indulgence. Whether you're
-            looking for the latest sweet sensations or our best-selling
-            favorites, our offerings promise to satisfy your cravings and bring
-            a touch of sweetness to your day. Discover the essence of authentic
-            sweetness with us!
+            At{" "}
+            <span className=" font-semibold text-lg text-red-400">
+              Sweet Home
+            </span>
+            , we specialize in delightful sweets made exclusively from{" "}
+            <span className="font-semibold text-lg text-red-400">
+              pure cow milk
+            </span>
+            . Our artisanal treats combine traditional recipes with the rich,
+            creamy flavor of high-quality milk, ensuring every bite is a taste
+            of indulgence. Whether you're looking for the latest sweet
+            sensations or our best-selling favorites, our offerings promise to
+            satisfy your cravings and bring a touch of sweetness to your day.
+            Discover the essence of authentic sweetness with us!
           </p>
         </div>
 
