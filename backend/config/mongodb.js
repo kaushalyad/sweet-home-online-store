@@ -8,6 +8,8 @@ const connectDB = async () => {
 
     await mongoose.connect(`${process.env.MONGODB_URI}/sweet-home-database`)
 
+    
+
 }
 
 export default connectDB;
