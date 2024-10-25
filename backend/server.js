@@ -14,10 +14,12 @@ const port = process.env.PORT || 4000
 connectDB()
 connectCloudinary()
 
+
 // middlewares
 app.use(express.json())
 const allowedOrigins = [
     'https://sweethome-store.com/', // First origin
+    
     'https://sweet-home-online-store.onrender.com/'  // Second origin
   ];
 const corsOptions = {
