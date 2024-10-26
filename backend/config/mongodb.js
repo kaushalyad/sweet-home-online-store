@@ -16,12 +16,10 @@ const connectDB = async () => {
             console.log("MongoDB connection disconnected.");
         });
 
-        // Connect to MongoDB with TLS configuration options
-        await mongoose.connect(`${process.env.MONGODB_URI}/sweet-home-database`, {
-            useNewUrlParser: true,
-            useUnifiedTopology: true,
+        // Connect to MongoDB with TLS configuration options, without deprecated options
+        await mongoose.connect(process.env.MONGODB_URI, {
             tls: true,
-            tlsAllowInvalidCertificates: true, // Allow if necessary for compatibility
+            tlsAllowInvalidCertificates: true, // Optional: Allow invalid certs for testing, disable for production
         });
 
     } catch (error) {
