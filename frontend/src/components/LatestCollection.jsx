@@ -4,7 +4,7 @@ import Title from "./Title";
 import ProductItem from "./ProductItem";
 import Buffer from "./Buffer";
 const LatestCollection = () => {
-  const { products, buffers } = useContext(ShopContext);
+  const { products, buffer } = useContext(ShopContext);
   const [latestProducts, setLatestProducts] = useState([]);
 
   useEffect(() => {
@@ -24,7 +24,7 @@ const LatestCollection = () => {
 
       {/* Rendering Products */}
 
-      {buffers ? (
+      {buffer ? (
         <Buffer />
       ) : (
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 gap-y-6">
