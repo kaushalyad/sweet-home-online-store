@@ -18,7 +18,7 @@ connectCloudinary();
 // middlewares
 app.use(express.json());
 
-app.use();
+app.use(cors());
 
 // api endpoints
 app.use("/api/user", userRouter);
