@@ -15,18 +15,10 @@ const port = process.env.PORT || 4000;
 connectDB();
 connectCloudinary();
 
-app.use(express.static(path.join(__dirname, "../frontend/dist")));
-app.get("*", (req, res) => {
-  res.sendFile(path.resolve(__dirname, "../frontend/dist", "index.html"));
-});
 // middlewares
 app.use(express.json());
 
-app.use(
-  cors({
-    origin: "http://145.223.20.24", // Allow only your VPS IP address or domain
-  })
-);
+app.use();
 
 // api endpoints
 app.use("/api/user", userRouter);
