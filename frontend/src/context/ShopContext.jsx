@@ -10,7 +10,7 @@ const ShopContextProvider = (props) => {
     const currency = '';
     const delivery_fee = 10;
     // console.log(import.meta.env.VITE_BACKEND_URL);
-    const backendUrl = 'https://api.sweethome-store.com/api/product/list'
+    const backendUrl = import.meta.env.VITE_BACKEND_URL
 
     const [search, setSearch] = useState('');
     const [showSearch, setShowSearch] = useState(false);
