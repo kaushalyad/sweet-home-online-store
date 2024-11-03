@@ -23,31 +23,35 @@ const Navbar = () => {
   };
 
   return (
-    <div className="flex items-center justify-between py-5 font-medium">
-      <Link to="/">
-        <img src={assets.logo} className="md:w-24 sm: w-14" alt="" />
-      </Link>
+    <div className="flex  items-center justify-between py-5 font-medium">
+      <div className="flex items-center gap-10">
+        <Link to="/">
+          <img src={assets.logo} className="md:w-24 sm: w-14" alt="" />
+        </Link>
 
-      <ul className="hidden sm:flex gap-5 text-sm text-gray-700">
-        <NavLink to="/" className="flex flex-col items-center gap-1">
-          <p>HOME</p>
-          <hr className="w-2/4 border-none h-[1.5px] bg-gray-700 hidden" />
-        </NavLink>
-        <NavLink to="/collection" className="flex flex-col items-center gap-1">
-          <p>COLLECTION</p>
-          <hr className="w-2/4 border-none h-[1.5px] bg-gray-700 hidden" />
-        </NavLink>
-        <NavLink to="/about" className="flex flex-col items-center gap-1">
-          <p>ABOUT</p>
-          <hr className="w-2/4 border-none h-[1.5px] bg-gray-700 hidden" />
-        </NavLink>
-        <NavLink to="/contact" className="flex flex-col items-center gap-1">
-          <p>CONTACT</p>
-          <hr className="w-2/4 border-none h-[1.5px] bg-gray-700 hidden" />
-        </NavLink>
-      </ul>
-
-      <div className="flex items-center gap-6">
+        <ul className="hidden sm:flex gap-4 text-sm text-gray-700">
+          <NavLink to="/" className="flex flex-col items-center gap-1">
+            <p>HOME</p>
+            <hr className="w-2/4 border-none h-[1.5px] bg-gray-700 hidden" />
+          </NavLink>
+          <NavLink
+            to="/collection"
+            className="flex flex-col items-center gap-1"
+          >
+            <p>COLLECTION</p>
+            <hr className="w-2/4 border-none h-[1.5px] bg-gray-700 hidden" />
+          </NavLink>
+          <NavLink to="/about" className="flex flex-col items-center gap-1">
+            <p>ABOUT</p>
+            <hr className="w-2/4 border-none h-[1.5px] bg-gray-700 hidden" />
+          </NavLink>
+          <NavLink to="/contact" className="flex flex-col items-center gap-1">
+            <p>CONTACT</p>
+            <hr className="w-2/4 border-none h-[1.5px] bg-gray-700 hidden" />
+          </NavLink>
+        </ul>
+      </div>
+      <div className="flex items-center gap-4">
         <img
           onClick={() => {
             setShowSearch(true);
@@ -59,12 +63,27 @@ const Navbar = () => {
         />
 
         <div className="group relative">
-          <button
-            onClick={() => (token ? null : navigate("/login"))}
-            className="bg-black text-white px-10 py-1 rounded-sm"
-            src={assets.profile_icon}
-            alt=""
-          >Login</button>
+          {/* <img onClick={()=> token ? null : navigate('/login') } className='w-5 cursor-pointer' src={assets.profile_icon} alt="" /> */}
+          {token ? (
+            <div className="flex flex-row">
+              <p>{}</p>
+              <img
+                onClick={() => (token ? null : navigate("/login"))}
+                className="w-5 cursor-pointer"
+                src={assets.profile_icon}
+                alt=""
+              />
+            </div>
+          ) : (
+            <button
+              onClick={() => (token ? null : navigate("/login"))}
+              className="bg-black text-white px-10 py-1 rounded-sm"
+              src={assets.profile_icon}
+              alt=""
+            >
+              Login
+            </button>
+          )}
           {/* Dropdown Menu */}
           {token && (
             <div className="group-hover:block hidden absolute dropdown-menu right-0 pt-4 z-10">
@@ -84,7 +103,7 @@ const Navbar = () => {
           )}
         </div>
         <Link to="/cart" className="relative">
-          <img src={assets.cart_icon} className="w-5 min-w-5" alt="" />
+          <img src={assets.cart_icon} className="w-6 min-w-6" alt="" />
           <p className="absolute right-[-5px] bottom-[-5px] w-4 text-center leading-4 bg-black text-white aspect-square rounded-full text-[8px]">
             {getCartCount()}
           </p>
