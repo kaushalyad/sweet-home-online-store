@@ -15,7 +15,7 @@ const BestSeller = () => {
   return (
     <div className="my-10">
       <div className="text-center sm:text-2xl md:text-3xl py-8">
-        <Title text1={"BEST"} text2={"SELLERS"} />
+        <Title text1={"Trending"} text2={"Sweets And Namkeens"} />
         <p className="w-3/4 m-auto text-xs sm:text-sm md:text-base text-gray-600">
           Discover our best sellers, loved by all! Indulge in crowd favorites
           like rich brownies, decadent cookies, and classic cakes, perfect for

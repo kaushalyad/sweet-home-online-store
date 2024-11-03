@@ -1,12 +1,18 @@
-import React from 'react'
+import React from 'react';
 
-const Title = ({text1,text2}) => {
+const Title = ({ text1 = "Welcome to", text2 = "Our Store", className = "" }) => {
   return (
-    <div className='inline-flex gap-2 items-center mb-3'>
-      <p className='text-gray-500'>{text1} <span className='text-gray-700 font-medium'>{text2}</span></p>
-      <p className='w-8 sm:w-12 h-[1px] sm:h-[2px] bg-gray-700'></p>
+    <div className={`flex items-center gap-3 mb-6 ${className}`} aria-label={`${text1} ${text2}`}>
+      <div className="w-10 sm:w-14 h-[2px] bg-gradient-to-r from-pink-500 to-purple-500 animate-slide rotate-[-10deg]"></div>
+      <p className="text-gray-500 text-xl sm:text-2xl font-light tracking-wider relative">
+        {text1}{" "}
+        <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-500 via-blue-500 to-green-500 animate-gradient font-bold shadow-lg">
+          {text2}
+        </span>
+      </p>
+      <div className="w-10 sm:w-14 h-[2px] bg-gradient-to-r from-purple-500 to-pink-500 animate-slide rotate-[10deg]"></div>
     </div>
-  )
-}
+  );
+};
 
-export default Title
+export default Title;

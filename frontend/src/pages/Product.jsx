@@ -67,14 +67,14 @@ const Product = () => {
           <div className="flex gap-8 mt-4">
             <button
               onClick={() => addToCart(productData._id, 1)}
-              className="bg-black text-white px-8 py-3 text-sm active:bg-gray-700"
+              className="bg-black text-white mobile:px-8 py-3 small_mobile:px-4 text-sm active:bg-gray-700 rounded-sm"
             >
               ADD TO CART
             </button>
 
             <button
               onClick={() => addToCart(productData._id, 1)}
-              className="bg-black text-white px-11 py-3 text-sm active:bg-gray-700"
+              className="bg-black text-white small_mobile:px-6 mobile:px-11 py-3 text-sm active:bg-gray-700 rounded-sm"
             >
               <Link to="/cart">BUY NOW</Link>
             </button>
