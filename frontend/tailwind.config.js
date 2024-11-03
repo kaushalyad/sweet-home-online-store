@@ -1,4 +1,4 @@
-/** @type {import('tailwindcss').Config} */
+// tailwind.config.js
 export default {
   content: ["./index.html", "./src/**/*.{js,ts,jsx,tsx}"],
   theme: {
@@ -14,23 +14,31 @@ export default {
         dot1: "dot 1s infinite ease-in-out",
         dot2: "dot 1s infinite ease-in-out 0.2s",
         dot3: "dot 1s infinite ease-in-out 0.4s",
-        gradient: "gradient 3s ease infinite",       // New gradient animation for text
-        slide: "slide 2s ease-in-out infinite",     // New slide animation for lines
+        gradient: "gradient 3s ease infinite",
+        slide: "slide 2s ease-in-out infinite",
+        rotate: "rotate 3s linear infinite",  // New rotate animation
       },
       keyframes: {
         dot: {
           "0%, 100%": { opacity: 0 },
           "50%": { opacity: 1 },
         },
-        gradient: {                                 // Keyframes for gradient animation
+        gradient: {
           "0%, 100%": { backgroundPosition: "0% 50%" },
           "50%": { backgroundPosition: "100% 50%" },
         },
-        slide: {                                    // Keyframes for slide animation
+        slide: {
           "0%": { transform: "translateX(-10px)" },
           "50%": { transform: "translateX(10px)" },
           "100%": { transform: "translateX(-10px)" },
         },
+        rotate: {                                   // New keyframes for rotation
+          "0%": { transform: "rotate(0deg)" },
+          "100%": { transform: "rotate(360deg)" },
+        },
+      },
+      boxShadow: {
+        glow: "0 0 8px 4px rgba(128, 90, 213, 0.6)",  // Soft purple glow around text
       },
     },
   },
