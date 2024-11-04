@@ -10,9 +10,9 @@ const Contact = () => {
         <Title text1={"CONTACT"} text2={"US"} />
       </div>
 
-      <div className="my-10 flex flex-col justify-center md:flex-row gap-10 mb-28">
+      <div className="my-10 flex flex-col justify-between md:flex-row gap-10 mb-28">
         <img
-          className="w-full md:max-w-[480px]"
+          className=" max-h-96"
           src={assets.contact_img}
           alt=""
         />

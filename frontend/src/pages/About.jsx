@@ -29,10 +29,11 @@ const About = () => {
           </p>
           <b className="text-gray-800">Our Mission</b>
           <p>
-            Our mission at Forever is to empower customers with choice,
-            convenience, and confidence. We're dedicated to providing a seamless
-            shopping experience that exceeds expectations, from browsing and
-            ordering to delivery and beyond.
+            At Sweet Home, our mission is to bring the authentic taste of Indian
+            sweets to every doorstep, offering quality treats at affordable
+            prices. We are committed to delivering joy with each bite, ensuring
+            everyone can savor the richness of India’s traditional sweets
+            without compromise on quality or cost.
           </p>
         </div>
       </div>
