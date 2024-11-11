@@ -15,11 +15,6 @@ const LatestCollection = () => {
     <div className="my-10">
       <div className="text-center py-8 sm:text-2xl md:text-3xl">
         <Title text1={"Latest"} text2={"Sweets And Namkeens"} />
-        <p className="w-3/4 m-auto text-xs sm:text-sm md:text-base text-gray-600">
-          Explore the latest sweets featuring unique flavors like matcha and
-          lavender. From artisanal chocolates to gourmet cupcakes, there's a
-          delightful treat for everyone!
-        </p>
       </div>
 
       {/* Rendering Products */}
