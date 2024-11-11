@@ -266,7 +266,7 @@ const PlaceOrder = () => {
                 }`}
               ></p>
               {/* <img className="h-5 mx-4" src={assets.razorpay_logo} alt="" /> */}
-              
+
               <p className="text-gray-700 text-sm font-medium mx-4">
                 ONLINE PAYMENT
               </p>
