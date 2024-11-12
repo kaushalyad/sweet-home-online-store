@@ -1,10 +1,12 @@
 import React from "react";
 import { assets } from "../assets/assets";
+import { NavLink } from "react-router-dom";
+import { FaPhoneAlt, FaEnvelope } from "react-icons/fa"; // Import icons
 
 const Footer = () => {
   return (
     <div>
-      <div className="flex flex-col sm:grid grid-cols-[3fr_1fr_1fr] gap-14 my-10 mt-40 text-sm">
+      <div className=" sm:grid grid-cols-[2fr_1fr_1fr_1fr] gap-7 my-10 mt-40 text-sm">
         <div>
           <img src={assets.logo} className="mb-5 w-14" alt="" />
           <p className="w-full md:w-2/3 text-gray-600">
@@ -24,23 +26,50 @@ const Footer = () => {
             Discover the essence of authentic sweetness with us!
           </p>
         </div>
+        <div>
+          <p className="text-xl font-medium mb-5">HELP</p>
+          <ul className="flex flex-col gap-1 text-gray-600">
+            <NavLink><li className="underline">Payments </li></NavLink>
+            <NavLink><li className="underline">Shipping</li></NavLink>
+            <NavLink><li className="underline">Cancellation & Returns</li></NavLink>
+            <NavLink><li className="underline">FAQ</li></NavLink>
+          </ul>
+        </div>
 
         <div>
-          <p className="text-xl font-medium mb-5">COMPANY</p>
+          <p className="text-xl font-medium mb-5">CONSUMER POLICY</p>
           <ul className="flex flex-col gap-1 text-gray-600">
-            <li>Home</li>
-            <li>About us</li>
-            <li>Delivery</li>
-            <li>Privacy policy</li>
+            <NavLink><li className="underline">Cancellation & Returns</li></NavLink>
+            <NavLink><li className="underline">Privacy policy</li></NavLink>
           </ul>
         </div>
 
         <div>
           <p className="text-xl font-medium mb-5">GET IN TOUCH</p>
-          <ul className="flex flex-col gap-1 text-gray-600">
-            <li>+91-9931018857</li>
-            <li>sweethomeowner@sweethome-store.com </li>
-          </ul>
+          <ul className="flex flex-col gap-2 text-gray-600 text-sm">
+    <li className="flex items-center gap-2">
+      <FaPhoneAlt className="text-blue-600" />
+      <span>+91-9931018857</span>
+    </li>
+    <li className="flex items-center gap-2">
+      <FaEnvelope className="text-blue-600" />
+      <a 
+        href="mailto:sweethomeowner@sweethome-store.com" 
+        className="hover:text-blue-600"
+      >
+        sweethomeowner@sweethome-store.com
+      </a>
+    </li>
+    <li className="flex items-center gap-2">
+      <FaEnvelope className="text-blue-600" />
+      <a 
+        href="kaushalyad321@gmail.com" 
+        className="hover:text-blue-600"
+      >
+        kaushalyad321@gmail.com
+      </a>
+    </li>
+  </ul>
         </div>
       </div>
 
