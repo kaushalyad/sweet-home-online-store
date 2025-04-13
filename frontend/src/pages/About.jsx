@@ -4,6 +4,7 @@ import { assets } from "../assets/assets";
 import NewsletterBox from "../components/NewsletterBox";
 import { motion } from "framer-motion";
 import { FaCheckCircle, FaUsers, FaStar, FaShippingFast } from "react-icons/fa";
+import { Link } from "react-router-dom";
 
 const About = () => {
   // Animation variants
@@ -397,12 +398,12 @@ const About = () => {
             <p className="text-white text-lg mb-8 max-w-2xl mx-auto">
               Browse our collection of authentic sweets and place your order today. Satisfaction guaranteed!
             </p>
-            <a 
-              href="/products" 
+            <Link 
+              to="/collection" 
               className="inline-block px-8 py-4 bg-white text-pink-500 rounded-full font-bold hover:bg-gray-100 transition-colors duration-300"
             >
               Shop Now
-            </a>
+            </Link>
           </motion.div>
         </div>
       </div>

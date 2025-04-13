@@ -6,7 +6,7 @@ import { Link, useLocation } from 'react-router-dom';
 import { FaUser, FaMapMarkerAlt, FaPhone, FaEnvelope, FaCalendarAlt, FaShoppingBag, FaHeart, FaCog, FaArrowRight } from 'react-icons/fa';
 
 const Profile = () => {
-  const { backendUrl, token, currency } = useContext(ShopContext);
+  const { backendUrl, token, currency, products, wishlistItems, addToCart, removeFromWishlist } = useContext(ShopContext);
   const location = useLocation();
   const [userData, setUserData] = useState({
     name: 'Sweet Home Customer',
@@ -216,19 +216,95 @@ const Profile = () => {
             initial="hidden"
             animate="visible"
             variants={fadeIn}
-            className="bg-white p-6 rounded-lg shadow-sm text-center py-12"
+            className="bg-white p-6 rounded-lg shadow-sm"
           >
-            <FaHeart className="mx-auto text-gray-300 text-4xl mb-4" />
-            <h3 className="text-xl font-bold text-gray-800 mb-2">Wishlist Coming Soon</h3>
-            <p className="text-gray-600 mb-6 max-w-md mx-auto">
-              We're working on this feature. Soon you'll be able to save all your favorite sweet treats here.
-            </p>
-            <Link 
-              to="/collection" 
-              className="inline-block px-6 py-2 bg-black text-white rounded-md hover:bg-gray-800 transition-colors duration-300"
-            >
-              Browse Collection
-            </Link>
+            <div className="flex justify-between items-center mb-6">
+              <h3 className="text-xl font-bold text-gray-800">My Wishlist</h3>
+              <Link 
+                to="/collection" 
+                className="text-pink-500 hover:text-pink-700 flex items-center transition-colors duration-300"
+              >
+                Browse More <FaArrowRight className="ml-2" />
+              </Link>
+            </div>
+            
+            {wishlistItems && wishlistItems.length > 0 ? (
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+                {wishlistItems.map((productId) => {
+                  const product = products.find(p => p._id === productId);
+                  if (!product) return null;
+                  
+                  return (
+                    <motion.div 
+                      key={product._id}
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.4 }}
+                      className="border border-gray-200 rounded-lg overflow-hidden hover:shadow-md transition-shadow duration-300"
+                    >
+                      <div className="relative">
+                        <Link to={`/collection/${product._id}`}>
+                          <img 
+                            src={product.image[0]} 
+                            alt={product.name} 
+                            className="w-full h-48 object-cover"
+                          />
+                        </Link>
+                        <button
+                          onClick={() => removeFromWishlist(product._id)}
+                          className="absolute top-2 right-2 bg-white p-2 rounded-full shadow-md hover:shadow-lg transition-all duration-300"
+                          aria-label="Remove from wishlist"
+                        >
+                          <FaHeart className="text-red-500" />
+                        </button>
+                      </div>
+                      
+                      <div className="p-4">
+                        <Link 
+                          to={`/collection/${product._id}`}
+                          className="hover:text-pink-500 transition-colors duration-300"
+                        >
+                          <h4 className="font-medium text-gray-800 line-clamp-1">{product.name}</h4>
+                        </Link>
+                        <p className="font-bold text-gray-900 mt-2">
+                          <span className="text-xs text-gray-500 mr-1">{currency}</span>
+                          <span>{product.price}</span>
+                        </p>
+                        
+                        <div className="mt-4 flex justify-between">
+                          <button
+                            onClick={() => addToCart(product._id, product.sizes[0])}
+                            className="bg-black text-white text-xs px-4 py-2 rounded-sm hover:bg-gray-800 transition-colors"
+                          >
+                            ADD TO CART
+                          </button>
+                          <button
+                            onClick={() => removeFromWishlist(product._id)}
+                            className="text-gray-500 text-xs hover:text-gray-700 transition-colors duration-300"
+                          >
+                            REMOVE
+                          </button>
+                        </div>
+                      </div>
+                    </motion.div>
+                  );
+                })}
+              </div>
+            ) : (
+              <div className="text-center py-12 bg-gray-50 rounded-lg">
+                <FaHeart className="mx-auto text-gray-300 text-4xl mb-4" />
+                <h3 className="text-xl font-bold text-gray-800 mb-2">Your Wishlist is Empty</h3>
+                <p className="text-gray-600 mb-6 max-w-md mx-auto">
+                  Save your favorite products to your wishlist and they'll be here waiting for you.
+                </p>
+                <Link 
+                  to="/collection" 
+                  className="inline-block px-6 py-2 bg-black text-white rounded-md hover:bg-gray-800 transition-colors duration-300"
+                >
+                  Browse Collection
+                </Link>
+              </div>
+            )}
           </motion.div>
         );
         

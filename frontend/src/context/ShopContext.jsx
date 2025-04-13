@@ -12,6 +12,7 @@ const ShopContextProvider = (props) => {
   const [search, setSearch] = useState("");
   const [showSearch, setShowSearch] = useState(true);
   const [cartItems, setCartItems] = useState({});
+  const [wishlistItems, setWishlistItems] = useState([]);
   const [products, setProducts] = useState([]);
   const [buffer, setBuffer] = useState(true);
   const [token, setToken] = useState(() => localStorage.getItem("token") || "");
@@ -25,9 +26,13 @@ const ShopContextProvider = (props) => {
       setIsAuthenticated(true);
       // Validate token on backend 
       validateToken(token);
+      // Get user's wishlist when logged in
+      getUserWishlist(token);
     } else {
       localStorage.removeItem("token");
       setIsAuthenticated(false);
+      // Clear wishlist when logging out
+      setWishlistItems([]);
     }
   }, [token]);
 
@@ -68,6 +73,91 @@ const ShopContextProvider = (props) => {
         // Error in setting up the request
         console.error("Request setup error:", error.message);
       }
+    }
+  };
+
+  // Add to wishlist function
+  const addToWishlist = async (productId) => {
+    if (!token) {
+      toast.error("Please login to add items to your wishlist");
+      navigate("/login");
+      return;
+    }
+    
+    try {
+      // Check if product is already in wishlist
+      if (wishlistItems.includes(productId)) {
+        // Remove from wishlist if already added
+        removeFromWishlist(productId);
+        return;
+      }
+      
+      // Add to local state
+      setWishlistItems(prev => [...prev, productId]);
+      
+      // Save to localStorage as backup
+      const localWishlist = JSON.parse(localStorage.getItem("wishlist") || "[]");
+      if (!localWishlist.includes(productId)) {
+        localStorage.setItem("wishlist", JSON.stringify([...localWishlist, productId]));
+      }
+      
+      // Show success message
+      toast.success("Product added to wishlist");
+      
+      // In a full implementation, this would synchronize with a backend API
+      // For now, we're just using localStorage
+    } catch (error) {
+      console.error("Error adding to wishlist:", error);
+      toast.error("Failed to add to wishlist. Please try again.");
+    }
+  };
+
+  // Remove from wishlist function
+  const removeFromWishlist = async (productId) => {
+    try {
+      // Remove from local state
+      setWishlistItems(prev => prev.filter(id => id !== productId));
+      
+      // Remove from localStorage
+      const localWishlist = JSON.parse(localStorage.getItem("wishlist") || "[]");
+      localStorage.setItem("wishlist", JSON.stringify(localWishlist.filter(id => id !== productId)));
+      
+      // Show success message
+      toast.success("Product removed from wishlist");
+      
+      // In a full implementation, this would synchronize with a backend API
+    } catch (error) {
+      console.error("Error removing from wishlist:", error);
+      toast.error("Failed to remove from wishlist. Please try again.");
+    }
+  };
+
+  // Check if product is in wishlist
+  const isInWishlist = (productId) => {
+    return wishlistItems.includes(productId);
+  };
+
+  // Get user's wishlist
+  const getUserWishlist = async (userToken) => {
+    if (!userToken) return;
+    
+    try {
+      // First load from localStorage as fallback
+      const localWishlist = JSON.parse(localStorage.getItem("wishlist") || "[]");
+      setWishlistItems(localWishlist);
+      
+      // In a full implementation, this would fetch from an API
+      // For example:
+      // const response = await axios.get(backendUrl + "/api/wishlist", { 
+      //   headers: { token: userToken } 
+      // });
+      // if (response.data.success) {
+      //   setWishlistItems(response.data.wishlistItems);
+      //   localStorage.setItem("wishlist", JSON.stringify(response.data.wishlistItems));
+      // }
+    } catch (error) {
+      console.error("Error fetching wishlist:", error);
+      // Don't show error toast as this is not critical
     }
   };
 
@@ -198,6 +288,7 @@ const ShopContextProvider = (props) => {
     localStorage.removeItem("token");
     setToken("");
     setCartItems({});
+    setWishlistItems([]);
     navigate("/login");
     toast.success("Logged out successfully!");
   };
@@ -210,8 +301,7 @@ const ShopContextProvider = (props) => {
     }
   }, []);
 
-  const value = {
-    products,
+  const contextValue = {
     currency,
     delivery_fee,
     search,
@@ -224,17 +314,25 @@ const ShopContextProvider = (props) => {
     getCartCount,
     updateQuantity,
     getCartAmount,
+    products,
     navigate,
     backendUrl,
     setToken,
     token,
     buffer,
     logout,
-    isAuthenticated
+    isAuthenticated,
+    // Add wishlist functions to context
+    wishlistItems,
+    addToWishlist,
+    removeFromWishlist,
+    isInWishlist
   };
 
   return (
-    <ShopContext.Provider value={value}>{props.children}</ShopContext.Provider>
+    <ShopContext.Provider value={contextValue}>
+      {props.children}
+    </ShopContext.Provider>
   );
 };
 

@@ -75,7 +75,7 @@ const LatestCollection = () => {
             className="flex justify-center mt-12"
           >
             <Link 
-              to="/products" 
+              to="/collection" 
               className="inline-flex items-center px-6 py-3 border border-gray-300 rounded-full hover:bg-gray-50 transition-colors duration-300 text-gray-800 font-medium"
             >
               View All Products

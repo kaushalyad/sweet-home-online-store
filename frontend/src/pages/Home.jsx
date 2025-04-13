@@ -6,6 +6,7 @@ import OurPolicy from '../components/OurPolicy'
 import NewsletterBox from '../components/NewsletterBox'
 import { motion } from 'framer-motion'
 import { FaArrowRight } from 'react-icons/fa'
+import { Link } from 'react-router-dom'
 
 const Home = () => {
   // Animation variants
@@ -32,12 +33,12 @@ const Home = () => {
               Experience the authentic taste of traditional Indian sweets, delivered fresh to your doorstep
             </p>
             <div className="flex justify-center space-x-4">
-              <a 
-                href="/products" 
+              <Link 
+                to="/collection" 
                 className="px-8 py-3 bg-black text-white rounded-full hover:bg-gray-800 transition-colors duration-300 inline-flex items-center"
               >
                 Shop Now <FaArrowRight className="ml-2" />
-              </a>
+              </Link>
               <a 
                 href="#latest" 
                 className="px-8 py-3 bg-white text-gray-800 border border-gray-300 rounded-full hover:bg-gray-100 transition-colors duration-300"
@@ -91,12 +92,12 @@ const Home = () => {
             <p className="text-white text-lg mb-6 opacity-90">
               Celebrate festivals with our specially curated sweet boxes. Perfect for gifting and sharing joy with your loved ones.
             </p>
-            <a 
-              href="/products/category/festive" 
+            <Link 
+              to="/collection" 
               className="inline-block px-8 py-3 bg-white text-pink-500 rounded-full font-medium hover:bg-gray-100 transition-colors duration-300"
             >
               Explore Collection
-            </a>
+            </Link>
           </div>
           
           {/* Decorative circles */}
