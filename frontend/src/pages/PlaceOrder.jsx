@@ -7,7 +7,7 @@ import axios from "axios";
 import { toast } from "react-toastify";
 
 const PlaceOrder = () => {
-  const [method, setMethod] = useState("cod");
+  const [method, setMethod] = useState("razorpay");
   const {
     navigate,
     backendUrl,
@@ -37,38 +37,90 @@ const PlaceOrder = () => {
   };
 
   const initPay = (order) => {
+    console.log("initPay called with order:", order);
+    
+    // Check if Razorpay script is loaded
+    if (!window.Razorpay) {
+      console.error("Razorpay script not loaded! Make sure the script tag is in your HTML.");
+      toast.error("Payment gateway not available. Please try again later.");
+      return;
+    }
+    
+    // Get key from env
+    const razorpayKey = import.meta.env.VITE_RAZORPAY_KEY_ID;
+    console.log("Using Razorpay key:", razorpayKey);
+    
+    if (!razorpayKey) {
+      console.error("Razorpay key is missing in environment variables!");
+      toast.error("Payment configuration error. Please contact support.");
+      return;
+    }
+
     const options = {
-      key: import.meta.env.VITE_RAZORPAY_KEY_ID,
+      key: razorpayKey,
       amount: order.amount,
       currency: order.currency,
-      name: "Order Payment",
-      description: "Order Payment",
+      name: "Sweet Home",
+      description: "Payment for your order at Sweet Home",
       order_id: order.id,
       receipt: order.receipt,
+      prefill: {
+        name: formData.firstName + " " + formData.lastName,
+        email: formData.email,
+        contact: formData.phone
+      },
+      theme: {
+        color: "#000000"
+      },
       handler: async (response) => {
-        console.log(response);
+        console.log("Payment response:", response);
         try {
+          // Send the payment details to backend for verification
           const { data } = await axios.post(
             backendUrl + "/api/order/verifyRazorpay",
-            response,
+            {
+              ...response,
+              userId: order.receipt // This is necessary for order ID lookup
+            },
             { headers: { token } }
           );
+          
           if (data.success) {
-            navigate("/orders");
+            toast.success("Payment successful!");
             setCartItems({});
+            navigate("/orders");
+          } else {
+            toast.error(data.message || "Payment verification failed. Please contact support.");
           }
         } catch (error) {
-          console.log(error);
-          toast.error(error);
+          console.error("Payment verification error:", error);
+          toast.error(error.response?.data?.message || "Payment verification failed. Please try again.");
         }
       },
+      modal: {
+        ondismiss: function() {
+          console.log("Razorpay modal dismissed");
+          toast.info("Payment cancelled. You can try again later.");
+        }
+      }
     };
-    const rzp = new window.Razorpay(options);
-    rzp.open();
+    
+    console.log("Creating Razorpay instance with options:", { ...options, key: "[HIDDEN]" });
+    
+    try {
+      const rzp = new window.Razorpay(options);
+      console.log("Razorpay instance created, opening payment modal...");
+      rzp.open();
+      console.log("Razorpay open() called");
+    } catch (error) {
+      console.error("Razorpay initialization error:", error);
+      toast.error("Payment gateway initialization failed: " + (error.message || "Unknown error"));
+    }
   };
 
   const onSubmitHandler = async (event) => {
     event.preventDefault();
+    console.log("Form submitted, method:", method);
     try {
       let orderItems = [];
 
@@ -92,6 +144,8 @@ const PlaceOrder = () => {
         items: orderItems,
         amount: getCartAmount() + delivery_fee,
       };
+
+      console.log("Order data prepared:", orderData);
 
       switch (method) {
         // API Calls for COD
@@ -124,23 +178,35 @@ const PlaceOrder = () => {
           break;
 
         case "razorpay":
-          const responseRazorpay = await axios.post(
-            backendUrl + "/api/order/razorpay",
-            orderData,
-            { headers: { token } }
-          );
-          if (responseRazorpay.data.success) {
-            initPay(responseRazorpay.data.order);
+          console.log("Initiating Razorpay payment...");
+          try {
+            const responseRazorpay = await axios.post(
+              backendUrl + "/api/order/razorpay",
+              orderData,
+              { headers: { token } }
+            );
+            console.log("Razorpay API response:", responseRazorpay.data);
+            
+            if (responseRazorpay.data.success) {
+              console.log("Calling initPay with order:", responseRazorpay.data.order);
+              initPay(responseRazorpay.data.order);
+            } else {
+              console.error("Razorpay API failed:", responseRazorpay.data);
+              toast.error(responseRazorpay.data.message || "Failed to initialize payment");
+            }
+          } catch (error) {
+            console.error("Razorpay API error:", error);
+            toast.error("Failed to connect to payment server. Please try again.");
           }
-
           break;
 
         default:
+          console.error("Unknown payment method:", method);
           break;
       }
     } catch (error) {
-      console.log(error);
-      toast.error(error.message);
+      console.error("Order submission error:", error);
+      toast.error(error.message || "An error occurred while placing your order");
     }
   };
 
@@ -250,48 +316,57 @@ const PlaceOrder = () => {
 
         <div className="mt-12">
           <Title text1={"PAYMENT"} text2={"METHOD"} />
-          {/* --------------- Payment Method Selection ------------- */}
+          {/* Payment Method Selection */}
           <div className="flex gap-3 flex-col lg:flex-row mt-4">
-            {/* <div onClick={() => setMethod('stripe')} className='flex items-center gap-3 border p-2 px-3 cursor-pointer'>
-                            <p className={`min-w-3.5 h-3.5 border rounded-full ${method === 'stripe' ? 'bg-green-400' : ''}`}></p>
-                            <img className='h-5 mx-4' src={assets.stripe_logo} alt="" />
-                        </div> */}
             <div
-              onClick={() => setMethod("razorpay")}
-              className="flex items-center gap-3 border p-2 px-3 cursor-pointer"
+              onClick={() => {
+                setMethod("razorpay");
+                console.log("Payment method set to razorpay");
+              }}
+              className={`flex items-center gap-3 border p-2 px-3 cursor-pointer ${
+                method === "razorpay" ? "border-green-500 bg-green-50" : ""
+              }`}
             >
-              <p
-                className={`min-w-3.5 h-3.5 border rounded-full ${
-                  method === "razorpay" ? "bg-green-400" : ""
+              <div
+                className={`w-4 h-4 border rounded-full flex items-center justify-center ${
+                  method === "razorpay" ? "border-green-500" : "border-gray-400"
                 }`}
-              ></p>
-              {/* <img className="h-5 mx-4" src={assets.razorpay_logo} alt="" /> */}
-
-              <p className="text-gray-700 text-sm font-medium mx-4">
-                ONLINE PAYMENT
-              </p>
+              >
+                {method === "razorpay" && (
+                  <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                )}
+              </div>
+              <p className="text-gray-700 font-medium mx-4">ONLINE PAYMENT</p>
             </div>
+            
             <div
-              onClick={() => setMethod("cod")}
-              className="flex items-center gap-3 border p-2 px-3 cursor-pointer"
+              onClick={() => {
+                setMethod("cod");
+                console.log("Payment method set to COD");
+              }}
+              className={`flex items-center gap-3 border p-2 px-3 cursor-pointer ${
+                method === "cod" ? "border-green-500 bg-green-50" : ""
+              }`}
             >
-              <p
-                className={`min-w-3.5 h-3.5 border rounded-full ${
-                  method === "cod" ? "bg-green-400" : ""
+              <div
+                className={`w-4 h-4 border rounded-full flex items-center justify-center ${
+                  method === "cod" ? "border-green-500" : "border-gray-400"
                 }`}
-              ></p>
-              <p className="text-gray-700 text-sm font-medium mx-4">
-                CASH ON DELIVERY
-              </p>
+              >
+                {method === "cod" && (
+                  <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                )}
+              </div>
+              <p className="text-gray-700 font-medium mx-4">CASH ON DELIVERY</p>
             </div>
           </div>
 
           <div className="w-full text-end mt-8">
             <button
               type="submit"
-              className="bg-black text-white px-16 py-3 text-sm rounded-sm"
+              className="bg-black text-white px-16 py-3 text-sm rounded-sm hover:bg-gray-800 transition-colors"
             >
-              PLACE ORDER
+              {method === "razorpay" ? "PROCEED TO PAYMENT" : "PLACE ORDER"}
             </button>
           </div>
         </div>

@@ -98,4 +98,32 @@ const adminLogin = async (req, res) => {
   }
 };
 
-export { loginUser, registerUser, adminLogin };
+// Route for verifying token validity
+const verifyToken = async (req, res) => {
+  try {
+    // If the middleware passes, the token is valid
+    // The middleware has already verified the token and attached the userId to req.body
+    const userId = req.body.userId;
+    
+    // Fetch user info (optional, to return user data)
+    const user = await userModel.findById(userId).select('-password');
+    
+    if (!user) {
+      return res.json({ success: false, message: "User not found" });
+    }
+    
+    return res.json({ 
+      success: true,
+      message: "Token is valid",
+      user: {
+        name: user.name,
+        email: user.email
+      }
+    });
+  } catch (error) {
+    console.log(error);
+    res.json({ success: false, message: error.message });
+  }
+};
+
+export { loginUser, registerUser, adminLogin, verifyToken };
