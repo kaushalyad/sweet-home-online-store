@@ -1,4 +1,4 @@
-import { useContext } from 'react'
+import { useContext, useState, useEffect } from 'react'
 import { Routes, Route, Navigate, useParams } from 'react-router-dom'
 import Home from './pages/Home'
 import Collection from './pages/Collection'
@@ -9,7 +9,9 @@ import Cart from './pages/Cart'
 import Login from './pages/Login'
 import PlaceOrder from './pages/PlaceOrder'
 import Orders from './pages/Orders'
+import TrackOrder from './pages/TrackOrder'
 import Profile from './pages/Profile'
+import ProductListing from './pages/ProductListing'
 import Navbar from './components/Navbar'
 import Footer from './components/Footer'
 import SearchBar from './components/SearchBar'
@@ -19,6 +21,8 @@ import Verify from './pages/Verify'
 import { ShopContext } from './context/ShopContext'
 import PropTypes from 'prop-types'
 import { Link } from 'react-router-dom'
+
+export const backendUrl = import.meta.env.VITE_BACKEND_URL
 
 // Protected route component that redirects to login if not authenticated
 const ProtectedRoute = ({ element }) => {
@@ -59,13 +63,42 @@ const NotFound = () => {
 };
 
 const App = () => {
+  const [showPromoBanner, setShowPromoBanner] = useState(true);
+  
+  // Check if promo banner is visible
+  useEffect(() => {
+    const handleBannerVisibility = () => {
+      const bannerState = localStorage.getItem('promoBannerClosed');
+      if (bannerState === 'true') {
+        setShowPromoBanner(false);
+      }
+    };
+    
+    handleBannerVisibility();
+    
+    // Listen for custom event from Navbar when banner is closed
+    const handleBannerClosed = () => setShowPromoBanner(false);
+    window.addEventListener('promoBannerClosed', handleBannerClosed);
+    
+    return () => {
+      window.removeEventListener('promoBannerClosed', handleBannerClosed);
+    };
+  }, []);
+
   return (
     <div className='relative'>
       <ToastContainer />
       <Navbar />
-      <div className='pt-16 md:pt-20'> {/* Space for the fixed navbar */}
-        <SearchBar />
-        <div className='px-4 sm:px-[5vw] md:px-[7vw] lg:px-[9vw] pt-4'>
+      <div 
+        className='transition-all duration-300'
+        style={{ 
+          paddingTop: showPromoBanner ? '180px' : '140px' // Further increased padding for navbar
+        }}
+      > 
+        <div className="flex justify-center mb-6">
+          <SearchBar />
+        </div>
+        <div className='px-4 sm:px-[5vw] md:px-[7vw] lg:px-[9vw]'>
           <Routes>
             <Route path='/' element={<Home />} />
             <Route path='/collection' element={<Collection />} />
@@ -77,13 +110,14 @@ const App = () => {
             <Route path='/login' element={<Login />} />
             <Route path='/place-order' element={<ProtectedRoute element={<PlaceOrder />} />} />
             <Route path='/orders' element={<ProtectedRoute element={<Orders />} />} />
+            <Route path='/track-order/:orderId' element={<ProtectedRoute element={<TrackOrder />} />} />
             <Route path='/profile' element={<ProtectedRoute element={<Profile />} />} />
             <Route path='/wishlist' element={<ProtectedRoute element={<Profile />} />} />
             <Route path='/settings' element={<ProtectedRoute element={<Profile />} />} />
             <Route path='/verify' element={<Verify />} />
             
-            {/* Redirect route for legacy links */}
-            <Route path='/products' element={<Navigate to="/collection" replace />} />
+            {/* Advanced product listing with filters */}
+            <Route path='/products' element={<ProductListing />} />
             <Route path='/products/:productId' element={<ProductRedirect />} />
             
             {/* 404 route - must be last */}

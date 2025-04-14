@@ -26,7 +26,7 @@ const Login = () => {
             email,
             password
           });
-
+          
           if (response.data.success) {
             toast.success('Account created successfully!');
             setToken(response.data.token);

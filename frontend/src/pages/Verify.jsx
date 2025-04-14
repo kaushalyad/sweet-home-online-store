@@ -28,12 +28,15 @@ const Verify = () => {
       if (response.data.success) {
         setCartItems({});
         navigate("/orders");
+        toast.success("Payment successful!");
       } else {
+        toast.error("Payment failed or was cancelled");
         navigate("/cart");
       }
     } catch (error) {
       console.log(error);
-      toast.error(error.message);
+      toast.error(error.message || "Payment verification failed");
+      navigate("/cart");
     }
   };
 
@@ -41,7 +44,11 @@ const Verify = () => {
     verifyPayment();
   }, [token]);
 
-  return <div>success</div>;
+  return (
+    <div className="min-h-[400px] flex items-center justify-center">
+      <div className="animate-spin h-8 w-8 border-4 border-gray-200 rounded-full border-t-black"></div>
+    </div>
+  );
 };
 
 export default Verify;

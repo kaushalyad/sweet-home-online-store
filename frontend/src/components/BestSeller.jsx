@@ -64,6 +64,7 @@ const BestSeller = () => {
                 price={item.price}
                 index={index}
                 featured={true}
+                bestseller={true}
               />
             ))}
           </motion.div>

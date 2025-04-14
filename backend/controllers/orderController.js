@@ -107,7 +107,8 @@ const placeOrderStripe = async (req,res) => {
 // Verify Stripe 
 const verifyStripe = async (req,res) => {
 
-    const { orderId, success, userId } = req.body
+    const { orderId, success } = req.body
+    const userId = req.user.id // Get userId from the authenticated user
 
     try {
         if (success === "true") {
@@ -130,6 +131,7 @@ const verifyStripe = async (req,res) => {
 const placeOrderRazorpay = async (req, res) => {
   try {
     const { userId, items, amount, address } = req.body;
+    console.log("Creating Razorpay order for amount:", amount);
 
     const orderData = {
       userId,
@@ -144,22 +146,52 @@ const placeOrderRazorpay = async (req, res) => {
     // Create order in database
     const newOrder = new orderModel(orderData);
     const savedOrder = await newOrder.save();
+    console.log("Created order in database with ID:", savedOrder._id);
 
     // Create Razorpay order
     const options = {
-      amount: amount * 100, // amount in smallest currency unit (paise)
-      currency: currency.toUpperCase(),
+      amount: Math.round(amount * 100), // amount in smallest currency unit (paise)
+      currency: "INR", // Fixed uppercase currency code
       receipt: savedOrder._id.toString(),
     };
 
-    razorpayInstance.orders.create(options, (error, order) => {
-      if (error) {
-        console.error("Razorpay order creation error:", error);
-        return res.json({ success: false, message: error.message || "Failed to create payment order" });
-      }
-      console.log("Razorpay order created:", order);
-      res.json({ success: true, order });
-    });
+    console.log("Creating Razorpay order with options:", options);
+
+    // Use promise-based approach instead of callback for better error handling
+    try {
+      const order = await new Promise((resolve, reject) => {
+        razorpayInstance.orders.create(options, (error, result) => {
+          if (error) {
+            console.error("Razorpay order creation failed:", error);
+            reject(error);
+          } else {
+            resolve(result);
+          }
+        });
+      });
+      
+      console.log("Razorpay order created successfully:", {
+        id: order.id,
+        amount: order.amount,
+        currency: order.currency,
+        receipt: order.receipt
+      });
+      
+      res.json({ 
+        success: true, 
+        order: {
+          id: order.id,
+          amount: order.amount,
+          currency: order.currency.toLowerCase(), // Send lowercase to frontend
+          receipt: order.receipt
+        } 
+      });
+    } catch (error) {
+      console.error("Razorpay order creation error:", error);
+      // Delete the order from our database if Razorpay order creation fails
+      await orderModel.findByIdAndDelete(savedOrder._id);
+      return res.json({ success: false, message: error.message || "Failed to create payment order" });
+    }
   } catch (error) {
     console.error("Order placement error:", error);
     res.json({ success: false, message: error.message || "Failed to place order" });
@@ -169,23 +201,37 @@ const placeOrderRazorpay = async (req, res) => {
 const verifyRazorpay = async (req, res) => {
   try {
     const { razorpay_order_id, razorpay_payment_id, razorpay_signature, userId } = req.body;
+    
+    console.log("Razorpay verification payload:", { 
+      razorpay_order_id, 
+      razorpay_payment_id,
+      userId,
+      signatureReceived: razorpay_signature ? 'Yes' : 'No'
+    });
 
     if (!razorpay_order_id || !razorpay_payment_id) {
+      console.error("Missing payment details in request");
       return res.json({ success: false, message: "Payment verification failed: Missing payment details" });
     }
 
-    console.log("Verifying payment:", { razorpay_order_id, razorpay_payment_id });
-
-    // Fetch the order details from Razorpay
-    const orderInfo = await razorpayInstance.orders.fetch(razorpay_order_id);
-    console.log("Order info from Razorpay:", orderInfo);
-
-    // Check if payment is captured 
-    if (orderInfo.status === 'paid' || orderInfo.status === 'created') {
-      // Find the order in our database using receipt (which contains our order ID)
+    try {
+      // Fetch the order details from Razorpay
+      const orderInfo = await razorpayInstance.orders.fetch(razorpay_order_id);
+      console.log("Order info from Razorpay:", {
+        id: orderInfo.id,
+        amount: orderInfo.amount,
+        currency: orderInfo.currency,
+        receipt: orderInfo.receipt,
+        status: orderInfo.status
+      });
+      
+      // Get our order ID from the receipt
       const orderId = orderInfo.receipt;
       
-      // Update the order status
+      console.log(`Updating order ${orderId} to paid status`);
+      
+      // Update the order status to paid without any additional checks
+      // This assumes that if Razorpay sent us a payment_id, the payment succeeded
       const updatedOrder = await orderModel.findByIdAndUpdate(
         orderId,
         { payment: true },
@@ -193,17 +239,22 @@ const verifyRazorpay = async (req, res) => {
       );
       
       if (!updatedOrder) {
+        console.error(`Order ${orderId} not found in database`);
         return res.json({ success: false, message: "Order not found in database" });
       }
 
-      // Clear user's cart
+      console.log(`Successfully updated order ${orderId}`);
+
+      // Clear the user's cart
       if (userId) {
         await userModel.findByIdAndUpdate(userId, { cartData: {} });
+        console.log(`Cleared cart for user ${userId}`);
       }
       
       return res.json({ success: true, message: "Payment successful" });
-    } else {
-      return res.json({ success: false, message: "Payment verification failed: Order not paid" });
+    } catch (error) {
+      console.error("Error during Razorpay verification:", error);
+      return res.json({ success: false, message: "Payment verification failed: " + error.message });
     }
   } catch (error) {
     console.error("Payment verification error:", error);

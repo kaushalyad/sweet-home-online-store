@@ -2,12 +2,13 @@ import React, { useContext, useEffect, useState } from 'react'
 import { ShopContext } from '../context/ShopContext'
 import Title from '../components/Title';
 import axios from 'axios';
+import { Link } from 'react-router-dom';
 
 const Orders = () => {
 
-  const { backendUrl, token , currency} = useContext(ShopContext);
+  const { backendUrl, token, currency, navigate } = useContext(ShopContext);
 
-  const [orderData,setorderData] = useState([])
+  const [orderData, setorderData] = useState([])
 
   const loadOrderData = async () => {
     try {
@@ -24,6 +25,7 @@ const Orders = () => {
             item['payment'] = order.payment
             item['paymentMethod'] = order.paymentMethod
             item['date'] = order.date
+            item['orderId'] = order._id
             allOrdersItem.push(item)
           })
         })
@@ -31,7 +33,7 @@ const Orders = () => {
       }
       
     } catch (error) {
-      
+      console.error("Error loading orders:", error);
     }
   }
 
@@ -47,7 +49,17 @@ const Orders = () => {
         </div>
 
         <div>
-            {
+            {orderData.length === 0 ? (
+              <div className="py-12 text-center">
+                <p className="text-gray-500 mb-6">You haven't placed any orders yet.</p>
+                <button 
+                  onClick={() => navigate('/collection')} 
+                  className="px-6 py-2 bg-pink-500 text-white rounded hover:bg-pink-600"
+                >
+                  Start Shopping
+                </button>
+              </div>
+            ) : (
               orderData.map((item,index) => (
                 <div key={index} className='py-4 border-t border-b text-gray-700 flex flex-col md:flex-row md:items-center md:justify-between gap-4'>
                     <div className='flex items-start gap-6 text-sm'>
@@ -65,14 +77,19 @@ const Orders = () => {
                     </div>
                     <div className='md:w-1/2 flex justify-between'>
                         <div className='flex items-center gap-2'>
-                            <p className='min-w-2 h-2 rounded-full bg-green-500'></p>
+                            <div className={`w-2 h-2 rounded-full ${
+                              item.status === 'Delivered' ? 'bg-green-500' : 
+                              item.status === 'Shipped' ? 'bg-blue-500' : 
+                              item.status === 'Processing' ? 'bg-yellow-500' : 
+                              'bg-red-500'
+                            }`}></div>
                             <p className='text-sm md:text-base'>{item.status}</p>
                         </div>
-                        <button onClick={loadOrderData} className='border px-4 py-2 text-sm font-medium rounded-sm'>Track Order</button>
+                        <Link to={`/track-order/${item.orderId}`} className='border px-4 py-2 text-sm font-medium rounded-sm hover:bg-gray-50'>Track Order</Link>
                     </div>
                 </div>
               ))
-            }
+            )}
         </div>
     </div>
   )
