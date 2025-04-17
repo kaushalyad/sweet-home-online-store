@@ -3,6 +3,7 @@ import { ShopContext } from '../context/ShopContext';
 import axios from 'axios';
 import { toast } from 'react-toastify';
 import { assets } from '../assets/assets';
+import { Link } from 'react-router-dom';
 
 const Login = () => {
   const [currentState, setCurrentState] = useState('Login');
@@ -198,16 +199,16 @@ const Login = () => {
                 </label>
               </div>
             )}
-
-            <div className="text-sm">
-              {currentState === 'Login' ? (
-                <a href="#" className="font-medium text-black hover:text-gray-800 transition-colors duration-200">
+            {currentState === 'Login' && (
+              <div className="text-sm">
+                <Link
+                  to="/forgot-password"
+                  className="font-medium text-pink-600 hover:text-pink-500"
+                >
                   Forgot your password?
-                </a>
-              ) : (
-                <span className="text-gray-500">Password must be at least 6 characters</span>
-              )}
-            </div>
+                </Link>
+              </div>
+            )}
           </div>
 
           <div>

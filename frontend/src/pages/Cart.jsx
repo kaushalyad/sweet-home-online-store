@@ -7,31 +7,35 @@ import { FaShoppingCart, FaArrowRight, FaStar, FaHeart, FaTrash, FaArrowLeft } f
 import { Link, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import ProductItem from "../components/ProductItem";
+import { toast } from "react-toastify";
+import { trackPageView, trackPurchaseSuccess, trackPurchaseFailure } from "../utils/analytics";
 
 const Cart = () => {
 
-  const { products, currency, cartItems, updateQuantity, navigate } = useContext(ShopContext);
+  const { products, currency, cartItems, updateQuantity, removeFromCart, navigate } = useContext(ShopContext);
 
   const [cartData, setCartData] = useState([]);
 
+  // Track page view
   useEffect(() => {
+    trackPageView(window.location.pathname, "Cart");
+  }, []);
 
-    if (products.length > 0) {
-      const tempData = [];
-      for (const items in cartItems) {
-        for (const item in cartItems[items]) {
-          if (cartItems[items][item] > 0) {
-            tempData.push({
-              _id: items,
-              size: item,
-              quantity: cartItems[items][item]
-            })
-          }
-        }
+  // Process cart items
+  useEffect(() => {
+    const tempData = [];
+    // Convert cartItems object to array
+    Object.entries(cartItems).forEach(([itemId, quantity]) => {
+      const product = products.find((p) => p._id === itemId);
+      if (product) {
+        tempData.push({
+          ...product,
+          quantity: quantity
+        });
       }
-      setCartData(tempData);
-    }
-  }, [cartItems, products])
+    });
+    setCartData(tempData);
+  }, [cartItems, products]);
 
   // Popular products to show in empty cart
   const popularProducts = products
@@ -44,6 +48,23 @@ const Cart = () => {
   // Handle click on a recommended product
   const handleProductClick = (productId) => {
     navigate(`/collection/${productId}`);
+  };
+
+  const handleCheckout = async () => {
+    try {
+      // Your checkout logic here
+      const orderId = "ORDER_" + Date.now();
+      const totalAmount = cartData.reduce((total, item) => total + (item.price * item.quantity), 0);
+      
+      // Track successful purchase
+      trackPurchaseSuccess(orderId, cartData, totalAmount);
+      
+      navigate("/place-order");
+    } catch (error) {
+      // Track failed purchase
+      trackPurchaseFailure(error, cartData, cartData.reduce((total, item) => total + (item.price * item.quantity), 0));
+      toast.error("Failed to place order. Please try again.");
+    }
   };
 
   return (
@@ -120,7 +141,7 @@ const Cart = () => {
                     defaultValue={item.quantity} 
                   />
                   <button 
-                    onClick={() => updateQuantity(item._id, item.size, 0)}
+                    onClick={() => removeFromCart(item._id, item.size)}
                     className="hover:text-pink-600 transition-colors"
                   >
                     <img className='w-4 mr-4 sm:w-5 cursor-pointer' src={assets.bin_icon} alt="Remove" />
@@ -135,7 +156,7 @@ const Cart = () => {
               <CartTotal />
               <div className='w-full text-end'>
                 <button 
-                  onClick={() => navigate('/place-order')} 
+                  onClick={handleCheckout} 
                   className='bg-pink-600 hover:bg-pink-700 text-white text-sm my-8 px-8 py-3 rounded-md transition-colors'
                 >
                   PROCEED TO CHECKOUT

@@ -1,6 +1,6 @@
 import React, { useContext, useState, useEffect } from "react";
 import { ShopContext } from "../context/ShopContext";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { FaHeart, FaStar, FaShoppingCart, FaEye } from "react-icons/fa";
 
@@ -10,6 +10,7 @@ const ProductItem = ({ id, image, name, price, index = 0, featured = false, best
   const [currentImage, setCurrentImage] = useState(0);
   const [isHovered, setIsHovered] = useState(false);
   const [isAdded, setIsAdded] = useState(false);
+  const navigate = useNavigate();
 
   // Check if product is in wishlist when component mounts or wishlist changes
   useEffect(() => {
@@ -143,14 +144,19 @@ const ProductItem = ({ id, image, name, price, index = 0, featured = false, best
                 <FaHeart className="text-lg" />
               </motion.button>
 
-              <Link
-                to={`/collection/${id}`}
+              <motion.button
+                whileHover={{ scale: 1.1 }}
+                whileTap={{ scale: 0.9 }}
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  navigate(`/collection/${id}`);
+                }}
                 className="bg-white text-gray-700 hover:text-white hover:bg-gray-700 p-2.5 rounded-full shadow-md transition-colors duration-300"
                 aria-label="View details"
-                onClick={(e) => e.stopPropagation()}
               >
                 <FaEye className="text-lg" />
-              </Link>
+              </motion.button>
             </div>
           </div>
           

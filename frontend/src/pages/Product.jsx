@@ -4,6 +4,8 @@ import { ShopContext } from "../context/ShopContext";
 import RelatedProducts from "../components/RelatedProducts";
 import { motion, AnimatePresence } from "framer-motion";
 import { FaHeart, FaShoppingCart, FaShippingFast, FaRegClock, FaCheck, FaArrowLeft, FaStar, FaShare, FaFacebook, FaTwitter, FaPinterest, FaWhatsapp } from "react-icons/fa";
+import { toast } from "react-toastify";
+import { trackPageView, trackProductView, trackAddToCart, trackBuyNow } from "../utils/analytics";
 
 const Product = () => {
   const { productId } = useParams();
@@ -47,8 +49,36 @@ const Product = () => {
     }
   }, [isInWishlist, productData]);
 
+  // Track page view when component mounts
+  useEffect(() => {
+    trackPageView(window.location.pathname, productData?.name || "Product Page");
+  }, [productData]);
+
+  // Track product view
+  useEffect(() => {
+    if (productData) {
+      trackProductView(productData);
+    }
+  }, [productData]);
+
   const handleAddToCart = () => {
+    if (quantity < 1) {
+      toast.error("Quantity must be at least 1");
+      return;
+    }
     addToCart(productData._id, "default", quantity);
+    toast.success("Added to cart!");
+    trackAddToCart(productData, quantity);
+  };
+
+  const handleBuyNow = () => {
+    if (quantity < 1) {
+      toast.error("Quantity must be at least 1");
+      return;
+    }
+    addToCart(productData._id, "default", quantity);
+    trackBuyNow(productData, quantity);
+    navigate("/cart");
   };
 
   const toggleWishlist = () => {
@@ -367,10 +397,7 @@ const Product = () => {
                 <motion.button
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
-                  onClick={() => {
-                    handleAddToCart();
-                    navigate("/cart");
-                  }}
+                  onClick={handleBuyNow}
                   className="flex-1 bg-gray-800 hover:bg-gray-900 text-white px-6 py-3.5 rounded-md font-medium transition-colors shadow-sm"
                 >
                   Buy Now

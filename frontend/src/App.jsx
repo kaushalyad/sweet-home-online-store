@@ -1,5 +1,5 @@
 import { useContext, useState, useEffect } from 'react'
-import { Routes, Route, Navigate, useParams } from 'react-router-dom'
+import { Routes, Route, Navigate, useParams, Link } from 'react-router-dom'
 import Home from './pages/Home'
 import Collection from './pages/Collection'
 import About from './pages/About'
@@ -7,6 +7,8 @@ import Contact from './pages/Contact'
 import Product from './pages/Product'
 import Cart from './pages/Cart'
 import Login from './pages/Login'
+import ForgotPassword from './pages/ForgotPassword'
+import ResetPassword from './pages/ResetPassword'
 import PlaceOrder from './pages/PlaceOrder'
 import Orders from './pages/Orders'
 import TrackOrder from './pages/TrackOrder'
@@ -18,9 +20,9 @@ import SearchBar from './components/SearchBar'
 import { ToastContainer } from 'react-toastify'
 import 'react-toastify/dist/ReactToastify.css'
 import Verify from './pages/Verify'
-import { ShopContext } from './context/ShopContext'
+import { ShopContext, ShopContextProvider } from './context/ShopContext'
 import PropTypes from 'prop-types'
-import { Link } from 'react-router-dom'
+import { initGA } from "./utils/analytics"
 
 export const backendUrl = import.meta.env.VITE_BACKEND_URL
 
@@ -85,48 +87,51 @@ const App = () => {
     };
   }, []);
 
+  // Initialize GA4
+  initGA();
+
   return (
-    <div className='relative'>
-      <ToastContainer />
-      <Navbar />
-      <div 
-        className='transition-all duration-300'
-        style={{ 
-          paddingTop: showPromoBanner ? '180px' : '140px' // Further increased padding for navbar
-        }}
-      > 
-        <div className="flex justify-center mb-6">
-          <SearchBar />
-        </div>
-        <div className='px-4 sm:px-[5vw] md:px-[7vw] lg:px-[9vw]'>
-          <Routes>
-            <Route path='/' element={<Home />} />
-            <Route path='/collection' element={<Collection />} />
-            <Route path='/collection/:productId' element={<Product />} />
-            <Route path='/about' element={<About />} />
-            <Route path='/contact' element={<Contact />} />
-            <Route path='/product/:productId' element={<Product />} />
-            <Route path='/cart' element={<Cart />} />
-            <Route path='/login' element={<Login />} />
-            <Route path='/place-order' element={<ProtectedRoute element={<PlaceOrder />} />} />
-            <Route path='/orders' element={<ProtectedRoute element={<Orders />} />} />
-            <Route path='/track-order/:orderId' element={<ProtectedRoute element={<TrackOrder />} />} />
-            <Route path='/profile' element={<ProtectedRoute element={<Profile />} />} />
-            <Route path='/wishlist' element={<ProtectedRoute element={<Profile />} />} />
-            <Route path='/settings' element={<ProtectedRoute element={<Profile />} />} />
-            <Route path='/verify' element={<Verify />} />
-            
-            {/* Advanced product listing with filters */}
-            <Route path='/products' element={<ProductListing />} />
-            <Route path='/products/:productId' element={<ProductRedirect />} />
-            
-            {/* 404 route - must be last */}
-            <Route path='*' element={<NotFound />} />
-          </Routes>
-          <Footer />
+    <ShopContextProvider>
+      <div className='relative'>
+        <ToastContainer />
+        <Navbar />
+        <div 
+          className='transition-all duration-300'
+          style={{ 
+            paddingTop: showPromoBanner ? '180px' : '140px'
+          }}
+        > 
+          <div className="flex justify-center mb-6">
+            <SearchBar />
+          </div>
+          <div className='px-4 sm:px-[5vw] md:px-[7vw] lg:px-[9vw]'>
+            <Routes>
+              <Route path='/' element={<Home />} />
+              <Route path='/collection' element={<Collection />} />
+              <Route path='/collection/:productId' element={<Product />} />
+              <Route path='/about' element={<About />} />
+              <Route path='/contact' element={<Contact />} />
+              <Route path='/product/:productId' element={<Product />} />
+              <Route path='/cart' element={<Cart />} />
+              <Route path='/login' element={<Login />} />
+              <Route path='/forgot-password' element={<ForgotPassword />} />
+              <Route path='/reset-password' element={<ResetPassword />} />
+              <Route path='/place-order' element={<ProtectedRoute element={<PlaceOrder />} />} />
+              <Route path='/orders' element={<ProtectedRoute element={<Orders />} />} />
+              <Route path='/track-order/:orderId' element={<ProtectedRoute element={<TrackOrder />} />} />
+              <Route path='/profile' element={<ProtectedRoute element={<Profile />} />} />
+              <Route path='/wishlist' element={<ProtectedRoute element={<Profile />} />} />
+              <Route path='/settings' element={<ProtectedRoute element={<Profile />} />} />
+              <Route path='/verify' element={<Verify />} />
+              <Route path='/products' element={<ProductListing />} />
+              <Route path='/products/:productId' element={<ProductRedirect />} />
+              <Route path='*' element={<NotFound />} />
+            </Routes>
+            <Footer />
+          </div>
         </div>
       </div>
-    </div>
+    </ShopContextProvider>
   )
 }
 
