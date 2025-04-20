@@ -28,7 +28,7 @@ const corsOptions = {
   origin: function (origin, callback) {
     if (!origin || allowedOrigins.indexOf(origin) !== -1) {
       // Instead of callback(null, true), pass the origin to echo it back
-      callback(null, origin || true);
+      callback(null, origin);
     } else {
       callback(new Error("Not allowed by CORS"));
     }
