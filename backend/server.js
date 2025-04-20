@@ -28,8 +28,8 @@ const corsOptions = {
   origin: function (origin, callback) {
     if (!origin) {
       // No origin, allow requests like curl or server-to-server
-      callback(null, false);
-    } else if (allowedOrigins.indexOf(origin) !== -1) {
+      callback(null, true);
+    } else if (allowedOrigins.some(allowedOrigin => origin.startsWith(allowedOrigin))) {
       callback(null, origin);
     } else {
       callback(new Error("Not allowed by CORS"));
