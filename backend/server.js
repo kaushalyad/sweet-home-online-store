@@ -1,15 +1,32 @@
 import express from "express";
+import cors from "cors";
+import "dotenv/config";
+import connectDB from "./config/mongodb.js";
+import connectCloudinary from "./config/cloudinary.js";
+import userRouter from "./routes/userRoute.js";
+import productRouter from "./routes/productRoute.js";
+import cartRouter from "./routes/cartRoute.js";
+import orderRouter from "./routes/orderRoute.js";
 
+// App Config
 const app = express();
-const port = 5000;
+const port = process.env.PORT || 4000;
 
+// Connect to database and cloudinary
+connectDB();
+connectCloudinary();
+
+// middlewares
+app.use(express.json());
 const allowedOrigins = [
   "https://sweethome-store.com",
   "http://localhost:3000",
   "http://127.0.0.1:3000",
 ];
 
-// Manual CORS headers middleware
+// Remove cors middleware usage
+
+// Manual CORS headers middleware at the top
 app.use((req, res, next) => {
   const origin = req.headers.origin;
   if (allowedOrigins.some(allowedOrigin => origin && origin.startsWith(allowedOrigin))) {
@@ -24,16 +41,21 @@ app.use((req, res, next) => {
   next();
 });
 
-app.get("/api/product/list", (req, res) => {
-  res.json({
-    success: true,
-    products: [
-      { id: 1, name: "Test Product 1", price: 100 },
-      { id: 2, name: "Test Product 2", price: 200 },
-    ],
-  });
+// api endpoints
+app.use("/api/user", userRouter);
+app.use("/api/product", productRouter);
+app.use("/api/cart", cartRouter);
+app.use("/api/order", orderRouter);
+
+// Root endpoint
+app.get("/", (req, res) => {
+  res.send("API Working");
 });
 
-app.listen(port, () => {
-  console.log(`Test CORS server running on port ${port}`);
+// Error handling middleware
+app.use((req, res) => {
+  res.status(404).send("Route not found");
 });
+
+// Server listener
+app.listen(port, () => console.log(`Server started on PORT : ${port}`));
