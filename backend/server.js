@@ -1,4 +1,5 @@
 import express from "express";
+import cors from "cors";
 import "dotenv/config";
 import connectDB from "./config/mongodb.js";
 import connectCloudinary from "./config/cloudinary.js";
@@ -22,20 +23,23 @@ const allowedOrigins = [
   "http://127.0.0.1:3000",
 ];
 
-// Forced CORS headers middleware at the very top
-app.use((req, res, next) => {
-  const origin = req.headers.origin;
-  if (origin && allowedOrigins.some(allowedOrigin => origin.startsWith(allowedOrigin))) {
-    res.header("Access-Control-Allow-Origin", origin);
-  }
-  res.header("Access-Control-Allow-Credentials", "true");
-  res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept, Authorization");
-  res.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
-  if (req.method === "OPTIONS") {
-    return res.sendStatus(204);
-  }
-  next();
-});
+// CORS options
+const corsOptions = {
+  origin: function (origin, callback) {
+    if (!origin) {
+      // Allow requests with no origin like curl or server-to-server
+      callback(null, true);
+    } else if (allowedOrigins.some(allowedOrigin => origin.startsWith(allowedOrigin))) {
+      callback(null, true);
+    } else {
+      callback(new Error("Not allowed by CORS"));
+    }
+  },
+  credentials: true,
+};
+
+// Use CORS middleware
+app.use(cors(corsOptions));
 
 // Middlewares
 app.use(express.json());
