@@ -24,24 +24,9 @@ const allowedOrigins = [
   "http://127.0.0.1:3000",
 ];
 
-const corsOptions = {
-  origin: function (origin, callback) {
-    if (!origin) {
-      // No origin, allow requests like curl or server-to-server
-      callback(null, true);
-    } else if (allowedOrigins.some(allowedOrigin => origin.startsWith(allowedOrigin))) {
-      callback(null, origin);
-    } else {
-      callback(new Error("Not allowed by CORS"));
-    }
-  },
-  credentials: true,
-};
+// Remove cors middleware usage
 
-app.use(cors(corsOptions));
-app.options("*", cors(corsOptions));
-
-// Explicit CORS headers middleware to ensure correct headers
+// Manual CORS headers middleware at the top
 app.use((req, res, next) => {
   const origin = req.headers.origin;
   if (allowedOrigins.some(allowedOrigin => origin && origin.startsWith(allowedOrigin))) {
@@ -50,6 +35,9 @@ app.use((req, res, next) => {
   res.header("Access-Control-Allow-Credentials", "true");
   res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept, Authorization");
   res.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
+  if (req.method === "OPTIONS") {
+    return res.sendStatus(204);
+  }
   next();
 });
 
