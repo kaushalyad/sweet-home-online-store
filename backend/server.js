@@ -24,6 +24,7 @@ const allowedOrigins = [
   "http://127.0.0.1:3000",
 ];
 
+/* CORS middleware disabled to avoid duplicate Access-Control-Allow-Origin headers
 const corsOptions = {
   origin: function (origin, callback) {
     if (!origin || allowedOrigins.indexOf(origin) !== -1) {
@@ -38,6 +39,7 @@ const corsOptions = {
 
 app.use(cors(corsOptions));
 app.options("*", cors(corsOptions));
+*/
 
 // api endpoints
 app.use("/api/user", userRouter);
