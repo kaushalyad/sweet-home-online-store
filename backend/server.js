@@ -41,6 +41,23 @@ app.use((req, res, next) => {
   next();
 });
 
+// Handle OPTIONS preflight requests for /api/user routes
+app.options("/api/user/*", (req, res) => {
+  const origin = req.headers.origin;
+  const allowedOrigins = [
+    "https://sweethome-store.com",
+    "http://localhost:3000",
+    "http://127.0.0.1:3000",
+  ];
+  if (allowedOrigins.some(allowedOrigin => origin && origin.startsWith(allowedOrigin))) {
+    res.header("Access-Control-Allow-Origin", origin);
+  }
+  res.header("Access-Control-Allow-Credentials", "true");
+  res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept, Authorization");
+  res.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
+  res.sendStatus(204);
+});
+
 // api endpoints
 app.use("/api/user", userRouter);
 app.use("/api/product", productRouter);
