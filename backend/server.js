@@ -1,3 +1,12 @@
+import express from "express";
+import "dotenv/config";
+import connectDB from "./config/mongodb.js";
+import connectCloudinary from "./config/cloudinary.js";
+import userRouter from "./routes/userRoute.js";
+import productRouter from "./routes/productRoute.js";
+import cartRouter from "./routes/cartRoute.js";
+import orderRouter from "./routes/orderRoute.js";
+
 // App Config
 const app = express();
 const port = process.env.PORT || 4000;
@@ -6,46 +15,32 @@ const port = process.env.PORT || 4000;
 connectDB();
 connectCloudinary();
 
-// Global OPTIONS handler for all routes to handle preflight requests
-app.options("*", (req, res) => {
-  const origin = req.headers.origin;
-  const allowedOrigins = [
-    "https://sweethome-store.com",
-    "http://localhost:3000",
-    "http://127.0.0.1:3000",
-  ];
-  if (allowedOrigins.some(allowedOrigin => origin && origin.startsWith(allowedOrigin))) {
-    res.header("Access-Control-Allow-Origin", origin);
-  }
-  res.header("Access-Control-Allow-Credentials", "true");
-  res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept, Authorization");
-  res.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
-  res.sendStatus(204);
-});
-
-// middlewares
-app.use(express.json());
+// Allowed origins
 const allowedOrigins = [
   "https://sweethome-store.com",
   "http://localhost:3000",
   "http://127.0.0.1:3000",
 ];
 
-// Remove cors middleware usage
-
-// Manual CORS headers middleware at the top
+// Forced CORS headers middleware at the very top
 app.use((req, res, next) => {
   const origin = req.headers.origin;
-  if (allowedOrigins.some(allowedOrigin => origin && origin.startsWith(allowedOrigin))) {
+  if (origin && allowedOrigins.some(allowedOrigin => origin.startsWith(allowedOrigin))) {
     res.header("Access-Control-Allow-Origin", origin);
   }
   res.header("Access-Control-Allow-Credentials", "true");
   res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept, Authorization");
   res.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
+  if (req.method === "OPTIONS") {
+    return res.sendStatus(204);
+  }
   next();
 });
 
-// api endpoints
+// Middlewares
+app.use(express.json());
+
+// API endpoints
 app.use("/api/user", userRouter);
 app.use("/api/product", productRouter);
 app.use("/api/cart", cartRouter);
