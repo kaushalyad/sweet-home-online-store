@@ -41,6 +41,18 @@ const corsOptions = {
 app.use(cors(corsOptions));
 app.options("*", cors(corsOptions));
 
+// Explicit CORS headers middleware to ensure correct headers
+app.use((req, res, next) => {
+  const origin = req.headers.origin;
+  if (allowedOrigins.some(allowedOrigin => origin && origin.startsWith(allowedOrigin))) {
+    res.header("Access-Control-Allow-Origin", origin);
+  }
+  res.header("Access-Control-Allow-Credentials", "true");
+  res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept, Authorization");
+  res.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
+  next();
+});
+
 // api endpoints
 app.use("/api/user", userRouter);
 app.use("/api/product", productRouter);
