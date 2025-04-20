@@ -1,13 +1,3 @@
-import express from "express";
-import cors from "cors";
-import "dotenv/config";
-import connectDB from "./config/mongodb.js";
-import connectCloudinary from "./config/cloudinary.js";
-import userRouter from "./routes/userRoute.js";
-import productRouter from "./routes/productRoute.js";
-import cartRouter from "./routes/cartRoute.js";
-import orderRouter from "./routes/orderRoute.js";
-
 // App Config
 const app = express();
 const port = process.env.PORT || 4000;
@@ -15,6 +5,23 @@ const port = process.env.PORT || 4000;
 // Connect to database and cloudinary
 connectDB();
 connectCloudinary();
+
+// Global OPTIONS handler for all routes to handle preflight requests
+app.options("*", (req, res) => {
+  const origin = req.headers.origin;
+  const allowedOrigins = [
+    "https://sweethome-store.com",
+    "http://localhost:3000",
+    "http://127.0.0.1:3000",
+  ];
+  if (allowedOrigins.some(allowedOrigin => origin && origin.startsWith(allowedOrigin))) {
+    res.header("Access-Control-Allow-Origin", origin);
+  }
+  res.header("Access-Control-Allow-Credentials", "true");
+  res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept, Authorization");
+  res.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
+  res.sendStatus(204);
+});
 
 // middlewares
 app.use(express.json());
@@ -35,60 +42,7 @@ app.use((req, res, next) => {
   res.header("Access-Control-Allow-Credentials", "true");
   res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept, Authorization");
   res.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
-  if (req.method === "OPTIONS") {
-    return res.sendStatus(204);
-  }
   next();
-});
-
-// Handle OPTIONS preflight requests for /api/user routes
-app.options("/api/user/*", (req, res) => {
-  const origin = req.headers.origin;
-  const allowedOrigins = [
-    "https://sweethome-store.com",
-    "http://localhost:3000",
-    "http://127.0.0.1:3000",
-  ];
-  if (allowedOrigins.some(allowedOrigin => origin && origin.startsWith(allowedOrigin))) {
-    res.header("Access-Control-Allow-Origin", origin);
-  }
-  res.header("Access-Control-Allow-Credentials", "true");
-  res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept, Authorization");
-  res.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
-  res.sendStatus(204);
-});
-
-// Explicit OPTIONS handlers for login and register routes
-app.options("/api/user/login", (req, res) => {
-  const origin = req.headers.origin;
-  const allowedOrigins = [
-    "https://sweethome-store.com",
-    "http://localhost:3000",
-    "http://127.0.0.1:3000",
-  ];
-  if (allowedOrigins.some(allowedOrigin => origin && origin.startsWith(allowedOrigin))) {
-    res.header("Access-Control-Allow-Origin", origin);
-  }
-  res.header("Access-Control-Allow-Credentials", "true");
-  res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept, Authorization");
-  res.header("Access-Control-Allow-Methods", "POST, OPTIONS");
-  res.sendStatus(204);
-});
-
-app.options("/api/user/register", (req, res) => {
-  const origin = req.headers.origin;
-  const allowedOrigins = [
-    "https://sweethome-store.com",
-    "http://localhost:3000",
-    "http://127.0.0.1:3000",
-  ];
-  if (allowedOrigins.some(allowedOrigin => origin && origin.startsWith(allowedOrigin))) {
-    res.header("Access-Control-Allow-Origin", origin);
-  }
-  res.header("Access-Control-Allow-Credentials", "true");
-  res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept, Authorization");
-  res.header("Access-Control-Allow-Methods", "POST, OPTIONS");
-  res.sendStatus(204);
 });
 
 // api endpoints
