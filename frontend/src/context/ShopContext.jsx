@@ -3,6 +3,8 @@ import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 
+axios.defaults.withCredentials = true;
+
 export const ShopContext = createContext();
 
 export const ShopContextProvider = (props) => {
@@ -46,7 +48,7 @@ export const ShopContextProvider = (props) => {
       );
       
       if (!response.data.success) {
-        // If token is invalid, clear it
+        // If token is invalid,
         setToken("");
         toast.error("Your session has expired. Please login again.");
       } else {

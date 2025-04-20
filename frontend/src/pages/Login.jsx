@@ -26,7 +26,7 @@ const Login = () => {
             name,
             email,
             password
-          });
+          }, { withCredentials: true });
           
           if (response.data.success) {
             toast.success('Account created successfully!');
@@ -39,7 +39,7 @@ const Login = () => {
           const response = await axios.post(backendUrl + '/api/user/login', {
             email,
             password
-          });
+          }, { withCredentials: true });
 
           if (response.data.success) {
             toast.success('Logged in successfully!');
