@@ -29,7 +29,9 @@ const corsOptions = {
     if (!origin) {
       // Allow requests with no origin like curl or server-to-server
       callback(null, true);
-    } else if (allowedOrigins.some(allowedOrigin => origin.startsWith(allowedOrigin))) {
+    } else if (
+      allowedOrigins.some((allowedOrigin) => origin.startsWith(allowedOrigin))
+    ) {
       callback(null, true);
     } else {
       callback(new Error("Not allowed by CORS"));
@@ -39,7 +41,7 @@ const corsOptions = {
 };
 
 // Use CORS middleware
-app.use(cors(corsOptions));
+app.use(cors({ origin: true, credentials: true }));
 
 // Middlewares
 app.use(express.json());
