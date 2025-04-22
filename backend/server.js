@@ -46,12 +46,14 @@ const corsOptions = {
 // app.use(cors());
 
 // OR configure it to match Nginx:
-app.use(cors({
-  origin: ['https://sweethome-store.com', 'https://www.sweethome-store.com'],
-  credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization']
-}));
+app.use(
+  cors({
+    origin: [/^https:\/\/(www\.)?sweethome-store\.com$/],
+    credentials: true,
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"],
+  })
+);
 // Middlewares
 app.use(express.json());
 
