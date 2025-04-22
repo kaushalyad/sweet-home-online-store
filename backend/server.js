@@ -41,8 +41,13 @@ const corsOptions = {
 };
 
 // Use CORS middleware
-app.use(cors({ origin: true, credentials: true }));
-
+// In Express:
+app.use(cors({
+  origin: 'https://sweethome-store.com',
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization']
+}));
 // Middlewares
 app.use(express.json());
 
