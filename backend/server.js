@@ -16,44 +16,16 @@ const port = process.env.PORT || 4000;
 connectDB();
 connectCloudinary();
 
-// Allowed origins
-const allowedOrigins = [
-  "https://sweethome-store.com",
-  // "http://localhost:3000",
-  // "http://127.0.0.1:3000",
-];
-
-// CORS options
-const corsOptions = {
-  origin: function (origin, callback) {
-    if (!origin) {
-      // Allow requests with no origin like curl or server-to-server
-      callback(null, true);
-    } else if (
-      allowedOrigins.some((allowedOrigin) => origin.startsWith(allowedOrigin))
-    ) {
-      callback(null, true);
-    } else {
-      callback(new Error("Not allowed by CORS"));
-    }
-  },
-  credentials: true,
-};
-
-// Use CORS middleware
-// In Express:
-// Either completely remove CORS middleware:
-// app.use(cors());
-
-// OR configure it to match Nginx:
+// Use CORS middleware with a single configuration
 app.use(
   cors({
-    origin: [/^https:\/\/(www\.)?sweethome-store\.com$/],
+    origin: 'https://sweethome-store.com',  // Single string value
     credentials: true,
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],
   })
 );
+
 // Middlewares
 app.use(express.json());
 
