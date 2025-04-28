@@ -11,7 +11,10 @@ import orderRouter from "./routes/orderRoute.js";
 // App Config
 const app = express();
 const port = process.env.PORT || 4000;
-
+app.use((req, res, next) => {
+  console.log('Incoming request headers:', req.headers);
+  next();
+});
 // Connect to database and cloudinary
 connectDB();
 connectCloudinary();
@@ -56,6 +59,7 @@ app.use(
   })
 );
 // Middlewares
+
 app.use(express.json());
 
 // API endpoints
