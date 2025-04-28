@@ -46,9 +46,10 @@ const corsOptions = {
 // app.use(cors());
 
 // OR configure it to match Nginx:
+// Remove this or comment it out
 app.use(
   cors({
-    origin: [/^https:\/\/(www\.)?sweethome-store\.com$/],
+    origin: "https://sweethome-store.com",
     credentials: true,
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],
