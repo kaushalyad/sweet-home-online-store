@@ -32,8 +32,8 @@ const corsOptions = {
       // Allow requests with no origin like curl or server-to-server
       callback(null, true);
     } else {
-      // Allow all subdomains of sweethome-store.com
-      const regex = /^https:\/\/([a-z0-9-]+\.)*sweethome-store\.com$/i;
+      // Allow all subdomains of sweethome-store.com, including www and root domain
+      const regex = /^https:\/\/(www\.)?sweethome-store\.com$/i;
       if (regex.test(origin)) {
         callback(null, origin);
       } else {
