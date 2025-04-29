@@ -47,6 +47,7 @@ const corsOptions = {
       if (isAllowed) {
         callback(null, origin);
       } else {
+        console.error("Blocked CORS request from origin:", origin);
         callback(new Error("Not allowed by CORS"));
       }
     }
@@ -69,6 +70,14 @@ const corsOptions = {
       res.header("Access-Control-Allow-Methods", "GET,POST,PUT,DELETE,OPTIONS");
       res.header("Access-Control-Allow-Headers", "Content-Type,Authorization");
       res.header("Access-Control-Allow-Credentials", "true");
+      res.on("finish", () => {
+        console.log(`OPTIONS ${req.originalUrl} - Response headers:`, {
+          "Access-Control-Allow-Origin": res.getHeader("Access-Control-Allow-Origin"),
+          "Access-Control-Allow-Credentials": res.getHeader("Access-Control-Allow-Credentials"),
+          "Access-Control-Allow-Methods": res.getHeader("Access-Control-Allow-Methods"),
+          "Access-Control-Allow-Headers": res.getHeader("Access-Control-Allow-Headers"),
+        });
+      });
       return res.sendStatus(204);
     }
     next();
