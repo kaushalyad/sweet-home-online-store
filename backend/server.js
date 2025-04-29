@@ -62,7 +62,9 @@ const corsOptions = {
   // Explicitly handle OPTIONS requests to ensure CORS headers are set
   app.use((req, res, next) => {
     if (req.method === "OPTIONS") {
-      res.header("Access-Control-Allow-Origin", req.headers.origin || "*");
+      if (req.headers.origin) {
+        res.header("Access-Control-Allow-Origin", req.headers.origin);
+      }
       res.header("Access-Control-Allow-Methods", "GET,POST,PUT,DELETE,OPTIONS");
       res.header("Access-Control-Allow-Headers", "Content-Type,Authorization");
       res.header("Access-Control-Allow-Credentials", "true");
