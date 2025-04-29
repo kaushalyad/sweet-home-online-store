@@ -56,15 +56,28 @@ const corsOptions = {
   allowedHeaders: ["Content-Type", "Authorization"],
 };
 
-// Use CORS middleware with options
-app.use(cors(corsOptions));
-app.options("*", cors(corsOptions));
+  // Use CORS middleware with options
+  app.use(cors(corsOptions));
 
-// Middlewares
-app.use(express.json());
+  // Explicitly handle OPTIONS requests to ensure CORS headers are set
+  app.use((req, res, next) => {
+    if (req.method === "OPTIONS") {
+      res.header("Access-Control-Allow-Origin", req.headers.origin || "*");
+      res.header("Access-Control-Allow-Methods", "GET,POST,PUT,DELETE,OPTIONS");
+      res.header("Access-Control-Allow-Headers", "Content-Type,Authorization");
+      res.header("Access-Control-Allow-Credentials", "true");
+      return res.sendStatus(204);
+    }
+    next();
+  });
 
-// API endpoints
-app.use("/api/user", userRouter);
+  app.options("*", cors(corsOptions));
+
+  // Middlewares
+  app.use(express.json());
+
+  // API endpoints
+  app.use("/api/user", userRouter);
 app.use("/api/product", productRouter);
 app.use("/api/cart", cartRouter);
 app.use("/api/order", orderRouter);
