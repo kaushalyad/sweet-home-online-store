@@ -11,10 +11,7 @@ import orderRouter from "./routes/orderRoute.js";
 // App Config
 const app = express();
 const port = process.env.PORT || 4000;
-app.use((req, res, next) => {
-  console.log('Incoming request headers:', req.headers);
-  next();
-});
+
 // Connect to database and cloudinary
 connectDB();
 connectCloudinary();
@@ -41,25 +38,14 @@ const corsOptions = {
     }
   },
   credentials: true,
+  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization"],
 };
 
-// Use CORS middleware
-// In Express:
-// Either completely remove CORS middleware:
-// app.use(cors());
+// Use CORS middleware with options
+app.use(cors(corsOptions));
 
-// OR configure it to match Nginx:
-// Remove this or comment it out
-app.use(
-  cors({
-    origin: "https://sweethome-store.com",
-    credentials: true,
-    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-    allowedHeaders: ["Content-Type", "Authorization"],
-  })
-);
 // Middlewares
-
 app.use(express.json());
 
 // API endpoints
