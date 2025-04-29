@@ -65,5 +65,12 @@ app.use((req, res) => {
   res.status(404).send("Route not found");
 });
 
+// CORS error handling middleware to ensure CORS headers on error responses
+app.use((err, req, res, next) => {
+  res.header("Access-Control-Allow-Origin", req.headers.origin || "*");
+  res.header("Access-Control-Allow-Credentials", "true");
+  res.status(err.status || 500).json({ success: false, message: err.message || "Internal Server Error" });
+});
+
 // Server listener
 app.listen(port, () => console.log(`Server started on PORT : ${port}`));
