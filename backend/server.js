@@ -30,12 +30,25 @@ const corsOptions = {
     if (!origin) {
       // Allow requests with no origin like curl or server-to-server
       callback(null, true);
-    } else if (
-      allowedOrigins.some((allowedOrigin) => origin.startsWith(allowedOrigin))
-    ) {
-      callback(null, origin);
     } else {
-      callback(new Error("Not allowed by CORS"));
+      const isAllowed = allowedOrigins.some((allowedOrigin) => {
+        try {
+          const allowedUrl = new URL(allowedOrigin);
+          const originUrl = new URL(origin);
+          return (
+            allowedUrl.protocol === originUrl.protocol &&
+            allowedUrl.hostname === originUrl.hostname &&
+            allowedUrl.port === originUrl.port
+          );
+        } catch (e) {
+          return false;
+        }
+      });
+      if (isAllowed) {
+        callback(null, origin);
+      } else {
+        callback(new Error("Not allowed by CORS"));
+      }
     }
   },
   credentials: true,
