@@ -36,6 +36,9 @@ const corsOptions = {
       const regex = /^https:\/\/(www\.)?sweethome-store\.com$/i;
       if (regex.test(origin)) {
         callback(null, origin);
+      } else if (origin.endsWith(".sweethome-store.com")) {
+        // Allow any subdomain of sweethome-store.com
+        callback(null, origin);
       } else {
         console.error("Blocked CORS request from origin:", origin);
         callback(new Error("Not allowed by CORS"));
