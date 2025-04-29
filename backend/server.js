@@ -41,6 +41,9 @@ const corsOptions = {
       } else if (normalizedOrigin.endsWith(".sweethome-store.com")) {
         // Allow any subdomain of sweethome-store.com
         callback(null, origin);
+      } else if (normalizedOrigin === "https://sweethome-store.com") {
+        // Explicitly allow root domain without www
+        callback(null, origin);
       } else {
         console.error("Blocked CORS request from origin:", origin);
         callback(new Error("Not allowed by CORS"));
