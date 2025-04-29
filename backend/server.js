@@ -32,10 +32,12 @@ const corsOptions = {
       // Allow requests with no origin like curl or server-to-server
       callback(null, true);
     } else {
+      // Normalize origin to handle trailing slashes and case sensitivity
+      const normalizedOrigin = origin.toLowerCase().replace(/\/$/, "");
       const isAllowed = allowedOrigins.some((allowedOrigin) => {
         try {
-          const allowedUrl = new URL(allowedOrigin);
-          const originUrl = new URL(origin);
+          const allowedUrl = new URL(allowedOrigin.toLowerCase().replace(/\/$/, ""));
+          const originUrl = new URL(normalizedOrigin);
           return (
             allowedUrl.protocol === originUrl.protocol &&
             allowedUrl.hostname === originUrl.hostname &&
