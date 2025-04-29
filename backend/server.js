@@ -32,11 +32,13 @@ const corsOptions = {
       // Allow requests with no origin like curl or server-to-server
       callback(null, true);
     } else {
+      // Normalize origin to lowercase and remove trailing slash
+      const normalizedOrigin = origin.toLowerCase().replace(/\/$/, "");
       // Allow all subdomains of sweethome-store.com, including www and root domain
       const regex = /^https:\/\/(www\.)?sweethome-store\.com$/i;
-      if (regex.test(origin)) {
+      if (regex.test(normalizedOrigin)) {
         callback(null, origin);
-      } else if (origin.endsWith(".sweethome-store.com")) {
+      } else if (normalizedOrigin.endsWith(".sweethome-store.com")) {
         // Allow any subdomain of sweethome-store.com
         callback(null, origin);
       } else {
