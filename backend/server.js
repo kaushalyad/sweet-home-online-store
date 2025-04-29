@@ -64,6 +64,7 @@ const corsOptions = {
     if (req.method === "OPTIONS") {
       if (req.headers.origin) {
         res.header("Access-Control-Allow-Origin", req.headers.origin);
+        res.header("Vary", "Origin");
       }
       res.header("Access-Control-Allow-Methods", "GET,POST,PUT,DELETE,OPTIONS");
       res.header("Access-Control-Allow-Headers", "Content-Type,Authorization");
