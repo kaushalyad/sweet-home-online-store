@@ -66,11 +66,16 @@ app.use((req, res) => {
 });
 
 // CORS error handling middleware to ensure CORS headers on error responses
-app.use((err, req, res, next) => {
-  res.header("Access-Control-Allow-Origin", req.headers.origin || "*");
-  res.header("Access-Control-Allow-Credentials", "true");
-  res.status(err.status || 500).json({ success: false, message: err.message || "Internal Server Error" });
+app.use((req, res, next) => {
+  res.on("finish", () => {
+    console.log(`${req.method} ${req.originalUrl} - CORS headers:`, {
+      "Access-Control-Allow-Origin": res.getHeader("Access-Control-Allow-Origin"),
+      "Access-Control-Allow-Credentials": res.getHeader("Access-Control-Allow-Credentials"),
+    });
+  });
+  next();
 });
+
 
 // Server listener
 app.listen(port, () => console.log(`Server started on PORT : ${port}`));
