@@ -256,8 +256,8 @@ const listProducts = async (req, res) => {
         })
 
     } catch (error) {
-        console.log(error)
-        res.json({ success: false, message: error.message })
+        console.error("Error in listProducts:", error);
+        res.status(500).json({ success: false, message: error.message });
     }
 }
 
