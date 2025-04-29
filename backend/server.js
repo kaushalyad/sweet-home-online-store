@@ -43,6 +43,7 @@ const corsOptions = {
 };
 
 // Use CORS middleware with options
+app.use(cors(corsOptions));
 app.options("*", cors(corsOptions));
 
 // Middlewares
