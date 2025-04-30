@@ -52,42 +52,39 @@ const corsOptions = {
   },
   credentials: true,
   methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-  allowedHeaders: ["Content-Type", "Authorization"],
+  allowedHeaders: ["Content-Type", "Authorization", "token"],
 };
 
-  // Use CORS middleware with options
-  app.use(cors(corsOptions));
+// Use CORS middleware with options
+app.use(cors(corsOptions));
 
-  // Explicitly handle OPTIONS requests to ensure CORS headers are set
-  app.use((req, res, next) => {
-    if (req.method === "OPTIONS") {
-      if (req.headers.origin) {
-        res.header("Access-Control-Allow-Origin", req.headers.origin);
-        res.header("Vary", "Origin");
-      }
-      res.header("Access-Control-Allow-Methods", "GET,POST,PUT,DELETE,OPTIONS");
-      res.header("Access-Control-Allow-Headers", "Content-Type,Authorization");
-      res.header("Access-Control-Allow-Credentials", "true");
-      res.on("finish", () => {
-        console.log(`OPTIONS ${req.originalUrl} - Response headers:`, {
-          "Access-Control-Allow-Origin": res.getHeader("Access-Control-Allow-Origin"),
-          "Access-Control-Allow-Credentials": res.getHeader("Access-Control-Allow-Credentials"),
-          "Access-Control-Allow-Methods": res.getHeader("Access-Control-Allow-Methods"),
-          "Access-Control-Allow-Headers": res.getHeader("Access-Control-Allow-Headers"),
-        });
-      });
-      return res.sendStatus(204);
-    }
-    next();
-  });
+// Middleware to set CORS headers on all responses (including errors)
+app.use((req, res, next) => {
+  const origin = req.headers.origin;
+  if (origin && allowedOrigins.includes(origin.toLowerCase())) {
+    res.header("Access-Control-Allow-Origin", origin);
+    res.header("Access-Control-Allow-Credentials", "true");
+    res.header("Access-Control-Allow-Methods", "GET,POST,PUT,DELETE,OPTIONS");
+    res.header("Access-Control-Allow-Headers", "Content-Type,Authorization,token");
+  }
+  next();
+});
 
-  app.options("*", cors(corsOptions));
+// Explicitly handle OPTIONS requests to ensure CORS headers are set
+app.use((req, res, next) => {
+  if (req.method === "OPTIONS") {
+    return res.sendStatus(204);
+  }
+  next();
+});
 
-  // Middlewares
-  app.use(express.json());
+app.options("*", cors(corsOptions));
 
-  // API endpoints
-  app.use("/api/user", userRouter);
+// Middlewares
+app.use(express.json());
+
+// API endpoints
+app.use("/api/user", userRouter);
 app.use("/api/product", productRouter);
 app.use("/api/cart", cartRouter);
 app.use("/api/order", orderRouter);
@@ -112,7 +109,6 @@ app.use((req, res, next) => {
   });
   next();
 });
-
 
 // Server listener
 app.listen(port, () => console.log(`Server started on PORT : ${port}`));
