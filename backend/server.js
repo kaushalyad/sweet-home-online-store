@@ -1,6 +1,8 @@
 import express from "express";
 import cors from "cors";
 import "dotenv/config";
+import morgan from "morgan";
+import logger from "./config/logger.js";
 import connectDB from "./config/mongodb.js";
 import connectCloudinary from "./config/cloudinary.js";
 import userRouter from "./routes/userRoute.js";
@@ -27,7 +29,7 @@ const allowedOrigins = [
 // CORS options
 const corsOptions = {
   origin: function (origin, callback) {
-    console.log("CORS origin check:", origin);
+    logger.info(`CORS origin check: ${origin}`);
     if (!origin) {
       // Allow requests with no origin like curl or server-to-server
       callback(null, true);
@@ -45,7 +47,7 @@ const corsOptions = {
         // Explicitly allow root domain without www
         callback(null, origin);
       } else {
-        console.error("Blocked CORS request from origin:", origin);
+        logger.error(`Blocked CORS request from origin: ${origin}`);
         callback(new Error("Not allowed by CORS"));
       }
     }
@@ -81,6 +83,7 @@ app.use((req, res, next) => {
 app.options("*", cors(corsOptions));
 
 // Middlewares
+app.use(morgan("combined", { stream: { write: message => logger.info(message.trim()) } }));
 app.use(express.json());
 
 // API endpoints
@@ -95,6 +98,11 @@ app.get("/", (req, res) => {
 });
 
 // Error handling middleware
+app.use((err, req, res, next) => {
+  logger.error(`Error: ${err.message}\nStack: ${err.stack}`);
+  res.status(500).json({ success: false, message: "Internal Server Error", error: err.message });
+});
+
 app.use((req, res) => {
   res.status(404).send("Route not found");
 });
@@ -102,13 +110,13 @@ app.use((req, res) => {
 // CORS error handling middleware to ensure CORS headers on error responses
 app.use((req, res, next) => {
   res.on("finish", () => {
-    console.log(`${req.method} ${req.originalUrl} - CORS headers:`, {
+    logger.info(`${req.method} ${req.originalUrl} - CORS headers: ${JSON.stringify({
       "Access-Control-Allow-Origin": res.getHeader("Access-Control-Allow-Origin"),
       "Access-Control-Allow-Credentials": res.getHeader("Access-Control-Allow-Credentials"),
-    });
+    })}`);
   });
   next();
 });
 
 // Server listener
-app.listen(port, () => console.log(`Server started on PORT : ${port}`));
+app.listen(port, () => logger.info(`Server started on PORT : ${port}`));

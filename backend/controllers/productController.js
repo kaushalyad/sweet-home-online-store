@@ -171,6 +171,8 @@ const listProducts = async (req, res) => {
             tags
         } = req.query
 
+        console.log("listProducts called with query params:", req.query);
+
         // Build query object
         let query = {}
 
@@ -195,8 +197,8 @@ const listProducts = async (req, res) => {
         // Price range
         if (minPrice || maxPrice) {
             query.price = {}
-            if (minPrice) query.price.$gte = Number(minPrice)
-            if (maxPrice) query.price.$lte = Number(maxPrice)
+            if (minPrice && !isNaN(minPrice)) query.price.$gte = Number(minPrice)
+            if (maxPrice && !isNaN(maxPrice)) query.price.$lte = Number(maxPrice)
         }
 
         // Product flags
@@ -205,16 +207,20 @@ const listProducts = async (req, res) => {
         if (newArrival === 'true') query.newArrival = true
 
         // Tags filter
-        if (tags) {
-            const tagsArray = tags.split(',')
-            query.tags = { $in: tagsArray }
+        if (tags && tags.trim() !== '') {
+            const tagsArray = tags.split(',').map(tag => tag.trim()).filter(tag => tag !== '')
+            if (tagsArray.length > 0) {
+                query.tags = { $in: tagsArray }
+            }
         }
+
+        console.log("MongoDB query object:", query);
 
         // Count total before pagination
         const total = await productModel.countDocuments(query)
 
         // Build sort option
-        let sortOption = { date: -1 } // Default sort by date, newest first
+        let sortOption = { createdAt: -1 } // Default sort by createdAt, newest first
         if (sort) {
             switch (sort) {
                 case 'price-asc':
@@ -235,28 +241,32 @@ const listProducts = async (req, res) => {
             }
         }
 
+        console.log("Sort option:", sortOption, "Page:", page, "Limit:", limit);
+
         // Pagination
-        const skip = (page - 1) * limit
+        const pageNum = Number(page)
+        const limitNum = Number(limit)
+        const skip = (pageNum - 1) * limitNum
 
         const products = await productModel
             .find(query)
             .sort(sortOption)
             .skip(skip)
-            .limit(Number(limit))
+            .limit(limitNum)
 
         res.json({
             success: true, 
             products,
             pagination: {
                 total,
-                page: Number(page),
-                limit: Number(limit),
-                totalPages: Math.ceil(total / limit)
+                page: pageNum,
+                limit: limitNum,
+                totalPages: Math.ceil(total / limitNum)
             }
         })
 
     } catch (error) {
-        console.error("Error in listProducts:", error);
+        console.error("Error in listProducts:", error.stack);
         res.status(500).json({ success: false, message: error.message });
     }
 }
