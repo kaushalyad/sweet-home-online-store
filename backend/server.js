@@ -59,16 +59,16 @@ const corsOptions = {
 app.use(cors(corsOptions));
 
 // Middleware to set CORS headers on all responses (including errors)
-app.use((req, res, next) => {
-  const origin = req.headers.origin;
-  if (origin && allowedOrigins.includes(origin.toLowerCase())) {
-    res.header("Access-Control-Allow-Origin", origin);
-    res.header("Access-Control-Allow-Credentials", "true");
-    res.header("Access-Control-Allow-Methods", "GET,POST,PUT,DELETE,OPTIONS");
-    res.header("Access-Control-Allow-Headers", "Content-Type,Authorization,token");
-  }
-  next();
-});
+// app.use((req, res, next) => {
+//   const origin = req.headers.origin;
+//   if (origin && allowedOrigins.includes(origin.toLowerCase())) {
+//     res.header("Access-Control-Allow-Origin", origin);
+//     res.header("Access-Control-Allow-Credentials", "true");
+//     res.header("Access-Control-Allow-Methods", "GET,POST,PUT,DELETE,OPTIONS");
+//     res.header("Access-Control-Allow-Headers", "Content-Type,Authorization,token");
+//   }
+//   next();
+// });
 
 // Explicitly handle OPTIONS requests to ensure CORS headers are set
 app.use((req, res, next) => {
