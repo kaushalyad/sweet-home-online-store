@@ -74,16 +74,6 @@ app.use((req, res, next) => {
   next();
 });
 
-// Middleware to log response headers for debugging CORS issues
-app.use((req, res, next) => {
-  res.on('finish', () => {
-    const acao = res.getHeader('Access-Control-Allow-Origin');
-    const acac = res.getHeader('Access-Control-Allow-Credentials');
-    logger.info(`Response CORS headers: Access-Control-Allow-Origin: ${acao}, Access-Control-Allow-Credentials: ${acac}`);
-  });
-  next();
-});
-
 // Middleware to set CORS headers on all responses (including errors)
 // app.use((req, res, next) => {
 //   const origin = req.headers.origin;
