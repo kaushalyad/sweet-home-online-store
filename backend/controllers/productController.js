@@ -248,11 +248,31 @@ const listProducts = async (req, res) => {
         const limitNum = Number(limit)
         const skip = (pageNum - 1) * limitNum
 
-        const products = await productModel
-            .find(query)
-            .sort(sortOption)
-            .skip(skip)
-            .limit(limitNum)
+        let products = []
+        let total = 0
+
+        try {
+            total = await productModel.countDocuments(query)
+            products = await productModel
+                .find(query)
+                .sort(sortOption)
+                .skip(skip)
+                .limit(limitNum)
+        } catch (dbError) {
+            console.error("Database query error in listProducts:", dbError.stack)
+            // Return empty results on DB error to avoid 500
+            return res.json({
+                success: false,
+                message: "Database query error",
+                products: [],
+                pagination: {
+                    total: 0,
+                    page: pageNum,
+                    limit: limitNum,
+                    totalPages: 0
+                }
+            })
+        }
 
         res.json({
             success: true, 
