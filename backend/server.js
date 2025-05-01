@@ -100,10 +100,26 @@ app.get("/", (req, res) => {
   res.send("API Working");
 });
 
+// Request logging middleware
+app.use((req, res, next) => {
+  logger.info(`Incoming request: ${req.method} ${req.originalUrl} - Body: ${JSON.stringify(req.body)}`);
+  next();
+});
+
 // Error handling middleware
 app.use((err, req, res, next) => {
   logger.error(`Error: ${err.message}\nStack: ${err.stack}`);
   res.status(500).json({ success: false, message: "Internal Server Error", error: err.message });
+});
+
+// Global unhandled rejection handler
+process.on('unhandledRejection', (reason, promise) => {
+  logger.error(`Unhandled Rejection at: ${promise}, reason: ${reason}`);
+});
+
+// Global uncaught exception handler
+process.on('uncaughtException', (error) => {
+  logger.error(`Uncaught Exception: ${error.message}\nStack: ${error.stack}`);
 });
 
 app.use((req, res) => {
