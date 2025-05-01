@@ -49,6 +49,9 @@ const corsOptions = {
       } else if (origin === undefined) {
         // Allow requests with undefined origin (e.g., curl, Postman)
         callback(null, true);
+      } else if (origin === "https://www.sweethome-store.com") {
+        // Explicitly allow this origin
+        callback(null, origin);
       } else {
         logger.error(`Blocked CORS request from origin: ${origin}`);
         callback(new Error("Not allowed by CORS"));
