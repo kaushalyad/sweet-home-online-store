@@ -1,6 +1,7 @@
 import { v2 as cloudinary } from "cloudinary"
 import productModel from "../models/productModel.js"
 import mongoose from "mongoose"
+import logger from "../config/logger.js"
 
 // function for add product
 const addProduct = async (req, res) => {
