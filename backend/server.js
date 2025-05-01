@@ -36,24 +36,19 @@ const corsOptions = {
     } else {
       // Normalize origin to lowercase and remove trailing slash
       const normalizedOrigin = origin.toLowerCase().replace(/\/$/, "");
-      // Allow all subdomains of sweethome-store.com, including www and root domain
-      const regex = /^https:\/\/(www\.)?sweethome-store\.com$/i;
-      if (regex.test(normalizedOrigin)) {
+      logger.info(`Normalized CORS origin: ${normalizedOrigin}`);
+      // Allowed origins list normalized
+      const allowedOriginsNormalized = [
+        "https://sweethome-store.com",
+        "https://www.sweethome-store.com",
+        "http://localhost:3000",
+        "http://127.0.0.1:3000",
+      ];
+      // Check if normalized origin is in allowed list
+      if (allowedOriginsNormalized.includes(normalizedOrigin)) {
         callback(null, origin);
       } else if (normalizedOrigin.endsWith(".sweethome-store.com")) {
         // Allow any subdomain of sweethome-store.com
-        callback(null, origin);
-      } else if (normalizedOrigin === "https://sweethome-store.com") {
-        // Explicitly allow root domain without www
-        callback(null, origin);
-      } else if (origin === undefined) {
-        // Allow requests with undefined origin (e.g., curl, Postman)
-        callback(null, true);
-      } else if (origin === "https://www.sweethome-store.com") {
-        // Explicitly allow this origin
-        callback(null, origin);
-      } else if (origin === "http://localhost:3000" || origin === "http://127.0.0.1:3000") {
-        // Allow localhost origins for development
         callback(null, origin);
       } else {
         logger.error(`Blocked CORS request from origin: ${origin}`);
