@@ -8,7 +8,11 @@ export default defineConfig({
     host: "0.0.0.0", // Ensure this is correct for binding to all IP addresses
     port: 4173, // Or another available port
     proxy: {
-      "/api": "http:localhost:4000",
+      "/api": {
+        target: "http://localhost:4000",
+        changeOrigin: true,
+        secure: false,
+      },
     },
   },
 });
