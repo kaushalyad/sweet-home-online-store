@@ -64,6 +64,16 @@ const corsOptions = {
 // Use CORS middleware with options
 app.use(cors(corsOptions));
 
+// Middleware to remove duplicate Access-Control-Allow-Origin headers
+app.use((req, res, next) => {
+  const acao = res.getHeader('Access-Control-Allow-Origin');
+  if (acao && Array.isArray(acao)) {
+    // If multiple headers, keep only the first
+    res.setHeader('Access-Control-Allow-Origin', acao[0]);
+  }
+  next();
+});
+
 // Middleware to set CORS headers on all responses (including errors)
 // app.use((req, res, next) => {
 //   const origin = req.headers.origin;
