@@ -52,6 +52,9 @@ const corsOptions = {
       } else if (origin === "https://www.sweethome-store.com") {
         // Explicitly allow this origin
         callback(null, origin);
+      } else if (origin === "http://localhost:3000" || origin === "http://127.0.0.1:3000") {
+        // Allow localhost origins for development
+        callback(null, origin);
       } else {
         logger.error(`Blocked CORS request from origin: ${origin}`);
         callback(new Error("Not allowed by CORS"));
