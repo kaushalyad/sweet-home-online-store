@@ -46,6 +46,9 @@ const corsOptions = {
       } else if (normalizedOrigin === "https://sweethome-store.com") {
         // Explicitly allow root domain without www
         callback(null, origin);
+      } else if (origin === undefined) {
+        // Allow requests with undefined origin (e.g., curl, Postman)
+        callback(null, true);
       } else {
         logger.error(`Blocked CORS request from origin: ${origin}`);
         callback(new Error("Not allowed by CORS"));
