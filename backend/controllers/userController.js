@@ -4,32 +4,46 @@ import jwt from "jsonwebtoken";
 import userModel from "../models/userModel.js";
 import { sendResetPasswordEmail } from "../config/emailConfig.js";
 
+import logger from "../config/logger.js";
+
 const createToken = (id) => {
-  return jwt.sign({ id }, process.env.JWT_SECRET);
+  try {
+    if (!process.env.JWT_SECRET) {
+      throw new Error("JWT_SECRET is not defined in environment variables");
+    }
+    return jwt.sign({ id }, process.env.JWT_SECRET);
+  } catch (error) {
+    logger.error(`Error creating JWT token: ${error.message}`);
+    throw error;
+  }
 };
 
 // Route for user login
 const loginUser = async (req, res) => {
   try {
-    const { name, email, password } = req.body;
+    const { email, password } = req.body;
+
+    if (!email || !password) {
+      return res.status(400).json({ success: false, message: "Email and password are required" });
+    }
 
     const user = await userModel.findOne({ email });
 
     if (!user) {
-      return res.json({ success: false, message: "User doesn't exists" });
+      return res.status(401).json({ success: false, message: "User doesn't exist" });
     }
 
     const isMatch = await bcrypt.compare(password, user.password);
 
     if (isMatch) {
       const token = createToken(user._id);
-      res.json({ success: true, token, name });
+      res.json({ success: true, token, name: user.name });
     } else {
-      res.json({ success: false, message: "Invalid credentials" });
+      res.status(401).json({ success: false, message: "Invalid credentials" });
     }
   } catch (error) {
-    console.log(error);
-    res.json({ success: false, message: error.message });
+    logger.error(`Login error: ${error.message}\n${error.stack}`);
+    res.status(500).json({ success: false, message: "Internal Server Error" });
   }
 };
 
