@@ -171,7 +171,7 @@ const listProducts = async (req, res) => {
             tags
         } = req.query
 
-        console.log("listProducts called with query params:", req.query);
+        logger.info("listProducts called with query params:", req.query);
 
         // Build query object
         let query = {}
@@ -214,7 +214,7 @@ const listProducts = async (req, res) => {
             }
         }
 
-        console.log("MongoDB query object:", query);
+        logger.info("MongoDB query object:", query);
 
         // Count total before pagination
         const total = await productModel.countDocuments(query)
@@ -241,7 +241,7 @@ const listProducts = async (req, res) => {
             }
         }
 
-        console.log("Sort option:", sortOption, "Page:", page, "Limit:", limit);
+        logger.info("Sort option:", sortOption, "Page:", page, "Limit:", limit);
 
         // Pagination
         const pageNum = Number(page)
@@ -249,30 +249,12 @@ const listProducts = async (req, res) => {
         const skip = (pageNum - 1) * limitNum
 
         let products = []
-        let total = 0
 
-        try {
-            total = await productModel.countDocuments(query)
-            products = await productModel
-                .find(query)
-                .sort(sortOption)
-                .skip(skip)
-                .limit(limitNum)
-        } catch (dbError) {
-            console.error("Database query error in listProducts:", dbError.stack)
-            // Return empty results on DB error to avoid 500
-            return res.json({
-                success: false,
-                message: "Database query error",
-                products: [],
-                pagination: {
-                    total: 0,
-                    page: pageNum,
-                    limit: limitNum,
-                    totalPages: 0
-                }
-            })
-        }
+        products = await productModel
+            .find(query)
+            .sort(sortOption)
+            .skip(skip)
+            .limit(limitNum)
 
         res.json({
             success: true, 
@@ -286,7 +268,7 @@ const listProducts = async (req, res) => {
         })
 
     } catch (error) {
-        console.error("Error in listProducts:", error.stack);
+        logger.error("Error in listProducts:", error.stack);
         res.status(500).json({ success: false, message: error.message });
     }
 }
