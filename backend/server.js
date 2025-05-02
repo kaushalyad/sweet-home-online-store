@@ -38,18 +38,13 @@ const corsOptions = {
       const normalizedOrigin = origin.toLowerCase().replace(/\/$/, "");
       logger.info(`Normalized CORS origin: ${normalizedOrigin}`);
       // Allowed origins list normalized
-      const allowedOriginsNormalized = [
-        "https://sweethome-store.com",
-        "https://www.sweethome-store.com",
-        "http://localhost:3000",
-        "http://127.0.0.1:3000",
-      ];
+      const allowedOriginsNormalized = allowedOrigins.map(o => o.toLowerCase().replace(/\/$/, ""));
       // Check if normalized origin is in allowed list
       if (allowedOriginsNormalized.includes(normalizedOrigin)) {
-        callback(null, origin);
+        callback(null, true);
       } else if (normalizedOrigin.endsWith(".sweethome-store.com")) {
         // Allow any subdomain of sweethome-store.com
-        callback(null, origin);
+        callback(null, true);
       } else {
         logger.error(`Blocked CORS request from origin: ${origin}`);
         callback(new Error("Not allowed by CORS"));
@@ -59,42 +54,13 @@ const corsOptions = {
   credentials: true,
   methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
   allowedHeaders: ["Content-Type", "Authorization", "token"],
+  // Prevent duplicate headers
+  preflightContinue: false,
+  optionsSuccessStatus: 204
 };
 
-// Use CORS middleware with options
+// Apply CORS middleware once
 app.use(cors(corsOptions));
-
-// Middleware to remove duplicate Access-Control-Allow-Origin headers
-app.use((req, res, next) => {
-  const acao = res.getHeader('Access-Control-Allow-Origin');
-  if (acao && Array.isArray(acao)) {
-    // If multiple headers, keep only the first
-    res.setHeader('Access-Control-Allow-Origin', acao[0]);
-  }
-  next();
-});
-
-// Middleware to set CORS headers on all responses (including errors)
-// app.use((req, res, next) => {
-//   const origin = req.headers.origin;
-//   if (origin && allowedOrigins.includes(origin.toLowerCase())) {
-//     res.header("Access-Control-Allow-Origin", origin);
-//     res.header("Access-Control-Allow-Credentials", "true");
-//     res.header("Access-Control-Allow-Methods", "GET,POST,PUT,DELETE,OPTIONS");
-//     res.header("Access-Control-Allow-Headers", "Content-Type,Authorization,token");
-//   }
-//   next();
-// });
-
-// Explicitly handle OPTIONS requests to ensure CORS headers are set
-app.use((req, res, next) => {
-  if (req.method === "OPTIONS") {
-    return res.sendStatus(204);
-  }
-  next();
-});
-
-app.options("*", cors(corsOptions));
 
 // Middlewares
 app.use(morgan("combined", { stream: { write: message => logger.info(message.trim()) } }));
@@ -111,41 +77,15 @@ app.get("/", (req, res) => {
   res.send("API Working");
 });
 
-// Request logging middleware
-app.use((req, res, next) => {
-  logger.info(`Incoming request: ${req.method} ${req.originalUrl} - Body: ${JSON.stringify(req.body)}`);
-  next();
-});
-
 // Error handling middleware
 app.use((err, req, res, next) => {
   logger.error(`Error: ${err.message}\nStack: ${err.stack}`);
   res.status(500).json({ success: false, message: "Internal Server Error", error: err.message });
 });
 
-// Global unhandled rejection handler
-process.on('unhandledRejection', (reason, promise) => {
-  logger.error(`Unhandled Rejection at: ${promise}, reason: ${reason}`);
-});
-
-// Global uncaught exception handler
-process.on('uncaughtException', (error) => {
-  logger.error(`Uncaught Exception: ${error.message}\nStack: ${error.stack}`);
-});
-
+// 404 handler
 app.use((req, res) => {
   res.status(404).send("Route not found");
-});
-
-// CORS error handling middleware to ensure CORS headers on error responses
-app.use((req, res, next) => {
-  res.on("finish", () => {
-    logger.info(`${req.method} ${req.originalUrl} - CORS headers: ${JSON.stringify({
-      "Access-Control-Allow-Origin": res.getHeader("Access-Control-Allow-Origin"),
-      "Access-Control-Allow-Credentials": res.getHeader("Access-Control-Allow-Credentials"),
-    })}`);
-  });
-  next();
 });
 
 // Server listener
