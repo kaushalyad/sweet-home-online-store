@@ -60,7 +60,7 @@ const corsOptions = {
 };
 
 // Apply CORS middleware once
-app.use(cors(corsOptions));
+// app.use(cors(corsOptions));
 
 // Middlewares
 app.use(morgan("combined", { stream: { write: message => logger.info(message.trim()) } }));
