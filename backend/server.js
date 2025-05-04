@@ -31,7 +31,24 @@ const allowedOrigins = [
 
 // CORS options
 const corsOptions = {
-  origin: "https://www.sweethome-store.com", // Set specific origin for production
+  origin: function (origin, callback) {
+    // Log the origin for debugging
+    logger.info(`CORS origin check: ${origin}`);
+    
+    // Allow requests with no origin (like mobile apps or curl requests)
+    if (!origin) {
+      return callback(null, true);
+    }
+
+    // Check if the origin is allowed
+    if (origin === "https://www.sweethome-store.com") {
+      return callback(null, true);
+    }
+
+    // Block the request
+    logger.error(`Blocked CORS request from origin: ${origin}`);
+    return callback(new Error("Not allowed by CORS"));
+  },
   credentials: true,
   methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
   allowedHeaders: ["Content-Type", "Authorization", "token"],
@@ -43,6 +60,23 @@ const corsOptions = {
 
 // Apply CORS middleware once
 app.use(cors(corsOptions));
+
+// Add a middleware to ensure no duplicate CORS headers
+app.use((req, res, next) => {
+  // Remove any existing CORS headers
+  res.removeHeader('Access-Control-Allow-Origin');
+  res.removeHeader('Access-Control-Allow-Credentials');
+  res.removeHeader('Access-Control-Allow-Methods');
+  res.removeHeader('Access-Control-Allow-Headers');
+  
+  // Set the origin header only if it's the allowed origin
+  const origin = req.headers.origin;
+  if (origin === "https://www.sweethome-store.com") {
+    res.setHeader('Access-Control-Allow-Origin', origin);
+    res.setHeader('Access-Control-Allow-Credentials', 'true');
+  }
+  next();
+});
 
 // Middlewares
 app.use(morgan("combined", { stream: { write: message => logger.info(message.trim()) } }));
