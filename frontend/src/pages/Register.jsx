@@ -3,6 +3,8 @@ import { Link, useNavigate } from "react-router-dom";
 import { useShop } from "../context/ShopContext";
 import { toast } from "react-toastify";
 import axios from "axios";
+import { motion } from 'framer-motion';
+import { FaEye, FaEyeSlash, FaUser, FaEnvelope, FaPhone, FaLock } from 'react-icons/fa';
 
 const Register = () => {
   const [formData, setFormData] = useState({
@@ -65,151 +67,210 @@ const Register = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#f5f5f5] flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-md w-full">
+    <div className="min-h-screen bg-gradient-to-br from-pink-50 to-blue-50 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+      <motion.div 
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+        className="max-w-md w-full"
+      >
         {/* Registration Box */}
-        <div className="bg-white p-8 rounded-sm shadow-sm border border-gray-200">
-          <div className="mb-6">
-            <h2 className="text-2xl font-medium text-[#212121]">
-              Sign Up
+        <div className="bg-white p-8 rounded-xl shadow-lg border border-gray-100">
+          <motion.div 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.2 }}
+            className="mb-8 text-center"
+          >
+            <h2 className="text-3xl font-bold text-gray-900 mb-2">
+              Create Account
             </h2>
-            <p className="mt-1 text-sm text-[#878787]">
-              or <Link to="/login" className="text-[#2874f0] font-medium">login</Link>
+            <p className="text-gray-600">
+              or <Link to="/login" className="text-pink-600 font-medium hover:text-pink-700 transition-colors">login to your account</Link>
             </p>
-          </div>
+          </motion.div>
 
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div>
-              <label htmlFor="name" className="block text-sm font-medium text-[#212121]">
+          <form onSubmit={handleSubmit} className="space-y-6">
+            <motion.div
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.3 }}
+            >
+              <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-2">
                 Full Name
               </label>
-              <div className="mt-1">
+              <div className="relative">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <FaUser className="h-5 w-5 text-gray-400" />
+                </div>
                 <input
                   type="text"
                   name="name"
                   id="name"
                   required
-                  className="appearance-none block w-full px-3 py-2 border border-[#dbdbdb] rounded-sm shadow-sm placeholder-[#878787] focus:outline-none focus:ring-[#2874f0] focus:border-[#2874f0] sm:text-sm"
-                  placeholder="Enter Full Name"
+                  className="pl-10 appearance-none block w-full px-3 py-3 border border-gray-300 rounded-lg shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-pink-500 sm:text-sm transition-all duration-200"
+                  placeholder="Enter your full name"
                   value={formData.name}
                   onChange={handleChange}
                 />
               </div>
-            </div>
+            </motion.div>
 
-            <div>
-              <label htmlFor="email" className="block text-sm font-medium text-[#212121]">
-                Email
+            <motion.div
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.4 }}
+            >
+              <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
+                Email Address
               </label>
-              <div className="mt-1">
+              <div className="relative">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <FaEnvelope className="h-5 w-5 text-gray-400" />
+                </div>
                 <input
                   type="email"
                   name="email"
                   id="email"
                   required
-                  className="appearance-none block w-full px-3 py-2 border border-[#dbdbdb] rounded-sm shadow-sm placeholder-[#878787] focus:outline-none focus:ring-[#2874f0] focus:border-[#2874f0] sm:text-sm"
-                  placeholder="Enter Email"
+                  className="pl-10 appearance-none block w-full px-3 py-3 border border-gray-300 rounded-lg shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-pink-500 sm:text-sm transition-all duration-200"
+                  placeholder="Enter your email"
                   value={formData.email}
                   onChange={handleChange}
                 />
               </div>
-            </div>
+            </motion.div>
 
-            <div>
-              <label htmlFor="phone" className="block text-sm font-medium text-[#212121]">
+            <motion.div
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.5 }}
+            >
+              <label htmlFor="phone" className="block text-sm font-medium text-gray-700 mb-2">
                 Mobile Number
               </label>
-              <div className="mt-1">
+              <div className="relative">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <FaPhone className="h-5 w-5 text-gray-400" />
+                </div>
                 <input
                   type="tel"
                   name="phone"
                   id="phone"
                   required
-                  className="appearance-none block w-full px-3 py-2 border border-[#dbdbdb] rounded-sm shadow-sm placeholder-[#878787] focus:outline-none focus:ring-[#2874f0] focus:border-[#2874f0] sm:text-sm"
-                  placeholder="Enter Mobile Number"
+                  className="pl-10 appearance-none block w-full px-3 py-3 border border-gray-300 rounded-lg shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-pink-500 sm:text-sm transition-all duration-200"
+                  placeholder="Enter your mobile number"
                   value={formData.phone}
                   onChange={handleChange}
                 />
               </div>
-            </div>
+            </motion.div>
 
-            <div>
-              <label htmlFor="password" className="block text-sm font-medium text-[#212121]">
+            <motion.div
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.6 }}
+            >
+              <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-2">
                 Password
               </label>
-              <div className="mt-1 relative">
+              <div className="relative">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <FaLock className="h-5 w-5 text-gray-400" />
+                </div>
                 <input
                   type={showPassword ? "text" : "password"}
                   name="password"
                   id="password"
                   required
-                  className="appearance-none block w-full px-3 py-2 border border-[#dbdbdb] rounded-sm shadow-sm placeholder-[#878787] focus:outline-none focus:ring-[#2874f0] focus:border-[#2874f0] sm:text-sm"
-                  placeholder="Enter Password"
+                  className="pl-10 appearance-none block w-full px-3 py-3 border border-gray-300 rounded-lg shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-pink-500 sm:text-sm transition-all duration-200"
+                  placeholder="Create a password"
                   value={formData.password}
                   onChange={handleChange}
                 />
                 <button
                   type="button"
-                  className="absolute inset-y-0 right-0 pr-3 flex items-center"
+                  className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600 transition-colors"
                   onClick={() => setShowPassword(!showPassword)}
                 >
                   {showPassword ? (
-                    <svg className="h-5 w-5 text-[#878787]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" />
-                    </svg>
+                    <FaEyeSlash className="h-5 w-5" />
                   ) : (
-                    <svg className="h-5 w-5 text-[#878787]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                    </svg>
+                    <FaEye className="h-5 w-5" />
                   )}
                 </button>
               </div>
-            </div>
+            </motion.div>
 
-            <div>
-              <label htmlFor="confirmPassword" className="block text-sm font-medium text-[#212121]">
+            <motion.div
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.7 }}
+            >
+              <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700 mb-2">
                 Confirm Password
               </label>
-              <div className="mt-1">
+              <div className="relative">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <FaLock className="h-5 w-5 text-gray-400" />
+                </div>
                 <input
                   type={showPassword ? "text" : "password"}
                   name="confirmPassword"
                   id="confirmPassword"
                   required
-                  className="appearance-none block w-full px-3 py-2 border border-[#dbdbdb] rounded-sm shadow-sm placeholder-[#878787] focus:outline-none focus:ring-[#2874f0] focus:border-[#2874f0] sm:text-sm"
-                  placeholder="Confirm Password"
+                  className="pl-10 appearance-none block w-full px-3 py-3 border border-gray-300 rounded-lg shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-pink-500 sm:text-sm transition-all duration-200"
+                  placeholder="Confirm your password"
                   value={formData.confirmPassword}
                   onChange={handleChange}
                 />
               </div>
-            </div>
+            </motion.div>
 
-            <div>
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.8 }}
+            >
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full flex justify-center py-2 px-4 border border-transparent rounded-sm shadow-sm text-sm font-medium text-white bg-[#2874f0] hover:bg-[#1a5dc8] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#2874f0]"
+                className="group relative w-full flex justify-center py-3 px-4 border border-transparent rounded-lg text-sm font-medium text-white bg-gradient-to-r from-pink-600 to-pink-700 hover:from-pink-700 hover:to-pink-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-pink-500 transition-all duration-200 transform hover:-translate-y-0.5"
               >
-                {loading ? "Creating account..." : "Sign Up"}
+                {loading ? (
+                  <div className="flex items-center">
+                    <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    Creating account...
+                  </div>
+                ) : (
+                  "Create Account"
+                )}
               </button>
-            </div>
+            </motion.div>
           </form>
         </div>
 
         {/* Terms and Privacy */}
-        <div className="mt-4 text-center text-xs text-[#878787]">
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.9 }}
+          className="mt-6 text-center text-sm text-gray-600"
+        >
           By continuing, you agree to our{" "}
-          <Link to="/terms" className="text-[#2874f0] hover:text-[#1a5dc8]">
+          <Link to="/terms" className="text-pink-600 hover:text-pink-700 transition-colors">
             Terms of Use
           </Link>{" "}
           and{" "}
-          <Link to="/privacy" className="text-[#2874f0] hover:text-[#1a5dc8]">
+          <Link to="/privacy" className="text-pink-600 hover:text-pink-700 transition-colors">
             Privacy Policy
           </Link>
           .
-        </div>
-      </div>
+        </motion.div>
+      </motion.div>
     </div>
   );
 };

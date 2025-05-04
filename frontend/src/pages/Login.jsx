@@ -3,6 +3,8 @@ import { ShopContext } from '../context/ShopContext';
 import axios from 'axios';
 import { toast } from 'react-toastify';
 import { Link, useNavigate } from 'react-router-dom';
+import { motion } from 'framer-motion';
+import { FaEye, FaEyeSlash, FaEnvelope, FaPhone, FaLock } from 'react-icons/fa';
 
 const Login = () => {
   const [loginMethod, setLoginMethod] = useState("email");
@@ -59,137 +61,189 @@ const Login = () => {
   }, [token, navigate]);
 
   return (
-    <div className="min-h-screen bg-[#f5f5f5] flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-md w-full">
+    <div className="min-h-screen bg-gradient-to-br from-pink-50 to-blue-50 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+      <motion.div 
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+        className="max-w-md w-full"
+      >
         {/* Login Box */}
-        <div className="bg-white p-8 rounded-sm shadow-sm border border-gray-200">
-          <div className="mb-6">
-            <h2 className="text-2xl font-medium text-[#212121]">
-              Login
+        <div className="bg-white p-8 rounded-xl shadow-lg border border-gray-100">
+          <motion.div 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.2 }}
+            className="mb-8 text-center"
+          >
+            <h2 className="text-3xl font-bold text-gray-900 mb-2">
+              Welcome Back
             </h2>
-            <p className="mt-1 text-sm text-[#878787]">
-              or <Link to="/register" className="text-[#2874f0] font-medium">sign up</Link>
+            <p className="text-gray-600">
+              or <Link to="/register" className="text-pink-600 font-medium hover:text-pink-700 transition-colors">create an account</Link>
             </p>
-          </div>
+          </motion.div>
 
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div>
-              <label htmlFor="email" className="block text-sm font-medium text-[#212121]">
-                {loginMethod === "email" ? "Email" : "Mobile Number"}
+          <form onSubmit={handleSubmit} className="space-y-6">
+            <motion.div
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.3 }}
+            >
+              <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
+                {loginMethod === "email" ? "Email Address" : "Mobile Number"}
               </label>
-              <div className="mt-1">
+              <div className="relative">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  {loginMethod === "email" ? (
+                    <FaEnvelope className="h-5 w-5 text-gray-400" />
+                  ) : (
+                    <FaPhone className="h-5 w-5 text-gray-400" />
+                  )}
+                </div>
                 <input
                   type={loginMethod === "email" ? "email" : "tel"}
                   name={loginMethod === "email" ? "email" : "phone"}
                   id={loginMethod === "email" ? "email" : "phone"}
                   required
-                  className="appearance-none block w-full px-3 py-2 border border-[#dbdbdb] rounded-sm shadow-sm placeholder-[#878787] focus:outline-none focus:ring-[#2874f0] focus:border-[#2874f0] sm:text-sm"
-                  placeholder={loginMethod === "email" ? "Enter Email" : "Enter Mobile Number"}
+                  className="pl-10 appearance-none block w-full px-3 py-3 border border-gray-300 rounded-lg shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-pink-500 sm:text-sm transition-all duration-200"
+                  placeholder={loginMethod === "email" ? "Enter your email" : "Enter your mobile number"}
                   value={loginMethod === "email" ? formData.email : formData.phone}
                   onChange={handleChange}
                 />
               </div>
-            </div>
+            </motion.div>
 
-            <div>
-              <label htmlFor="password" className="block text-sm font-medium text-[#212121]">
+            <motion.div
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.4 }}
+            >
+              <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-2">
                 Password
               </label>
-              <div className="mt-1 relative">
+              <div className="relative">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <FaLock className="h-5 w-5 text-gray-400" />
+                </div>
                 <input
                   type={showPassword ? "text" : "password"}
                   name="password"
                   id="password"
                   required
-                  className="appearance-none block w-full px-3 py-2 border border-[#dbdbdb] rounded-sm shadow-sm placeholder-[#878787] focus:outline-none focus:ring-[#2874f0] focus:border-[#2874f0] sm:text-sm"
-                  placeholder="Enter Password"
+                  className="pl-10 appearance-none block w-full px-3 py-3 border border-gray-300 rounded-lg shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-pink-500 sm:text-sm transition-all duration-200"
+                  placeholder="Enter your password"
                   value={formData.password}
                   onChange={handleChange}
                 />
                 <button
                   type="button"
-                  className="absolute inset-y-0 right-0 pr-3 flex items-center"
+                  className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600 transition-colors"
                   onClick={() => setShowPassword(!showPassword)}
                 >
                   {showPassword ? (
-                    <svg className="h-5 w-5 text-[#878787]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" />
-                    </svg>
+                    <FaEyeSlash className="h-5 w-5" />
                   ) : (
-                    <svg className="h-5 w-5 text-[#878787]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                    </svg>
+                    <FaEye className="h-5 w-5" />
                   )}
                 </button>
               </div>
-            </div>
+            </motion.div>
 
-            <div className="flex items-center justify-between">
+            <motion.div
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.5 }}
+              className="flex items-center justify-between"
+            >
               <div className="flex items-center">
                 <input
                   id="remember-me"
                   name="remember-me"
                   type="checkbox"
-                  className="h-4 w-4 text-[#2874f0] focus:ring-[#2874f0] border-[#dbdbdb] rounded"
+                  className="h-4 w-4 text-pink-600 focus:ring-pink-500 border-gray-300 rounded transition-colors"
                 />
-                <label htmlFor="remember-me" className="ml-2 block text-sm text-[#212121]">
+                <label htmlFor="remember-me" className="ml-2 block text-sm text-gray-700">
                   Remember me
                 </label>
               </div>
 
               <div className="text-sm">
-                <Link to="/forgot-password" className="font-medium text-[#2874f0] hover:text-[#1a5dc8]">
+                <Link to="/forgot-password" className="font-medium text-pink-600 hover:text-pink-700 transition-colors">
                   Forgot password?
                 </Link>
               </div>
-            </div>
+            </motion.div>
 
-            <div>
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.6 }}
+            >
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full flex justify-center py-2 px-4 border border-transparent rounded-sm shadow-sm text-sm font-medium text-white bg-[#2874f0] hover:bg-[#1a5dc8] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#2874f0]"
+                className="group relative w-full flex justify-center py-3 px-4 border border-transparent rounded-lg text-sm font-medium text-white bg-gradient-to-r from-pink-600 to-pink-700 hover:from-pink-700 hover:to-pink-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-pink-500 transition-all duration-200 transform hover:-translate-y-0.5"
               >
-                {loading ? "Logging in..." : "Login"}
+                {loading ? (
+                  <div className="flex items-center">
+                    <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    Logging in...
+                  </div>
+                ) : (
+                  "Login"
+                )}
               </button>
-            </div>
+            </motion.div>
           </form>
 
-          <div className="mt-6">
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.7 }}
+            className="mt-8"
+          >
             <div className="relative">
               <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-[#dbdbdb]"></div>
+                <div className="w-full border-t border-gray-200"></div>
               </div>
               <div className="relative flex justify-center text-sm">
-                <span className="px-2 bg-white text-[#878787]">OR</span>
+                <span className="px-4 bg-white text-gray-500">OR</span>
               </div>
             </div>
 
             <div className="mt-6">
               <button
                 onClick={() => setLoginMethod(loginMethod === "email" ? "phone" : "email")}
-                className="w-full flex justify-center py-2 px-4 border border-[#dbdbdb] rounded-sm shadow-sm text-sm font-medium text-[#212121] bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#2874f0]"
+                className="w-full flex justify-center py-3 px-4 border border-gray-300 rounded-lg shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-pink-500 transition-all duration-200"
               >
                 {loginMethod === "email" ? "Login with Mobile Number" : "Login with Email"}
               </button>
             </div>
-          </div>
+          </motion.div>
         </div>
 
         {/* Terms and Privacy */}
-        <div className="mt-4 text-center text-xs text-[#878787]">
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.8 }}
+          className="mt-6 text-center text-sm text-gray-600"
+        >
           By continuing, you agree to our{" "}
-          <Link to="/terms" className="text-[#2874f0] hover:text-[#1a5dc8]">
+          <Link to="/terms" className="text-pink-600 hover:text-pink-700 transition-colors">
             Terms of Use
           </Link>{" "}
           and{" "}
-          <Link to="/privacy" className="text-[#2874f0] hover:text-[#1a5dc8]">
+          <Link to="/privacy" className="text-pink-600 hover:text-pink-700 transition-colors">
             Privacy Policy
           </Link>
           .
-        </div>
-      </div>
+        </motion.div>
+      </motion.div>
     </div>
   );
 };

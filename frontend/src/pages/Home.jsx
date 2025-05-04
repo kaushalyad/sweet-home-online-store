@@ -1,14 +1,32 @@
-import React from 'react'
+import React, { useState, useEffect } from 'react'
 import Slider from '../components/Slider'
 import LatestCollection from '../components/LatestCollection'
 import BestSeller from '../components/BestSeller'
 import OurPolicy from '../components/OurPolicy'
 import NewsletterBox from '../components/NewsletterBox'
 import { motion } from 'framer-motion'
-import { FaArrowRight, FaShippingFast, FaRegClock, FaGift, FaBirthdayCake, FaHeart } from 'react-icons/fa'
+import { FaArrowRight, FaShippingFast, FaRegClock, FaGift, FaBirthdayCake, FaHeart, FaStar, FaShoppingCart, FaCrown } from 'react-icons/fa'
 import { Link } from 'react-router-dom'
+import axios from 'axios'
 
 const Home = () => {
+  const [products, setProducts] = useState([])
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        const { data } = await axios.get('/api/products')
+        setProducts(data)
+        setLoading(false)
+      } catch (error) {
+        console.error('Error fetching products:', error)
+        setLoading(false)
+      }
+    }
+    fetchProducts()
+  }, [])
+
   // Animation variants
   const fadeIn = {
     hidden: { opacity: 0, y: 20 },
@@ -176,7 +194,9 @@ const Home = () => {
         transition={{ duration: 0.8, delay: 0.2 }}
         className="container mx-auto px-4 py-8"
       >
-        <Slider />
+        <div className="max-w-[1400px] mx-auto">
+          <Slider />
+        </div>
       </motion.div>
       
       {/* Sweet Categories Showcase */}
@@ -349,6 +369,139 @@ const Home = () => {
         className="py-16"
       >
         <NewsletterBox/>
+      </motion.div>
+
+      {/* Premium Products Showcase */}
+      <motion.div
+        initial={{ opacity: 0 }}
+        whileInView={{ opacity: 1 }}
+        viewport={{ once: true }}
+        transition={{ duration: 0.8 }}
+        className="py-24 bg-gradient-to-b from-amber-50 to-white relative overflow-hidden"
+      >
+        <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/diamond-upholstery.png')] opacity-5"></div>
+        <div className="container mx-auto px-4 relative z-10">
+          <div className="text-center mb-16">
+            <div className="inline-block mb-4 px-4 py-2 bg-gradient-to-r from-amber-500 to-rose-500 rounded-full text-white text-sm font-medium shadow-lg">
+              Premium Collection
+            </div>
+            <h2 className="text-4xl font-bold text-gray-800 mb-4">Exquisite Sweet Delights</h2>
+            <p className="text-gray-600 max-w-2xl mx-auto text-lg">Discover our handcrafted premium sweets, made with the finest ingredients</p>
+          </div>
+
+          {loading ? (
+            <div className="flex justify-center items-center min-h-[400px]">
+              <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-amber-500"></div>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+              {products.map((product) => (
+                <motion.div
+                  key={product._id}
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.5 }}
+                  className="group bg-white rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2 border border-amber-100"
+                >
+                  <div className="relative">
+                    <div className="aspect-w-1 aspect-h-1 w-full overflow-hidden">
+                      <img
+                        src={product.images[0]?.url}
+                        alt={product.name}
+                        className="w-full h-64 object-cover transform group-hover:scale-110 transition-transform duration-500"
+                      />
+                    </div>
+                    {product.isNew && (
+                      <div className="absolute top-4 left-4 px-3 py-1 bg-gradient-to-r from-amber-500 to-rose-500 text-white text-sm font-medium rounded-full">
+                        New Arrival
+                      </div>
+                    )}
+                    {product.isBestseller && (
+                      <div className="absolute top-4 right-4 px-3 py-1 bg-gradient-to-r from-amber-500 to-rose-500 text-white text-sm font-medium rounded-full">
+                        Best Seller
+                      </div>
+                    )}
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                      <div className="absolute bottom-4 left-4 right-4">
+                        <button className="w-full py-2 bg-white text-amber-600 rounded-full font-medium hover:bg-amber-50 transition-colors duration-300 flex items-center justify-center">
+                          <FaShoppingCart className="mr-2" />
+                          Add to Cart
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="p-6">
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-sm font-medium text-amber-600">{product.category}</span>
+                      <div className="flex items-center">
+                        <FaStar className="text-amber-400" />
+                        <span className="ml-1 text-sm text-gray-600">{product.rating || 4.5}</span>
+                      </div>
+                    </div>
+                    <h3 className="text-xl font-bold text-gray-800 mb-2">{product.name}</h3>
+                    <p className="text-gray-600 mb-4 line-clamp-2">{product.description}</p>
+                    <div className="flex items-center justify-between">
+                      <span className="text-2xl font-bold text-amber-600">₹{product.price}</span>
+                      <Link
+                        to={`/product/${product._id}`}
+                        className="text-amber-600 hover:text-amber-700 font-medium flex items-center"
+                      >
+                        View Details
+                        <FaArrowRight className="ml-2 group-hover:translate-x-1 transition-transform" />
+                      </Link>
+                    </div>
+                  </div>
+                </motion.div>
+              ))}
+            </div>
+          )}
+
+          <div className="text-center mt-12">
+            <Link
+              to="/collection"
+              className="inline-flex items-center px-8 py-4 bg-gradient-to-r from-amber-500 to-rose-500 text-white rounded-full hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 text-lg font-medium"
+            >
+              View All Products
+              <FaArrowRight className="ml-2" />
+            </Link>
+          </div>
+        </div>
+      </motion.div>
+
+      {/* Premium Features Banner */}
+      <motion.div
+        initial={{ opacity: 0 }}
+        whileInView={{ opacity: 1 }}
+        viewport={{ once: true }}
+        transition={{ duration: 0.8 }}
+        className="py-16 bg-gradient-to-r from-amber-50 to-rose-50"
+      >
+        <div className="container mx-auto px-4">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div className="bg-white p-8 rounded-2xl shadow-lg border border-amber-100 text-center">
+              <div className="w-16 h-16 bg-gradient-to-r from-amber-100 to-rose-100 rounded-full flex items-center justify-center mx-auto mb-6">
+                <FaCrown className="text-amber-500 text-2xl" />
+              </div>
+              <h3 className="text-xl font-bold text-gray-800 mb-3">Premium Quality</h3>
+              <p className="text-gray-600">Handcrafted with the finest ingredients and traditional recipes</p>
+            </div>
+            <div className="bg-white p-8 rounded-2xl shadow-lg border border-amber-100 text-center">
+              <div className="w-16 h-16 bg-gradient-to-r from-amber-100 to-rose-100 rounded-full flex items-center justify-center mx-auto mb-6">
+                <FaShippingFast className="text-amber-500 text-2xl" />
+              </div>
+              <h3 className="text-xl font-bold text-gray-800 mb-3">Express Delivery</h3>
+              <p className="text-gray-600">Same-day delivery for the freshest experience</p>
+            </div>
+            <div className="bg-white p-8 rounded-2xl shadow-lg border border-amber-100 text-center">
+              <div className="w-16 h-16 bg-gradient-to-r from-amber-100 to-rose-100 rounded-full flex items-center justify-center mx-auto mb-6">
+                <FaGift className="text-amber-500 text-2xl" />
+              </div>
+              <h3 className="text-xl font-bold text-gray-800 mb-3">Luxury Packaging</h3>
+              <p className="text-gray-600">Elegant packaging perfect for gifting and special occasions</p>
+            </div>
+          </div>
+        </div>
       </motion.div>
     </div>
   )
