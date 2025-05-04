@@ -17,7 +17,7 @@ export default defineConfig({
     port: 4173,
     proxy: {
       "/api": {
-        target: "http://localhost:4000",
+        target: "https://api.sweethome-store.com",
         changeOrigin: true,
         secure: false,
       },
