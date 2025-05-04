@@ -10,7 +10,6 @@ import productRouter from "./routes/productRoute.js";
 import cartRouter from "./routes/cartRoute.js";
 import orderRouter from "./routes/orderRoute.js";
 import wishlistRouter from "./routes/wishlistRoute.js";
-import addressRouter from "./routes/addressRoutes.js";
 
 // App Config
 const app = express();
@@ -77,7 +76,6 @@ app.use("/api/product", productRouter);
 app.use("/api/cart", cartRouter);
 app.use("/api/order", orderRouter);
 app.use("/api/wishlist", wishlistRouter);
-app.use("/api/addresses", addressRouter);
 
 // Root endpoint
 app.get("/", (req, res) => {
