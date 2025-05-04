@@ -31,29 +31,7 @@ const allowedOrigins = [
 
 // CORS options
 const corsOptions = {
-  origin: function (origin, callback) {
-    logger.info(`CORS origin check: ${origin}`);
-    if (!origin) {
-      // Allow requests with no origin like curl or server-to-server
-      callback(null, true);
-    } else {
-      // Normalize origin to lowercase and remove trailing slash
-      const normalizedOrigin = origin.toLowerCase().replace(/\/$/, "");
-      logger.info(`Normalized CORS origin: ${normalizedOrigin}`);
-      // Allowed origins list normalized
-      const allowedOriginsNormalized = allowedOrigins.map(o => o.toLowerCase().replace(/\/$/, ""));
-      // Check if normalized origin is in allowed list
-      if (allowedOriginsNormalized.includes(normalizedOrigin)) {
-        callback(null, true);
-      } else if (normalizedOrigin.endsWith(".sweethome-store.com")) {
-        // Allow any subdomain of sweethome-store.com
-        callback(null, true);
-      } else {
-        logger.error(`Blocked CORS request from origin: ${origin}`);
-        callback(new Error("Not allowed by CORS"));
-      }
-    }
-  },
+  origin: "https://www.sweethome-store.com", // Set specific origin for production
   credentials: true,
   methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
   allowedHeaders: ["Content-Type", "Authorization", "token"],
