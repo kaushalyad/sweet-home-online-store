@@ -7,40 +7,40 @@ export default defineConfig({
   plugins: [react()],
   resolve: {
     alias: {
-      '@': path.resolve(__dirname, './src'),
-      'src': path.resolve(__dirname, './src'),
+      "@": path.resolve(__dirname, "./src"),
+      src: path.resolve(__dirname, "./src"),
     },
-    extensions: ['.js', '.jsx', '.json']
+    extensions: [".js", ".jsx", ".json"],
   },
   server: {
     host: "0.0.0.0",
     port: 4173,
     proxy: {
       "/api": {
-        target: "http://localhost:4000",
+        target: "https://api.sweethome-store.com",
         changeOrigin: true,
         secure: false,
       },
     },
     fs: {
       strict: false,
-      allow: ['..']
+      allow: [".."],
     },
     hmr: {
-      overlay: true
-    }
+      overlay: true,
+    },
   },
   build: {
     sourcemap: true,
     rollupOptions: {
       output: {
         manualChunks: {
-          vendor: ['react', 'react-dom', 'react-router-dom', 'react-hot-toast'],
+          vendor: ["react", "react-dom", "react-router-dom", "react-hot-toast"],
         },
       },
     },
   },
   optimizeDeps: {
-    include: ['react', 'react-dom', 'react-router-dom', 'react-hot-toast'],
+    include: ["react", "react-dom", "react-router-dom", "react-hot-toast"],
   },
 });
