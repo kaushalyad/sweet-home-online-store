@@ -2,22 +2,40 @@ import React, { useContext, useState, useEffect } from 'react';
 import { ShopContext } from '../context/ShopContext';
 import Title from '../components/Title';
 import { motion } from 'framer-motion';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { FaUser, FaMapMarkerAlt, FaPhone, FaEnvelope, FaCalendarAlt, FaShoppingBag, FaHeart, FaCog, FaArrowRight } from 'react-icons/fa';
+import axios from 'axios';
+import { toast } from 'react-toastify';
 
 const Profile = () => {
   const { backendUrl, token, currency, products, wishlistItems, addToCart, removeFromWishlist } = useContext(ShopContext);
   const location = useLocation();
+  const navigate = useNavigate();
   const [userData, setUserData] = useState({
-    name: 'Sweet Home Customer',
-    email: 'customer@example.com',
-    phone: '+91 9876543210',
-    address: '123 Main Street, Mumbai, India',
-    joinedDate: 'January 2023',
+    name: '',
+    email: '',
+    phone: '',
+    address: '',
+    createdAt: '',
+    isEmailVerified: false,
+    isPhoneVerified: false,
+    notificationSettings: {}
   });
   
   const [recentOrders, setRecentOrders] = useState([]);
   const [activeTab, setActiveTab] = useState('profile');
+  const [isUpdating, setIsUpdating] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [passwordData, setPasswordData] = useState({
+    currentPassword: '',
+    newPassword: '',
+    confirmPassword: ''
+  });
+  const [notificationSettings, setNotificationSettings] = useState({
+    orderUpdates: true,
+    promotionalOffers: true,
+    newArrivals: true
+  });
 
   // Animation variants
   const fadeIn = {
@@ -27,11 +45,12 @@ const Profile = () => {
 
   // Set active tab based on current route
   useEffect(() => {
-    if (location.pathname === '/wishlist') {
+    const path = location.pathname;
+    if (path.includes('/wishlist')) {
       setActiveTab('wishlist');
-    } else if (location.pathname === '/settings') {
+    } else if (path.includes('/settings')) {
       setActiveTab('settings');
-    } else if (location.pathname === '/orders') {
+    } else if (path.includes('/orders')) {
       setActiveTab('orders');
     } else {
       setActiveTab('profile');
@@ -40,25 +59,126 @@ const Profile = () => {
 
   // Fetch user data and recent orders
   useEffect(() => {
-    // This would be replaced with actual API calls once implemented
-    // For now using placeholder data
-    setRecentOrders([
-      {
-        id: 'ORD12345',
-        date: new Date('2023-05-15'),
-        status: 'Delivered',
-        total: 1250,
-        items: 3
-      },
-      {
-        id: 'ORD12346',
-        date: new Date('2023-06-02'),
-        status: 'Processing',
-        total: 850,
-        items: 2
+    const fetchUserData = async () => {
+      try {
+        if (!token) {
+          navigate('/login');
+          return;
+        }
+        
+        setIsLoading(true);
+        const response = await axios.post(
+          backendUrl + '/api/user/profile', 
+          {}, 
+          { 
+            headers: { 
+              'Authorization': `Bearer ${token}`,
+              'Content-Type': 'application/json'
+            }
+          }
+        );
+
+        if (response.data.success) {
+          const userData = response.data.user;
+          setUserData({
+            name: userData.name || '',
+            email: userData.email || '',
+            phone: userData.phone || 'Not provided',
+            address: userData.address || 'Not provided',
+            createdAt: userData.createdAt || new Date(),
+            isEmailVerified: userData.isEmailVerified || false,
+            isPhoneVerified: userData.isPhoneVerified || false,
+            notificationSettings: userData.notificationSettings || {
+              orderUpdates: true,
+              promotionalOffers: true,
+              newArrivals: true
+            }
+          });
+
+          // Set notification settings if available
+          if (userData.notificationSettings) {
+            setNotificationSettings(userData.notificationSettings);
+          }
+        } else {
+          toast.error(response.data.message || 'Failed to fetch profile data');
+        }
+      } catch (error) {
+        console.error("Error fetching profile data:", error);
+        if (error.response?.status === 401) {
+          toast.error('Session expired. Please login again.');
+          navigate('/login');
+        } else {
+          toast.error('Failed to fetch profile data. Please try again.');
+        }
+      } finally {
+        setIsLoading(false);
       }
-    ]);
-  }, [token]);
+    };
+
+    const fetchOrders = async () => {
+      try {
+        if (!token) return;
+        
+        const response = await axios.post(
+          backendUrl + '/api/order/userorders', 
+          {}, 
+          { 
+            headers: { 
+              'Authorization': `Bearer ${token}`,
+              'Content-Type': 'application/json'
+            }
+          }
+        );
+        
+        if (response.data.success) {
+          // Transform orders data to match the required format
+          const transformedOrders = response.data.orders.map(order => ({
+            id: order._id,
+            date: new Date(order.date),
+            status: order.status,
+            total: order.items.reduce((sum, item) => sum + (item.price * item.quantity), 0),
+            items: order.items.length,
+            payment: order.payment,
+            paymentMethod: order.paymentMethod
+          }));
+          setRecentOrders(transformedOrders);
+        } else {
+          toast.error(response.data.message || 'Failed to fetch orders');
+        }
+      } catch (error) {
+        console.error("Error fetching orders:", error);
+        if (error.response?.status === 401) {
+          toast.error('Session expired. Please login again.');
+          navigate('/login');
+        } else {
+          toast.error('Failed to fetch orders. Please try again.');
+        }
+      }
+    };
+
+    fetchUserData();
+    fetchOrders();
+  }, [token, backendUrl, navigate]);
+
+  const handleTabChange = (tabId) => {
+    setActiveTab(tabId);
+    switch (tabId) {
+      case 'profile':
+        navigate('/profile');
+        break;
+      case 'orders':
+        navigate('/orders');
+        break;
+      case 'wishlist':
+        navigate('/wishlist');
+        break;
+      case 'settings':
+        navigate('/settings');
+        break;
+      default:
+        navigate('/profile');
+    }
+  };
 
   const profileItems = [
     { id: 'profile', label: 'Profile Information', icon: <FaUser /> },
@@ -67,7 +187,184 @@ const Profile = () => {
     { id: 'settings', label: 'Account Settings', icon: <FaCog /> },
   ];
 
+  const handlePersonalInfoChange = (e) => {
+    const { name, value } = e.target;
+    setUserData(prev => ({
+      ...prev,
+      [name]: value
+    }));
+  };
+
+  const handlePasswordChange = (e) => {
+    const { name, value } = e.target;
+    setPasswordData(prev => ({
+      ...prev,
+      [name]: value
+    }));
+  };
+
+  const handleNotificationToggle = (setting) => {
+    setNotificationSettings(prev => ({
+      ...prev,
+      [setting]: !prev[setting]
+    }));
+  };
+
+  const handleUpdatePersonalInfo = async () => {
+    try {
+      setIsUpdating(true);
+      const response = await axios.post(
+        backendUrl + '/api/user/update',
+        {
+          name: userData.name,
+          email: userData.email,
+          phone: userData.phone,
+          address: userData.address
+        },
+        { 
+          headers: { 
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
+        }
+      );
+
+      if (response.data.success) {
+        toast.success('Personal information updated successfully');
+        // Update local state with the response data
+        if (response.data.user) {
+          setUserData(prev => ({
+            ...prev,
+            ...response.data.user
+          }));
+        }
+      } else {
+        toast.error(response.data.message || 'Failed to update information');
+      }
+    } catch (error) {
+      console.error('Error updating personal info:', error);
+      toast.error('Failed to update personal information');
+    } finally {
+      setIsUpdating(false);
+    }
+  };
+
+  const handleUpdatePassword = async () => {
+    if (passwordData.newPassword !== passwordData.confirmPassword) {
+      toast.error('New passwords do not match');
+      return;
+    }
+
+    try {
+      setIsUpdating(true);
+      const response = await axios.post(
+        backendUrl + '/api/user/update-password',
+        {
+          currentPassword: passwordData.currentPassword,
+          newPassword: passwordData.newPassword
+        },
+        { 
+          headers: { 
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
+        }
+      );
+
+      if (response.data.success) {
+        toast.success('Password updated successfully');
+        setPasswordData({
+          currentPassword: '',
+          newPassword: '',
+          confirmPassword: ''
+        });
+      } else {
+        toast.error(response.data.message || 'Failed to update password');
+      }
+    } catch (error) {
+      console.error('Error updating password:', error);
+      toast.error('Failed to update password');
+    } finally {
+      setIsUpdating(false);
+    }
+  };
+
+  const handleUpdateNotifications = async () => {
+    try {
+      setIsUpdating(true);
+      const response = await axios.post(
+        backendUrl + '/api/user/update-notifications',
+        notificationSettings,
+        { headers: { token } }
+      );
+
+      if (response.data.success) {
+        toast.success('Notification preferences updated successfully');
+      } else {
+        toast.error(response.data.message || 'Failed to update preferences');
+      }
+    } catch (error) {
+      console.error('Error updating notifications:', error);
+      toast.error('Failed to update notification preferences');
+    } finally {
+      setIsUpdating(false);
+    }
+  };
+
+  const handleDownloadData = async () => {
+    try {
+      const response = await axios.get(
+        backendUrl + '/api/user/download-data',
+        { 
+          headers: { token },
+          responseType: 'blob'
+        }
+      );
+      
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', 'account-data.json');
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+    } catch (error) {
+      console.error('Error downloading data:', error);
+      toast.error('Failed to download account data');
+    }
+  };
+
+  const handleDeleteAccount = async () => {
+    if (window.confirm('Are you sure you want to delete your account? This action cannot be undone.')) {
+      try {
+        const response = await axios.post(
+          backendUrl + '/api/user/delete-account',
+          {},
+          { headers: { token } }
+        );
+
+        if (response.data.success) {
+          toast.success('Account deleted successfully');
+          navigate('/');
+        } else {
+          toast.error(response.data.message || 'Failed to delete account');
+        }
+      } catch (error) {
+        console.error('Error deleting account:', error);
+        toast.error('Failed to delete account');
+      }
+    }
+  };
+
   const renderTabContent = () => {
+    if (isLoading) {
+      return (
+        <div className="flex justify-center items-center h-64">
+          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#2874f0]"></div>
+        </div>
+      );
+    }
+
     switch (activeTab) {
       case 'profile':
         return (
@@ -107,7 +404,9 @@ const Profile = () => {
                   </div>
                   <div>
                     <p className="text-sm text-gray-500">Phone Number</p>
-                    <p className="font-medium text-gray-800">{userData.phone}</p>
+                    <p className="font-medium text-gray-800">
+                      {userData.phone && userData.phone !== '' ? userData.phone : 'Not provided'}
+                    </p>
                   </div>
                 </div>
               </div>
@@ -119,7 +418,9 @@ const Profile = () => {
                   </div>
                   <div>
                     <p className="text-sm text-gray-500">Delivery Address</p>
-                    <p className="font-medium text-gray-800">{userData.address}</p>
+                    <p className="font-medium text-gray-800">
+                      {userData.address && userData.address !== '' ? userData.address : 'Not provided'}
+                    </p>
                   </div>
                 </div>
                 
@@ -129,14 +430,23 @@ const Profile = () => {
                   </div>
                   <div>
                     <p className="text-sm text-gray-500">Customer Since</p>
-                    <p className="font-medium text-gray-800">{userData.joinedDate}</p>
+                    <p className="font-medium text-gray-800">
+                      {userData.createdAt ? new Date(userData.createdAt).toLocaleDateString('en-US', {
+                        year: 'numeric',
+                        month: 'long',
+                        day: 'numeric'
+                      }) : 'Not available'}
+                    </p>
                   </div>
                 </div>
               </div>
             </div>
             
             <div className="mt-8 border-t border-gray-100 pt-6">
-              <button className="bg-black text-white px-6 py-3 rounded-md hover:bg-gray-800 transition-colors duration-300">
+              <button 
+                onClick={() => setActiveTab('settings')}
+                className="bg-black text-white px-6 py-3 rounded-md hover:bg-gray-800 transition-colors duration-300"
+              >
                 Edit Profile
               </button>
             </div>
@@ -153,55 +463,62 @@ const Profile = () => {
           >
             <div className="flex justify-between items-center mb-6">
               <h3 className="text-xl font-bold text-gray-800">Recent Orders</h3>
-              <Link 
-                to="/orders" 
-                className="text-pink-500 hover:text-pink-700 flex items-center transition-colors duration-300"
-              >
-                View All <FaArrowRight className="ml-2" />
-              </Link>
             </div>
             
             {recentOrders.length > 0 ? (
-              <div className="space-y-4">
+              <div className="space-y-6">
                 {recentOrders.map((order) => (
-                  <div key={order.id} className="border border-gray-200 rounded-lg p-4 hover:shadow-sm transition-shadow duration-300">
-                    <div className="flex justify-between items-center">
+                  <div key={order.id} className="border border-[#dbdbdb] rounded-lg p-6">
+                    <div className="flex justify-between items-start mb-4">
                       <div>
-                        <p className="font-medium text-gray-800">{order.id}</p>
-                        <p className="text-sm text-gray-500">{order.date.toDateString()}</p>
+                        <p className="font-medium text-[#212121]">Order #{order.id.slice(-6)}</p>
+                        <p className="text-sm text-[#878787]">{order.date.toDateString()}</p>
                       </div>
                       <div className="text-right">
-                        <p className="font-bold text-gray-900">{currency}{order.total}</p>
-                        <p className="text-sm">{order.items} items</p>
+                        <p className="font-bold text-[#212121]">{currency}{order.total}</p>
+                        <p className="text-sm text-[#878787]">{order.items} items</p>
                       </div>
                     </div>
+
+                    {/* Order Items Preview */}
+                    <div className="flex gap-2 mb-4 overflow-x-auto pb-2">
+                      {order.items.map((item, index) => (
+                        <div key={index} className="flex-shrink-0 w-16 h-16 border border-[#dbdbdb] rounded-md overflow-hidden">
+                          <img 
+                            src={item.image} 
+                            alt={item.name}
+                            className="w-full h-full object-cover"
+                          />
+                        </div>
+                      ))}
+                    </div>
                     
-                    <div className="flex items-center justify-between mt-4 pt-4 border-t border-gray-100">
+                    <div className="flex items-center justify-between pt-4 border-t border-[#dbdbdb]">
                       <div className="flex items-center">
                         <div className={`w-2 h-2 rounded-full mr-2 ${
                           order.status === 'Delivered' ? 'bg-green-500' : 
                           order.status === 'Processing' ? 'bg-blue-500' : 
                           order.status === 'Cancelled' ? 'bg-red-500' : 'bg-yellow-500'
                         }`}></div>
-                        <span className="text-sm font-medium text-gray-700">{order.status}</span>
+                        <span className="text-sm font-medium text-[#212121]">{order.status}</span>
                       </div>
                       <Link 
-                        to={`/order/${order.id}`} 
-                        className="text-sm text-gray-700 hover:text-black transition-colors duration-300"
+                        to={`/track-order/${order.id}`} 
+                        className="px-4 py-2 bg-[#2874f0] text-white rounded-md hover:bg-[#1a5dc8] transition-colors duration-300 text-sm"
                       >
-                        View Details
+                        Track Order
                       </Link>
                     </div>
                   </div>
                 ))}
               </div>
             ) : (
-              <div className="text-center py-12 bg-gray-50 rounded-lg">
-                <FaShoppingBag className="mx-auto text-gray-300 text-4xl mb-4" />
-                <p className="text-gray-600 mb-2">You haven't placed any orders yet</p>
+              <div className="text-center py-12 bg-[#f5f5f5] rounded-lg">
+                <FaShoppingBag className="mx-auto text-[#878787] text-4xl mb-4" />
+                <p className="text-[#212121] mb-2">You haven&apos;t placed any orders yet</p>
                 <Link 
                   to="/collection" 
-                  className="inline-block mt-3 px-6 py-2 bg-black text-white rounded-md hover:bg-gray-800 transition-colors duration-300"
+                  className="inline-block mt-3 px-6 py-2 bg-[#2874f0] text-white rounded-sm hover:bg-[#1a5dc8] transition-colors duration-300"
                 >
                   Start Shopping
                 </Link>
@@ -314,13 +631,200 @@ const Profile = () => {
             initial="hidden"
             animate="visible"
             variants={fadeIn}
-            className="bg-white p-6 rounded-lg shadow-sm text-center py-12"
+            className="bg-white p-6 rounded-lg shadow-sm"
           >
-            <FaCog className="mx-auto text-gray-300 text-4xl mb-4" />
-            <h3 className="text-xl font-bold text-gray-800 mb-2">Account Settings Coming Soon</h3>
-            <p className="text-gray-600 mb-6 max-w-md mx-auto">
-              We're developing account settings to give you more control over your Sweet Home experience.
-            </p>
+            <h3 className="text-xl font-bold text-[#212121] mb-6">Account Settings</h3>
+            
+            <div className="space-y-6">
+              {/* Personal Information */}
+              <div className="border border-[#dbdbdb] rounded-lg p-6">
+                <h4 className="text-lg font-medium text-[#212121] mb-4">Personal Information</h4>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div>
+                    <label className="block text-sm font-medium text-[#212121] mb-2">Full Name</label>
+                    <input
+                      type="text"
+                      name="name"
+                      value={userData.name}
+                      onChange={handlePersonalInfoChange}
+                      className="w-full px-4 py-2 border border-[#dbdbdb] rounded-md focus:outline-none focus:ring-2 focus:ring-[#2874f0] focus:border-transparent"
+                      placeholder="Enter your full name"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-[#212121] mb-2">Email Address</label>
+                    <input
+                      type="email"
+                      name="email"
+                      value={userData.email}
+                      onChange={handlePersonalInfoChange}
+                      className="w-full px-4 py-2 border border-[#dbdbdb] rounded-md focus:outline-none focus:ring-2 focus:ring-[#2874f0] focus:border-transparent"
+                      placeholder="Enter your email"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-[#212121] mb-2">Phone Number</label>
+                    <input
+                      type="tel"
+                      name="phone"
+                      value={userData.phone}
+                      onChange={handlePersonalInfoChange}
+                      className="w-full px-4 py-2 border border-[#dbdbdb] rounded-md focus:outline-none focus:ring-2 focus:ring-[#2874f0] focus:border-transparent"
+                      placeholder="Enter your phone number"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-[#212121] mb-2">Delivery Address</label>
+                    <textarea
+                      name="address"
+                      value={userData.address}
+                      onChange={handlePersonalInfoChange}
+                      className="w-full px-4 py-2 border border-[#dbdbdb] rounded-md focus:outline-none focus:ring-2 focus:ring-[#2874f0] focus:border-transparent"
+                      placeholder="Enter your delivery address"
+                      rows="3"
+                    />
+                  </div>
+                </div>
+                <div className="mt-4 flex justify-end">
+                  <button 
+                    onClick={handleUpdatePersonalInfo}
+                    disabled={isUpdating}
+                    className="px-6 py-2 bg-[#2874f0] text-white rounded-md hover:bg-[#1a5dc8] transition-colors disabled:opacity-50"
+                  >
+                    {isUpdating ? 'Saving...' : 'Save Changes'}
+                  </button>
+                </div>
+              </div>
+
+              {/* Change Password */}
+              <div className="border border-[#dbdbdb] rounded-lg p-6">
+                <h4 className="text-lg font-medium text-[#212121] mb-4">Change Password</h4>
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-medium text-[#212121] mb-2">Current Password</label>
+                    <input
+                      type="password"
+                      name="currentPassword"
+                      value={passwordData.currentPassword}
+                      onChange={handlePasswordChange}
+                      className="w-full px-4 py-2 border border-[#dbdbdb] rounded-md focus:outline-none focus:ring-2 focus:ring-[#2874f0] focus:border-transparent"
+                      placeholder="Enter current password"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-[#212121] mb-2">New Password</label>
+                    <input
+                      type="password"
+                      name="newPassword"
+                      value={passwordData.newPassword}
+                      onChange={handlePasswordChange}
+                      className="w-full px-4 py-2 border border-[#dbdbdb] rounded-md focus:outline-none focus:ring-2 focus:ring-[#2874f0] focus:border-transparent"
+                      placeholder="Enter new password"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-[#212121] mb-2">Confirm New Password</label>
+                    <input
+                      type="password"
+                      name="confirmPassword"
+                      value={passwordData.confirmPassword}
+                      onChange={handlePasswordChange}
+                      className="w-full px-4 py-2 border border-[#dbdbdb] rounded-md focus:outline-none focus:ring-2 focus:ring-[#2874f0] focus:border-transparent"
+                      placeholder="Confirm new password"
+                    />
+                  </div>
+                </div>
+                <div className="mt-4 flex justify-end">
+                  <button 
+                    onClick={handleUpdatePassword}
+                    disabled={isUpdating}
+                    className="px-6 py-2 bg-[#2874f0] text-white rounded-md hover:bg-[#1a5dc8] transition-colors disabled:opacity-50"
+                  >
+                    {isUpdating ? 'Updating...' : 'Update Password'}
+                  </button>
+                </div>
+              </div>
+
+              {/* Notification Preferences */}
+              <div className="border border-[#dbdbdb] rounded-lg p-6">
+                <h4 className="text-lg font-medium text-[#212121] mb-4">Notification Preferences</h4>
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h5 className="font-medium text-[#212121]">Order Updates</h5>
+                      <p className="text-sm text-[#878787]">Get notified about your order status</p>
+                    </div>
+                    <label className="relative inline-flex items-center cursor-pointer">
+                      <input 
+                        type="checkbox" 
+                        className="sr-only peer" 
+                        checked={notificationSettings.orderUpdates}
+                        onChange={() => handleNotificationToggle('orderUpdates')}
+                      />
+                      <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-[#2874f0] rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#2874f0]"></div>
+                    </label>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h5 className="font-medium text-[#212121]">Promotional Offers</h5>
+                      <p className="text-sm text-[#878787]">Receive updates about special offers and discounts</p>
+                    </div>
+                    <label className="relative inline-flex items-center cursor-pointer">
+                      <input 
+                        type="checkbox" 
+                        className="sr-only peer" 
+                        checked={notificationSettings.promotionalOffers}
+                        onChange={() => handleNotificationToggle('promotionalOffers')}
+                      />
+                      <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-[#2874f0] rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#2874f0]"></div>
+                    </label>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h5 className="font-medium text-[#212121]">New Arrivals</h5>
+                      <p className="text-sm text-[#878787]">Get notified about new products</p>
+                    </div>
+                    <label className="relative inline-flex items-center cursor-pointer">
+                      <input 
+                        type="checkbox" 
+                        className="sr-only peer" 
+                        checked={notificationSettings.newArrivals}
+                        onChange={() => handleNotificationToggle('newArrivals')}
+                      />
+                      <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-[#2874f0] rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#2874f0]"></div>
+                    </label>
+                  </div>
+                </div>
+                <div className="mt-4 flex justify-end">
+                  <button 
+                    onClick={handleUpdateNotifications}
+                    disabled={isUpdating}
+                    className="px-6 py-2 bg-[#2874f0] text-white rounded-md hover:bg-[#1a5dc8] transition-colors disabled:opacity-50"
+                  >
+                    {isUpdating ? 'Saving...' : 'Save Preferences'}
+                  </button>
+                </div>
+              </div>
+
+              {/* Account Actions */}
+              <div className="border border-[#dbdbdb] rounded-lg p-6">
+                <h4 className="text-lg font-medium text-[#212121] mb-4">Account Actions</h4>
+                <div className="space-y-4">
+                  <button 
+                    onClick={handleDownloadData}
+                    className="w-full px-6 py-3 border border-[#dbdbdb] text-[#212121] rounded-md hover:bg-gray-50 transition-colors"
+                  >
+                    Download Account Data
+                  </button>
+                  <button 
+                    onClick={handleDeleteAccount}
+                    className="w-full px-6 py-3 border border-red-500 text-red-500 rounded-md hover:bg-red-50 transition-colors"
+                  >
+                    Delete Account
+                  </button>
+                </div>
+              </div>
+            </div>
           </motion.div>
         );
 
@@ -338,7 +842,7 @@ const Profile = () => {
           transition={{ duration: 0.5 }}
         >
           <Title text1={"MY"} text2={"ACCOUNT"} />
-          <div className="w-20 h-1 bg-pink-500 mx-auto mt-4"></div>
+          <div className="w-20 h-1 bg-[#2874f0] mx-auto mt-4"></div>
         </motion.div>
       </div>
       
@@ -351,13 +855,19 @@ const Profile = () => {
           className="md:col-span-1"
         >
           <div className="bg-white p-6 rounded-lg shadow-sm">
-            <div className="flex items-center gap-4 mb-6">
-              <div className="w-12 h-12 bg-pink-100 rounded-full flex items-center justify-center text-pink-500 font-bold">
-                {userData.name.charAt(0)}
+            {isLoading ? (
+              <div className="flex justify-center items-center h-24">
+                <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-[#2874f0]"></div>
+              </div>
+            ) : (
+              <>
+                <div className="flex items-center gap-4 mb-6">
+                  <div className="w-12 h-12 bg-[#2874f0] bg-opacity-10 rounded-full flex items-center justify-center text-[#2874f0] font-bold">
+                    {userData.name.charAt(0)}
               </div>
               <div>
-                <p className="font-semibold text-gray-800">{userData.name}</p>
-                <p className="text-sm text-gray-500">{userData.email}</p>
+                    <p className="font-semibold text-[#212121]">{userData.name}</p>
+                    <p className="text-sm text-[#878787]">{userData.email}</p>
               </div>
             </div>
             
@@ -365,11 +875,11 @@ const Profile = () => {
               {profileItems.map((item) => (
                 <button
                   key={item.id}
-                  onClick={() => setActiveTab(item.id)}
+                      onClick={() => handleTabChange(item.id)}
                   className={`w-full flex items-center gap-3 px-4 py-3 rounded-md text-left transition-colors duration-300 ${
                     activeTab === item.id 
-                      ? 'bg-pink-50 text-pink-500'
-                      : 'text-gray-700 hover:bg-gray-50'
+                          ? 'bg-[#2874f0] bg-opacity-10 text-[#2874f0]'
+                          : 'text-[#212121] hover:bg-gray-50'
                   }`}
                 >
                   <span className="text-lg">{item.icon}</span>
@@ -377,6 +887,8 @@ const Profile = () => {
                 </button>
               ))}
             </div>
+              </>
+            )}
           </div>
         </motion.div>
         

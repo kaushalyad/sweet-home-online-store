@@ -2,6 +2,7 @@ import orderModel from "../models/orderModel.js";
 import userModel from "../models/userModel.js";
 import Stripe from 'stripe'
 import razorpay from 'razorpay'
+import logger from '../config/logger.js';
 
 // global variables
 const currency = 'inr'
@@ -22,9 +23,19 @@ const placeOrder = async (req,res) => {
         
         const { userId, items, amount, address} = req.body;
 
+        // Transform items to include full product data
+        const orderItems = items.map(item => ({
+            name: item.name,
+            price: item.price,
+            quantity: item.quantity,
+            size: item.size,
+            image: item.image, // Include the full image data
+            product: item // Store the full product data
+        }));
+
         const orderData = {
             userId,
-            items,
+            items: orderItems,
             address,
             amount,
             paymentMethod:"COD",
@@ -133,9 +144,19 @@ const placeOrderRazorpay = async (req, res) => {
     const { userId, items, amount, address } = req.body;
     console.log("Creating Razorpay order for amount:", amount);
 
+    // Transform items to include full product data
+    const orderItems = items.map(item => ({
+        name: item.name,
+        price: item.price,
+        quantity: item.quantity,
+        size: item.size,
+        image: item.image, // Include the full image data
+        product: item // Store the full product data
+    }));
+
     const orderData = {
       userId,
-      items,
+      items: orderItems,
       address,
       amount,
       paymentMethod: "Razorpay",
@@ -307,4 +328,154 @@ const updateStatus = async (req,res) => {
     }
 }
 
-export {verifyRazorpay, verifyStripe ,placeOrder, placeOrderStripe, placeOrderRazorpay, allOrders, userOrders, updateStatus}
+// Create new order
+const createOrder = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const { items, totalAmount, shippingAddress, paymentMethod } = req.body;
+
+    if (!items || !totalAmount || !shippingAddress || !paymentMethod) {
+      return res.status(400).json({
+        success: false,
+        message: "Please provide all required order details"
+      });
+    }
+
+    const order = await orderModel.create({
+      user: userId,
+      items,
+      totalAmount,
+      shippingAddress,
+      paymentMethod,
+      status: 'Processing',
+      payment: 'Pending'
+    });
+
+    // Clear user's cart after successful order
+    await userModel.findByIdAndUpdate(userId, { cartData: {} });
+
+    logger.info(`Order created successfully for user: ${userId}`);
+
+    return res.status(201).json({
+      success: true,
+      message: "Order placed successfully",
+      order
+    });
+  } catch (error) {
+    logger.error('Order creation error:', error);
+    return res.status(500).json({
+      success: false,
+      message: "Failed to create order"
+    });
+  }
+};
+
+// Get user orders
+const getUserOrders = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    
+    const orders = await orderModel.find({ userId })
+      .sort({ date: -1 });
+
+    logger.info(`Orders fetched successfully for user: ${userId}`);
+
+    return res.status(200).json({
+      success: true,
+      orders
+    });
+  } catch (error) {
+    logger.error('Error fetching orders:', error);
+    return res.status(500).json({
+      success: false,
+      message: "Failed to fetch orders"
+    });
+  }
+};
+
+// Track order
+const trackOrder = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const { orderId } = req.params;
+
+    const order = await orderModel.findOne({
+      _id: orderId,
+      userId: userId
+    });
+
+    if (!order) {
+      return res.status(404).json({
+        success: false,
+        message: "Order not found"
+      });
+    }
+
+    logger.info(`Order tracking info fetched for order: ${orderId}`);
+
+    return res.status(200).json({
+      success: true,
+      order: {
+        id: order._id,
+        status: order.status,
+        items: order.items,
+        amount: order.amount,
+        address: order.address,
+        paymentMethod: order.paymentMethod,
+        payment: order.payment,
+        date: order.date
+      }
+    });
+  } catch (error) {
+    logger.error('Error tracking order:', error);
+    return res.status(500).json({
+      success: false,
+      message: "Failed to track order"
+    });
+  }
+};
+
+// Cancel order
+const cancelOrder = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const { orderId } = req.params;
+
+    const order = await orderModel.findOne({
+      _id: orderId,
+      user: userId
+    });
+
+    if (!order) {
+      return res.status(404).json({
+        success: false,
+        message: "Order not found"
+      });
+    }
+
+    if (order.status === 'Delivered' || order.status === 'Cancelled') {
+      return res.status(400).json({
+        success: false,
+        message: `Cannot cancel order in ${order.status} status`
+      });
+    }
+
+    order.status = 'Cancelled';
+    await order.save();
+
+    logger.info(`Order cancelled successfully: ${orderId}`);
+
+    return res.status(200).json({
+      success: true,
+      message: "Order cancelled successfully"
+    });
+  } catch (error) {
+    logger.error('Error cancelling order:', error);
+    return res.status(500).json({
+      success: false,
+      message: "Failed to cancel order"
+    });
+  }
+};
+
+export {verifyRazorpay, verifyStripe ,placeOrder, placeOrderStripe, placeOrderRazorpay, allOrders, userOrders, updateStatus, createOrder, getUserOrders, trackOrder, cancelOrder}

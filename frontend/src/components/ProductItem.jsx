@@ -34,7 +34,7 @@ const ProductItem = ({ id, image, name, price, index = 0, featured = false, best
   const handleQuickAddToCart = (e) => {
     e.preventDefault();
     e.stopPropagation();
-    addToCart(id, "default");
+    addToCart(id, 1); // Pass 1 as the default quantity
     
     // Show added animation
     setIsAdded(true);

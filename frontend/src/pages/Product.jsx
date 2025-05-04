@@ -66,7 +66,7 @@ const Product = () => {
       toast.error("Quantity must be at least 1");
       return;
     }
-    addToCart(productData._id, "default", quantity);
+    addToCart(productData._id, quantity);
     toast.success("Added to cart!");
     trackAddToCart(productData, quantity);
   };
@@ -76,7 +76,7 @@ const Product = () => {
       toast.error("Quantity must be at least 1");
       return;
     }
-    addToCart(productData._id, "default", quantity);
+    addToCart(productData._id, quantity);
     trackBuyNow(productData, quantity);
     navigate("/cart");
   };

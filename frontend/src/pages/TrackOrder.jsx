@@ -1,16 +1,60 @@
 import React, { useContext, useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import { ShopContext } from '../context/ShopContext';
 import axios from 'axios';
 import Title from '../components/Title';
 import { FaBox, FaCheck, FaShippingFast, FaTruck, FaMapMarkerAlt, FaSearchLocation, FaSnowflake, FaExclamationTriangle, FaInfoCircle } from 'react-icons/fa';
+import { toast } from 'react-toastify';
 
 const TrackOrder = () => {
   const { orderId } = useParams();
-  const { backendUrl, token, currency, navigate } = useContext(ShopContext);
+  const navigate = useNavigate();
+  const { backendUrl, token, currency } = useContext(ShopContext);
   const [orderData, setOrderData] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [trackingId, setTrackingId] = useState("SH" + Math.floor(Math.random() * 1000000).toString().padStart(6, '0'));
+  const [error, setError] = useState(null);
+
+  // Base64 encoded placeholder image (1x1 transparent pixel)
+  const PLACEHOLDER_IMAGE = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=';
+
+  const loadOrderData = async () => {
+    try {
+      if (!token) {
+        navigate('/login');
+        return;
+      }
+
+      setLoading(true);
+      setError(null);
+      
+      const response = await axios.get(
+        `${backendUrl}/api/order/track/${orderId}`,
+        {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
+        }
+      );
+
+      if (response.data.success) {
+        setOrderData(response.data.order);
+      } else {
+        setError('Failed to load order data');
+        toast.error('Failed to load order data');
+      }
+    } catch (error) {
+      console.error("Error loading order:", error);
+      setError('Error loading order data');
+      toast.error('Error loading order data');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    loadOrderData();
+  }, [token, orderId]);
 
   // Mock delivery timeline steps based on order status
   const getTimelineSteps = (status) => {
@@ -107,61 +151,25 @@ const TrackOrder = () => {
     return '4-5 days';
   };
 
-  const loadOrderData = async () => {
-    try {
-      if (!token) {
-        navigate('/login');
-        return;
-      }
-
-      setLoading(true);
-      const response = await axios.post(
-        backendUrl + '/api/order/userorders', 
-        {}, 
-        { headers: { token } }
-      );
-
-      if (response.data.success) {
-        // Find the specific order
-        const order = response.data.orders.find(order => order._id === orderId);
-        if (order) {
-          setOrderData(order);
-        } else {
-          // Order not found
-          navigate('/orders');
-        }
-      }
-      
-    } catch (error) {
-      console.error("Error loading order:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    loadOrderData();
-  }, [token, orderId]);
-
   if (loading) {
     return (
       <div className="min-h-[60vh] flex items-center justify-center">
-        <div className="w-16 h-16 border-4 border-gray-200 border-t-pink-500 rounded-full animate-spin"></div>
+        <div className="w-16 h-16 border-4 border-gray-200 border-t-[#2874f0] rounded-full animate-spin"></div>
       </div>
     );
   }
 
-  if (!orderData) {
+  if (error || !orderData) {
     return (
       <div className="min-h-[60vh] flex flex-col items-center justify-center">
         <div className="text-4xl text-gray-300 mb-4">
           <FaSearchLocation />
         </div>
-        <h2 className="text-xl font-medium text-gray-800 mb-2">Order Not Found</h2>
-        <p className="text-gray-600 mb-6">We couldn't find the order you're looking for.</p>
+        <h2 className="text-xl font-medium text-[#212121] mb-2">Order Not Found</h2>
+        <p className="text-[#878787] mb-6">We couldn't find the order you're looking for.</p>
         <button 
           onClick={() => navigate('/orders')}
-          className="px-6 py-2 bg-pink-500 text-white rounded hover:bg-pink-600"
+          className="px-6 py-2 bg-[#2874f0] text-white rounded hover:bg-[#1a5dc8]"
         >
           Back to Orders
         </button>
@@ -178,11 +186,11 @@ const TrackOrder = () => {
       </div>
 
       {/* Order Summary */}
-      <div className="bg-white rounded-lg shadow-sm border border-gray-100 p-6 mb-8">
+      <div className="bg-white rounded-lg shadow-sm border border-[#dbdbdb] p-6 mb-8">
         <div className="flex justify-between items-start flex-wrap gap-4">
           <div>
-            <h2 className="text-lg font-medium text-gray-800">Order #{orderId.slice(-6)}</h2>
-            <p className="text-gray-500 text-sm mt-1">
+            <h2 className="text-lg font-medium text-[#212121]">Order #{orderId.slice(-6)}</h2>
+            <p className="text-[#878787] text-sm mt-1">
               Placed on {new Date(orderData.date).toLocaleString('en-US', { 
                 year: 'numeric', 
                 month: 'long', 
@@ -193,19 +201,21 @@ const TrackOrder = () => {
             </p>
           </div>
           <div className="text-right">
-            <div className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-50 text-blue-700">
+            <div className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${
+              orderData.status === 'Delivered' ? 'bg-green-50 text-green-700' :
+              orderData.status === 'Processing' ? 'bg-blue-50 text-blue-700' :
+              orderData.status === 'Cancelled' ? 'bg-red-50 text-red-700' :
+              'bg-yellow-50 text-yellow-700'
+            }`}>
               {orderData.status}
             </div>
-            <p className="text-gray-500 text-sm mt-1">
-              Tracking ID: {trackingId}
-            </p>
           </div>
         </div>
 
         <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-6">
           <div>
-            <h3 className="text-sm font-medium text-gray-700 mb-2">Shipping Address</h3>
-            <p className="text-gray-600">
+            <h3 className="text-sm font-medium text-[#212121] mb-2">Shipping Address</h3>
+            <p className="text-[#878787]">
               {orderData.address.firstName} {orderData.address.lastName}<br />
               {orderData.address.address || orderData.address.street}<br />
               {orderData.address.city}, {orderData.address.state} {orderData.address.zipCode || orderData.address.zipcode}<br />
@@ -214,10 +224,12 @@ const TrackOrder = () => {
             </p>
           </div>
           <div>
-            <h3 className="text-sm font-medium text-gray-700 mb-2">Payment Information</h3>
-            <p className="text-gray-600">
+            <h3 className="text-sm font-medium text-[#212121] mb-2">Payment Information</h3>
+            <p className="text-[#878787]">
               Method: {orderData.paymentMethod}<br />
-              Status: {orderData.payment ? 'Paid' : 'Payment Pending'}<br />
+              Status: <span className={orderData.payment ? 'text-green-600' : 'text-red-600'}>
+                {orderData.payment ? 'Paid' : 'Payment Pending'}
+              </span><br />
               Amount: {currency}{orderData.amount}
             </p>
           </div>
@@ -225,8 +237,8 @@ const TrackOrder = () => {
       </div>
       
       {/* Special Handling Instructions */}
-      <div className="bg-white rounded-lg shadow-sm border border-gray-100 p-6 mb-8">
-        <h2 className="text-lg font-medium text-gray-800 flex items-center mb-4">
+      <div className="bg-white rounded-lg shadow-sm border border-[#dbdbdb] p-6 mb-8">
+        <h2 className="text-lg font-medium text-[#212121] flex items-center mb-4">
           <FaExclamationTriangle className="text-amber-500 mr-2" /> Special Handling Instructions
         </h2>
         
@@ -234,8 +246,8 @@ const TrackOrder = () => {
           <div className="flex items-start p-4 bg-blue-50 rounded-lg">
             <FaSnowflake className="text-blue-500 mt-1 mr-3 flex-shrink-0" />
             <div>
-              <h3 className="font-medium text-gray-800">Refrigeration & Storage</h3>
-              <p className="text-gray-600 mt-1">
+              <h3 className="font-medium text-[#212121]">Refrigeration & Storage</h3>
+              <p className="text-[#878787] mt-1">
                 Upon delivery, please refrigerate milk-based sweets immediately to maintain freshness. 
                 Dry sweets and namkeens should be stored in airtight containers at room temperature.
               </p>
@@ -245,8 +257,8 @@ const TrackOrder = () => {
           <div className="flex items-start p-4 bg-green-50 rounded-lg">
             <FaInfoCircle className="text-green-500 mt-1 mr-3 flex-shrink-0" />
             <div>
-              <h3 className="font-medium text-gray-800">Freshness Information</h3>
-              <p className="text-gray-600 mt-1">
+              <h3 className="font-medium text-[#212121]">Freshness Information</h3>
+              <p className="text-[#878787] mt-1">
                 Our sweets are prepared fresh before shipping and are packaged to maintain quality during delivery. 
                 For best taste, consume milk-based sweets within 2-3 days and dry sweets/namkeens within their recommended shelf life.
               </p>
@@ -256,8 +268,8 @@ const TrackOrder = () => {
           <div className="flex items-start p-4 bg-purple-50 rounded-lg">
             <FaInfoCircle className="text-purple-500 mt-1 mr-3 flex-shrink-0" />
             <div>
-              <h3 className="font-medium text-gray-800">Expected Delivery Time</h3>
-              <p className="text-gray-600 mt-1">
+              <h3 className="font-medium text-[#212121]">Expected Delivery Time</h3>
+              <p className="text-[#878787] mt-1">
                 To ensure freshness, our sweet deliveries are prioritized. 
                 {orderData.status !== 'Delivered' ? 
                   ' Expected delivery is within 24-48 hours of shipping.' : 
@@ -270,21 +282,23 @@ const TrackOrder = () => {
       </div>
 
       {/* Order Tracking Timeline */}
-      <div className="bg-white rounded-lg shadow-sm border border-gray-100 p-6 mb-8">
-        <h2 className="text-lg font-medium text-gray-800 mb-6">Delivery Progress</h2>
+      <div className="bg-white rounded-lg shadow-sm border border-[#dbdbdb] p-6 mb-8">
+        <h2 className="text-lg font-medium text-[#212121] mb-6">Delivery Progress</h2>
         
         <div className="space-y-8">
           {timelineSteps.map((step, index) => (
             <div key={step.id} className="relative">
               {/* Connector line */}
               {index < timelineSteps.length - 1 && (
-                <div className="absolute top-10 left-6 w-0.5 h-full -translate-x-1/2 bg-gray-200"></div>
+                <div className={`absolute top-10 left-6 w-0.5 h-full -translate-x-1/2 ${
+                  step.completed ? 'bg-[#2874f0]' : 'bg-[#dbdbdb]'
+                }`}></div>
               )}
               
               <div className="flex items-start">
                 {/* Icon */}
                 <div className={`flex-shrink-0 w-12 h-12 flex items-center justify-center rounded-full z-10 ${
-                  step.completed ? 'bg-green-100 text-green-600' : 'bg-gray-100 text-gray-400'
+                  step.completed ? 'bg-[#2874f0] bg-opacity-10 text-[#2874f0]' : 'bg-gray-100 text-[#878787]'
                 }`}>
                   {step.icon}
                 </div>
@@ -293,13 +307,13 @@ const TrackOrder = () => {
                 <div className="ml-4 flex-grow">
                   <div className="flex justify-between">
                     <h3 className={`font-medium ${
-                      step.completed ? 'text-gray-800' : 'text-gray-500'
+                      step.completed ? 'text-[#212121]' : 'text-[#878787]'
                     }`}>
                       {step.title}
                     </h3>
-                    <span className="text-sm text-gray-500">{step.date}</span>
+                    <span className="text-sm text-[#878787]">{step.date}</span>
                   </div>
-                  <p className="text-gray-600 mt-1">{step.description}</p>
+                  <p className="text-[#878787] mt-1">{step.description}</p>
                 </div>
               </div>
             </div>
@@ -308,30 +322,49 @@ const TrackOrder = () => {
       </div>
 
       {/* Order Items */}
-      <div className="bg-white rounded-lg shadow-sm border border-gray-100 p-6">
-        <h2 className="text-lg font-medium text-gray-800 mb-6">Order Items</h2>
+      <div className="bg-white rounded-lg shadow-sm border border-[#dbdbdb] p-6">
+        <h2 className="text-lg font-medium text-[#212121] mb-6">Order Items</h2>
         
         <div className="space-y-4">
-          {orderData.items.map((item, index) => (
-            <div key={index} className="flex items-start pb-4 border-b border-gray-100 last:border-b-0 last:pb-0">
-              <img 
-                src={item.image[0]} 
-                alt={item.name} 
-                className="w-16 h-16 object-cover rounded"
-              />
-              <div className="ml-4 flex-grow">
-                <h3 className="font-medium text-gray-800">{item.name}</h3>
-                <div className="flex flex-wrap gap-x-4 text-sm text-gray-600 mt-1">
-                  <p>Size: {item.size}</p>
-                  <p>Quantity: {item.quantity}</p>
-                  <p>Price: {currency}{item.price}</p>
+          {orderData.items.map((item, index) => {
+            // Get image URL with fallback
+            let imageUrl = PLACEHOLDER_IMAGE;
+            if (item.image) {
+              if (Array.isArray(item.image) && item.image[0]) {
+                imageUrl = item.image[0];
+              } else if (typeof item.image === 'string') {
+                imageUrl = item.image;
+              }
+            }
+
+            return (
+              <div key={index} className="flex items-start pb-4 border-b border-[#dbdbdb] last:border-b-0 last:pb-0">
+                <div className="w-16 h-16 bg-gray-100 rounded flex items-center justify-center">
+                  <img 
+                    src={imageUrl} 
+                    alt={item.name} 
+                    className="w-full h-full object-cover rounded"
+                    onError={(e) => {
+                      e.target.onerror = null;
+                      e.target.src = PLACEHOLDER_IMAGE;
+                      e.target.parentElement.classList.add('bg-gray-100');
+                    }}
+                  />
                 </div>
-                <div className="mt-2 text-sm">
-                  <span className="text-pink-600 font-medium">Shelf Life:</span> <span className="text-gray-600">{getShelfLife(item.name)}</span>
+                <div className="ml-4 flex-grow">
+                  <h3 className="font-medium text-[#212121]">{item.name}</h3>
+                  <div className="flex flex-wrap gap-x-4 text-sm text-[#878787] mt-1">
+                    <p>Size: {item.size || 'Regular'}</p>
+                    <p>Quantity: {item.quantity}</p>
+                    <p>Price: {currency}{item.price}</p>
+                  </div>
+                  <div className="mt-2 text-sm">
+                    <span className="text-pink-600 font-medium">Shelf Life:</span> <span className="text-[#878787]">{getShelfLife(item.name)}</span>
+                  </div>
                 </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       </div>
       
@@ -339,13 +372,13 @@ const TrackOrder = () => {
       <div className="mt-8 flex flex-wrap gap-4 justify-center">
         <button 
           onClick={() => navigate('/orders')}
-          className="px-6 py-3 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
+          className="px-6 py-3 border border-[#dbdbdb] rounded-md text-[#212121] hover:bg-gray-50"
         >
           Back to Orders
         </button>
         <button
           onClick={() => window.print()}
-          className="px-6 py-3 bg-pink-500 text-white rounded-md hover:bg-pink-600"
+          className="px-6 py-3 bg-[#2874f0] text-white rounded-md hover:bg-[#1a5dc8]"
         >
           Print Order Details
         </button>

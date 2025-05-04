@@ -4,9 +4,33 @@ const userSchema = new mongoose.Schema({
     name: { type: String, required: true },
     email: { type: String, required: true, unique: true },
     password: { type: String, required: true },
-    cartData: { type: Object, default: {} }
-}, { minimize: false })
+    phone: { type: String, default: '' },
+    address: { type: String, default: '' },
+    createdAt: { type: Date, default: Date.now },
+    isEmailVerified: { type: Boolean, default: false },
+    isPhoneVerified: { type: Boolean, default: false },
+    notificationSettings: {
+        orderUpdates: { type: Boolean, default: true },
+        promotionalOffers: { type: Boolean, default: true },
+        newArrivals: { type: Boolean, default: true }
+    },
+    cartData: { 
+        type: Object,
+        default: {}
+    }
+}, { 
+    minimize: false,
+    timestamps: true 
+});
 
-const userModel = mongoose.models.user || mongoose.model('user',userSchema);
+// Pre-save middleware to ensure cartData is always an object
+userSchema.pre('save', function(next) {
+    if (!this.cartData || typeof this.cartData !== 'object') {
+        this.cartData = {};
+    }
+    next();
+});
 
-export default userModel
+const userModel = mongoose.models.user || mongoose.model('user', userSchema);
+
+export default userModel;

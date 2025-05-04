@@ -14,6 +14,8 @@ import Orders from './pages/Orders'
 import TrackOrder from './pages/TrackOrder'
 import Profile from './pages/Profile'
 import ProductListing from './pages/ProductListing'
+import Addresses from './pages/Addresses'
+import OrderSuccess from './pages/OrderSuccess'
 import Navbar from './components/Navbar'
 import Footer from './components/Footer'
 import SearchBar from './components/SearchBar'
@@ -23,6 +25,7 @@ import Verify from './pages/Verify'
 import { ShopContext, ShopContextProvider } from './context/ShopContext'
 import PropTypes from 'prop-types'
 import { initGA } from "./utils/analytics"
+import Register from './pages/Register'
 
 export const backendUrl = import.meta.env.VITE_BACKEND_URL
 
@@ -114,17 +117,20 @@ const App = () => {
               <Route path='/product/:productId' element={<Product />} />
               <Route path='/cart' element={<Cart />} />
               <Route path='/login' element={<Login />} />
+              <Route path='/register' element={<Register />} />
               <Route path='/forgot-password' element={<ForgotPassword />} />
               <Route path='/reset-password' element={<ResetPassword />} />
               <Route path='/place-order' element={<ProtectedRoute element={<PlaceOrder />} />} />
               <Route path='/orders' element={<ProtectedRoute element={<Orders />} />} />
               <Route path='/track-order/:orderId' element={<ProtectedRoute element={<TrackOrder />} />} />
               <Route path='/profile' element={<ProtectedRoute element={<Profile />} />} />
+              <Route path='/addresses' element={<ProtectedRoute element={<Addresses />} />} />
               <Route path='/wishlist' element={<ProtectedRoute element={<Profile />} />} />
               <Route path='/settings' element={<ProtectedRoute element={<Profile />} />} />
               <Route path='/verify' element={<Verify />} />
               <Route path='/products' element={<ProductListing />} />
               <Route path='/products/:productId' element={<ProductRedirect />} />
+              <Route path='/order-success' element={<ProtectedRoute element={<OrderSuccess />} />} />
               <Route path='*' element={<NotFound />} />
             </Routes>
             <Footer />

@@ -1,32 +1,22 @@
-import React, { useContext, useState, useEffect } from "react";
-import { motion } from "framer-motion";
+import { useContext, useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import Title from "../components/Title";
 import { assets } from "../assets/assets";
 import { ShopContext } from "../context/ShopContext";
 import axios from "axios";
 import { toast } from "react-toastify";
+import { useNavigate } from "react-router-dom";
 
 const PlaceOrder = () => {
+  const navigate = useNavigate();
   const [method, setMethod] = useState("razorpay");
   const [formErrors, setFormErrors] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
-  // Add state for coupon code
+  const [showSuccess, setShowSuccess] = useState(false);
   const [couponCode, setCouponCode] = useState("");
   const [discount, setDiscount] = useState(0);
   const [appliedCoupon, setAppliedCoupon] = useState(null);
   const [isApplyingCoupon, setIsApplyingCoupon] = useState(false);
-  
-  const {
-    navigate,
-    backendUrl,
-    token,
-    cartItems,
-    setCartItems,
-    getCartAmount,
-    delivery_fee,
-    products,
-  } = useContext(ShopContext);
-  
   const [deliveryInstructions, setDeliveryInstructions] = useState("");
   const [specialRequirements, setSpecialRequirements] = useState({
     coldPacking: false,
@@ -34,7 +24,6 @@ const PlaceOrder = () => {
     fragileHandling: true,
     noContact: false
   });
-  
   const [formData, setFormData] = useState({
     firstName: "",
     lastName: "",
@@ -46,7 +35,66 @@ const PlaceOrder = () => {
     country: "",
     phone: "",
   });
+  
+  const {
+    backendUrl,
+    token,
+    cartItems,
+    setCartItems,
+    getCartAmount,
+    delivery_fee,
+    products,
+  } = useContext(ShopContext);
 
+  // Debug logging for cart items and context
+  console.log("Full ShopContext:", {
+    cartItems,
+    products,
+    getCartAmount: getCartAmount(),
+    delivery_fee
+  });
+
+  // Check if cartItems is in the expected format
+  if (cartItems && typeof cartItems === 'object') {
+    console.log("Cart items structure:", {
+      keys: Object.keys(cartItems),
+      values: Object.values(cartItems),
+      type: typeof cartItems,
+      isArray: Array.isArray(cartItems),
+      stringified: JSON.stringify(cartItems)
+    });
+  } else {
+    console.error("Invalid cart items format:", cartItems);
+  }
+
+  // Check authentication and cart after hooks
+  if (!token) {
+    toast.error("Please login to place an order");
+    navigate("/login");
+    return null;
+  }
+
+  // Updated cart validation for new structure
+  const hasItems = cartItems && 
+    typeof cartItems === 'object' && 
+    Object.keys(cartItems).length > 0 && 
+    Object.values(cartItems).some(quantity => quantity > 0);
+
+  // Only redirect if not showing success animation
+  if (!hasItems && !showSuccess) {
+    console.log("Cart validation failed:", {
+      cartItems,
+      hasItems,
+      cartKeys: Object.keys(cartItems),
+      cartValues: Object.values(cartItems),
+      cartItemsType: typeof cartItems,
+      cartItemsStringified: JSON.stringify(cartItems)
+    });
+    toast.error("Your cart is empty");
+    navigate("/cart");
+    return null;
+  }
+  
   // Available coupons (in a real app, this would come from the backend)
   const availableCoupons = [
     { code: "SWEETFREE", discount: 100, minAmount: 500, description: "₹100 off on orders above ₹500" },
@@ -150,9 +198,6 @@ const PlaceOrder = () => {
     }));
   };
 
-  // Mobile order summary toggle
-  const [showOrderSummary, setShowOrderSummary] = useState(false);
-
   // Validation function
   const validateForm = () => {
     const errors = {};
@@ -182,6 +227,167 @@ const PlaceOrder = () => {
     setFormErrors(errors);
     return Object.keys(errors).length === 0;
   };
+
+  // Success animation component
+  const SuccessAnimation = () => (
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
+    >
+      <motion.div
+        initial={{ scale: 0.5, opacity: 0 }}
+        animate={{ scale: 1, opacity: 1 }}
+        exit={{ scale: 0.5, opacity: 0 }}
+        className="bg-white rounded-lg p-8 flex flex-col items-center relative overflow-hidden"
+      >
+        {/* Animated background circles */}
+        <motion.div
+          initial={{ scale: 0 }}
+          animate={{ scale: 1 }}
+          transition={{ duration: 0.5 }}
+          className="absolute inset-0 bg-gradient-to-br from-green-50 to-emerald-50"
+        />
+        <motion.div
+          initial={{ scale: 0 }}
+          animate={{ scale: 1.5 }}
+          transition={{ duration: 0.8, delay: 0.2 }}
+          className="absolute -top-10 -right-10 w-40 h-40 bg-green-100 rounded-full opacity-50"
+        />
+        <motion.div
+          initial={{ scale: 0 }}
+          animate={{ scale: 1.5 }}
+          transition={{ duration: 0.8, delay: 0.4 }}
+          className="absolute -bottom-10 -left-10 w-40 h-40 bg-emerald-100 rounded-full opacity-50"
+        />
+
+        {/* Main content */}
+        <motion.div
+          initial={{ scale: 0 }}
+          animate={{ scale: 1 }}
+          transition={{ delay: 0.2, type: "spring", stiffness: 200 }}
+          className="relative z-10"
+        >
+          {/* Animated checkmark circle */}
+          <motion.div
+            initial={{ scale: 0 }}
+            animate={{ scale: 1 }}
+            transition={{ delay: 0.3, type: "spring", stiffness: 200 }}
+            className="w-20 h-20 bg-gradient-to-br from-green-400 to-emerald-500 rounded-full flex items-center justify-center mb-6 shadow-lg"
+          >
+            <motion.svg
+              initial={{ pathLength: 0 }}
+              animate={{ pathLength: 1 }}
+              transition={{ duration: 0.5, delay: 0.5 }}
+              className="w-10 h-10 text-white"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <motion.path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={3}
+                d="M5 13l4 4L19 7"
+              />
+            </motion.svg>
+          </motion.div>
+
+          {/* Success message */}
+          <motion.div
+            initial={{ y: 20, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            transition={{ delay: 0.6 }}
+            className="text-center"
+          >
+            <motion.h2
+              initial={{ scale: 0.8, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              transition={{ delay: 0.7 }}
+              className="text-3xl font-bold text-gray-800 mb-3"
+            >
+              Order Placed Successfully!
+            </motion.h2>
+            <motion.p
+              initial={{ y: 20, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              transition={{ delay: 0.8 }}
+              className="text-gray-600 mb-4"
+            >
+              Thank you for your purchase. You can track your order status in your orders page.
+            </motion.p>
+
+            {/* Track Order Button */}
+            <motion.div
+              initial={{ y: 20, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              transition={{ delay: 0.9 }}
+              className="mb-6"
+            >
+              <button
+                onClick={() => {
+                  setCartItems({});
+                  navigate("/orders");
+                }}
+                className="bg-gradient-to-r from-green-500 to-emerald-600 text-white px-6 py-3 rounded-lg font-medium shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200 flex items-center space-x-2"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clipRule="evenodd" />
+                </svg>
+                <span>Track My Order</span>
+              </button>
+            </motion.div>
+
+            {/* Animated loading bar */}
+            <motion.div
+              initial={{ width: 0 }}
+              animate={{ width: "100%" }}
+              transition={{ duration: 3, ease: "linear" }}
+              className="h-1 bg-gradient-to-r from-green-400 to-emerald-500 rounded-full"
+            />
+
+            {/* Animated confetti */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 1 }}
+              className="absolute inset-0 pointer-events-none"
+            >
+              {[...Array(20)].map((_, i) => (
+                <motion.div
+                  key={i}
+                  initial={{ 
+                    x: Math.random() * 200 - 100,
+                    y: -20,
+                    opacity: 0,
+                    scale: 0
+                  }}
+                  animate={{ 
+                    y: 200,
+                    opacity: [0, 1, 0],
+                    scale: [0, 1, 0],
+                    rotate: Math.random() * 360
+                  }}
+                  transition={{ 
+                    duration: 2,
+                    delay: i * 0.1,
+                    repeat: Infinity,
+                    repeatDelay: 3
+                  }}
+                  className="absolute w-2 h-2"
+                  style={{
+                    left: `${Math.random() * 100}%`,
+                    background: ['#10B981', '#059669', '#34D399'][Math.floor(Math.random() * 3)]
+                  }}
+                />
+              ))}
+            </motion.div>
+          </motion.div>
+        </motion.div>
+      </motion.div>
+    </motion.div>
+  );
 
   const initPay = (order) => {
     console.log("initPay called with order:", order);
@@ -250,9 +456,13 @@ const PlaceOrder = () => {
           );
           
           if (data.success) {
-            toast.success("Payment successful!");
-            setCartItems({});
-            navigate("/orders");
+            // Show success animation first
+            setShowSuccess(true);
+            // Clear cart after showing success
+            setTimeout(() => {
+              setCartItems({});
+              navigate("/orders");
+            }, 3000);
           } else {
             console.error("Payment verification failed:", data);
             toast.error(data.message || "Payment verification failed. Please contact support.");
@@ -286,9 +496,35 @@ const PlaceOrder = () => {
   const onSubmitHandler = async (event) => {
     event.preventDefault();
     
+    // Check authentication again before submitting
+    if (!token) {
+      toast.error("Your session has expired. Please login again.");
+      navigate("/login");
+      return;
+    }
+
+    // Updated cart validation for new structure
+    const hasItems = cartItems && 
+      typeof cartItems === 'object' && 
+      Object.keys(cartItems).length > 0 && 
+      Object.values(cartItems).some(quantity => quantity > 0);
+
+    if (!hasItems) {
+      console.log("Cart validation failed in submit:", {
+        cartItems,
+        hasItems,
+        cartKeys: Object.keys(cartItems),
+        cartValues: Object.values(cartItems),
+        cartItemsType: typeof cartItems,
+        cartItemsStringified: JSON.stringify(cartItems)
+      });
+      toast.error("Your cart is empty. Please add items before placing an order.");
+      navigate("/cart");
+      return;
+    }
+    
     // Validate form
     if (!validateForm()) {
-      // Scroll to the first error
       const firstError = Object.keys(formErrors)[0];
       if (firstError) {
         const element = document.getElementById(firstError);
@@ -299,108 +535,165 @@ const PlaceOrder = () => {
     }
     
     setIsSubmitting(true);
-    console.log("Form submitted, method:", method);
     
     try {
-      let orderItems = [];
+      // Extract userId from token
+      const tokenParts = token.split('.');
+      if (tokenParts.length !== 3) {
+        throw new Error('Invalid token format');
+      }
+      const payload = JSON.parse(atob(tokenParts[1]));
+      const userId = payload.id;
 
-      for (const items in cartItems) {
-        for (const item in cartItems[items]) {
-          if (cartItems[items][item] > 0) {
-            const itemInfo = structuredClone(
-              products.find((product) => product._id === items)
-            );
-            if (itemInfo) {
-              itemInfo.size = item;
-              itemInfo.quantity = cartItems[items][item];
-              orderItems.push(itemInfo);
-            }
+      if (!userId) {
+        throw new Error('User ID not found in token');
+      }
+
+      // Process cart items with new structure
+      let orderItems = [];
+      console.log("Processing cart items:", cartItems);
+      console.log("Available products:", products);
+
+      // Ensure cartItems is in the correct format
+      const processedCartItems = typeof cartItems === 'string' ? JSON.parse(cartItems) : cartItems;
+      console.log("Processed cart items:", processedCartItems);
+
+      for (const [productId, quantity] of Object.entries(processedCartItems)) {
+        if (quantity > 0) {
+          console.log(`Processing product ID: ${productId}, Quantity: ${quantity}`);
+          const product = products.find(p => p._id === productId);
+          
+          if (!product) {
+            console.error(`Product not found for ID: ${productId}`);
+            continue;
           }
+
+          console.log(`Adding item - Product: ${product.name}, Quantity: ${quantity}`);
+          orderItems.push({
+            name: product.name,
+            price: product.price,
+            quantity: quantity,
+            size: "regular", // Default size since it's not in the new structure
+            image: Array.isArray(product.image) ? product.image : [product.image],
+            product: {
+              amount: product.price * quantity
+            }
+          });
         }
       }
 
-      const additionalCosts = calculateAdditionalCosts();
+      if (orderItems.length === 0) {
+        console.error("No valid items found in cart after processing:", {
+          cartItems,
+          processedCartItems,
+          products,
+          orderItems
+        });
+        throw new Error('No valid items found in cart');
+      }
 
-      let orderData = {
+      console.log("Processed order items:", orderItems);
+
+      const additionalCosts = calculateAdditionalCosts();
+      const totalAmount = getTotalAmount();
+
+      const orderData = {
+        userId,
+        items: orderItems,
         address: {
-          ...formData,
+          firstName: formData.firstName,
+          lastName: formData.lastName,
+          email: formData.email,
+          phone: formData.phone,
+          street: formData.street,
+          city: formData.city,
+          state: formData.state,
+          zipcode: formData.zipcode,
+          country: formData.country,
           deliveryInstructions,
           specialRequirements
         },
-        items: orderItems,
-        amount: getTotalAmount(),
+        amount: totalAmount,
         additionalCosts,
         discount: discount,
-        appliedCoupon: appliedCoupon ? appliedCoupon.code : null
+        appliedCoupon: appliedCoupon ? appliedCoupon.code : null,
+        paymentMethod: method.toLowerCase(),
+        payment: method === "razorpay",
+        status: "Order Placed",
+        date: Date.now()
       };
 
-      console.log("Order data prepared:", orderData);
+      console.log("Submitting order data:", orderData);
 
+      let response;
       switch (method) {
-        // API Calls for COD
         case "cod":
           toast.info("Processing your order...");
-          const response = await axios.post(
+          response = await axios.post(
             backendUrl + "/api/order/place",
             orderData,
-            { headers: { token } }
+            { 
+              headers: { 
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+              } 
+            }
           );
           if (response.data.success) {
-            toast.success("Order placed successfully!");
-            setCartItems({});
-            navigate("/orders");
+            // Show success animation first
+            setShowSuccess(true);
+            // Clear cart after showing success
+            setTimeout(() => {
+              setCartItems({});
+              navigate("/orders");
+            }, 3000);
           } else {
-            toast.error(response.data.message || "Failed to place order");
-          }
-          break;
-
-        case "stripe":
-          toast.info("Redirecting to payment gateway...");
-          const responseStripe = await axios.post(
-            backendUrl + "/api/order/stripe",
-            orderData,
-            { headers: { token } }
-          );
-          if (responseStripe.data.success) {
-            const { session_url } = responseStripe.data;
-            window.location.replace(session_url);
-          } else {
-            toast.error(responseStripe.data.message || "Failed to create payment session");
+            throw new Error(response.data.message || "Failed to place order");
           }
           break;
 
         case "razorpay":
           toast.info("Initializing payment...");
-          console.log("Initiating Razorpay payment...");
           try {
-            const responseRazorpay = await axios.post(
+            response = await axios.post(
               backendUrl + "/api/order/razorpay",
               orderData,
-              { headers: { token } }
+              { 
+                headers: { 
+                  'Authorization': `Bearer ${token}`,
+                  'Content-Type': 'application/json'
+                } 
+              }
             );
-            console.log("Razorpay API response:", responseRazorpay.data);
             
-            if (responseRazorpay.data.success) {
-              console.log("Calling initPay with order:", responseRazorpay.data.order);
-              initPay(responseRazorpay.data.order);
+            if (response.data.success) {
+              initPay(response.data.order);
             } else {
-              console.error("Razorpay API failed:", responseRazorpay.data);
-              toast.error(responseRazorpay.data.message || "Failed to initialize payment");
+              throw new Error(response.data.message || "Failed to initialize payment");
             }
           } catch (error) {
             console.error("Razorpay API error:", error);
-            toast.error("Failed to connect to payment server. Please try again.");
+            throw new Error("Failed to connect to payment server. Please try again.");
           }
           break;
 
         default:
-          console.error("Unknown payment method:", method);
-          toast.error("Please select a valid payment method");
-          break;
+          throw new Error("Please select a valid payment method");
       }
     } catch (error) {
       console.error("Order submission error:", error);
-      toast.error(error.response?.data?.message || "An error occurred while placing your order");
+      if (error.response?.status === 401) {
+        toast.error("Your session has expired. Please login again.");
+        navigate("/login");
+      } else if (error.message === 'User ID not found in token') {
+        toast.error("Authentication error. Please login again.");
+        navigate("/login");
+      } else if (error.message === 'No valid items found in cart') {
+        toast.error("Your cart is empty or contains invalid items. Please check your cart.");
+        navigate("/cart");
+      } else {
+        toast.error(error.message || "An error occurred while placing your order");
+      }
     } finally {
       setIsSubmitting(false);
     }
@@ -408,6 +701,9 @@ const PlaceOrder = () => {
 
   return (
     <div className="bg-gray-50 py-8">
+      <AnimatePresence>
+        {showSuccess && <SuccessAnimation />}
+      </AnimatePresence>
       <div className="container mx-auto px-4">
         {/* Order Progress */}
         <div className="max-w-3xl mx-auto mb-8">
@@ -640,7 +936,7 @@ const PlaceOrder = () => {
                     <label htmlFor="giftWrapping" className="ml-3 cursor-pointer flex items-start">
                       <div>
                         <p className="text-sm font-medium text-gray-700">Gift wrap my order</p>
-                        <p className="text-xs text-gray-500">We'll wrap it in beautiful packaging with a personalized note</p>
+                        <p className="text-xs text-gray-500">We&apos;ll wrap it in beautiful packaging with a personalized note</p>
                       </div>
                     </label>
                   </div>

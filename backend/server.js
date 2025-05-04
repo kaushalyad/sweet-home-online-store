@@ -23,7 +23,9 @@ const allowedOrigins = [
   "https://sweethome-store.com",
   "https://www.sweethome-store.com",
   "http://localhost:3000",
+  "http://localhost:4173",
   "http://127.0.0.1:3000",
+  "http://127.0.0.1:4173"
 ];
 
 // CORS options
@@ -60,7 +62,7 @@ const corsOptions = {
 };
 
 // Apply CORS middleware once
-// app.use(cors(corsOptions));
+app.use(cors(corsOptions));
 
 // Middlewares
 app.use(morgan("combined", { stream: { write: message => logger.info(message.trim()) } }));

@@ -1,16 +1,27 @@
-import { createContext, useEffect, useState } from "react";
+import { createContext, useEffect, useState, useContext, useCallback } from "react";
 import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
+import logger from "@/utils/logger";
+import PropTypes from 'prop-types';
 
 axios.defaults.withCredentials = true;
 
 export const ShopContext = createContext();
 
-export const ShopContextProvider = (props) => {
+// Custom hook to use the shop context
+export const useShop = () => {
+  const context = useContext(ShopContext);
+  if (!context) {
+    throw new Error('useShop must be used within a ShopContextProvider');
+  }
+  return context;
+};
+
+export const ShopContextProvider = ({ children }) => {
   const currency = "₹";
   const delivery_fee = 40;
-  const backendUrl = import.meta.env.VITE_BACKEND_URL;
+  const backendUrl = "http://localhost:4000";
   const [search, setSearch] = useState("");
   const [showSearch, setShowSearch] = useState(true);
   const [cartItems, setCartItems] = useState({});
@@ -19,64 +30,114 @@ export const ShopContextProvider = (props) => {
   const [buffer, setBuffer] = useState(true);
   const [token, setToken] = useState(() => localStorage.getItem("token") || "");
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [userData, setUserData] = useState(null);
   const navigate = useNavigate();
-
-  // Set token to localStorage whenever it changes
-  useEffect(() => {
-    if (token) {
-      localStorage.setItem("token", token);
-      setIsAuthenticated(true);
-      // Validate token on backend 
-      validateToken(token);
-      // Get user's wishlist when logged in
-      getUserWishlist(token);
-    } else {
-      localStorage.removeItem("token");
-      setIsAuthenticated(false);
-      // Clear wishlist when logging out
-      setWishlistItems([]);
-    }
-  }, [token]);
 
   // Validate token with the backend to ensure it's still valid
   const validateToken = async (tokenToValidate) => {
+    if (!tokenToValidate) {
+      setToken("");
+      setIsAuthenticated(false);
+      setUserData(null);
+      return false;
+    }
+
     try {
       const response = await axios.post(
         backendUrl + "/api/user/verify-token",
         {},
-        { headers: { token: tokenToValidate } }
+        { 
+          headers: { 
+            'Authorization': `Bearer ${tokenToValidate}`,
+            'Content-Type': 'application/json'
+          }
+        }
       );
       
       if (!response.data.success) {
-        // If token is invalid,
+        logger.warn("Token validation failed:", response.data.message);
         setToken("");
-        toast.error("Your session has expired. Please login again.");
+        setIsAuthenticated(false);
+        setUserData(null);
+        toast.error(response.data.message || "Your session has expired. Please login again.");
+        navigate("/login");
+        return false;
       } else {
-        // If validation successful, we could store user info if needed
-        console.log("Token validated successfully");
+        setIsAuthenticated(true);
+        // Fetch user data after successful token validation
+        fetchUserData(tokenToValidate);
+        logger.info("Token validated successfully");
+        return true;
       }
     } catch (error) {
-      console.log("Token validation error:", error);
-      // Handle different error scenarios
+      logger.error("Token validation error:", error);
+      setToken("");
+      setIsAuthenticated(false);
+      setUserData(null);
+      
       if (error.response) {
-        // Server responded with an error status code
         if (error.response.status === 401) {
-          setToken("");
-          toast.error("Your session has expired. Please login again.");
+          toast.error(error.response.data.message || "Your session has expired. Please login again.");
         } else {
-          // Other server error, but don't log out user just yet
-          console.error("Server error:", error.response.data);
+          toast.error("Authentication failed. Please login again.");
         }
       } else if (error.request) {
-        // Request was made but no response received (network error)
-        console.error("Network error - no response received");
-        // Don't log out user due to network issues
+        toast.error("Network error. Please check your connection.");
       } else {
-        // Error in setting up the request
-        console.error("Request setup error:", error.message);
+        toast.error("Authentication failed. Please login again.");
       }
+      navigate("/login");
+      return false;
     }
   };
+
+  // Fetch user data
+  const fetchUserData = async (userToken) => {
+    try {
+      const response = await axios.post(
+        backendUrl + '/api/user/profile',
+        {},
+        {
+          headers: {
+            'Authorization': `Bearer ${userToken}`,
+            'Content-Type': 'application/json'
+          }
+        }
+      );
+
+      if (response.data.success) {
+        setUserData(response.data.user);
+      } else {
+        logger.warn("Failed to fetch user data:", response.data.message);
+      }
+    } catch (error) {
+      logger.error("Error fetching user data:", error);
+    }
+  };
+
+  // Set token to localStorage whenever it changes
+  useEffect(() => {
+    const initializeAuth = async () => {
+      if (token) {
+        localStorage.setItem("token", token);
+        const isValid = await validateToken(token);
+        if (isValid) {
+          // Get user's wishlist and cart when logged in
+          getUserWishlist(token);
+          getUserCart(token);
+        }
+      } else {
+        localStorage.removeItem("token");
+        setIsAuthenticated(false);
+        setUserData(null);
+        // Clear wishlist and cart when logging out
+        setWishlistItems([]);
+        setCartItems({});
+      }
+    };
+
+    initializeAuth();
+  }, [token]);
 
   // Add to wishlist function
   const addToWishlist = async (productId) => {
@@ -109,7 +170,7 @@ export const ShopContextProvider = (props) => {
       // In a full implementation, this would synchronize with a backend API
       // For now, we're just using localStorage
     } catch (error) {
-      console.error("Error adding to wishlist:", error);
+      logger.error("Error adding to wishlist:", error);
       toast.error("Failed to add to wishlist. Please try again.");
     }
   };
@@ -129,7 +190,7 @@ export const ShopContextProvider = (props) => {
       
       // In a full implementation, this would synchronize with a backend API
     } catch (error) {
-      console.error("Error removing from wishlist:", error);
+      logger.error("Error removing from wishlist:", error);
       toast.error("Failed to remove from wishlist. Please try again.");
     }
   };
@@ -158,91 +219,148 @@ export const ShopContextProvider = (props) => {
       //   localStorage.setItem("wishlist", JSON.stringify(response.data.wishlistItems));
       // }
     } catch (error) {
-      console.error("Error fetching wishlist:", error);
+      logger.error("Error fetching wishlist:", error);
       // Don't show error toast as this is not critical
     }
   };
 
-  const addToCart = async (itemId, size) => {
-    if (!size) {
-      toast.error("Select Product Size");
+  const addToCart = async (itemId, quantity = 1) => {
+    if (!token) {
+      toast.error("Please login to add items to your cart");
+      navigate("/login");
       return;
     }
 
-    let cartData = structuredClone(cartItems);
-
-    if (cartData[itemId]) {
-      if (cartData[itemId][size]) {
-        cartData[itemId][size] += 1;
+    try {
+      logger.info(`Adding to cart - Item: ${itemId}, Quantity: ${quantity}`);
+      
+      // First update the backend
+      const response = await axios.post(
+        backendUrl + "/api/cart/add",
+        { 
+          itemId, 
+          quantity: Number(quantity)
+        },
+        { 
+          headers: { 
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
+        }
+      );
+      
+      logger.info("Add to cart response:", response.data);
+      
+      // Check if we have cartData in the response
+      if (response.data && response.data.cartData) {
+        // Update local cart state with the response data
+        const updatedCartData = response.data.cartData;
+        logger.info("Updating cart with data:", updatedCartData);
+        
+        // Ensure we have a valid cart data object
+        if (typeof updatedCartData === 'object' && updatedCartData !== null) {
+          // Convert Map to object if needed
+          const cartDataObject = updatedCartData instanceof Map 
+            ? Object.fromEntries(updatedCartData) 
+            : updatedCartData;
+            
+          setCartItems(cartDataObject);
+          // Save to localStorage as backup
+          localStorage.setItem("cart", JSON.stringify(cartDataObject));
+          toast.success("Product added to cart successfully");
+        } else {
+          logger.error("Invalid cart data received:", updatedCartData);
+          toast.error("Error updating cart. Please try again.");
+        }
       } else {
-        cartData[itemId][size] = 1;
+        logger.error("Invalid response format:", response.data);
+        toast.error("Failed to add to cart. Please try again.");
       }
-    } else {
-      cartData[itemId] = {};
-      cartData[itemId][size] = 1;
-    }
-    setCartItems(cartData);
-
-    if (token) {
-      try {
-        await axios.post(
-          backendUrl + "/api/cart/add",
-          { itemId, size },
-          { headers: { token } }
-        );
-      } catch (error) {
-        console.log(error);
-        toast.error(error.message);
+    } catch (error) {
+      logger.error("Error adding to cart:", error);
+      
+      if (error.response) {
+        logger.error("Error response data:", error.response.data);
+        logger.error("Error response status:", error.response.status);
+      }
+      
+      if (error.response?.status === 401) {
+        setToken("");
+        toast.error("Session expired. Please login again.");
+        navigate("/login");
+      } else {
+        toast.error(error.response?.data?.message || "Failed to add to cart");
       }
     }
   };
 
   const getCartCount = () => {
-    let totalCount = 0;
-    for (const items in cartItems) {
-      for (const item in cartItems[items]) {
-        try {
-          if (cartItems[items][item] > 0) {
-            totalCount += cartItems[items][item];
+    try {
+      let totalCount = 0;
+      if (cartItems && typeof cartItems === 'object') {
+        Object.values(cartItems).forEach(quantity => {
+          if (typeof quantity === 'number' && quantity > 0) {
+            totalCount += quantity;
           }
-        } catch (error) {}
+        });
       }
+      return totalCount;
+    } catch (error) {
+      logger.error("Error calculating cart count:", error);
+      return 0;
     }
-    return totalCount;
   };
 
-  const updateQuantity = async (itemId, size, quantity) => {
-    let cartData = structuredClone(cartItems);
+  const updateQuantity = async (itemId, quantity) => {
+    if (!token) {
+      toast.error("Please login to update cart");
+      navigate("/login");
+      return;
+    }
 
-    cartData[itemId][size] = quantity;
-
-    setCartItems(cartData);
-
-    if (token) {
-      try {
-        await axios.post(
-          backendUrl + "/api/cart/update",
-          { itemId, size, quantity },
-          { headers: { token } }
-        );
-      } catch (error) {
-        console.log(error);
-        toast.error(error.message);
+    try {
+      const response = await axios.post(
+        backendUrl + "/api/cart/update",
+        { itemId, quantity },
+        { 
+          headers: { 
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
+        }
+      );
+      
+      if (response.data.success) {
+        // Update local cart state with the response data
+        setCartItems(response.data.cartData);
+        // Save to localStorage as backup
+        localStorage.setItem("cart", JSON.stringify(response.data.cartData));
+        toast.success("Cart updated successfully");
+      } else {
+        toast.error(response.data.message || "Failed to update cart");
+      }
+    } catch (error) {
+      logger.error("Error updating cart:", error);
+      
+      if (error.response?.status === 401) {
+        setToken("");
+        toast.error("Session expired. Please login again.");
+        navigate("/login");
+      } else {
+        toast.error(error.response?.data?.message || "Failed to update cart");
       }
     }
   };
 
   const getCartAmount = () => {
     let totalAmount = 0;
-    for (const items in cartItems) {
-      let itemInfo = products.find((product) => product._id === items);
-      for (const item in cartItems[items]) {
-        try {
-          if (cartItems[items][item] > 0) {
-            totalAmount += itemInfo.price * cartItems[items][item];
-          }
-        } catch (error) {}
-      }
+    if (cartItems && products) {
+      Object.entries(cartItems).forEach(([productId, quantity]) => {
+        const product = products.find(p => p._id === productId);
+        if (product && quantity > 0) {
+          totalAmount += product.price * quantity;
+        }
+      });
     }
     return totalAmount;
   };
@@ -257,40 +375,90 @@ export const ShopContextProvider = (props) => {
         toast.error(response.data.message);
       }
     } catch (error) {
-      console.log(error);
+      logger.error(error);
       toast.error(error.message);
     }
   };
 
-  const getUserCart = async (userToken) => {
-    if (!userToken) return;
+  const getUserCart = useCallback(async (userToken) => {
+    if (!userToken) {
+      logger.warn("No token provided for getUserCart");
+      return { success: false, message: "No token provided" };
+    }
     
     try {
+      logger.info("Fetching user cart from backend");
       const response = await axios.post(
-        backendUrl + "/api/cart/get",
+        backendUrl + "/api/cart",
         {},
-        { headers: { token: userToken } }
+        { 
+          headers: { 
+            'Authorization': `Bearer ${userToken}`,
+            'Content-Type': 'application/json'
+          }
+        }
       );
+      
+      logger.info("Cart API response:", response.data);
+      
       if (response.data.success) {
-        setCartItems(response.data.cartData);
+        const cartData = response.data.cartData || {};
+        logger.info("Cart data received:", cartData);
+        
+        // Ensure we have a valid cart data object
+        if (typeof cartData === 'object' && cartData !== null) {
+          // Convert any string quantities to numbers
+          const processedCartData = Object.entries(cartData).reduce((acc, [key, value]) => {
+            acc[key] = Number(value);
+            return acc;
+          }, {});
+          
+          setCartItems(processedCartData);
+          // Save to localStorage as backup
+          localStorage.setItem("cart", JSON.stringify(processedCartData));
+          return { success: true, cartData: processedCartData };
+        } else {
+          logger.error("Invalid cart data received:", cartData);
+          return { success: false, message: "Invalid cart data received" };
+        }
       }
+      
+      const errorMsg = response.data.message || "Failed to fetch cart";
+      logger.warn("Failed to fetch cart:", errorMsg);
+      // Load from localStorage as fallback
+      const localCart = JSON.parse(localStorage.getItem("cart") || "{}");
+      setCartItems(localCart);
+      return { success: false, message: errorMsg, cartData: localCart };
     } catch (error) {
-      console.log(error);
-      if (error.response && error.response.status === 401) {
-        // If unauthorized, the token is invalid
-        setToken("");
-        toast.error("Session expired. Please login again.");
-      } else {
-        toast.error("Failed to fetch your cart. Please try again.");
+      logger.error("Error fetching cart:", error);
+      if (error.response) {
+        logger.error("Error response data:", error.response.data);
+        logger.error("Error response status:", error.response.status);
+        
+        if (error.response.status === 401) {
+          setToken("");
+          toast.error("Session expired. Please login again.");
+          navigate("/login");
+          return { success: false, message: "Session expired" };
+        }
       }
+      // Load from localStorage as fallback
+      const localCart = JSON.parse(localStorage.getItem("cart") || "{}");
+      setCartItems(localCart);
+      return { 
+        success: false, 
+        message: error.response?.data?.message || error.message || "Failed to fetch cart", 
+        cartData: localCart 
+      };
     }
-  };
+  }, [backendUrl, navigate, setToken]);
 
   const logout = () => {
     localStorage.removeItem("token");
     setToken("");
     setCartItems({});
     setWishlistItems([]);
+    setUserData(null);
     navigate("/login");
     toast.success("Logged out successfully!");
   };
@@ -301,7 +469,47 @@ export const ShopContextProvider = (props) => {
     if (token) {
       getUserCart(token);
     }
-  }, []);
+  }, [token, getUserCart]);
+
+  const removeFromCart = async (itemId) => {
+    if (!token) {
+      toast.error("Please login to remove items from cart");
+      navigate("/login");
+      return;
+    }
+
+    try {
+      const response = await axios.delete(
+        backendUrl + `/api/cart/remove/${itemId}`,
+        { 
+          headers: { 
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
+        }
+      );
+      
+      if (response.data.success) {
+        // Update local cart state with the response data
+        setCartItems(response.data.cartData);
+        // Save to localStorage as backup
+        localStorage.setItem("cart", JSON.stringify(response.data.cartData));
+        toast.success("Item removed from cart");
+      } else {
+        toast.error(response.data.message || "Failed to remove item from cart");
+      }
+    } catch (error) {
+      logger.error("Error removing from cart:", error);
+      
+      if (error.response?.status === 401) {
+        setToken("");
+        toast.error("Session expired. Please login again.");
+        navigate("/login");
+      } else {
+        toast.error(error.response?.data?.message || "Failed to remove item from cart");
+      }
+    }
+  };
 
   const contextValue = {
     currency,
@@ -324,18 +532,26 @@ export const ShopContextProvider = (props) => {
     buffer,
     logout,
     isAuthenticated,
+    userData,
     // Add wishlist functions to context
     wishlistItems,
     addToWishlist,
     removeFromWishlist,
-    isInWishlist
+    isInWishlist,
+    removeFromCart,
+    // Add getUserCart to context
+    getUserCart
   };
 
   return (
     <ShopContext.Provider value={contextValue}>
-      {props.children}
+      {children}
     </ShopContext.Provider>
   );
+};
+
+ShopContextProvider.propTypes = {
+  children: PropTypes.node.isRequired
 };
 
 export default ShopContextProvider;

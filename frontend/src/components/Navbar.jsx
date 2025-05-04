@@ -5,7 +5,7 @@ import { ShopContext } from "../context/ShopContext";
 import { FaGift, FaBirthdayCake, FaHeart, FaSearch, FaShoppingCart, FaUserAlt } from "react-icons/fa";
 
 // Define as a named function declaration instead of a function expression
-function Navbar() {
+const Navbar = () => {
   const [visible, setVisible] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [showCategoryMenu, setShowCategoryMenu] = useState(false);
@@ -39,11 +39,12 @@ function Navbar() {
     getCartCount,
     token,
     logout,
-    showSearch
+    showSearch,
+    userData
   } = useContext(ShopContext);
 
   const [showProfileMenu, setShowProfileMenu] = useState(false);
-
+  console.log("userData",userData);
   // Handle scroll effect for navbar
   useEffect(() => {
     const handleScroll = () => {
@@ -409,7 +410,7 @@ function Navbar() {
                   <div className="w-60 py-4 px-5 bg-white shadow-lg rounded-md border border-gray-200">
                     <div className="border-b border-gray-200 pb-3.5 mb-3.5">
                       <p className="text-sm text-gray-500">Welcome back!</p>
-                      <p className="font-semibold">Sweet Home Customer</p>
+                      <p className="font-semibold">{userData?.name ? `Hello, ${userData.name}!` : 'Welcome to Sweet Home!'}</p>
                     </div>
                     <div className="flex flex-col gap-3.5 text-gray-700">
                       <button 
@@ -430,7 +431,7 @@ function Navbar() {
                         </svg>
                         <span>My Orders</span>
                       </button>
-                      <button 
+                      {/* <button 
                         onClick={() => handleNavigation('/track-order')}
                         className="flex items-center gap-2 hover:text-black transition-colors duration-200 text-left"
                       >
@@ -438,7 +439,7 @@ function Navbar() {
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
                         </svg>
                         <span>Track Order</span>
-                      </button>
+                      </button> */}
                       <button 
                         onClick={() => handleNavigation('/wishlist')}
                         className="flex items-center gap-2 hover:text-black transition-colors duration-200 text-left"

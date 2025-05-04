@@ -1,173 +1,284 @@
-import React, { useContext, useEffect, useState } from 'react'
-import { ShopContext } from '../context/ShopContext'
-import Title from '../components/Title';
-import { assets } from '../assets/assets';
+import { useEffect, useState, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { ShopContext } from '../context/ShopContext';
+import { useContext } from 'react';
+import { FaShoppingCart } from 'react-icons/fa';
 import CartTotal from '../components/CartTotal';
-import { FaShoppingCart, FaArrowRight, FaStar, FaHeart, FaTrash, FaArrowLeft } from 'react-icons/fa';
-import { Link, useNavigate } from "react-router-dom";
-import { motion } from "framer-motion";
-import ProductItem from "../components/ProductItem";
+import Title from '../components/Title';
 import { toast } from "react-toastify";
 import { trackPageView, trackPurchaseSuccess, trackPurchaseFailure } from "../utils/analytics";
 
 const Cart = () => {
-
-  const { products, currency, cartItems, updateQuantity, removeFromCart, navigate } = useContext(ShopContext);
-
-  const [cartData, setCartData] = useState([]);
+  const navigate = useNavigate();
+  const { cartItems, products, getUserCart, updateQuantity, removeFromCart, token } = useContext(ShopContext);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [cartProducts, setCartProducts] = useState([]);
+  const isMounted = useRef(true);
 
   // Track page view
   useEffect(() => {
     trackPageView(window.location.pathname, "Cart");
   }, []);
 
-  // Process cart items
+  // Cleanup on unmount
   useEffect(() => {
-    const tempData = [];
-    // Convert cartItems object to array
-    Object.entries(cartItems).forEach(([itemId, quantity]) => {
-      const product = products.find((p) => p._id === itemId);
-      if (product) {
-        tempData.push({
-          ...product,
-          quantity: quantity
-        });
+    return () => {
+      isMounted.current = false;
+    };
+  }, []);
+
+  // Check for token and redirect if not present
+  useEffect(() => {
+    if (!token) {
+      toast.error("Please login to view your cart");
+      navigate("/login");
+      return;
+    }
+  }, [token, navigate]);
+
+  // Process cart items whenever cartItems or products change
+  useEffect(() => {
+    if (!products || !cartItems) return;
+
+    // Convert cartItems object to array of products with quantities
+    const processedProducts = Object.entries(cartItems).map(([productId, quantity]) => {
+      // Find the product details from the products array
+      const productDetails = products.find(p => p._id === productId);
+      if (!productDetails) {
+        console.warn(`Product not found for ID: ${productId}`);
+        return null;
       }
-    });
-    setCartData(tempData);
+      return {
+        ...productDetails,
+        quantity: Number(quantity)
+      };
+    }).filter(Boolean);
+
+    if (isMounted.current) {
+      setCartProducts(processedProducts);
+      setLoading(false);
+    }
   }, [cartItems, products]);
 
-  // Popular products to show in empty cart
-  const popularProducts = products
-    .filter(product => product.bestseller)
-    .slice(0, 4);
-    
-  // Check if cart is empty
-  const isCartEmpty = cartData.length === 0;
-  
-  // Handle click on a recommended product
-  const handleProductClick = (productId) => {
-    navigate(`/collection/${productId}`);
+  // Fetch cart data from backend
+  useEffect(() => {
+    const fetchCartData = async () => {
+      if (!token) {
+        setLoading(false);
+        return;
+      }
+
+      try {
+        setLoading(true);
+        const response = await getUserCart(token);
+        if (!response.success) {
+          setError(response.message || 'Failed to fetch cart data');
+          if (response.message === "No token provided") {
+            toast.error("Please login to view your cart");
+            navigate("/login");
+          }
+        }
+      } catch (error) {
+        setError(error.message || 'Failed to fetch cart data');
+        if (error.message === "No token provided") {
+          toast.error("Please login to view your cart");
+          navigate("/login");
+        }
+      } finally {
+        if (isMounted.current) {
+          setLoading(false);
+        }
+      }
+    };
+
+    fetchCartData();
+  }, [getUserCart, token, navigate]);
+
+  // Handle quantity update
+  const handleQuantityChange = async (productId, newQuantity) => {
+    if (!token) {
+      toast.error("Please login to update cart");
+      navigate("/login");
+      return;
+    }
+
+    if (newQuantity < 1) return;
+    try {
+      await updateQuantity(productId, newQuantity);
+    } catch (error) {
+      toast.error('Failed to update quantity');
+    }
   };
+
+  // Handle item removal
+  const handleRemoveItem = async (productId) => {
+    if (!token) {
+      toast.error("Please login to remove items from cart");
+      navigate("/login");
+      return;
+    }
+
+    try {
+      await removeFromCart(productId);
+      toast.success('Item removed from cart');
+    } catch (error) {
+      toast.error('Failed to remove item');
+    }
+  };
+
+  // Check if cart is empty
+  const isCartEmpty = !loading && cartProducts.length === 0;
 
   const handleCheckout = async () => {
     try {
       // Your checkout logic here
       const orderId = "ORDER_" + Date.now();
-      const totalAmount = cartData.reduce((total, item) => total + (item.price * item.quantity), 0);
+      const totalAmount = cartProducts.reduce((total, item) => total + (item.price * item.quantity), 0);
       
       // Track successful purchase
-      trackPurchaseSuccess(orderId, cartData, totalAmount);
+      trackPurchaseSuccess(orderId, cartProducts, totalAmount);
       
       navigate("/place-order");
     } catch (error) {
       // Track failed purchase
-      trackPurchaseFailure(error, cartData, cartData.reduce((total, item) => total + (item.price * item.quantity), 0));
+      trackPurchaseFailure(error, cartProducts, cartProducts.reduce((total, item) => total + (item.price * item.quantity), 0));
       toast.error("Failed to place order. Please try again.");
     }
   };
 
-  return (
-    <div className='border-t pt-10'>
-      <div className='text-2xl mb-5'>
-        <Title text1={'YOUR'} text2={'CART'} />
-      </div>
-
-      {isCartEmpty ? (
-        <div className="flex flex-col items-center justify-center py-10 px-4 text-center">
-          <div className="bg-pink-50 rounded-full p-6 mb-6">
-            <FaShoppingCart className="text-pink-500 text-4xl animate-bounce" />
-          </div>
-          <h2 className="text-2xl font-medium text-gray-800 mb-3">Your cart is empty</h2>
-          <p className="text-gray-600 max-w-md mb-8">
-            Looks like you haven't added any sweets to your cart yet. 
-            Explore our delicious collection and find your favorites!
-          </p>
-          
-          <button 
-            onClick={() => navigate('/collection')} 
-            className="bg-pink-500 hover:bg-pink-600 text-white px-8 py-3 rounded-md flex items-center transition-all duration-300 transform hover:scale-105"
-          >
-            Start Shopping <FaArrowRight className="ml-2" />
-          </button>
-          
-          {popularProducts.length > 0 && (
-            <div className="mt-12 w-full">
-              <h3 className="text-lg font-medium text-gray-800 mb-6 flex items-center justify-center">
-                <FaStar className="text-yellow-500 mr-2" /> Popular Recommendations
-              </h3>
-              
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                {popularProducts.map(product => (
-                  <ProductItem
-                    key={product._id}
-                    id={product._id}
-                    name={product.name}
-                    image={product.image}
-                    price={product.price}
-                    bestseller={product.bestseller}
-                    featured={product.featured}
-                  />
-                ))}
-              </div>
-            </div>
-          )}
+  if (loading) {
+    return (
+      <div className="container mx-auto px-4 py-8">
+        <Title title="Your Cart" />
+        <div className="flex justify-center items-center h-64">
+          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
         </div>
-      ) : (
-        <>
-          <div>
-            {cartData.map((item, index) => {
-              const productData = products.find((product) => product._id === item._id);
+      </div>
+    );
+  }
 
-              return (
-                <div key={index} className='py-4 border-t border-b text-gray-700 grid grid-cols-[4fr_0.5fr_0.5fr] sm:grid-cols-[4fr_2fr_0.5fr] items-center gap-4'>
-                  <div className='flex items-start gap-6'>
-                    <img className='w-16 sm:w-20 rounded-md' src={productData.image[0]} alt="" />
-                    <div>
-                      <p className='text-xs sm:text-lg font-medium'>{productData.name}</p>
-                      <div className='flex items-center gap-5 mt-2'>
-                        <p>{currency}{productData.price}</p>
-                      </div>
-                    </div>
-                  </div>
-                  <input 
-                    onChange={(e) => e.target.value === '' || e.target.value === '0' 
-                      ? null 
-                      : updateQuantity(item._id, item.size, Number(e.target.value))
-                    } 
-                    className='border rounded-md max-w-10 sm:max-w-20 px-1 sm:px-2 py-1' 
-                    type="number" 
-                    min={1} 
-                    defaultValue={item.quantity} 
-                  />
-                  <button 
-                    onClick={() => removeFromCart(item._id, item.size)}
-                    className="hover:text-pink-600 transition-colors"
-                  >
-                    <img className='w-4 mr-4 sm:w-5 cursor-pointer' src={assets.bin_icon} alt="Remove" />
-                  </button>
-                </div>
-              )
-            })}
+  if (error) {
+    return (
+      <div className="container mx-auto px-4 py-8">
+        <Title title="Your Cart" />
+        <div className="text-center text-red-500">{error}</div>
+      </div>
+    );
+  }
+
+  if (isCartEmpty) {
+    return (
+      <div className="container mx-auto px-4 py-8">
+        <Title title="Your Cart" />
+        <div className="text-center py-8">
+          <FaShoppingCart className="mx-auto text-6xl text-gray-400 mb-4" />
+          <h2 className="text-2xl font-semibold mb-2">Your cart is empty</h2>
+          <p className="text-gray-600 mb-4">Add some delicious items to your cart!</p>
+          <button
+            onClick={() => navigate('/shop')}
+            className="bg-primary text-white px-6 py-2 rounded-full hover:bg-primary-dark transition-colors"
+          >
+            Continue Shopping
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="container mx-auto px-4 py-8">
+      <Title title="Your Cart" />
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div className="lg:col-span-2">
+          {/* Cart Items Table Header */}
+          <div className="hidden md:grid grid-cols-12 gap-4 mb-4 p-4 bg-gray-50 rounded-lg font-semibold text-gray-700">
+            <div className="col-span-4">Product</div>
+            <div className="col-span-2 text-center">Price</div>
+            <div className="col-span-3 text-center">Quantity</div>
+            <div className="col-span-2 text-center">Total</div>
+            <div className="col-span-1 text-center">Action</div>
           </div>
 
-          <div className='flex justify-end my-12'>
-            <div className='w-full sm:w-[450px]'>
-              <CartTotal />
-              <div className='w-full text-end'>
-                <button 
-                  onClick={handleCheckout} 
-                  className='bg-pink-600 hover:bg-pink-700 text-white text-sm my-8 px-8 py-3 rounded-md transition-colors'
+          {/* Cart Items */}
+          {cartProducts.map((product) => (
+            <div key={product._id} className="grid grid-cols-12 gap-4 items-center mb-4 p-4 bg-white rounded-lg shadow">
+              {/* Product Info */}
+              <div className="col-span-12 md:col-span-4 flex items-center gap-4">
+                <img
+                  src={product.image[0]}
+                  alt={product.name}
+                  className="w-20 h-20 object-cover rounded"
+                />
+                <div>
+                  <h3 className="font-semibold text-gray-800">{product.name}</h3>
+                  <p className="text-sm text-gray-500">{product.category}</p>
+                </div>
+              </div>
+
+              {/* Price */}
+              <div className="col-span-6 md:col-span-2 text-center">
+                <span className="md:hidden font-semibold mr-2">Price:</span>
+                <span className="text-gray-800">₹{product.price.toFixed(2)}</span>
+              </div>
+
+              {/* Quantity Controls */}
+              <div className="col-span-6 md:col-span-3 flex items-center justify-center gap-2">
+                <span className="md:hidden font-semibold mr-2">Quantity:</span>
+                <button
+                  onClick={() => handleQuantityChange(product._id, product.quantity - 1)}
+                  className="w-8 h-8 flex items-center justify-center border rounded-full hover:bg-gray-100"
                 >
-                  PROCEED TO CHECKOUT
+                  -
+                </button>
+                <span className="w-8 text-center">{product.quantity}</span>
+                <button
+                  onClick={() => handleQuantityChange(product._id, product.quantity + 1)}
+                  className="w-8 h-8 flex items-center justify-center border rounded-full hover:bg-gray-100"
+                >
+                  +
+                </button>
+              </div>
+
+              {/* Total */}
+              <div className="col-span-6 md:col-span-2 text-center">
+                <span className="md:hidden font-semibold mr-2">Total:</span>
+                <span className="font-semibold text-gray-800">
+                  ₹{(product.price * product.quantity).toFixed(2)}
+                </span>
+              </div>
+
+              {/* Remove Button */}
+              <div className="col-span-6 md:col-span-1 text-center">
+                <button
+                  onClick={() => handleRemoveItem(product._id)}
+                  className="text-red-500 hover:text-red-700 transition-colors"
+                >
+                  Remove
                 </button>
               </div>
             </div>
-          </div>
-        </>
-      )}
-    </div>
-  )
-}
+          ))}
+        </div>
 
-export default Cart
+        {/* Cart Summary */}
+        <div className="lg:col-span-1">
+          <div className="bg-white rounded-lg shadow p-6">
+            <h3 className="text-lg font-semibold mb-4">Cart Summary</h3>
+            <CartTotal />
+            <div className="mt-6">
+              <button 
+                onClick={handleCheckout} 
+                className="w-full bg-pink-600 hover:bg-pink-700 text-white py-3 rounded-md transition-colors"
+              >
+                PROCEED TO CHECKOUT
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default Cart;
