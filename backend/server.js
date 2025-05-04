@@ -56,13 +56,35 @@ const corsOptions = {
   credentials: true,
   methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
   allowedHeaders: ["Content-Type", "Authorization", "token"],
-  // Prevent duplicate headers
+  exposedHeaders: ["Content-Range", "X-Content-Range"],
+  maxAge: 86400, // 24 hours
   preflightContinue: false,
   optionsSuccessStatus: 204
 };
 
 // Apply CORS middleware once
 app.use(cors(corsOptions));
+
+// Remove any duplicate CORS headers
+app.use((req, res, next) => {
+  // Remove any existing CORS headers
+  res.removeHeader('Access-Control-Allow-Origin');
+  res.removeHeader('Access-Control-Allow-Credentials');
+  res.removeHeader('Access-Control-Allow-Methods');
+  res.removeHeader('Access-Control-Allow-Headers');
+  
+  // Set the origin header only if it's in the allowed list
+  const origin = req.headers.origin;
+  if (origin) {
+    const normalizedOrigin = origin.toLowerCase().replace(/\/$/, "");
+    const allowedOriginsNormalized = allowedOrigins.map(o => o.toLowerCase().replace(/\/$/, ""));
+    if (allowedOriginsNormalized.includes(normalizedOrigin) || normalizedOrigin.endsWith(".sweethome-store.com")) {
+      res.setHeader('Access-Control-Allow-Origin', origin);
+      res.setHeader('Access-Control-Allow-Credentials', 'true');
+    }
+  }
+  next();
+});
 
 // Middlewares
 app.use(morgan("combined", { stream: { write: message => logger.info(message.trim()) } }));

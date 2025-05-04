@@ -7,25 +7,10 @@ import NewsletterBox from '../components/NewsletterBox'
 import { motion } from 'framer-motion'
 import { FaArrowRight, FaShippingFast, FaRegClock, FaGift, FaBirthdayCake, FaHeart, FaStar, FaShoppingCart, FaCrown } from 'react-icons/fa'
 import { Link } from 'react-router-dom'
-import axios from 'axios'
+import { useShop } from '@/context/ShopContext'
 
 const Home = () => {
-  const [products, setProducts] = useState([])
-  const [loading, setLoading] = useState(true)
-
-  useEffect(() => {
-    const fetchProducts = async () => {
-      try {
-        const { data } = await axios.get('/api/products')
-        setProducts(data)
-        setLoading(false)
-      } catch (error) {
-        console.error('Error fetching products:', error)
-        setLoading(false)
-      }
-    }
-    fetchProducts()
-  }, [])
+  const { products, loading } = useShop()
 
   // Animation variants
   const fadeIn = {

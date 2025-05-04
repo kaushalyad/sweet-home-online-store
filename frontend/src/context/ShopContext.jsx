@@ -5,7 +5,26 @@ import axios from "axios";
 import logger from "@/utils/logger";
 import PropTypes from 'prop-types';
 
-axios.defaults.withCredentials = true;
+// Backend URL configuration
+const backendUrl = import.meta.env.VITE_BACKEND_URL || "http://localhost:4000";
+
+// API configuration
+const api = axios.create({
+  baseURL: backendUrl,
+  withCredentials: true,
+  headers: {
+    'Content-Type': 'application/json',
+  }
+});
+
+// Add request interceptor to add token to all requests
+api.interceptors.request.use((config) => {
+  const token = localStorage.getItem('token');
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
+  return config;
+});
 
 export const ShopContext = createContext();
 
@@ -21,7 +40,6 @@ export const useShop = () => {
 export const ShopContextProvider = ({ children }) => {
   const currency = "₹";
   const delivery_fee = 40;
-  const backendUrl = "http://localhost:4000";
   const [search, setSearch] = useState("");
   const [showSearch, setShowSearch] = useState(true);
   const [cartItems, setCartItems] = useState({});
@@ -43,16 +61,7 @@ export const ShopContextProvider = ({ children }) => {
     }
 
     try {
-      const response = await axios.post(
-        backendUrl + "/api/user/verify-token",
-        {},
-        { 
-          headers: { 
-            'Authorization': `Bearer ${tokenToValidate}`,
-            'Content-Type': 'application/json'
-          }
-        }
-      );
+      const response = await api.post("/api/user/verify-token");
       
       if (!response.data.success) {
         logger.warn("Token validation failed:", response.data.message);
@@ -94,16 +103,7 @@ export const ShopContextProvider = ({ children }) => {
   // Fetch user data
   const fetchUserData = async (userToken) => {
     try {
-      const response = await axios.post(
-        backendUrl + '/api/user/profile',
-        {},
-        {
-          headers: {
-            'Authorization': `Bearer ${userToken}`,
-            'Content-Type': 'application/json'
-          }
-        }
-      );
+      const response = await api.post('/api/user/profile');
 
       if (response.data.success) {
         setUserData(response.data.user);
@@ -235,17 +235,11 @@ export const ShopContextProvider = ({ children }) => {
       logger.info(`Adding to cart - Item: ${itemId}, Quantity: ${quantity}`);
       
       // First update the backend
-      const response = await axios.post(
-        backendUrl + "/api/cart/add",
+      const response = await api.post(
+        "/api/cart/add",
         { 
           itemId, 
           quantity: Number(quantity)
-        },
-        { 
-          headers: { 
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json'
-          }
         }
       );
       
@@ -319,15 +313,9 @@ export const ShopContextProvider = ({ children }) => {
     }
 
     try {
-      const response = await axios.post(
-        backendUrl + "/api/cart/update",
-        { itemId, quantity },
-        { 
-          headers: { 
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json'
-          }
-        }
+      const response = await api.post(
+        "/api/cart/update",
+        { itemId, quantity }
       );
       
       if (response.data.success) {
@@ -365,18 +353,22 @@ export const ShopContextProvider = ({ children }) => {
     return totalAmount;
   };
 
-  const getProductsData = async () => {
+  // Fetch products
+  const fetchProducts = async () => {
     try {
-      const response = await axios.get(backendUrl + "/api/product/list", { withCredentials: false });
-      if (response.data.success) {
-        setBuffer(false);
-        setProducts(response.data.products.reverse());
-      } else {
-        toast.error(response.data.message);
-      }
+      setBuffer(true);
+      const { data } = await api.get('/api/product/list');
+      setProducts(data.products.reverse());
+      setBuffer(false);
     } catch (error) {
-      logger.error(error);
-      toast.error(error.message);
+      logger.error('Error fetching products:', error);
+      if (error.response) {
+        logger.error('Response data:', error.response.data);
+        logger.error('Response status:', error.response.status);
+      } else if (error.request) {
+        logger.error('No response received:', error.request);
+      }
+      setBuffer(false);
     }
   };
 
@@ -388,16 +380,7 @@ export const ShopContextProvider = ({ children }) => {
     
     try {
       logger.info("Fetching user cart from backend");
-      const response = await axios.post(
-        backendUrl + "/api/cart",
-        {},
-        { 
-          headers: { 
-            'Authorization': `Bearer ${userToken}`,
-            'Content-Type': 'application/json'
-          }
-        }
-      );
+      const response = await api.post('/api/cart');
       
       logger.info("Cart API response:", response.data);
       
@@ -451,7 +434,7 @@ export const ShopContextProvider = ({ children }) => {
         cartData: localCart 
       };
     }
-  }, [backendUrl, navigate, setToken]);
+  }, [navigate, setToken]);
 
   const logout = () => {
     localStorage.removeItem("token");
@@ -465,7 +448,7 @@ export const ShopContextProvider = ({ children }) => {
 
   // Initialize app - fetch products and user cart if token exists
   useEffect(() => {
-    getProductsData();
+    fetchProducts();
     if (token) {
       getUserCart(token);
     }
@@ -479,15 +462,7 @@ export const ShopContextProvider = ({ children }) => {
     }
 
     try {
-      const response = await axios.delete(
-        backendUrl + `/api/cart/remove/${itemId}`,
-        { 
-          headers: { 
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json'
-          }
-        }
-      );
+      const response = await api.delete(`/api/cart/remove/${itemId}`);
       
       if (response.data.success) {
         // Update local cart state with the response data
