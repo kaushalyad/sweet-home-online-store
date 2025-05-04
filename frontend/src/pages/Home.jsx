@@ -1,4 +1,3 @@
-import React, { useState, useEffect } from 'react'
 import Slider from '../components/Slider'
 import LatestCollection from '../components/LatestCollection'
 import BestSeller from '../components/BestSeller'
@@ -10,7 +9,7 @@ import { Link } from 'react-router-dom'
 import { useShop } from '@/context/ShopContext'
 
 const Home = () => {
-  const { products, loading } = useShop()
+  const { products, buffer } = useShop()
 
   // Animation variants
   const fadeIn = {
@@ -374,11 +373,11 @@ const Home = () => {
             <p className="text-gray-600 max-w-2xl mx-auto text-lg">Discover our handcrafted premium sweets, made with the finest ingredients</p>
           </div>
 
-          {loading ? (
+          {buffer ? (
             <div className="flex justify-center items-center min-h-[400px]">
               <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-amber-500"></div>
             </div>
-          ) : (
+          ) : products && products.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
               {products.map((product) => (
                 <motion.div
@@ -392,7 +391,7 @@ const Home = () => {
                   <div className="relative">
                     <div className="aspect-w-1 aspect-h-1 w-full overflow-hidden">
                       <img
-                        src={product.images[0]?.url}
+                        src={product.images?.[0]?.url || 'https://via.placeholder.com/400x400?text=No+Image'}
                         alt={product.name}
                         className="w-full h-64 object-cover transform group-hover:scale-110 transition-transform duration-500"
                       />
@@ -439,6 +438,10 @@ const Home = () => {
                   </div>
                 </motion.div>
               ))}
+            </div>
+          ) : (
+            <div className="text-center py-12">
+              <p className="text-gray-600 text-lg">No products available at the moment.</p>
             </div>
           )}
 
