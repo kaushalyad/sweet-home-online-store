@@ -1,5 +1,4 @@
 import express from 'express';
-import cors from 'cors';
 import dotenv from 'dotenv';
 import connectDB from './config/db.js';
 import userRouter from './routes/userRoute.js';
@@ -10,13 +9,13 @@ import orderRouter from './routes/orderRoute.js';
 import addressRouter from './routes/addressRoutes.js';
 
 dotenv.config();
+
 const app = express();
 
 // Connect to MongoDB
 connectDB();
 
 // Middleware
-app.use(cors());
 app.use(express.json());
 
 // Routes
