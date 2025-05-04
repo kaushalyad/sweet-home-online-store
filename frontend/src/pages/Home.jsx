@@ -1,4 +1,3 @@
-import React, { useState, useEffect } from 'react'
 import Slider from '../components/Slider'
 import LatestCollection from '../components/LatestCollection'
 import BestSeller from '../components/BestSeller'
@@ -7,25 +6,10 @@ import NewsletterBox from '../components/NewsletterBox'
 import { motion } from 'framer-motion'
 import { FaArrowRight, FaShippingFast, FaRegClock, FaGift, FaBirthdayCake, FaHeart, FaStar, FaShoppingCart, FaCrown } from 'react-icons/fa'
 import { Link } from 'react-router-dom'
-import axios from 'axios'
+import { useShop } from '../context/ShopContext'
 
 const Home = () => {
-  const [products, setProducts] = useState([])
-  const [loading, setLoading] = useState(true)
-
-  useEffect(() => {
-    const fetchProducts = async () => {
-      try {
-        const { data } = await axios.get('/api/products')
-        setProducts(data)
-        setLoading(false)
-      } catch (error) {
-        console.error('Error fetching products:', error)
-        setLoading(false)
-      }
-    }
-    fetchProducts()
-  }, [])
+  const { products, buffer } = useShop();
 
   // Animation variants
   const fadeIn = {
@@ -389,9 +373,13 @@ const Home = () => {
             <p className="text-gray-600 max-w-2xl mx-auto text-lg">Discover our handcrafted premium sweets, made with the finest ingredients</p>
           </div>
 
-          {loading ? (
+          {buffer ? (
             <div className="flex justify-center items-center min-h-[400px]">
               <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-amber-500"></div>
+            </div>
+          ) : products.length === 0 ? (
+            <div className="text-center py-12">
+              <p className="text-gray-600 text-lg">No products available at the moment.</p>
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
@@ -407,17 +395,17 @@ const Home = () => {
                   <div className="relative">
                     <div className="aspect-w-1 aspect-h-1 w-full overflow-hidden">
                       <img
-                        src={product.images[0]?.url}
+                        src={product.image[0]}
                         alt={product.name}
                         className="w-full h-64 object-cover transform group-hover:scale-110 transition-transform duration-500"
                       />
                     </div>
-                    {product.isNew && (
+                    {product.newArrival && (
                       <div className="absolute top-4 left-4 px-3 py-1 bg-gradient-to-r from-amber-500 to-rose-500 text-white text-sm font-medium rounded-full">
                         New Arrival
                       </div>
                     )}
-                    {product.isBestseller && (
+                    {product.bestseller && (
                       <div className="absolute top-4 right-4 px-3 py-1 bg-gradient-to-r from-amber-500 to-rose-500 text-white text-sm font-medium rounded-full">
                         Best Seller
                       </div>
