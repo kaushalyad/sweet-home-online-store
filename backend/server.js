@@ -18,6 +18,22 @@ const port = process.env.PORT || 4000;
 connectDB();
 connectCloudinary();
 
+// Debug middleware to log headers
+app.use((req, res, next) => {
+  logger.info('Request Headers:', req.headers);
+  next();
+});
+
+// Middleware to ensure no CORS headers are set
+app.use((req, res, next) => {
+  // Remove any CORS headers that might be set
+  res.removeHeader('Access-Control-Allow-Origin');
+  res.removeHeader('Access-Control-Allow-Credentials');
+  res.removeHeader('Access-Control-Allow-Methods');
+  res.removeHeader('Access-Control-Allow-Headers');
+  next();
+});
+
 // Middlewares
 app.use(morgan("combined", { stream: { write: message => logger.info(message.trim()) } }));
 app.use(express.json());
