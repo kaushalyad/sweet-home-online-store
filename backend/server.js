@@ -20,17 +20,8 @@ connectCloudinary();
 
 // Debug middleware to log headers
 app.use((req, res, next) => {
-  logger.info('Request Headers:', req.headers);
-  next();
-});
-
-// Middleware to ensure no CORS headers are set
-app.use((req, res, next) => {
-  // Remove any CORS headers that might be set
-  res.removeHeader('Access-Control-Allow-Origin');
-  res.removeHeader('Access-Control-Allow-Credentials');
-  res.removeHeader('Access-Control-Allow-Methods');
-  res.removeHeader('Access-Control-Allow-Headers');
+  logger.info('Request Headers:', JSON.stringify(req.headers, null, 2));
+  logger.info('Response Headers:', JSON.stringify(res.getHeaders(), null, 2));
   next();
 });
 
