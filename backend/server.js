@@ -28,10 +28,10 @@ app.use((req, res, next) => {
   res.removeHeader('Access-Control-Allow-Headers');
   
   // Set CORS headers
-  res.header('Access-Control-Allow-Origin', 'https://www.sweethome-store.com');
-  res.header('Access-Control-Allow-Credentials', 'true');
-  res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
-  res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, token');
+  res.setHeader('Access-Control-Allow-Origin', 'https://www.sweethome-store.com');
+  res.setHeader('Access-Control-Allow-Credentials', 'true');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, token');
   
   // Handle preflight requests
   if (req.method === 'OPTIONS') {
