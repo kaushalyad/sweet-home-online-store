@@ -19,61 +19,14 @@ const port = process.env.PORT || 4000;
 connectDB();
 connectCloudinary();
 
-// Allowed origins
-const allowedOrigins = [
-  "https://sweethome-store.com",
-  "https://www.sweethome-store.com",
-  "http://localhost:3000",
-  "http://localhost:4173",
-  "http://127.0.0.1:3000",
-  "http://127.0.0.1:4173"
-];
-
-// CORS options
-const corsOptions = {
-  origin: function (origin, callback) {
-    // Log the origin for debugging
-    logger.info(`CORS origin check: ${origin}`);
-    
-    // Allow requests with no origin (like mobile apps or curl requests)
-    if (!origin) {
-      return callback(null, true);
-    }
-
-    // Check if the origin is allowed
-    if (origin === "https://www.sweethome-store.com") {
-      return callback(null, true);
-    }
-
-    // Block the request
-    logger.error(`Blocked CORS request from origin: ${origin}`);
-    return callback(new Error("Not allowed by CORS"));
-  },
-  credentials: true,
-  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-  allowedHeaders: ["Content-Type", "Authorization", "token"],
-  exposedHeaders: ["Content-Range", "X-Content-Range"],
-  maxAge: 86400, // 24 hours
-  preflightContinue: false,
-  optionsSuccessStatus: 204
-};
-
-// Apply CORS middleware once
-app.use(cors(corsOptions));
-
-// Add a middleware to ensure no duplicate CORS headers
+// Basic CORS setup
 app.use((req, res, next) => {
-  // Remove any existing CORS headers
-  res.removeHeader('Access-Control-Allow-Origin');
-  res.removeHeader('Access-Control-Allow-Credentials');
-  res.removeHeader('Access-Control-Allow-Methods');
-  res.removeHeader('Access-Control-Allow-Headers');
-  
-  // Set the origin header only if it's the allowed origin
-  const origin = req.headers.origin;
-  if (origin === "https://www.sweethome-store.com") {
-    res.setHeader('Access-Control-Allow-Origin', origin);
-    res.setHeader('Access-Control-Allow-Credentials', 'true');
+  res.header('Access-Control-Allow-Origin', 'https://www.sweethome-store.com');
+  res.header('Access-Control-Allow-Credentials', 'true');
+  res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+  res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, token');
+  if (req.method === 'OPTIONS') {
+    return res.sendStatus(204);
   }
   next();
 });
