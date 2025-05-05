@@ -1,5 +1,4 @@
 import express from "express";
-import cors from "cors";
 import "dotenv/config";
 import morgan from "morgan";
 import logger from "./config/logger.js";
@@ -18,27 +17,6 @@ const port = process.env.PORT || 4000;
 // Connect to database and cloudinary
 connectDB();
 connectCloudinary();
-
-// Basic CORS setup
-app.use((req, res, next) => {
-  // Remove any existing CORS headers
-  res.removeHeader('Access-Control-Allow-Origin');
-  res.removeHeader('Access-Control-Allow-Credentials');
-  res.removeHeader('Access-Control-Allow-Methods');
-  res.removeHeader('Access-Control-Allow-Headers');
-  
-  // Set CORS headers
-  res.setHeader('Access-Control-Allow-Origin', 'https://www.sweethome-store.com');
-  res.setHeader('Access-Control-Allow-Credentials', 'true');
-  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, token');
-  
-  // Handle preflight requests
-  if (req.method === 'OPTIONS') {
-    return res.sendStatus(204);
-  }
-  next();
-});
 
 // Middlewares
 app.use(morgan("combined", { stream: { write: message => logger.info(message.trim()) } }));
