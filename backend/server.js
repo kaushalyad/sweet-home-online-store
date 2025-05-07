@@ -46,17 +46,29 @@ const corsOptions = {
   },
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'token']
+  allowedHeaders: ['Content-Type', 'Authorization', 'token'],
+  maxAge: 86400 // 24 hours
 };
 
 // Apply CORS middleware
 app.use(cors(corsOptions));
 
+// Increase JSON payload limit
+app.use(express.json({ limit: '50mb' }));
+app.use(express.urlencoded({ limit: '50mb', extended: true }));
+
 // Middlewares
 app.use(cookieParser());
 app.use(morgan("dev"));
-app.use(express.json());
 app.use(trackUserBehavior);
+
+// Add security headers
+app.use((req, res, next) => {
+  res.setHeader('X-Content-Type-Options', 'nosniff');
+  res.setHeader('X-Frame-Options', 'DENY');
+  res.setHeader('X-XSS-Protection', '1; mode=block');
+  next();
+});
 
 // API endpoints
 app.use("/api/user", userRouter);
@@ -71,28 +83,16 @@ app.get("/", (req, res) => {
   res.send("API Working");
 });
 
-// Error handling middleware
-app.use(errorHandler);
-
 // 404 handler
 app.use((req, res) => {
   res.status(404).send("Route not found");
 });
 
-// Handle uncaught exceptions
-process.on('uncaughtException', (err) => {
-  logger.error(`Uncaught Exception: ${err.message}\nStack: ${err.stack}`);
-  process.exit(1);
-});
-
-// Handle unhandled promise rejections
-process.on('unhandledRejection', (err) => {
-  logger.error(`Unhandled Rejection: ${err.message}\nStack: ${err.stack}`);
-  process.exit(1);
-});
+// Error handler
+app.use(errorHandler);
 
 // Server listener
-app.listen(port, () => {
+app.listen(port, '0.0.0.0', () => {
   logger.info(`Server started on PORT : ${port}`);
   logger.info(`Environment: ${process.env.NODE_ENV || 'development'}`);
 });

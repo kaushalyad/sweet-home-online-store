@@ -1,9 +1,0 @@
-{
-  "dependencies": {
-    "morgan": "^1.10.0",
-    "react-hot-toast": "^2.5.2"
-  },
-  "devDependencies": {
-    "@tailwindcss/postcss7-compat": "^2.2.17"
-  }
-}
