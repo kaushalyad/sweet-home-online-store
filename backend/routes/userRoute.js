@@ -1,17 +1,41 @@
 import express from 'express';
-import { loginUser, registerUser, adminLogin, verifyToken, forgotPassword, resetPassword, loginWithPhone, getUserProfile, updateUserProfile } from '../controllers/userController.js';
-import authUser from '../middleware/auth.js';
+import { 
+  loginUser, 
+  registerUser, 
+  adminLogin, 
+  verifyToken, 
+  refreshToken,
+  getUserProfile, 
+  updateUserProfile, 
+  listUsers,
+  updatePassword,
+  downloadUserData,
+  deleteAccount,
+  verifyAdmin
+} from '../controllers/userController.js';
+import { protect, admin } from '../middleware/authMiddleware.js';
 
-const userRouter = express.Router();
+const router = express.Router();
 
-userRouter.post('/register', registerUser)
-userRouter.post('/login', loginUser)
-userRouter.post('/login/phone', loginWithPhone)
-userRouter.post('/admin', adminLogin)
-userRouter.post('/verify-token', authUser, verifyToken)
-userRouter.post('/forgot-password', forgotPassword)
-userRouter.post('/reset-password', resetPassword)
-userRouter.post('/profile', authUser, getUserProfile)
-userRouter.post('/update', authUser, updateUserProfile)
+// Public routes
+router.post('/register', registerUser);
+router.post('/login', loginUser);
+router.post('/admin/login', adminLogin);
+router.post('/refresh', refreshToken);
 
-export default userRouter;
+// Protected routes
+router.post('/verify', protect, verifyToken);
+router.post('/verify-token', protect, verifyToken); // Alias for verify
+router.route('/profile')
+  .get(protect, getUserProfile)
+  .post(protect, getUserProfile)
+  .put(protect, updateUserProfile);
+router.post('/update-password', protect, updatePassword);
+router.get('/download-data', protect, downloadUserData);
+router.post('/delete-account', protect, deleteAccount);
+
+// Admin routes
+router.get('/list', protect, admin, listUsers);
+router.post('/admin', protect, verifyAdmin);
+
+export default router;

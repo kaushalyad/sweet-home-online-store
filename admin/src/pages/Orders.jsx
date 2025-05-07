@@ -5,47 +5,78 @@ import axios from 'axios'
 import { backendUrl, currency } from '../App'
 import { toast } from 'react-toastify'
 import { assets } from '../assets/assets'
-import { FaSnowflake, FaGift, FaHandHoldingHeart, FaDoorClosed } from 'react-icons/fa'
+import { FaSnowflake, FaGift, FaHandHoldingHeart, FaDoorClosed, FaBox } from 'react-icons/fa'
 
-const Orders = ({ token }) => {
-
+const Orders = () => {
   const [orders, setOrders] = useState([])
   const [filter, setFilter] = useState('all')
 
   const fetchAllOrders = async () => {
-
+    const token = localStorage.getItem('token')
     if (!token) {
-      return null;
+      toast.error('Please login again')
+      return
     }
 
     try {
-      const response = await axios.post(backendUrl + '/api/order/list', {}, { headers: { token } })
+      const response = await axios.post(
+        backendUrl + '/api/order/list', 
+        {}, 
+        { 
+          headers: { 
+            Authorization: token 
+          } 
+        }
+      )
       if (response.data.success) {
-        setOrders(response.data.orders.reverse())
+        // Ensure each order has an _id field
+        const ordersWithIds = response.data.orders.map(order => ({
+          ...order,
+          _id: order._id || order.id // Handle both _id and id fields
+        }))
+        setOrders(ordersWithIds.reverse())
       } else {
         toast.error(response.data.message)
       }
     } catch (error) {
-      toast.error(error.message)
+      toast.error(error.response?.data?.message || 'Error fetching orders')
     }
   }
 
   const statusHandler = async (event, orderId) => {
+    const token = localStorage.getItem('token')
+    if (!token) {
+      toast.error('Please login again')
+      return
+    }
+
+    if (!orderId) {
+      toast.error('Invalid order ID')
+      return
+    }
+
     try {
-      const response = await axios.post(backendUrl + '/api/order/status', {orderId, status:event.target.value}, { headers: {token}})
+      const response = await axios.put(
+        backendUrl + '/api/order/status/' + orderId, 
+        { status: event.target.value }, 
+        { 
+          headers: {
+            Authorization: token
+          }
+        }
+      )
       if (response.data.success) {
         await fetchAllOrders()
         toast.success(`Order status updated to ${event.target.value}`)
       }
     } catch (error) {
-      console.log(error)
-      toast.error(response.data.message)
+      toast.error(error.response?.data?.message || 'Error updating order status')
     }
   }
 
   useEffect(() => {
-    fetchAllOrders();
-  }, [token])
+    fetchAllOrders()
+  }, [])
 
   // Filter orders based on selection
   const filteredOrders = filter === 'all' 
@@ -107,7 +138,9 @@ const Orders = ({ token }) => {
             } p-5 md:p-8 my-3 md:my-4 text-xs sm:text-sm text-gray-700`} 
             key={index}
           >
-            <img className='w-12' src={assets.parcel_icon} alt="" />
+            <div className="flex items-center justify-center">
+              <FaBox className="w-4 h-4 text-gray-600" />
+            </div>
             <div>
               <div>
                 {order.items.map((item, index) => {
@@ -119,36 +152,36 @@ const Orders = ({ token }) => {
                   }
                 })}
               </div>
-              <p className='mt-3 mb-2 font-medium'>{order.address.firstName + " " + order.address.lastName}</p>
+              <p className='mt-3 mb-2 font-medium'>{order.shippingAddress.firstName + " " + order.shippingAddress.lastName}</p>
               <div>
-                <p>{order.address.street || order.address.address},</p>
-                <p>{order.address.city + ", " + order.address.state + ", " + order.address.country + ", " + (order.address.zipcode || order.address.zipCode)}</p>
+                <p>{order.shippingAddress.street},</p>
+                <p>{order.shippingAddress.city + ", " + order.shippingAddress.state + ", " + order.shippingAddress.country + ", " + order.shippingAddress.zipCode}</p>
               </div>
-              <p>{order.address.phone}</p>
+              <p>{order.shippingAddress.phone}</p>
 
               {/* Special Requirements */}
-              {order.address.specialRequirements && (
+              {order.shippingAddress.specialRequirements && (
                 <div className="mt-3 pt-3 border-t border-gray-200">
                   <p className="font-medium mb-1">Special Requirements:</p>
                   <div className="flex flex-wrap gap-2">
-                    {order.address.specialRequirements.coldPacking && (
+                    {order.shippingAddress.specialRequirements.coldPacking && (
                       <span className="inline-flex items-center bg-blue-100 text-blue-800 px-2 py-1 rounded text-xs">
-                        <FaSnowflake className="mr-1" /> Cold Packing
+                        <FaSnowflake className="mr-1 w-4 h-4" /> Cold Packing
                       </span>
                     )}
-                    {order.address.specialRequirements.giftWrapping && (
+                    {order.shippingAddress.specialRequirements.giftWrapping && (
                       <span className="inline-flex items-center bg-purple-100 text-purple-800 px-2 py-1 rounded text-xs">
-                        <FaGift className="mr-1" /> Gift Wrapped
+                        <FaGift className="mr-1 w-4 h-4" /> Gift Wrapped
                       </span>
                     )}
-                    {order.address.specialRequirements.fragileHandling && (
+                    {order.shippingAddress.specialRequirements.fragileHandling && (
                       <span className="inline-flex items-center bg-amber-100 text-amber-800 px-2 py-1 rounded text-xs">
-                        <FaHandHoldingHeart className="mr-1" /> Fragile
+                        <FaHandHoldingHeart className="mr-1 w-4 h-4" /> Fragile
                       </span>
                     )}
-                    {order.address.specialRequirements.noContact && (
+                    {order.shippingAddress.specialRequirements.noContact && (
                       <span className="inline-flex items-center bg-gray-100 text-gray-800 px-2 py-1 rounded text-xs">
-                        <FaDoorClosed className="mr-1" /> No Contact
+                        <FaDoorClosed className="mr-1 w-4 h-4" /> No Contact
                       </span>
                     )}
                   </div>
@@ -156,10 +189,10 @@ const Orders = ({ token }) => {
               )}
 
               {/* Delivery Instructions */}
-              {order.address.deliveryInstructions && (
+              {order.shippingAddress.deliveryInstructions && (
                 <div className="mt-2">
                   <p className="font-medium">Instructions:</p>
-                  <p className="text-gray-600 italic">{order.address.deliveryInstructions}</p>
+                  <p className="text-gray-600 italic">{order.shippingAddress.deliveryInstructions}</p>
                 </div>
               )}
             </div>

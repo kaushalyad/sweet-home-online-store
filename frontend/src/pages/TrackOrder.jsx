@@ -77,7 +77,7 @@ const TrackOrder = () => {
         title: 'Processing', 
         description: 'Your sweets are being freshly prepared', 
         icon: <FaCheck />, 
-        completed: ['Processing', 'Shipped', 'Out for Delivery', 'Delivered'].includes(status),
+        completed: ['Processing', 'Preparing', 'Packing', 'Quality Check', 'Shipped', 'Out for delivery', 'Delivered'].includes(status),
         date: orderData ? new Date(new Date(orderData.date).getTime() + 1000*60*60*4).toLocaleString('en-US', { 
           month: 'short', 
           day: 'numeric', 
@@ -90,8 +90,8 @@ const TrackOrder = () => {
         title: 'Shipped', 
         description: 'Your order has been packaged with care and shipped', 
         icon: <FaShippingFast />, 
-        completed: ['Shipped', 'Out for Delivery', 'Delivered'].includes(status),
-        date: status === 'Placed' ? 'Estimated: ' + new Date(new Date().getTime() + 1000*60*60*24).toLocaleString('en-US', { 
+        completed: ['Shipped', 'Out for delivery', 'Delivered'].includes(status),
+        date: status === 'Order Placed' ? 'Estimated: ' + new Date(new Date().getTime() + 1000*60*60*24).toLocaleString('en-US', { 
           month: 'short', 
           day: 'numeric'
         }) : new Date(new Date(orderData?.date).getTime() + 1000*60*60*24).toLocaleString('en-US', { 
@@ -106,8 +106,8 @@ const TrackOrder = () => {
         title: 'Out for Delivery', 
         description: 'Your sweets are out for delivery in temperature-controlled packaging', 
         icon: <FaTruck />, 
-        completed: ['Out for Delivery', 'Delivered'].includes(status),
-        date: status !== 'Delivered' && status !== 'Out for Delivery' ? 'Estimated: ' + new Date(new Date().getTime() + 1000*60*60*48).toLocaleString('en-US', { 
+        completed: ['Out for delivery', 'Delivered'].includes(status),
+        date: status !== 'Delivered' && status !== 'Out for delivery' ? 'Estimated: ' + new Date(new Date().getTime() + 1000*60*60*48).toLocaleString('en-US', { 
           month: 'short', 
           day: 'numeric'
         }) : new Date(new Date(orderData?.date).getTime() + 1000*60*60*48).toLocaleString('en-US', { 

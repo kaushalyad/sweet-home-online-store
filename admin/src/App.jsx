@@ -1,50 +1,49 @@
-import React, { useEffect, useState } from 'react'
-import Navbar from './components/Navbar'
-import Sidebar from './components/Sidebar'
+import { useEffect, useState } from 'react'
 import { Routes, Route } from 'react-router-dom'
-import Add from './pages/Add'
-import List from './pages/List'
-import Orders from './pages/Orders'
-import ProductManager from './pages/ProductManager'
-import Dashboard from './pages/Dashboard'
+import { ToastContainer } from 'react-toastify'
 import Login from './components/Login'
-import { ToastContainer } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
+import Layout from './components/Layout'
+import Dashboard from './pages/Dashboard'
+import Products from './pages/Products'
+import Orders from './pages/Orders'
+import Users from './pages/Users'
+import Analytics from './pages/Analytics'
+import UserBehavior from './pages/UserBehavior'
 
 export const backendUrl = import.meta.env.VITE_BACKEND_URL
 export const currency = '₹'
 
-const App = () => {
+function App() {
+  const [token, setToken] = useState(() => {
+    const savedToken = localStorage.getItem('token');
+    return savedToken || '';
+  });
 
-  const [token, setToken] = useState(localStorage.getItem('token')?localStorage.getItem('token'):'');
+  useEffect(() => {
+    if (token) {
+      localStorage.setItem('token', token);
+    } else {
+      localStorage.removeItem('token');
+    }
+  }, [token]);
 
-  useEffect(()=>{
-    localStorage.setItem('token',token)
-  },[token])
+  if (!token) {
+    return <Login setToken={setToken} />;
+  }
 
   return (
     <div className='bg-gray-50 min-h-screen'>
       <ToastContainer />
-      {token === ""
-        ? <Login setToken={setToken} />
-        : <>
-          <Navbar setToken={setToken} />
-          <hr />
-          <div className='flex w-full'>
-            <Sidebar />
-            <div className='w-[70%] mx-auto ml-[max(5vw,25px)] my-8 text-gray-600 text-base'>
-              <Routes>
-                <Route path='/' element={<Dashboard token={token} />} />
-                <Route path='/dashboard' element={<Dashboard token={token} />} />
-                <Route path='/product-manager' element={<ProductManager token={token} />} />
-                <Route path='/add' element={<Add token={token} />} />
-                <Route path='/list' element={<List token={token} />} />
-                <Route path='/orders' element={<Orders token={token} />} />
-              </Routes>
-            </div>
-          </div>
-        </>
-      }
+      <Routes>
+        <Route path="/" element={<Layout setToken={setToken} />}>
+          <Route index element={<Dashboard token={token} />} />
+          <Route path="products" element={<Products token={token} />} />
+          <Route path="orders" element={<Orders token={token} />} />
+          <Route path="users" element={<Users token={token} />} />
+          <Route path="analytics" element={<Analytics token={token} />} />
+          <Route path="user-behavior" element={<UserBehavior token={token} />} />
+        </Route>
+      </Routes>
     </div>
   )
 }

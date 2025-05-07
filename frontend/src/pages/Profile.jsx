@@ -213,8 +213,8 @@ const Profile = () => {
   const handleUpdatePersonalInfo = async () => {
     try {
       setIsUpdating(true);
-      const response = await axios.post(
-        backendUrl + '/api/user/update',
+      const response = await axios.put(
+        backendUrl + '/api/user/profile',
         {
           name: userData.name,
           email: userData.email,
@@ -316,7 +316,10 @@ const Profile = () => {
       const response = await axios.get(
         backendUrl + '/api/user/download-data',
         { 
-          headers: { token },
+          headers: { 
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          },
           responseType: 'blob'
         }
       );

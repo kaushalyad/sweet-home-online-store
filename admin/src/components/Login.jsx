@@ -11,16 +11,51 @@ const Login = ({setToken}) => {
     const onSubmitHandler = async (e) => {
         try {
             e.preventDefault();
-            const response = await axios.post(backendUrl + '/api/user/admin',{email,password})
+            const requestData = { email, password };
+            console.log('Login attempt with:', {
+                email,
+                password: '***',
+                backendUrl,
+                fullUrl: `${backendUrl}/api/user/admin/login`,
+                requestData: JSON.stringify(requestData)
+            });
+            
+            // Log the actual request data
+            console.log('Request data:', {
+                url: `${backendUrl}/api/user/admin/login`,
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                data: requestData
+            });
+            
+            const response = await axios.post(backendUrl + '/api/user/admin/login', requestData, {
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                withCredentials: true
+            });
+            
             if (response.data.success) {
-                setToken(response.data.token)
+                const tokenWithBearer = `Bearer ${response.data.token}`
+                setToken(tokenWithBearer)
+                localStorage.setItem('token', tokenWithBearer)
+                toast.success('Login successful!')
             } else {
                 toast.error(response.data.message)
             }
-             
         } catch (error) {
-            console.log(error);
-            toast.error(error.message)
+            console.error('Login error details:', {
+                message: error.message,
+                response: error.response?.data,
+                status: error.response?.status,
+                requestData: { email, password: '***' },
+                requestHeaders: error.config?.headers,
+                fullError: error.toString(),
+                stack: error.stack
+            });
+            toast.error(error.response?.data?.message || 'Login failed')
         }
     }
 

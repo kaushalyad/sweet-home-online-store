@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FaChevronLeft, FaChevronRight, FaShoppingCart, FaCrown, FaGift, FaStar, FaLeaf, FaMedal } from 'react-icons/fa';
 import { Link } from 'react-router-dom';
+import { assets } from '../assets/assets';
 
 const slides = [
   {
@@ -9,7 +10,7 @@ const slides = [
     title: "Royal Sweets",
     subtitle: "Premium Collection",
     description: "Experience the epitome of luxury with our handcrafted, gold-leaf adorned sweets",
-    image: "https://images.pexels.com/photos/291528/pexels-photo-291528.jpeg",
+    image: assets.slider1,
     buttonText: "Explore Collection",
     buttonLink: "/products",
     bgColor: "from-amber-600 to-orange-500",
@@ -23,7 +24,7 @@ const slides = [
     title: "Festive Elegance",
     subtitle: "Diwali Special",
     description: "Celebrate the festival of lights with our exclusive, premium sweet boxes",
-    image: "https://images.pexels.com/photos/291528/pexels-photo-291528.jpeg",
+    image: assets.slider2,
     buttonText: "View Collection",
     buttonLink: "/collection/diwali",
     bgColor: "from-purple-600 to-pink-500",
@@ -37,7 +38,7 @@ const slides = [
     title: "Corporate Luxury",
     subtitle: "Executive Gifting",
     description: "Elevate your corporate gifting with our premium, custom-designed sweet boxes",
-    image: "https://images.pexels.com/photos/291528/pexels-photo-291528.jpeg",
+    image: assets.slider3,
     buttonText: "Explore Gifts",
     buttonLink: "/gifts",
     bgColor: "from-blue-600 to-indigo-500",

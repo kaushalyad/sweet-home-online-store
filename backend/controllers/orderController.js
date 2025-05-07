@@ -1,4 +1,4 @@
-import orderModel from "../models/orderModel.js";
+import Order from "../models/order.js";
 import userModel from "../models/userModel.js";
 import Stripe from 'stripe'
 import razorpay from 'razorpay'
@@ -18,50 +18,83 @@ const razorpayInstance = new razorpay({
 
 // Placing orders using COD Method
 const placeOrder = async (req,res) => {
-    
     try {
-        
-        const { userId, items, amount, address} = req.body;
+        const { items, amount, address, paymentMethod, status, date, additionalCosts, discount, appliedCoupon } = req.body;
+        const userId = req.user.id;
 
-        // Transform items to include full product data
-        const orderItems = items.map(item => ({
-            name: item.name,
-            price: item.price,
-            quantity: item.quantity,
-            size: item.size,
-            image: item.image, // Include the full image data
-            product: item // Store the full product data
-        }));
-
-        const orderData = {
-            userId,
-            items: orderItems,
-            address,
-            amount,
-            paymentMethod:"COD",
-            payment:false,
-            date: Date.now()
+        if (!items || !amount || !address || !paymentMethod) {
+            return res.status(400).json({
+                success: false,
+                message: "Please provide all required fields"
+            });
         }
 
-        const newOrder = new orderModel(orderData)
-        await newOrder.save()
+        // Transform items to match schema
+        const orderItems = items.map(item => ({
+            product: item.product?._id || item.productId || item.product,
+            quantity: item.quantity,
+            price: item.price,
+            name: item.name,
+            size: item.size,
+            image: item.image
+        }));
 
-        await userModel.findByIdAndUpdate(userId,{cartData:{}})
+        // Validate that all items have a product ID
+        const invalidItems = orderItems.filter(item => !item.product);
+        if (invalidItems.length > 0) {
+            return res.status(400).json({
+                success: false,
+                message: "Some items are missing product IDs",
+                invalidItems
+            });
+        }
 
-        res.json({success:true,message:"Order Placed"})
+        const order = await Order.create({
+            userId: userId,
+            items: orderItems,
+            totalAmount: amount,
+            shippingAddress: {
+                firstName: address.firstName,
+                lastName: address.lastName,
+                email: address.email,
+                phone: address.phone,
+                street: address.address,
+                city: address.city,
+                state: address.state,
+                country: address.country,
+                zipCode: address.pincode
+            },
+            paymentMethod: paymentMethod.toLowerCase(),
+            status: status || 'pending',
+            paymentStatus: 'pending',
+            additionalCosts: additionalCosts || 0,
+            discount: discount || 0,
+            appliedCoupon: appliedCoupon || null,
+            date: date || Date.now()
+        });
 
+        // Clear the user's cart after successful order placement
+        await userModel.findByIdAndUpdate(userId, { cartData: {} });
+
+        res.status(201).json({
+            success: true,
+            message: "Order placed successfully",
+            order
+        });
 
     } catch (error) {
-        console.log(error)
-        res.json({success:false,message:error.message})
+        logger.error(`Place order error: ${error.message}`);
+        res.status(500).json({
+            success: false,
+            message: "Failed to place order",
+            error: error.message
+        });
     }
-
 }
 
 // Placing orders using Stripe Method
 const placeOrderStripe = async (req,res) => {
     try {
-        
         const { userId, items, amount, address} = req.body
         const { origin } = req.headers;
 
@@ -75,7 +108,7 @@ const placeOrderStripe = async (req,res) => {
             date: Date.now()
         }
 
-        const newOrder = new orderModel(orderData)
+        const newOrder = new Order(orderData)
         await newOrder.save()
 
         const line_items = items.map((item) => ({
@@ -107,6 +140,9 @@ const placeOrderStripe = async (req,res) => {
             mode: 'payment',
         })
 
+        // Clear the user's cart after successful order creation
+        await userModel.findByIdAndUpdate(userId, { cartData: {} });
+
         res.json({success:true,session_url:session.url});
 
     } catch (error) {
@@ -123,11 +159,11 @@ const verifyStripe = async (req,res) => {
 
     try {
         if (success === "true") {
-            await orderModel.findByIdAndUpdate(orderId, {payment:true});
+            await Order.findByIdAndUpdate(orderId, {payment:true});
             await userModel.findByIdAndUpdate(userId, {cartData: {}})
             res.json({success: true});
         } else {
-            await orderModel.findByIdAndDelete(orderId)
+            await Order.findByIdAndDelete(orderId)
             res.json({success:false})
         }
         
@@ -150,8 +186,8 @@ const placeOrderRazorpay = async (req, res) => {
         price: item.price,
         quantity: item.quantity,
         size: item.size,
-        image: item.image, // Include the full image data
-        product: item // Store the full product data
+        image: item.image,
+        product: item.product
     }));
 
     const orderData = {
@@ -165,20 +201,22 @@ const placeOrderRazorpay = async (req, res) => {
     };
 
     // Create order in database
-    const newOrder = new orderModel(orderData);
+    const newOrder = new Order(orderData);
     const savedOrder = await newOrder.save();
     console.log("Created order in database with ID:", savedOrder._id);
 
+    // Clear the user's cart after successful order creation
+    await userModel.findByIdAndUpdate(userId, { cartData: {} });
+
     // Create Razorpay order
     const options = {
-      amount: Math.round(amount * 100), // amount in smallest currency unit (paise)
-      currency: "INR", // Fixed uppercase currency code
+      amount: Math.round(amount * 100),
+      currency: "INR",
       receipt: savedOrder._id.toString(),
     };
 
     console.log("Creating Razorpay order with options:", options);
 
-    // Use promise-based approach instead of callback for better error handling
     try {
       const order = await new Promise((resolve, reject) => {
         razorpayInstance.orders.create(options, (error, result) => {
@@ -203,14 +241,14 @@ const placeOrderRazorpay = async (req, res) => {
         order: {
           id: order.id,
           amount: order.amount,
-          currency: order.currency.toLowerCase(), // Send lowercase to frontend
+          currency: order.currency.toLowerCase(),
           receipt: order.receipt
         } 
       });
     } catch (error) {
       console.error("Razorpay order creation error:", error);
       // Delete the order from our database if Razorpay order creation fails
-      await orderModel.findByIdAndDelete(savedOrder._id);
+      await Order.findByIdAndDelete(savedOrder._id);
       return res.json({ success: false, message: error.message || "Failed to create payment order" });
     }
   } catch (error) {
@@ -253,7 +291,7 @@ const verifyRazorpay = async (req, res) => {
       
       // Update the order status to paid without any additional checks
       // This assumes that if Razorpay sent us a payment_id, the payment succeeded
-      const updatedOrder = await orderModel.findByIdAndUpdate(
+      const updatedOrder = await Order.findByIdAndUpdate(
         orderId,
         { payment: true },
         { new: true }
@@ -288,7 +326,7 @@ const allOrders = async (req,res) => {
 
     try {
         
-        const orders = await orderModel.find({})
+        const orders = await Order.find({})
         res.json({success:true,orders})
 
     } catch (error) {
@@ -298,20 +336,57 @@ const allOrders = async (req,res) => {
 
 }
 
-// User Order Data For Forntend
-const userOrders = async (req,res) => {
-    try {
-        
-        const { userId } = req.body
+// Get user orders
+const userOrders = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const { page = 1, limit = 10, status } = req.query;
 
-        const orders = await orderModel.find({ userId })
-        res.json({success:true,orders})
+    logger.info(`Fetching orders for user: ${userId}`);
 
-    } catch (error) {
-        console.log(error)
-        res.json({success:false,message:error.message})
+    // Build query
+    const query = { userId: userId };
+    if (status) {
+      query.status = status;
     }
-}
+
+    logger.info(`Query: ${JSON.stringify(query)}`);
+
+    // Calculate pagination
+    const skip = (page - 1) * limit;
+
+    // Get total count for pagination
+    const total = await Order.countDocuments(query);
+    logger.info(`Total orders found: ${total}`);
+
+    // Get orders with pagination
+    const orders = await Order.find(query)
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(parseInt(limit))
+      .populate('items.product', 'name price image');
+
+    logger.info(`Retrieved ${orders.length} orders`);
+
+    res.json({
+      success: true,
+      orders,
+      pagination: {
+        total,
+        page: parseInt(page),
+        pages: Math.ceil(total / limit)
+      }
+    });
+
+  } catch (error) {
+    logger.error(`Get user orders error: ${error.message}`);
+    res.status(500).json({
+      success: false,
+      message: "Failed to get user orders",
+      error: error.message
+    });
+  }
+};
 
 // update order status from Admin Panel
 const updateStatus = async (req,res) => {
@@ -319,7 +394,7 @@ const updateStatus = async (req,res) => {
         
         const { orderId, status } = req.body
 
-        await orderModel.findByIdAndUpdate(orderId, { status })
+        await Order.findByIdAndUpdate(orderId, { status })
         res.json({success:true,message:'Status Updated'})
 
     } catch (error) {
@@ -331,64 +406,59 @@ const updateStatus = async (req,res) => {
 // Create new order
 const createOrder = async (req, res) => {
   try {
-    const userId = req.user.id;
-    const { items, totalAmount, shippingAddress, paymentMethod } = req.body;
-
-    if (!items || !totalAmount || !shippingAddress || !paymentMethod) {
-      return res.status(400).json({
-        success: false,
-        message: "Please provide all required order details"
-      });
-    }
-
-    const order = await orderModel.create({
-      user: userId,
-      items,
-      totalAmount,
-      shippingAddress,
-      paymentMethod,
-      status: 'Processing',
-      payment: 'Pending'
+    const order = new Order({
+      userId: req.user._id,
+      items: req.body.items,
+      amount: req.body.amount,
+      address: req.body.address,
+      paymentMethod: req.body.paymentMethod
     });
 
-    // Clear user's cart after successful order
-    await userModel.findByIdAndUpdate(userId, { cartData: {} });
-
-    logger.info(`Order created successfully for user: ${userId}`);
-
-    return res.status(201).json({
+    await order.save();
+    
+    res.status(201).json({
       success: true,
-      message: "Order placed successfully",
+      message: 'Order placed successfully',
       order
     });
   } catch (error) {
-    logger.error('Order creation error:', error);
-    return res.status(500).json({
+    logger.error(`Error creating order: ${error.message}`);
+    res.status(500).json({
       success: false,
-      message: "Failed to create order"
+      message: 'Error creating order',
+      error: error.message
     });
   }
 };
 
-// Get user orders
-const getUserOrders = async (req, res) => {
+// Get order details
+const getOrderDetails = async (req, res) => {
   try {
+    const { orderId } = req.params;
     const userId = req.user.id;
-    
-    const orders = await orderModel.find({ userId })
-      .sort({ date: -1 });
 
-    logger.info(`Orders fetched successfully for user: ${userId}`);
-
-    return res.status(200).json({
-      success: true,
-      orders
+    const order = await Order.findOne({
+      _id: orderId,
+      user: userId
     });
+
+    if (!order) {
+      return res.status(404).json({
+        success: false,
+        message: "Order not found"
+      });
+    }
+
+    res.json({
+      success: true,
+      order
+    });
+
   } catch (error) {
-    logger.error('Error fetching orders:', error);
-    return res.status(500).json({
+    logger.error(`Get order details error: ${error.message}`);
+    res.status(500).json({
       success: false,
-      message: "Failed to fetch orders"
+      message: "Failed to fetch order details"
     });
   }
 };
@@ -399,7 +469,7 @@ const trackOrder = async (req, res) => {
     const userId = req.user.id;
     const { orderId } = req.params;
 
-    const order = await orderModel.findOne({
+    const order = await Order.findOne({
       _id: orderId,
       userId: userId
     });
@@ -413,24 +483,38 @@ const trackOrder = async (req, res) => {
 
     logger.info(`Order tracking info fetched for order: ${orderId}`);
 
+    // Format the order data for frontend
+    const formattedOrder = {
+      id: order._id,
+      status: order.status,
+      items: order.items,
+      amount: order.totalAmount,
+      address: {
+        firstName: order.shippingAddress.firstName,
+        lastName: order.shippingAddress.lastName,
+        email: order.shippingAddress.email,
+        phone: order.shippingAddress.phone,
+        address: order.shippingAddress.street,
+        city: order.shippingAddress.city,
+        state: order.shippingAddress.state,
+        country: order.shippingAddress.country,
+        zipCode: order.shippingAddress.zipCode
+      },
+      paymentMethod: order.paymentMethod,
+      payment: order.paymentStatus === 'completed',
+      date: order.date || order.createdAt
+    };
+
     return res.status(200).json({
       success: true,
-      order: {
-        id: order._id,
-        status: order.status,
-        items: order.items,
-        amount: order.amount,
-        address: order.address,
-        paymentMethod: order.paymentMethod,
-        payment: order.payment,
-        date: order.date
-      }
+      order: formattedOrder
     });
   } catch (error) {
     logger.error('Error tracking order:', error);
     return res.status(500).json({
       success: false,
-      message: "Failed to track order"
+      message: "Failed to track order",
+      error: error.message
     });
   }
 };
@@ -441,7 +525,7 @@ const cancelOrder = async (req, res) => {
     const userId = req.user.id;
     const { orderId } = req.params;
 
-    const order = await orderModel.findOne({
+    const order = await Order.findOne({
       _id: orderId,
       user: userId
     });
@@ -478,4 +562,136 @@ const cancelOrder = async (req, res) => {
   }
 };
 
-export {verifyRazorpay, verifyStripe ,placeOrder, placeOrderStripe, placeOrderRazorpay, allOrders, userOrders, updateStatus, createOrder, getUserOrders, trackOrder, cancelOrder}
+// Update order status (admin only)
+const updateOrderStatus = async (req, res) => {
+  try {
+    const { orderId } = req.params;
+    const { status } = req.body;
+
+    if (!status) {
+      return res.status(400).json({
+        success: false,
+        message: "Please provide order status"
+      });
+    }
+
+    const validStatuses = [
+      'Order Placed',
+      'Processing',
+      'Preparing',
+      'Packing',
+      'Quality Check',
+      'Shipped',
+      'Out for delivery',
+      'Delivered',
+      'Cancelled'
+    ];
+    if (!validStatuses.includes(status)) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid order status"
+      });
+    }
+
+    const order = await Order.findByIdAndUpdate(
+      orderId,
+      { status },
+      { new: true }
+    );
+
+    if (!order) {
+      return res.status(404).json({
+        success: false,
+        message: "Order not found"
+      });
+    }
+
+    res.json({
+      success: true,
+      message: "Order status updated successfully",
+      order
+    });
+
+  } catch (error) {
+    logger.error(`Update order status error: ${error.message}`);
+    res.status(500).json({
+      success: false,
+      message: "Failed to update order status"
+    });
+  }
+};
+
+// List all orders (admin only)
+const listOrders = async (req, res) => {
+  try {
+    const { page = 1, limit = 10, status, search } = req.query;
+    const skip = (page - 1) * limit;
+
+    logger.info(`List orders request: ${JSON.stringify({ page, limit, status, search })}`);
+
+    // Build query
+    const query = {};
+    if (status) {
+      query.status = status.toLowerCase();
+    }
+    if (search) {
+      query.$or = [
+        { 'shippingAddress.firstName': { $regex: search, $options: 'i' } },
+        { 'shippingAddress.lastName': { $regex: search, $options: 'i' } },
+        { 'shippingAddress.email': { $regex: search, $options: 'i' } },
+        { 'shippingAddress.phone': { $regex: search, $options: 'i' } }
+      ];
+    }
+
+    // Get total count for pagination
+    const total = await Order.countDocuments(query);
+    logger.info(`Found ${total} orders matching query`);
+
+    // Get orders with pagination
+    const orders = await Order.find(query)
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(parseInt(limit))
+      .populate('userId', 'name email phone');
+
+    logger.info(`Retrieved ${orders.length} orders for page ${page}`);
+
+    // Format orders for response
+    const formattedOrders = orders.map(order => ({
+      id: order._id,
+      userId: order.userId,
+      items: order.items,
+      totalAmount: order.totalAmount,
+      status: order.status,
+      paymentStatus: order.paymentStatus,
+      paymentMethod: order.paymentMethod,
+      shippingAddress: order.shippingAddress,
+      date: order.date || order.createdAt,
+      trackingNumber: order.trackingNumber,
+      estimatedDelivery: order.estimatedDelivery,
+      notes: order.notes
+    }));
+
+    res.json({
+      success: true,
+      orders: formattedOrders,
+      pagination: {
+        total,
+        page: parseInt(page),
+        limit: parseInt(limit),
+        pages: Math.ceil(total / limit)
+      }
+    });
+
+  } catch (error) {
+    logger.error(`List orders error: ${error.message}`);
+    logger.error(error.stack);
+    res.status(500).json({
+      success: false,
+      message: "Failed to list orders",
+      error: error.message
+    });
+  }
+};
+
+export {verifyRazorpay, verifyStripe, placeOrder, placeOrderStripe, placeOrderRazorpay, allOrders, userOrders, updateStatus, createOrder, getOrderDetails, trackOrder, cancelOrder, updateOrderStatus, listOrders}

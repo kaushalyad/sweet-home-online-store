@@ -2,7 +2,6 @@ import validator from "validator";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import userModel from "../models/userModel.js";
-import { sendResetPasswordEmail } from "../config/emailConfig.js";
 import logger from "../config/logger.js";
 
 const createToken = (id) => {
@@ -172,13 +171,28 @@ const loginUser = async (req, res) => {
 // Verify token
 const verifyToken = async (req, res) => {
   try {
-    const userId = req.user.id;
+    let userId;
     
-    if (!userId) {
-      logger.warn('No user ID in request');
+    // Check if user is authenticated through middleware
+    if (req.user && req.user.id) {
+      userId = req.user.id;
+    } else if (req.body.token) {
+      // Verify token from request body
+      try {
+        const decoded = jwt.verify(req.body.token, process.env.JWT_SECRET);
+        userId = decoded.id;
+      } catch (error) {
+        logger.warn('Invalid token provided in request body');
+        return res.status(401).json({
+          success: false,
+          message: "Invalid token"
+        });
+      }
+    } else {
+      logger.warn('No user ID or token in request');
       return res.status(401).json({
         success: false,
-        message: "Invalid token"
+        message: "No token provided"
       });
     }
 
@@ -209,12 +223,13 @@ const verifyToken = async (req, res) => {
         isEmailVerified: user.isEmailVerified,
         isPhoneVerified: user.isPhoneVerified
       }
-      });
+    });
+
   } catch (error) {
-    logger.error('Token verification error:', error);
-    return res.status(401).json({
+    logger.error(`Token verification error: ${error.message}`);
+    return res.status(500).json({
       success: false,
-      message: "Invalid token"
+      message: "Token verification failed"
     });
   }
 };
@@ -248,189 +263,96 @@ const refreshToken = async (req, res) => {
     logger.error('Token refresh error:', error);
     return res.status(401).json({
       success: false,
-      message: "Failed to refresh token"
+      message: "Token refresh failed"
     });
   }
 };
 
-// Route for admin login
+// Admin login
 const adminLogin = async (req, res) => {
   try {
     const { email, password } = req.body;
-
-    if (
-      email === process.env.ADMIN_EMAIL &&
-      password === process.env.ADMIN_PASSWORD
-    ) {
-      const token = jwt.sign(email + password, process.env.JWT_SECRET);
-      res.json({ success: true, token });
-    } else {
-      res.json({ success: false, message: "Invalid credentials" });
-    }
-  } catch (error) {
-    console.log(error);
-    res.json({ success: false, message: error.message });
-  }
-};
-
-// Route for forgot password
-const forgotPassword = async (req, res) => {
-  try {
-    const { email } = req.body;
-    console.log('Processing forgot password request for:', email);
-
-    // Validate email
-    if (!validator.isEmail(email)) {
-      return res.json({ success: false, message: "Please enter a valid email address" });
-    }
-
-    // Find user by email
-    const user = await userModel.findOne({ email });
-    if (!user) {
-      console.log('No user found with email:', email);
-      return res.json({ success: false, message: "No account found with this email address" });
-    }
-
-    // Create reset token
-    const resetToken = jwt.sign(
-      { id: user._id },
-      process.env.JWT_SECRET,
-      { expiresIn: '1h' }
-    );
-
-    // Send reset password email
-    const emailSent = await sendResetPasswordEmail(email, resetToken);
-    
-    if (!emailSent) {
-      console.error('Failed to send reset password email to:', email);
-      return res.json({ 
-        success: false, 
-        message: "Failed to send reset email. Please try again later." 
-      });
-    }
-
-    console.log('Reset password email sent successfully to:', email);
-    res.json({ 
-      success: true, 
-      message: "Password reset link has been sent to your email" 
+    console.log('Admin login attempt:', {
+      email,
+      hasPassword: !!password,
+      passwordLength: password?.length
     });
-  } catch (error) {
-    console.error('Error in forgot password:', error);
-    res.json({ 
-      success: false, 
-      message: "An error occurred. Please try again later." 
-    });
-  }
-};
 
-// Route for reset password
-const resetPassword = async (req, res) => {
-  try {
-    const { token, password } = req.body;
+    // Hardcoded admin credentials
+    const ADMIN_EMAIL = 'sweethomeonlinestorehelp@gmail.com';
+    const ADMIN_PASSWORD = 'Kaushalyad@123';
 
-    if (!token) {
-      return res.json({ success: false, message: "Invalid reset link" });
-    }
-
-    if (!password || password.length < 8) {
-      return res.json({ 
-        success: false, 
-        message: "Password must be at least 8 characters long" 
-      });
-    }
-
-    // Verify token
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    
-    // Hash new password
-    const salt = await bcrypt.genSalt(10);
-    const hashedPassword = await bcrypt.hash(password, salt);
-
-    // Update user's password
-    const updatedUser = await userModel.findByIdAndUpdate(
-      decoded.id,
-      { password: hashedPassword },
-      { new: true }
-    );
-
-    if (!updatedUser) {
-      return res.json({ success: false, message: "User not found" });
-    }
-
-    res.json({ 
-      success: true, 
-      message: "Password has been reset successfully" 
-    });
-  } catch (error) {
-    console.error('Error in reset password:', error);
-    if (error.name === 'TokenExpiredError') {
-      return res.json({ success: false, message: "Reset link has expired" });
-    }
-    if (error.name === 'JsonWebTokenError') {
-      return res.json({ success: false, message: "Invalid reset link" });
-    }
-    res.json({ 
-      success: false, 
-      message: "An error occurred. Please try again." 
-    });
-  }
-};
-
-const loginWithPhone = async (req, res) => {
-  try {
-    const { phone, password } = req.body;
-
-    // Validate input
-    if (!phone || !password) {
+    if (!email || !password) {
+      console.log('Missing credentials:', { email, hasPassword: !!password });
       return res.status(400).json({
         success: false,
-        message: "Please provide both phone number and password"
+        message: "Please provide email and password"
       });
     }
 
-    // Find user by phone number
-    const user = await userModel.findOne({ phone });
-    if (!user) {
-      return res.status(404).json({
-        success: false,
-        message: "User not found with this phone number"
+    // Check credentials
+    if (email !== ADMIN_EMAIL || password !== ADMIN_PASSWORD) {
+      console.log('Invalid credentials:', { 
+        email,
+        providedEmail: email === ADMIN_EMAIL,
+        providedPassword: password === ADMIN_PASSWORD
       });
-    }
-
-    // Verify password
-    const isMatch = await bcrypt.compare(password, user.password);
-    if (!isMatch) {
       return res.status(401).json({
         success: false,
-        message: "Invalid password"
+        message: "Invalid credentials"
       });
     }
 
-    // Update last login time
-    user.lastLogin = new Date();
-    await user.save();
+    // Find or create admin user
+    let adminUser = await userModel.findOne({ email: ADMIN_EMAIL });
+    
+    if (!adminUser) {
+      // Create admin user if it doesn't exist
+      const salt = await bcrypt.genSalt(10);
+      const hashedPassword = await bcrypt.hash(ADMIN_PASSWORD, salt);
+      
+      adminUser = await userModel.create({
+        name: 'Admin User',
+        email: ADMIN_EMAIL,
+        password: hashedPassword,
+        role: 'admin',
+        isEmailVerified: true,
+        isPhoneVerified: true
+      });
+      
+      console.log('Admin user created:', {
+        id: adminUser._id,
+        email: adminUser.email,
+        role: adminUser.role
+      });
+    }
 
-    // Create token
-    const token = createToken(user._id);
+    // Create token with proper ObjectId
+    const token = createToken(adminUser._id);
+    console.log('Login successful:', { 
+      email, 
+      userId: adminUser._id,
+      tokenLength: token.length
+    });
 
-    res.status(200).json({
+    // Send response
+    res.json({
       success: true,
       message: "Login successful",
       token,
       user: {
-        id: user._id,
-        name: user.name,
-        email: user.email,
-        phone: user.phone,
-        role: user.role
+        id: adminUser._id,
+        name: adminUser.name,
+        email: adminUser.email,
+        role: adminUser.role
       }
     });
+
   } catch (error) {
-    logger.error("Phone login error:", error);
+    console.error('Login error:', error.message, '\nStack:', error.stack);
     res.status(500).json({
       success: false,
-      message: "Error during phone login",
-      error: error.message
+      message: "Login failed. Please try again."
     });
   }
 };
@@ -439,46 +361,35 @@ const loginWithPhone = async (req, res) => {
 const getUserProfile = async (req, res) => {
   try {
     const userId = req.user.id;
-    
-    if (!userId) {
-      logger.warn('No user ID in request');
-      return res.status(401).json({
-        success: false,
-        message: "Invalid token"
-      });
-    }
-
     const user = await userModel.findById(userId).select('-password');
-    
+
     if (!user) {
-      logger.warn(`User not found for ID: ${userId}`);
       return res.status(404).json({
         success: false,
         message: "User not found"
       });
     }
 
-    logger.info(`Profile fetched successfully for user: ${userId}`);
-
-    return res.status(200).json({
+    res.json({
       success: true,
       user: {
         id: user._id,
         name: user.name,
         email: user.email,
         phone: user.phone,
-        address: user.address,
-        createdAt: user.createdAt,
+        role: user.role,
         isEmailVerified: user.isEmailVerified,
         isPhoneVerified: user.isPhoneVerified,
-        notificationSettings: user.notificationSettings
+        notificationSettings: user.notificationSettings,
+        createdAt: user.createdAt
       }
     });
+
   } catch (error) {
-    logger.error('Profile fetch error:', error);
-    return res.status(500).json({
+    logger.error(`Get profile error: ${error.message}`);
+    res.status(500).json({
       success: false,
-      message: "Failed to fetch profile data"
+      message: "Failed to get profile"
     });
   }
 };
@@ -487,98 +398,332 @@ const getUserProfile = async (req, res) => {
 const updateUserProfile = async (req, res) => {
   try {
     const userId = req.user.id;
-    const { name, email, phone, address } = req.body;
+    const { name, phone } = req.body;
 
-    if (!userId) {
-      logger.warn('No user ID in request');
-      return res.status(401).json({
-        success: false,
-        message: "Invalid token"
-      });
-    }
-
-    // Validate email if provided
-    if (email && !validator.isEmail(email)) {
-      return res.status(400).json({
-        success: false,
-        message: "Please enter a valid email address"
-      });
-    }
-
-    // Validate phone if provided
-    if (phone && !validator.matches(phone, /^[6-9]\d{9}$/)) {
-      return res.status(400).json({
-        success: false,
-        message: "Please enter a valid Indian phone number"
-      });
-    }
-
-    // Check if email is already taken by another user
-    if (email) {
-      const existingUser = await userModel.findOne({ email, _id: { $ne: userId } });
-      if (existingUser) {
-        return res.status(400).json({
-          success: false,
-          message: "Email already registered"
-        });
-      }
-    }
-
-    // Check if phone is already taken by another user
-    if (phone) {
-      const existingUser = await userModel.findOne({ phone, _id: { $ne: userId } });
-      if (existingUser) {
-        return res.status(400).json({
-          success: false,
-          message: "Phone number already registered"
-        });
-      }
-    }
-
-    // Update user profile
-    const updatedUser = await userModel.findByIdAndUpdate(
-      userId,
-      { 
-        name: name || undefined,
-        email: email || undefined,
-        phone: phone || undefined,
-        address: address || undefined
-      },
-      { new: true }
-    ).select('-password');
-
-    if (!updatedUser) {
-      logger.warn(`User not found for ID: ${userId}`);
+    const user = await userModel.findById(userId);
+    if (!user) {
       return res.status(404).json({
         success: false,
         message: "User not found"
       });
     }
 
-    logger.info(`Profile updated successfully for user: ${userId}`);
+    if (name) user.name = name;
+    if (phone) {
+      if (!validator.matches(phone, /^[6-9]\d{9}$/)) {
+        return res.status(400).json({
+          success: false,
+          message: "Please enter a valid Indian phone number"
+        });
+      }
+      user.phone = phone;
+    }
 
-    return res.status(200).json({
+    await user.save();
+
+    res.json({
       success: true,
       message: "Profile updated successfully",
       user: {
-        id: updatedUser._id,
-        name: updatedUser.name,
-        email: updatedUser.email,
-        phone: updatedUser.phone,
-        address: updatedUser.address,
-        createdAt: updatedUser.createdAt,
-        isEmailVerified: updatedUser.isEmailVerified,
-        isPhoneVerified: updatedUser.isPhoneVerified,
-        notificationSettings: updatedUser.notificationSettings
+        id: user._id,
+        name: user.name,
+        email: user.email,
+        phone: user.phone
       }
     });
+
   } catch (error) {
-    logger.error('Profile update error:', error);
-    return res.status(500).json({
+    logger.error(`Update profile error: ${error.message}`);
+    res.status(500).json({
       success: false,
       message: "Failed to update profile"
     });
   }
 };
 
-export { registerUser, loginUser, verifyToken, refreshToken, adminLogin, forgotPassword, resetPassword, loginWithPhone, getUserProfile, updateUserProfile };
+// List users (admin only)
+const listUsers = async (req, res) => {
+  try {
+    const { page = 1, limit = 10, search, role } = req.query;
+    console.log('List users request:', {
+      page,
+      limit,
+      search,
+      role,
+      user: req.user ? {
+        id: req.user._id,
+        role: req.user.role
+      } : null
+    });
+
+    const query = {};
+
+    // Add search filter if provided
+    if (search) {
+      query.$or = [
+        { name: { $regex: search, $options: 'i' } },
+        { email: { $regex: search, $options: 'i' } },
+        { phone: { $regex: search, $options: 'i' } }
+      ];
+    }
+
+    // Add role filter if provided
+    if (role) {
+      query.role = role;
+    }
+
+    // Calculate pagination
+    const skip = (page - 1) * limit;
+
+    // Get total count for pagination
+    const total = await userModel.countDocuments(query);
+    console.log('Total users found:', total);
+
+    // Get users with pagination
+    const users = await userModel.find(query)
+      .select('-password')
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(parseInt(limit));
+
+    console.log('Users retrieved:', {
+      count: users.length,
+      firstUser: users[0] ? {
+        id: users[0]._id,
+        name: users[0].name,
+        email: users[0].email,
+        role: users[0].role
+      } : null
+    });
+
+    res.json({
+      success: true,
+      users: users || [],
+      pagination: {
+        total,
+        page: parseInt(page),
+        pages: Math.ceil(total / limit)
+      }
+    });
+
+  } catch (error) {
+    console.error('List users error:', error.message, '\nStack:', error.stack);
+    res.status(500).json({
+      success: false,
+      message: "Failed to list users"
+    });
+  }
+};
+
+// Update password
+const updatePassword = async (req, res) => {
+  try {
+    const { currentPassword, newPassword } = req.body;
+    const userId = req.user.id;
+
+    // Validate input
+    if (!currentPassword || !newPassword) {
+      return res.status(400).json({
+        success: false,
+        message: "Please provide both current and new password"
+      });
+    }
+
+    // Validate new password strength
+    if (newPassword.length < 8) {
+      return res.status(400).json({
+        success: false,
+        message: "New password must be at least 8 characters long"
+      });
+    }
+
+    // Find user
+    const user = await userModel.findById(userId).select('+password');
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found"
+      });
+    }
+
+    // Verify current password
+    const isMatch = await bcrypt.compare(currentPassword, user.password);
+    if (!isMatch) {
+      return res.status(401).json({
+        success: false,
+        message: "Current password is incorrect"
+      });
+    }
+
+    // Hash new password
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(newPassword, salt);
+
+    // Update password
+    user.password = hashedPassword;
+    await user.save();
+
+    res.json({
+      success: true,
+      message: "Password updated successfully"
+    });
+
+  } catch (error) {
+    logger.error(`Password update error: ${error.message}`);
+    res.status(500).json({
+      success: false,
+      message: "Failed to update password. Please try again."
+    });
+  }
+};
+
+// Download user data
+const downloadUserData = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const user = await userModel.findById(userId).select('-password');
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found"
+      });
+    }
+
+    // Prepare user data for download
+    const userData = {
+      personalInfo: {
+        name: user.name,
+        email: user.email,
+        phone: user.phone,
+        role: user.role,
+        isEmailVerified: user.isEmailVerified,
+        isPhoneVerified: user.isPhoneVerified,
+        createdAt: user.createdAt,
+        lastLogin: user.lastLogin
+      },
+      preferences: {
+        notificationSettings: user.notificationSettings
+      }
+    };
+
+    // Set response headers for file download
+    res.setHeader('Content-Type', 'application/json');
+    res.setHeader('Content-Disposition', 'attachment; filename=user-data.json');
+
+    // Send the data
+    res.json(userData);
+
+  } catch (error) {
+    logger.error(`Download user data error: ${error.message}`);
+    res.status(500).json({
+      success: false,
+      message: "Failed to download user data"
+    });
+  }
+};
+
+// Delete account
+const deleteAccount = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const { password } = req.body;
+
+    // Validate input
+    if (!password) {
+      return res.status(400).json({
+        success: false,
+        message: "Please provide your password to confirm account deletion"
+      });
+    }
+
+    // Find user
+    const user = await userModel.findById(userId).select('+password');
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found"
+      });
+    }
+
+    // Verify password
+    const isMatch = await bcrypt.compare(password, user.password);
+    if (!isMatch) {
+      return res.status(401).json({
+        success: false,
+        message: "Incorrect password"
+      });
+    }
+
+    // Prevent admin account deletion
+    if (user.role === 'admin') {
+      return res.status(403).json({
+        success: false,
+        message: "Admin accounts cannot be deleted"
+      });
+    }
+
+    // Delete user
+    await userModel.findByIdAndDelete(userId);
+
+    res.json({
+      success: true,
+      message: "Account deleted successfully"
+    });
+
+  } catch (error) {
+    logger.error(`Delete account error: ${error.message}`);
+    res.status(500).json({
+      success: false,
+      message: "Failed to delete account"
+    });
+  }
+};
+
+// Verify admin status
+const verifyAdmin = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const user = await userModel.findById(userId);
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found"
+      });
+    }
+
+    res.json({
+      success: true,
+      isAdmin: user.role === 'admin',
+      user: {
+        id: user._id,
+        name: user.name,
+        email: user.email,
+        role: user.role
+      }
+    });
+
+  } catch (error) {
+    logger.error(`Admin verification error: ${error.message}`);
+    res.status(500).json({
+      success: false,
+      message: "Failed to verify admin status"
+    });
+  }
+};
+
+export {
+  registerUser,
+  loginUser,
+  verifyToken,
+  refreshToken,
+  adminLogin,
+  getUserProfile,
+  updateUserProfile,
+  listUsers,
+  updatePassword,
+  downloadUserData,
+  deleteAccount,
+  verifyAdmin
+};

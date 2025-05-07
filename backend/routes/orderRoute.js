@@ -1,36 +1,48 @@
 import express from 'express'
-import {placeOrder, placeOrderStripe, placeOrderRazorpay, allOrders, userOrders, updateStatus, verifyStripe, verifyRazorpay, createOrder, getUserOrders, trackOrder, cancelOrder} from '../controllers/orderController.js'
-import adminAuth  from '../middleware/adminAuth.js'
-import authUser from '../middleware/auth.js'
+import { protect, admin } from '../middleware/authMiddleware.js'
+import { 
+  placeOrder, 
+  placeOrderStripe, 
+  placeOrderRazorpay, 
+  allOrders, 
+  userOrders, 
+  updateStatus, 
+  verifyStripe, 
+  verifyRazorpay, 
+  createOrder, 
+  trackOrder, 
+  cancelOrder, 
+  updateOrderStatus, 
+  listOrders, 
+  getOrderDetails 
+} from '../controllers/orderController.js'
 
 const orderRouter = express.Router()
 
-// Admin Features
-orderRouter.post('/list',adminAuth,allOrders)
-orderRouter.post('/status',adminAuth,updateStatus)
+// Public routes
+orderRouter.post('/', protect, placeOrder)
+orderRouter.post('/place', protect, placeOrder)
+
+// Protected user routes
+orderRouter.get('/my-orders', protect, userOrders)
+orderRouter.get('/user-orders', protect, userOrders)
+orderRouter.get('/userorders', protect, userOrders)
+orderRouter.post('/userorders', protect, userOrders)
+orderRouter.get('/track/:orderId', protect, trackOrder)
+orderRouter.get('/details/:orderId', protect, getOrderDetails)
+orderRouter.post('/cancel/:orderId', protect, cancelOrder)
 
 // Payment Features
-orderRouter.post('/place',authUser,placeOrder)
-orderRouter.post('/stripe',authUser,placeOrderStripe)
-orderRouter.post('/razorpay',authUser,placeOrderRazorpay)
+orderRouter.post('/stripe', protect, placeOrderStripe)
+orderRouter.post('/razorpay', protect, placeOrderRazorpay)
+orderRouter.post('/verify-stripe', protect, verifyStripe)
+orderRouter.post('/verify-razorpay', protect, verifyRazorpay)
+orderRouter.post('/create', protect, createOrder)
 
-// User Feature 
-orderRouter.post('/userorders',authUser,userOrders)
-
-// verify payment
-orderRouter.post('/verifyStripe',authUser, verifyStripe)
-orderRouter.post('/verifyRazorpay',authUser, verifyRazorpay)
-
-// Create new order
-orderRouter.post('/create', authUser, createOrder)
-
-// Get user's orders
-orderRouter.get('/userorders', authUser, getUserOrders)
-
-// Track specific order
-orderRouter.get('/track/:orderId', authUser, trackOrder)
-
-// Cancel order
-orderRouter.put('/cancel/:orderId', authUser, cancelOrder)
+// Protected admin routes
+orderRouter.use(protect, admin)
+orderRouter.get('/list', listOrders)
+orderRouter.post('/list', listOrders)
+orderRouter.put('/status/:orderId', updateOrderStatus)
 
 export default orderRouter
