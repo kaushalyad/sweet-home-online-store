@@ -249,7 +249,7 @@ export const ShopContextProvider = ({ children }) => {
     
     try {
       logger.info("Fetching user cart from backend");
-      const response = await axiosInstance.get("/cart");
+      const response = await axiosInstance.post("/cart");
       
       if (response.data.success) {
         const cartData = response.data.cartData || {};
@@ -276,6 +276,13 @@ export const ShopContextProvider = ({ children }) => {
         setToken("");
         toast.error("Session expired. Please login again.");
         navigate("/login");
+      } else {
+        logger.error("Cart fetch error details:", {
+          status: error.response?.status,
+          data: error.response?.data,
+          message: error.message
+        });
+        toast.error(error.response?.data?.message || "Failed to fetch cart. Please try again.");
       }
       
       setCartItems({});
