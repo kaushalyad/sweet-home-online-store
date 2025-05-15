@@ -39,7 +39,7 @@ const Verify = () => {
           },
           { 
             headers: { 
-              token,
+              'Authorization': `Bearer ${token}`,
               'Content-Type': 'application/json'
             } 
           }
@@ -60,7 +60,7 @@ const Verify = () => {
           { success, orderId },
           { 
             headers: { 
-              token,
+              'Authorization': `Bearer ${token}`,
               'Content-Type': 'application/json'
             } 
           }

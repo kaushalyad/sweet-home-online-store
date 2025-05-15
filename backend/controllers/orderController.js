@@ -280,7 +280,7 @@ const verifyRazorpay = async (req, res) => {
   try {
     const { razorpay_order_id, razorpay_payment_id, razorpay_signature, userId } = req.body;
     
-    console.log("Razorpay verification payload:", { 
+    logger.info("Razorpay verification payload:", { 
       razorpay_order_id, 
       razorpay_payment_id,
       userId,
@@ -288,7 +288,7 @@ const verifyRazorpay = async (req, res) => {
     });
 
     if (!razorpay_order_id || !razorpay_payment_id || !razorpay_signature) {
-      console.error("Missing payment details in request");
+      logger.error("Missing payment details in request");
       return res.status(400).json({ 
         success: false, 
         message: "Payment verification failed: Missing payment details" 
@@ -302,8 +302,14 @@ const verifyRazorpay = async (req, res) => {
         .update(razorpay_order_id + "|" + razorpay_payment_id)
         .digest('hex');
 
+      logger.info("Signature verification:", {
+        generated: generated_signature,
+        received: razorpay_signature,
+        match: generated_signature === razorpay_signature
+      });
+
       if (generated_signature !== razorpay_signature) {
-        console.error("Invalid signature");
+        logger.error("Invalid signature");
         return res.status(400).json({ 
           success: false, 
           message: "Payment verification failed: Invalid signature" 
@@ -312,7 +318,7 @@ const verifyRazorpay = async (req, res) => {
 
       // Fetch the order details from Razorpay
       const orderInfo = await razorpayInstance.orders.fetch(razorpay_order_id);
-      console.log("Order info from Razorpay:", {
+      logger.info("Order info from Razorpay:", {
         id: orderInfo.id,
         amount: orderInfo.amount,
         currency: orderInfo.currency,
@@ -324,14 +330,14 @@ const verifyRazorpay = async (req, res) => {
       const orderId = orderInfo.receipt;
       
       if (!orderId) {
-        console.error("No order ID found in Razorpay receipt");
+        logger.error("No order ID found in Razorpay receipt");
         return res.status(400).json({ 
           success: false, 
           message: "Payment verification failed: Invalid order" 
         });
       }
 
-      console.log(`Updating order ${orderId} to paid status`);
+      logger.info(`Updating order ${orderId} to paid status`);
       
       // Update the order status to paid
       const updatedOrder = await Order.findByIdAndUpdate(
@@ -340,25 +346,26 @@ const verifyRazorpay = async (req, res) => {
           payment: true,
           paymentStatus: 'completed',
           razorpayPaymentId: razorpay_payment_id,
-          razorpayOrderId: razorpay_order_id
+          razorpayOrderId: razorpay_order_id,
+          status: 'confirmed'
         },
         { new: true }
       );
       
       if (!updatedOrder) {
-        console.error(`Order ${orderId} not found in database`);
+        logger.error(`Order ${orderId} not found in database`);
         return res.status(404).json({ 
           success: false, 
           message: "Order not found in database" 
         });
       }
 
-      console.log(`Successfully updated order ${orderId}`);
+      logger.info(`Successfully updated order ${orderId}`);
 
       // Clear the user's cart
       if (userId) {
         await userModel.findByIdAndUpdate(userId, { cartData: {} });
-        console.log(`Cleared cart for user ${userId}`);
+        logger.info(`Cleared cart for user ${userId}`);
       }
       
       return res.json({ 
@@ -367,14 +374,14 @@ const verifyRazorpay = async (req, res) => {
         order: updatedOrder
       });
     } catch (error) {
-      console.error("Error during Razorpay verification:", error);
+      logger.error("Error during Razorpay verification:", error);
       return res.status(500).json({ 
         success: false, 
         message: "Payment verification failed: " + error.message 
       });
     }
   } catch (error) {
-    console.error("Payment verification error:", error);
+    logger.error("Payment verification error:", error);
     res.status(500).json({ 
       success: false, 
       message: error.message || "Payment verification failed" 

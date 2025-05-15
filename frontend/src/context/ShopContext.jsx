@@ -249,7 +249,7 @@ export const ShopContextProvider = ({ children }) => {
     
     try {
       logger.info("Fetching user cart from backend");
-      const response = await axiosInstance.post("/cart");
+      const response = await axiosInstance.get("/cart");
       
       if (response.data.success) {
         const cartData = response.data.cartData || {};
@@ -368,12 +368,9 @@ export const ShopContextProvider = ({ children }) => {
       });
       
       if (response.data.success) {
-        const updatedCartData = response.data.cartData || {};
-        setCartItems(updatedCartData);
-        toast.success("Product added to cart successfully");
-        
         // Refresh cart data to ensure consistency
         await getUserCart(token);
+        toast.success("Product added to cart successfully");
       } else {
         toast.error(response.data.message || "Failed to add to cart");
       }
