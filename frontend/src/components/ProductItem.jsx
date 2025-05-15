@@ -31,14 +31,23 @@ const ProductItem = ({ id, image, name, price, index = 0, featured = false, best
   };
 
   // Handle quick add to cart
-  const handleQuickAddToCart = (e) => {
+  const handleQuickAddToCart = async (e) => {
     e.preventDefault();
     e.stopPropagation();
-    addToCart(id, 1); // Pass 1 as the default quantity
     
-    // Show added animation
-    setIsAdded(true);
-    setTimeout(() => setIsAdded(false), 1500);
+    try {
+      // Show added animation immediately
+      setIsAdded(true);
+      
+      // Add to cart
+      await addToCart(id, 1);
+      
+      // Keep the animation for 1.5 seconds
+      setTimeout(() => setIsAdded(false), 1500);
+    } catch (error) {
+      // If there's an error, hide the animation
+      setIsAdded(false);
+    }
   };
 
   // Animation variants

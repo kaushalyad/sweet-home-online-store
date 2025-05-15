@@ -328,7 +328,7 @@ export const ShopContextProvider = ({ children }) => {
     }
 
     try {
-      const response = await axiosInstance.put(`/cart/${itemId}`, { quantity });
+      const response = await axiosInstance.put(`/cart/update/${itemId}`, { quantity });
       
       if (response.data.success) {
         // Update local cart state with the response data

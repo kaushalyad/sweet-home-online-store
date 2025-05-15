@@ -155,12 +155,22 @@ const addToCart = async (req, res) => {
 const updateCartItem = async (req, res) => {
   try {
     const userId = req.user.id;
-    const { itemId, quantity } = req.body;
+    const { itemId } = req.params;
+    const { quantity } = req.body;
 
     if (!itemId || quantity === undefined) {
       return res.status(400).json({
         success: false,
         message: "Item ID and quantity are required"
+      });
+    }
+
+    // Ensure quantity is a valid number
+    const numericQuantity = Number(quantity);
+    if (isNaN(numericQuantity)) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid quantity value"
       });
     }
 
@@ -180,16 +190,16 @@ const updateCartItem = async (req, res) => {
       });
     }
 
-    if (quantity <= 0) {
+    if (numericQuantity <= 0) {
       // Remove item if quantity is 0 or negative
       delete user.cartData[itemId];
     } else {
-      user.cartData[itemId] = quantity;
+      user.cartData[itemId] = numericQuantity;
     }
 
     await user.save();
 
-    logger.info(`Cart updated for user: ${userId}`);
+    logger.info(`Cart updated for user: ${userId}, item: ${itemId}, quantity: ${numericQuantity}`);
 
     return res.status(200).json({
       success: true,
