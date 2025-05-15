@@ -115,7 +115,29 @@ const PlaceOrder = () => {
     const subtotal = getCartAmount();
     const additionalCosts = calculateAdditionalCosts();
     const total = subtotal + delivery_fee + additionalCosts - discount;
-    return Math.max(total, 0);
+    
+    // Add validation logging
+    console.log("Order amount calculation:", {
+      subtotal,
+      delivery_fee,
+      additionalCosts,
+      discount,
+      total
+    });
+    
+    // Ensure total is not negative
+    if (total < 0) {
+      console.error("Negative total amount detected:", {
+        subtotal,
+        delivery_fee,
+        additionalCosts,
+        discount,
+        total
+      });
+      return 0;
+    }
+    
+    return total;
   };
 
   const onChangeHandler = (event) => {
@@ -225,6 +247,16 @@ const PlaceOrder = () => {
     }
     
     setFormErrors(errors);
+
+    // If there are errors, scroll to the first error field
+    if (Object.keys(errors).length > 0) {
+      const firstErrorField = document.getElementById(Object.keys(errors)[0]);
+      if (firstErrorField) {
+        firstErrorField.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        firstErrorField.focus();
+      }
+    }
+
     return Object.keys(errors).length === 0;
   };
 
@@ -755,10 +787,13 @@ const PlaceOrder = () => {
                       onChange={onChangeHandler}
                       name="firstName"
                       value={formData.firstName}
-                      className="border border-gray-300 rounded-md py-2 px-3 w-full focus:ring-pink-500 focus:border-pink-500 transition-colors text-sm sm:text-base"
+                      className={`border ${formErrors.firstName ? 'border-red-500 focus:ring-red-500 focus:border-red-500' : 'border-gray-300 focus:ring-pink-500 focus:border-pink-500'} rounded-md py-2 px-3 w-full transition-colors text-sm sm:text-base`}
                       type="text"
                       placeholder="Enter your first name"
                     />
+                    {formErrors.firstName && (
+                      <p className="mt-1 text-sm text-red-600">{formErrors.firstName}</p>
+                    )}
                   </div>
                   
                   <div>
@@ -769,10 +804,13 @@ const PlaceOrder = () => {
                       onChange={onChangeHandler}
                       name="lastName"
                       value={formData.lastName}
-                      className="border border-gray-300 rounded-md py-2 px-3 w-full focus:ring-pink-500 focus:border-pink-500 transition-colors text-sm sm:text-base"
+                      className={`border ${formErrors.lastName ? 'border-red-500 focus:ring-red-500 focus:border-red-500' : 'border-gray-300 focus:ring-pink-500 focus:border-pink-500'} rounded-md py-2 px-3 w-full transition-colors text-sm sm:text-base`}
                       type="text"
                       placeholder="Enter your last name"
                     />
+                    {formErrors.lastName && (
+                      <p className="mt-1 text-sm text-red-600">{formErrors.lastName}</p>
+                    )}
                   </div>
                 </div>
 
@@ -784,10 +822,13 @@ const PlaceOrder = () => {
                     onChange={onChangeHandler}
                     name="email"
                     value={formData.email}
-                    className="border border-gray-300 rounded-md py-2 px-3 w-full focus:ring-pink-500 focus:border-pink-500 transition-colors text-sm sm:text-base"
+                    className={`border ${formErrors.email ? 'border-red-500 focus:ring-red-500 focus:border-red-500' : 'border-gray-300 focus:ring-pink-500 focus:border-pink-500'} rounded-md py-2 px-3 w-full transition-colors text-sm sm:text-base`}
                     type="email"
                     placeholder="Enter your email"
                   />
+                  {formErrors.email && (
+                    <p className="mt-1 text-sm text-red-600">{formErrors.email}</p>
+                  )}
                 </div>
 
                 <div className="mt-4">
@@ -798,10 +839,13 @@ const PlaceOrder = () => {
                     onChange={onChangeHandler}
                     name="phone"
                     value={formData.phone}
-                    className="border border-gray-300 rounded-md py-2 px-3 w-full focus:ring-pink-500 focus:border-pink-500 transition-colors text-sm sm:text-base"
+                    className={`border ${formErrors.phone ? 'border-red-500 focus:ring-red-500 focus:border-red-500' : 'border-gray-300 focus:ring-pink-500 focus:border-pink-500'} rounded-md py-2 px-3 w-full transition-colors text-sm sm:text-base`}
                     type="tel"
                     placeholder="Enter your phone number"
                   />
+                  {formErrors.phone && (
+                    <p className="mt-1 text-sm text-red-600">{formErrors.phone}</p>
+                  )}
                 </div>
 
                 <div className="mt-4">
@@ -812,10 +856,13 @@ const PlaceOrder = () => {
                     onChange={onChangeHandler}
                     name="street"
                     value={formData.street}
-                    className="border border-gray-300 rounded-md py-2.5 px-4 w-full focus:ring-pink-500 focus:border-pink-500 transition-colors"
+                    className={`border ${formErrors.street ? 'border-red-500 focus:ring-red-500 focus:border-red-500' : 'border-gray-300 focus:ring-pink-500 focus:border-pink-500'} rounded-md py-2.5 px-4 w-full transition-colors`}
                     type="text"
                     placeholder="Enter your street address"
                   />
+                  {formErrors.street && (
+                    <p className="mt-1 text-sm text-red-600">{formErrors.street}</p>
+                  )}
                 </div>
                 
                 <div className="grid grid-cols-2 gap-4 mb-4">
@@ -827,10 +874,13 @@ const PlaceOrder = () => {
                       onChange={onChangeHandler}
                       name="city"
                       value={formData.city}
-                      className="border border-gray-300 rounded-md py-2.5 px-4 w-full focus:ring-pink-500 focus:border-pink-500 transition-colors"
+                      className={`border ${formErrors.city ? 'border-red-500 focus:ring-red-500 focus:border-red-500' : 'border-gray-300 focus:ring-pink-500 focus:border-pink-500'} rounded-md py-2.5 px-4 w-full transition-colors`}
                       type="text"
                       placeholder="Enter your city"
                     />
+                    {formErrors.city && (
+                      <p className="mt-1 text-sm text-red-600">{formErrors.city}</p>
+                    )}
                   </div>
                   <div>
                     <label htmlFor="state" className="block text-sm font-medium text-gray-700 mb-1">State</label>
@@ -855,10 +905,13 @@ const PlaceOrder = () => {
                       onChange={onChangeHandler}
                       name="zipcode"
                       value={formData.zipcode}
-                      className="border border-gray-300 rounded-md py-2.5 px-4 w-full focus:ring-pink-500 focus:border-pink-500 transition-colors"
+                      className={`border ${formErrors.zipcode ? 'border-red-500 focus:ring-red-500 focus:border-red-500' : 'border-gray-300 focus:ring-pink-500 focus:border-pink-500'} rounded-md py-2.5 px-4 w-full transition-colors`}
                       type="text"
                       placeholder="Enter your zipcode"
                     />
+                    {formErrors.zipcode && (
+                      <p className="mt-1 text-sm text-red-600">{formErrors.zipcode}</p>
+                    )}
                   </div>
                   <div>
                     <label htmlFor="country" className="block text-sm font-medium text-gray-700 mb-1">Country</label>
@@ -868,10 +921,13 @@ const PlaceOrder = () => {
                       onChange={onChangeHandler}
                       name="country"
                       value={formData.country}
-                      className="border border-gray-300 rounded-md py-2.5 px-4 w-full focus:ring-pink-500 focus:border-pink-500 transition-colors"
+                      className={`border ${formErrors.country ? 'border-red-500 focus:ring-red-500 focus:border-red-500' : 'border-gray-300 focus:ring-pink-500 focus:border-pink-500'} rounded-md py-2.5 px-4 w-full transition-colors`}
                       type="text"
                       placeholder="Enter your country"
                     />
+                    {formErrors.country && (
+                      <p className="mt-1 text-sm text-red-600">{formErrors.country}</p>
+                    )}
                   </div>
                 </div>
               </div>
