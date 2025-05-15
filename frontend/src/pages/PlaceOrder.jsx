@@ -451,21 +451,45 @@ const PlaceOrder = () => {
       order_id: order.id,
       handler: async function (response) {
         try {
+          console.log("Payment response received:", response);
+          
+          // Extract user ID from token
+          const tokenParts = token.split('.');
+          if (tokenParts.length !== 3) {
+            throw new Error('Invalid token format');
+          }
+          const payload = JSON.parse(atob(tokenParts[1]));
+          const userId = payload.id;
+
+          if (!userId) {
+            throw new Error('User ID not found in token');
+          }
+
+          console.log("Verifying payment with data:", {
+            razorpay_order_id: response.razorpay_order_id,
+            razorpay_payment_id: response.razorpay_payment_id,
+            razorpay_signature: response.razorpay_signature,
+            userId: userId
+          });
+
           const { data } = await axios.post(
             backendUrl + "/api/order/verify-razorpay",
             {
               razorpay_order_id: response.razorpay_order_id,
               razorpay_payment_id: response.razorpay_payment_id,
               razorpay_signature: response.razorpay_signature,
-              userId: userData._id
+              userId: userId
             },
             {
               headers: {
                 'Authorization': `Bearer ${token}`,
                 'Content-Type': 'application/json'
-              }
+              },
+              timeout: 10000 // 10 second timeout
             }
           );
+
+          console.log("Payment verification response:", data);
 
           if (data.success) {
             // Show success animation first
@@ -476,11 +500,18 @@ const PlaceOrder = () => {
               navigate("/orders");
             }, 3000);
           } else {
-            toast.error(data.message || "Payment verification failed");
+            console.error("Payment verification failed:", data.message);
+            toast.error(data.message || "Payment verification failed. Please contact support.");
           }
         } catch (error) {
           console.error("Payment verification error:", error);
-          toast.error(error.response?.data?.message || "Payment verification failed. Please try again.");
+          if (error.code === 'ECONNABORTED') {
+            toast.error("Payment verification timed out. Please check your order status.");
+          } else if (!error.response) {
+            toast.error("Network error. Please check your internet connection and try again.");
+          } else {
+            toast.error(error.response?.data?.message || "Payment verification failed. Please contact support.");
+          }
         }
       },
       prefill: {
