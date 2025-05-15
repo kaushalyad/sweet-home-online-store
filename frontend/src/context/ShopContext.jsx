@@ -362,7 +362,7 @@ export const ShopContextProvider = ({ children }) => {
     try {
       logger.info(`Adding to cart - Item: ${itemId}, Quantity: ${quantity}`);
       
-      const response = await axiosInstance.post("/cart", { 
+      const response = await axiosInstance.post("/cart/add", { 
         itemId, 
         quantity: Number(quantity)
       });
@@ -371,6 +371,9 @@ export const ShopContextProvider = ({ children }) => {
         const updatedCartData = response.data.cartData || {};
         setCartItems(updatedCartData);
         toast.success("Product added to cart successfully");
+        
+        // Refresh cart data to ensure consistency
+        await getUserCart(token);
       } else {
         toast.error(response.data.message || "Failed to add to cart");
       }
@@ -382,7 +385,12 @@ export const ShopContextProvider = ({ children }) => {
         toast.error("Session expired. Please login again.");
         navigate("/login");
       } else {
-        toast.error(error.response?.data?.message || "Failed to add to cart");
+        logger.error("Add to cart error details:", {
+          status: error.response?.status,
+          data: error.response?.data,
+          message: error.message
+        });
+        toast.error(error.response?.data?.message || "Failed to add to cart. Please try again.");
       }
     }
   };
