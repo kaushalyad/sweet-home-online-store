@@ -411,16 +411,31 @@ export const ShopContextProvider = ({ children }) => {
 
   const getProductsData = async () => {
     try {
+      logger.info("Fetching products from:", `${backendUrl}/api/product/list`);
       const response = await axiosInstance.get("/product/list");
       if (response.data.success) {
         setBuffer(false);
         setProducts(response.data.products.reverse());
+        logger.info("Products fetched successfully");
       } else {
-        toast.error(response.data.message);
+        logger.warn("Failed to fetch products:", response.data.message);
+        setBuffer(false);
+        toast.error(response.data.message || "Failed to fetch products");
       }
     } catch (error) {
-      logger.error(error);
-      toast.error(error.message);
+      logger.error("Error fetching products:", error);
+      setBuffer(false);
+      if (error.response) {
+        logger.error("Response data:", error.response.data);
+        logger.error("Response status:", error.response.status);
+        toast.error(error.response.data?.message || "Failed to fetch products");
+      } else if (error.request) {
+        logger.error("No response received:", error.request);
+        toast.error("No response from server. Please check your connection.");
+      } else {
+        logger.error("Error setting up request:", error.message);
+        toast.error("Failed to fetch products. Please try again.");
+      }
     }
   };
 
