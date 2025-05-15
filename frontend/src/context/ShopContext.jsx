@@ -238,6 +238,110 @@ export const ShopContextProvider = ({ children }) => {
     }
   };
 
+  const getUserCart = useCallback(async (userToken) => {
+    if (!userToken) {
+      logger.warn("No token provided for getUserCart");
+      return { success: false, message: "No token provided" };
+    }
+    
+    try {
+      logger.info("Fetching user cart from backend");
+      const response = await api.post("/cart");
+      
+      if (response.data.success) {
+        const cartData = response.data.cartData || {};
+        
+        if (typeof cartData === 'object' && cartData !== null) {
+          // Convert any string quantities to numbers
+          const processedCartData = Object.entries(cartData).reduce((acc, [key, value]) => {
+            acc[key] = Number(value);
+            return acc;
+          }, {});
+          
+          setCartItems(processedCartData);
+          return { success: true, cartData: processedCartData };
+        }
+      }
+      
+      // If we reach here, something went wrong
+      setCartItems({});
+      return { success: false, message: "Failed to fetch cart" };
+    } catch (error) {
+      logger.error("Error fetching cart:", error);
+      
+      if (error.response?.status === 401) {
+        setToken("");
+        toast.error("Session expired. Please login again.");
+        navigate("/login");
+      }
+      
+      setCartItems({});
+      return { success: false, message: "Failed to fetch cart" };
+    }
+  }, [api, navigate, setToken]);
+
+  const removeFromCart = async (itemId) => {
+    if (!token) {
+      toast.error("Please login to remove items from cart");
+      navigate("/login");
+      return;
+    }
+
+    try {
+      const response = await api.delete(`/cart/remove/${itemId}`);
+      
+      if (response.data.success) {
+        // Update local cart state with the response data
+        const updatedCartData = response.data.cartData || {};
+        setCartItems(updatedCartData);
+        toast.success("Item removed from cart");
+      } else {
+        toast.error(response.data.message || "Failed to remove item from cart");
+      }
+    } catch (error) {
+      logger.error("Error removing from cart:", error);
+      
+      if (error.response?.status === 401) {
+        setToken("");
+        toast.error("Session expired. Please login again.");
+        navigate("/login");
+      } else {
+        toast.error(error.response?.data?.message || "Failed to remove item from cart");
+      }
+    }
+  };
+
+  const updateQuantity = async (itemId, quantity) => {
+    if (!token) {
+      toast.error("Please login to update cart");
+      navigate("/login");
+      return;
+    }
+
+    try {
+      const response = await api.post("/cart/update", { itemId, quantity });
+      
+      if (response.data.success) {
+        // Update local cart state with the response data
+        const updatedCartData = response.data.cartData || {};
+        setCartItems(updatedCartData);
+        toast.success("Cart updated successfully");
+      } else {
+        toast.error(response.data.message || "Failed to update cart");
+      }
+    } catch (error) {
+      logger.error("Error updating cart:", error);
+      
+      if (error.response?.status === 401) {
+        setToken("");
+        toast.error("Session expired. Please login again.");
+        navigate("/login");
+      } else {
+        toast.error(error.response?.data?.message || "Failed to update cart");
+      }
+    }
+  };
+
   const addToCart = async (itemId, quantity = 1) => {
     if (!token) {
       toast.error("Please login to add items to your cart");
@@ -248,46 +352,20 @@ export const ShopContextProvider = ({ children }) => {
     try {
       logger.info(`Adding to cart - Item: ${itemId}, Quantity: ${quantity}`);
       
-      // First update the backend
       const response = await api.post("/cart/add", { 
         itemId, 
         quantity: Number(quantity)
       });
       
-      logger.info("Add to cart response:", response.data);
-      
-      // Check if we have cartData in the response
-      if (response.data && response.data.cartData) {
-        // Update local cart state with the response data
-        const updatedCartData = response.data.cartData;
-        logger.info("Updating cart with data:", updatedCartData);
-        
-        // Ensure we have a valid cart data object
-        if (typeof updatedCartData === 'object' && updatedCartData !== null) {
-          // Convert Map to object if needed
-          const cartDataObject = updatedCartData instanceof Map 
-            ? Object.fromEntries(updatedCartData) 
-            : updatedCartData;
-            
-          setCartItems(cartDataObject);
-          // Save to localStorage as backup
-          localStorage.setItem("cart", JSON.stringify(cartDataObject));
-          toast.success("Product added to cart successfully");
-        } else {
-          logger.error("Invalid cart data received:", updatedCartData);
-          toast.error("Error updating cart. Please try again.");
-        }
+      if (response.data.success) {
+        const updatedCartData = response.data.cartData || {};
+        setCartItems(updatedCartData);
+        toast.success("Product added to cart successfully");
       } else {
-        logger.error("Invalid response format:", response.data);
-        toast.error("Failed to add to cart. Please try again.");
+        toast.error(response.data.message || "Failed to add to cart");
       }
     } catch (error) {
       logger.error("Error adding to cart:", error);
-      
-      if (error.response) {
-        logger.error("Error response data:", error.response.data);
-        logger.error("Error response status:", error.response.status);
-      }
       
       if (error.response?.status === 401) {
         setToken("");
@@ -313,38 +391,6 @@ export const ShopContextProvider = ({ children }) => {
     } catch (error) {
       logger.error("Error calculating cart count:", error);
       return 0;
-    }
-  };
-
-  const updateQuantity = async (itemId, quantity) => {
-    if (!token) {
-      toast.error("Please login to update cart");
-      navigate("/login");
-      return;
-    }
-
-    try {
-      const response = await api.post("/cart/update", { itemId, quantity });
-      
-      if (response.data.success) {
-        // Update local cart state with the response data
-        setCartItems(response.data.cartData);
-        // Save to localStorage as backup
-        localStorage.setItem("cart", JSON.stringify(response.data.cartData));
-        toast.success("Cart updated successfully");
-      } else {
-        toast.error(response.data.message || "Failed to update cart");
-      }
-    } catch (error) {
-      logger.error("Error updating cart:", error);
-      
-      if (error.response?.status === 401) {
-        setToken("");
-        toast.error("Session expired. Please login again.");
-        navigate("/login");
-      } else {
-        toast.error(error.response?.data?.message || "Failed to update cart");
-      }
     }
   };
 
@@ -376,69 +422,27 @@ export const ShopContextProvider = ({ children }) => {
     }
   };
 
-  const getUserCart = useCallback(async (userToken) => {
-    if (!userToken) {
-      logger.warn("No token provided for getUserCart");
-      return { success: false, message: "No token provided" };
+  // Initialize app - fetch products and user cart if token exists
+  useEffect(() => {
+    getProductsData();
+    if (token) {
+      getUserCart(token);
     }
-    
-    try {
-      logger.info("Fetching user cart from backend");
-      const response = await api.post("/cart");
-      
-      logger.info("Cart API response:", response.data);
-      
-      if (response.data.success) {
-        const cartData = response.data.cartData || {};
-        logger.info("Cart data received:", cartData);
-        
-        // Ensure we have a valid cart data object
-        if (typeof cartData === 'object' && cartData !== null) {
-          // Convert any string quantities to numbers
-          const processedCartData = Object.entries(cartData).reduce((acc, [key, value]) => {
-            acc[key] = Number(value);
-            return acc;
-          }, {});
-          
-          setCartItems(processedCartData);
-          // Save to localStorage as backup
-          localStorage.setItem("cart", JSON.stringify(processedCartData));
-          return { success: true, cartData: processedCartData };
-        } else {
-          logger.error("Invalid cart data received:", cartData);
-          return { success: false, message: "Invalid cart data received" };
-        }
-      }
-      
-      const errorMsg = response.data.message || "Failed to fetch cart";
-      logger.warn("Failed to fetch cart:", errorMsg);
-      // Load from localStorage as fallback
-      const localCart = JSON.parse(localStorage.getItem("cart") || "{}");
-      setCartItems(localCart);
-      return { success: false, message: errorMsg, cartData: localCart };
-    } catch (error) {
-      logger.error("Error fetching cart:", error);
-      if (error.response) {
-        logger.error("Error response data:", error.response.data);
-        logger.error("Error response status:", error.response.status);
-        
-        if (error.response.status === 401) {
-          setToken("");
-          toast.error("Session expired. Please login again.");
-          navigate("/login");
-          return { success: false, message: "Session expired" };
-        }
-      }
-      // Load from localStorage as fallback
-      const localCart = JSON.parse(localStorage.getItem("cart") || "{}");
-      setCartItems(localCart);
-      return { 
-        success: false, 
-        message: error.response?.data?.message || error.message || "Failed to fetch cart", 
-        cartData: localCart 
+  }, [token, getUserCart]);
+
+  // Add cart refresh effect
+  useEffect(() => {
+    if (token) {
+      const refreshCart = async () => {
+        await getUserCart(token);
       };
+      
+      // Refresh cart every 30 seconds
+      const interval = setInterval(refreshCart, 30000);
+      
+      return () => clearInterval(interval);
     }
-  }, [api, navigate, setToken]);
+  }, [token, getUserCart]);
 
   const logout = () => {
     localStorage.removeItem("token");
@@ -448,46 +452,6 @@ export const ShopContextProvider = ({ children }) => {
     setUserData(null);
     navigate("/login");
     toast.success("Logged out successfully!");
-  };
-
-  // Initialize app - fetch products and user cart if token exists
-  useEffect(() => {
-    getProductsData();
-    if (token) {
-      getUserCart(token);
-    }
-  }, [token, getUserCart]);
-
-  const removeFromCart = async (itemId) => {
-    if (!token) {
-      toast.error("Please login to remove items from cart");
-      navigate("/login");
-      return;
-    }
-
-    try {
-      const response = await api.delete(`/cart/remove/${itemId}`);
-      
-      if (response.data.success) {
-        // Update local cart state with the response data
-        setCartItems(response.data.cartData);
-        // Save to localStorage as backup
-        localStorage.setItem("cart", JSON.stringify(response.data.cartData));
-        toast.success("Item removed from cart");
-      } else {
-        toast.error(response.data.message || "Failed to remove item from cart");
-      }
-    } catch (error) {
-      logger.error("Error removing from cart:", error);
-      
-      if (error.response?.status === 401) {
-        setToken("");
-        toast.error("Session expired. Please login again.");
-        navigate("/login");
-      } else {
-        toast.error(error.response?.data?.message || "Failed to remove item from cart");
-      }
-    }
   };
 
   const contextValue = {

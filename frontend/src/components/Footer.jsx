@@ -90,46 +90,66 @@ const Footer = () => {
               <li>
                 <NavLink
                   to="/about"
-                  className="text-gray-600 hover:text-pink-500 transition-colors duration-200 flex items-center gap-1.5"
+                  className={({ isActive }) => 
+                    `block text-gray-600 hover:text-pink-500 transition-colors duration-200 ${isActive ? 'text-pink-500' : ''}`
+                  }
                 >
-                  <span className="w-1.5 h-1.5 rounded-full bg-gray-400 inline-block"></span>
-                  About Us
+                  <span className="flex items-center gap-1.5">
+                    <span className="w-1.5 h-1.5 rounded-full bg-gray-400 inline-block"></span>
+                    About Us
+                  </span>
                 </NavLink>
               </li>
               <li>
                 <NavLink
                   to="/collection"
-                  className="text-gray-600 hover:text-pink-500 transition-colors duration-200 flex items-center gap-1.5"
+                  className={({ isActive }) => 
+                    `block text-gray-600 hover:text-pink-500 transition-colors duration-200 ${isActive ? 'text-pink-500' : ''}`
+                  }
                 >
-                  <span className="w-1.5 h-1.5 rounded-full bg-gray-400 inline-block"></span>
-                  Collections
+                  <span className="flex items-center gap-1.5">
+                    <span className="w-1.5 h-1.5 rounded-full bg-gray-400 inline-block"></span>
+                    Collections
+                  </span>
                 </NavLink>
               </li>
               <li>
                 <NavLink
                   to="/payments"
-                  className="text-gray-600 hover:text-pink-500 transition-colors duration-200 flex items-center gap-1.5 bg-white"
+                  className={({ isActive }) => 
+                    `block text-gray-600 hover:text-pink-500 transition-colors duration-200 ${isActive ? 'text-pink-500' : ''}`
+                  }
                 >
-                  <span className="w-1.5 h-1.5 rounded-full bg-gray-400 inline-block"></span>
-                  Payments
+                  <span className="flex items-center gap-1.5">
+                    <span className="w-1.5 h-1.5 rounded-full bg-gray-400 inline-block"></span>
+                    Payments
+                  </span>
                 </NavLink>
               </li>
               <li>
                 <NavLink
                   to="/shipping"
-                  className="text-gray-600 hover:text-pink-500 transition-colors duration-200 flex items-center gap-1.5"
+                  className={({ isActive }) => 
+                    `block text-gray-600 hover:text-pink-500 transition-colors duration-200 ${isActive ? 'text-pink-500' : ''}`
+                  }
                 >
-                  <span className="w-1.5 h-1.5 rounded-full bg-gray-400 inline-block"></span>
-                  Shipping
+                  <span className="flex items-center gap-1.5">
+                    <span className="w-1.5 h-1.5 rounded-full bg-gray-400 inline-block"></span>
+                    Shipping
+                  </span>
                 </NavLink>
               </li>
               <li>
                 <NavLink
                   to="/returns-cancellations"
-                  className="text-gray-600 hover:text-pink-500 transition-colors duration-200 flex items-center gap-1.5"
+                  className={({ isActive }) => 
+                    `block text-gray-600 hover:text-pink-500 transition-colors duration-200 ${isActive ? 'text-pink-500' : ''}`
+                  }
                 >
-                  <span className="w-1.5 h-1.5 rounded-full bg-gray-400 inline-block"></span>
-                  Returns & Cancellations
+                  <span className="flex items-center gap-1.5">
+                    <span className="w-1.5 h-1.5 rounded-full bg-gray-400 inline-block"></span>
+                    Returns & Cancellations
+                  </span>
                 </NavLink>
               </li>
             </ul>
@@ -144,46 +164,66 @@ const Footer = () => {
               <li>
                 <NavLink
                   to="/contact"
-                  className="text-gray-600 hover:text-pink-500 transition-colors duration-200 flex items-center gap-1.5"
+                  className={({ isActive }) => 
+                    `block text-gray-600 hover:text-pink-500 transition-colors duration-200 ${isActive ? 'text-pink-500' : ''}`
+                  }
                 >
-                  <span className="w-1.5 h-1.5 rounded-full bg-gray-400 inline-block"></span>
-                  Contact Us
+                  <span className="flex items-center gap-1.5">
+                    <span className="w-1.5 h-1.5 rounded-full bg-gray-400 inline-block"></span>
+                    Contact Us
+                  </span>
                 </NavLink>
               </li>
               <li>
                 <NavLink
                   to="/my-account"
-                  className="text-gray-600 hover:text-pink-500 transition-colors duration-200 flex items-center gap-1.5"
+                  className={({ isActive }) => 
+                    `block text-gray-600 hover:text-pink-500 transition-colors duration-200 ${isActive ? 'text-pink-500' : ''}`
+                  }
                 >
-                  <span className="w-1.5 h-1.5 rounded-full bg-gray-400 inline-block"></span>
-                  My Account
+                  <span className="flex items-center gap-1.5">
+                    <span className="w-1.5 h-1.5 rounded-full bg-gray-400 inline-block"></span>
+                    My Account
+                  </span>
                 </NavLink>
               </li>
               <li>
                 <NavLink
                   to="/track-order"
-                  className="text-gray-600 hover:text-pink-500 transition-colors duration-200 flex items-center gap-1.5"
+                  className={({ isActive }) => 
+                    `block text-gray-600 hover:text-pink-500 transition-colors duration-200 ${isActive ? 'text-pink-500' : ''}`
+                  }
                 >
-                  <span className="w-1.5 h-1.5 rounded-full bg-gray-400 inline-block"></span>
-                  Track Order
+                  <span className="flex items-center gap-1.5">
+                    <span className="w-1.5 h-1.5 rounded-full bg-gray-400 inline-block"></span>
+                    Track Order
+                  </span>
                 </NavLink>
               </li>
               <li>
                 <NavLink
                   to="/privacy-policy"
-                  className="text-gray-600 hover:text-pink-500 transition-colors duration-200 flex items-center gap-1.5"
+                  className={({ isActive }) => 
+                    `block text-gray-600 hover:text-pink-500 transition-colors duration-200 ${isActive ? 'text-pink-500' : ''}`
+                  }
                 >
-                  <span className="w-1.5 h-1.5 rounded-full bg-gray-400 inline-block"></span>
-                  Privacy Policy
+                  <span className="flex items-center gap-1.5">
+                    <span className="w-1.5 h-1.5 rounded-full bg-gray-400 inline-block"></span>
+                    Privacy Policy
+                  </span>
                 </NavLink>
               </li>
-              <li className="bg-[#FFFFFF]">
+              <li>
                 <NavLink
                   to="/faq"
-                  className="text-gray-600 bg-white hover:text-pink-500 transition-colors duration-200 flex items-center gap-1.5"
+                  className={({ isActive }) => 
+                    `block text-gray-600 hover:text-pink-500 transition-colors duration-200 ${isActive ? 'text-pink-500' : ''}`
+                  }
                 >
-                  <span className="w-1.5 h-1.5 rounded-full bg-gray-400 inline-block"></span>
-                  FAQ
+                  <span className="flex items-center gap-1.5">
+                    <span className="w-1.5 h-1.5 rounded-full bg-gray-400 inline-block"></span>
+                    FAQ
+                  </span>
                 </NavLink>
               </li>
             </ul>

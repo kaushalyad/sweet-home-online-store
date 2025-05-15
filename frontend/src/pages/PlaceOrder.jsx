@@ -394,102 +394,85 @@ const PlaceOrder = () => {
     
     // Check if Razorpay script is loaded
     if (!window.Razorpay) {
-      console.error("Razorpay script not loaded! Make sure the script tag is in your HTML.");
+      console.error("Razorpay script not loaded!");
       toast.error("Payment gateway not available. Please try again later.");
       return;
     }
-    
-    // Get key from env
-    const razorpayKey = import.meta.env.VITE_RAZORPAY_KEY_ID || "rzp_test_mOnUuMNqgoGi2H";
-    console.log("Using Razorpay key:", razorpayKey);
-    
-    if (!razorpayKey) {
-      console.error("Razorpay key is missing!");
-      toast.error("Payment configuration error. Please contact support.");
+
+    // Ensure currency is in correct format (uppercase)
+    const currency = (order.currency || "INR").toUpperCase();
+    console.log("Using currency:", currency);
+
+    // Validate amount
+    if (!order.amount || order.amount <= 0) {
+      console.error("Invalid order amount:", order.amount);
+      toast.error("Invalid order amount. Please try again.");
       return;
     }
 
-    // Ensure currency is uppercase for Razorpay
-    const currency = order.currency ? order.currency.toUpperCase() : "INR";
-    console.log("Using currency:", currency);
-
-    // Create a description that includes discount info
-    let description = "Payment for your order at Sweet Home";
-    if (discount > 0 && appliedCoupon) {
-      description += ` (Coupon: ${appliedCoupon.code}, Discount: ₹${discount})`;
-    }
-
     const options = {
-      key: razorpayKey,
+      key: import.meta.env.VITE_RAZORPAY_KEY_ID || "rzp_test_51OQwqPSHxQYwY",
       amount: order.amount,
       currency: currency,
       name: "Sweet Home",
-      description: description,
+      description: "Payment for your order",
       order_id: order.id,
-      prefill: {
-        name: formData.firstName + " " + formData.lastName,
-        email: formData.email,
-        contact: formData.phone
-      },
-      notes: {
-        address: `${formData.street}, ${formData.city}, ${formData.state}, ${formData.zipcode}`,
-        specialRequirements: JSON.stringify(specialRequirements),
-        appliedCoupon: appliedCoupon ? appliedCoupon.code : '',
-        discount: discount.toString()
-      },
-      theme: {
-        color: "#000000"
-      },
-      handler: async (response) => {
-        console.log("Payment response:", response);
+      handler: async function (response) {
         try {
-          // Send the payment details to backend for verification
           const { data } = await axios.post(
-            backendUrl + "/api/order/verifyRazorpay",
+            backendUrl + "/api/order/verify-razorpay",
             {
               razorpay_order_id: response.razorpay_order_id,
               razorpay_payment_id: response.razorpay_payment_id,
               razorpay_signature: response.razorpay_signature,
-              userId: order.receipt
+              userId: userData._id
             },
-            { headers: { token } }
+            {
+              headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+              }
+            }
           );
-          
+
           if (data.success) {
             // Show success animation first
             setShowSuccess(true);
-            // Clear cart after showing success
+            // Clear cart and navigate only after successful payment
             setTimeout(() => {
               setCartItems({});
               navigate("/orders");
             }, 3000);
           } else {
-            console.error("Payment verification failed:", data);
-            toast.error(data.message || "Payment verification failed. Please contact support.");
+            toast.error(data.message || "Payment verification failed");
           }
         } catch (error) {
           console.error("Payment verification error:", error);
           toast.error(error.response?.data?.message || "Payment verification failed. Please try again.");
         }
       },
+      prefill: {
+        name: formData.firstName + " " + formData.lastName,
+        email: formData.email,
+        contact: formData.phone
+      },
+      theme: {
+        color: "#F43F5E"
+      },
       modal: {
         ondismiss: function() {
-          console.log("Razorpay modal dismissed");
-          toast.info("Payment cancelled. You can try again later.");
+          toast.info("Payment cancelled. You can try again.");
         }
       }
     };
-    
-    console.log("Creating Razorpay instance with options:", { ...options, key: "[HIDDEN]" });
-    
+
     try {
-      const rzp = new window.Razorpay(options);
-      console.log("Razorpay instance created, opening payment modal...");
-      rzp.open();
-      console.log("Razorpay open() called");
+      console.log("Creating Razorpay instance with options:", { ...options, key: "[HIDDEN]" });
+      const razorpay = new window.Razorpay(options);
+      razorpay.open();
     } catch (error) {
       console.error("Razorpay initialization error:", error);
-      toast.error("Payment gateway initialization failed: " + (error.message || "Unknown error"));
+      toast.error("Failed to initialize payment. Please try again.");
     }
   };
 
@@ -597,6 +580,10 @@ const PlaceOrder = () => {
       const additionalCosts = calculateAdditionalCosts();
       const totalAmount = getTotalAmount();
 
+      if (totalAmount <= 0) {
+        throw new Error('Invalid order amount');
+      }
+
       const orderData = {
         userId,
         items: orderItems,
@@ -614,6 +601,7 @@ const PlaceOrder = () => {
           specialRequirements
         },
         amount: totalAmount,
+        totalAmount: totalAmount, // Add totalAmount field
         additionalCosts,
         discount: discount,
         appliedCoupon: appliedCoupon ? appliedCoupon.code : null,
@@ -662,7 +650,8 @@ const PlaceOrder = () => {
                 headers: { 
                   'Authorization': `Bearer ${token}`,
                   'Content-Type': 'application/json'
-                } 
+                },
+                timeout: 10000 // Add timeout of 10 seconds
               }
             );
             
@@ -673,7 +662,13 @@ const PlaceOrder = () => {
             }
           } catch (error) {
             console.error("Razorpay API error:", error);
-            throw new Error("Failed to connect to payment server. Please try again.");
+            if (error.code === 'ECONNABORTED') {
+              throw new Error("Payment server connection timed out. Please try again.");
+            } else if (!error.response) {
+              throw new Error("Failed to connect to payment server. Please check your internet connection and try again.");
+            } else {
+              throw new Error(error.response?.data?.message || "Failed to initialize payment. Please try again.");
+            }
           }
           break;
 
@@ -690,6 +685,9 @@ const PlaceOrder = () => {
         navigate("/login");
       } else if (error.message === 'No valid items found in cart') {
         toast.error("Your cart is empty or contains invalid items. Please check your cart.");
+        navigate("/cart");
+      } else if (error.message === 'Invalid order amount') {
+        toast.error("Invalid order amount. Please check your cart items.");
         navigate("/cart");
       } else {
         toast.error(error.message || "An error occurred while placing your order");
@@ -726,28 +724,29 @@ const PlaceOrder = () => {
         </div>
         
         <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-gray-800">Checkout</h1>
-          <p className="text-gray-600 mt-2">Complete your order with just a few more steps</p>
+          <h1 className="text-2xl sm:text-3xl font-bold text-gray-800">Checkout</h1>
+          <p className="text-sm sm:text-base text-gray-600 mt-2">Complete your order with just a few more steps</p>
         </div>
         
         <form
           onSubmit={onSubmitHandler}
-          className="grid grid-cols-1 lg:grid-cols-3 gap-8"
+          className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-8"
         >
-          {/* Left Side - Delivery Information */}
-          <div className="lg:col-span-2">
+          {/* Left Column - Shipping Information */}
+          <div className="lg:col-span-2 space-y-4 sm:space-y-6">
+            {/* Shipping Information */}
             <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
-              <div className="bg-gradient-to-r from-pink-500 to-rose-500 py-4 px-6">
-                <h2 className="text-white text-xl font-semibold flex items-center">
+              <div className="bg-gradient-to-r from-pink-500 to-rose-500 py-3 sm:py-4 px-4 sm:px-6">
+                <h2 className="text-white text-lg sm:text-xl font-semibold flex items-center">
                   <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
                     <path fillRule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clipRule="evenodd" />
                   </svg>
-                  Delivery Information
+                  Shipping Information
                 </h2>
               </div>
               
-              <div className="p-6">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+              <div className="p-4 sm:p-6">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
                     <label htmlFor="firstName" className="block text-sm font-medium text-gray-700 mb-1">First Name</label>
                     <input
@@ -756,12 +755,12 @@ const PlaceOrder = () => {
                       onChange={onChangeHandler}
                       name="firstName"
                       value={formData.firstName}
-                      className={`border ${formErrors.firstName ? 'border-red-500' : 'border-gray-300'} rounded-md py-2.5 px-4 w-full focus:ring-pink-500 focus:border-pink-500 transition-colors`}
+                      className="border border-gray-300 rounded-md py-2 px-3 w-full focus:ring-pink-500 focus:border-pink-500 transition-colors text-sm sm:text-base"
                       type="text"
                       placeholder="Enter your first name"
                     />
-                    {formErrors.firstName && <p className="mt-1 text-xs text-red-500">{formErrors.firstName}</p>}
                   </div>
+                  
                   <div>
                     <label htmlFor="lastName" className="block text-sm font-medium text-gray-700 mb-1">Last Name</label>
                     <input
@@ -770,15 +769,14 @@ const PlaceOrder = () => {
                       onChange={onChangeHandler}
                       name="lastName"
                       value={formData.lastName}
-                      className={`border ${formErrors.lastName ? 'border-red-500' : 'border-gray-300'} rounded-md py-2.5 px-4 w-full focus:ring-pink-500 focus:border-pink-500 transition-colors`}
+                      className="border border-gray-300 rounded-md py-2 px-3 w-full focus:ring-pink-500 focus:border-pink-500 transition-colors text-sm sm:text-base"
                       type="text"
                       placeholder="Enter your last name"
                     />
-                    {formErrors.lastName && <p className="mt-1 text-xs text-red-500">{formErrors.lastName}</p>}
                   </div>
                 </div>
-                
-                <div className="mb-4">
+
+                <div className="mt-4">
                   <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">Email Address</label>
                   <input
                     required
@@ -786,14 +784,13 @@ const PlaceOrder = () => {
                     onChange={onChangeHandler}
                     name="email"
                     value={formData.email}
-                    className={`border ${formErrors.email ? 'border-red-500' : 'border-gray-300'} rounded-md py-2.5 px-4 w-full focus:ring-pink-500 focus:border-pink-500 transition-colors`}
+                    className="border border-gray-300 rounded-md py-2 px-3 w-full focus:ring-pink-500 focus:border-pink-500 transition-colors text-sm sm:text-base"
                     type="email"
-                    placeholder="Enter your email address"
+                    placeholder="Enter your email"
                   />
-                  {formErrors.email && <p className="mt-1 text-xs text-red-500">{formErrors.email}</p>}
                 </div>
-                
-                <div className="mb-4">
+
+                <div className="mt-4">
                   <label htmlFor="phone" className="block text-sm font-medium text-gray-700 mb-1">Phone Number</label>
                   <input
                     required
@@ -801,14 +798,13 @@ const PlaceOrder = () => {
                     onChange={onChangeHandler}
                     name="phone"
                     value={formData.phone}
-                    className={`border ${formErrors.phone ? 'border-red-500' : 'border-gray-300'} rounded-md py-2.5 px-4 w-full focus:ring-pink-500 focus:border-pink-500 transition-colors`}
+                    className="border border-gray-300 rounded-md py-2 px-3 w-full focus:ring-pink-500 focus:border-pink-500 transition-colors text-sm sm:text-base"
                     type="tel"
                     placeholder="Enter your phone number"
                   />
-                  {formErrors.phone && <p className="mt-1 text-xs text-red-500">{formErrors.phone}</p>}
                 </div>
-                
-                <div className="mb-4">
+
+                <div className="mt-4">
                   <label htmlFor="street" className="block text-sm font-medium text-gray-700 mb-1">Street Address</label>
                   <input
                     required
@@ -1126,30 +1122,32 @@ const PlaceOrder = () => {
                 {!appliedCoupon ? (
                   <div className="mb-6 border-b border-gray-100 pb-6">
                     <p className="text-sm font-medium text-gray-700 mb-2">Apply Coupon Code</p>
-                    <div className="flex mb-3 relative group">
-                      <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
-                        <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-pink-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
-                        </svg>
+                    <div className="flex flex-col sm:flex-row gap-2 sm:gap-0">
+                      <div className="relative flex-1">
+                        <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
+                          <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-pink-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+                          </svg>
+                        </div>
+                        <input
+                          type="text"
+                          placeholder="Enter coupon code"
+                          value={couponCode}
+                          onChange={handleCouponChange}
+                          className="w-full border border-gray-300 rounded-md sm:rounded-r-none pl-10 pr-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-pink-300 text-sm font-medium uppercase placeholder-gray-400 shadow-sm transition-all hover:border-pink-300"
+                          aria-label="Coupon code"
+                        />
                       </div>
-                      <input
-                        type="text"
-                        placeholder="Enter coupon code"
-                        value={couponCode}
-                        onChange={handleCouponChange}
-                        className="border border-gray-300 rounded-l-md pl-10 pr-4 py-2.5 flex-1 focus:outline-none focus:ring-2 focus:ring-pink-300 text-sm font-medium uppercase placeholder-gray-400 shadow-sm transition-all group-hover:border-pink-300"
-                        aria-label="Coupon code"
-                      />
                       <button 
                         type="button"
                         onClick={applyCoupon}
                         disabled={isApplyingCoupon || !couponCode}
-                        className={`px-4 rounded-r-md text-sm font-medium flex items-center justify-center min-w-[90px] transition-all ${
+                        className={`px-4 py-2.5 rounded-md sm:rounded-l-none text-sm font-medium flex items-center justify-center w-full sm:w-auto min-w-[120px] sm:min-w-[90px] transition-all ${
                           isApplyingCoupon
-                            ? "bg-gray-100 text-gray-400 border-t border-r border-b border-gray-300"
+                            ? "bg-gray-100 text-gray-400 border border-gray-300"
                             : couponCode
                               ? "bg-gradient-to-r from-pink-500 to-rose-500 text-white hover:from-pink-600 hover:to-rose-600 shadow-md"
-                              : "bg-gray-100 text-gray-500 hover:bg-gray-200 border-t border-r border-b border-gray-300"
+                              : "bg-gray-100 text-gray-500 hover:bg-gray-200 border border-gray-300"
                         }`}
                       >
                         {isApplyingCoupon ? (
@@ -1162,7 +1160,7 @@ const PlaceOrder = () => {
                         )}
                       </button>
                     </div>
-                    <div className="text-xs text-gray-500 mt-2 bg-gray-50 p-3 rounded-md border border-gray-100">
+                    <div className="text-xs text-gray-500 mt-3 bg-gray-50 p-3 rounded-md border border-gray-100">
                       <p className="font-medium mb-2 text-gray-700 flex items-center">
                         <svg xmlns="http://www.w3.org/2000/svg" className="h-3.5 w-3.5 mr-1.5 text-pink-500" viewBox="0 0 20 20" fill="currentColor">
                           <path fillRule="evenodd" d="M5 2a1 1 0 011 1v1h1a1 1 0 010 2H6v1a1 1 0 01-2 0V6H3a1 1 0 010-2h1V3a1 1 0 011-1zm0 10a1 1 0 011 1v1h1a1 1 0 110 2H6v1a1 1 0 11-2 0v-1H3a1 1 0 110-2h1v-1a1 1 0 011-1zM12 2a1 1 0 01.967.744L14.146 7.2 17.5 9.134a1 1 0 010 1.732l-3.354 1.935-1.18 4.455a1 1 0 01-1.933 0L9.854 12.8 6.5 10.866a1 1 0 010-1.732l3.354-1.935 1.18-4.455A1 1 0 0112 2z" clipRule="evenodd" />
@@ -1171,15 +1169,15 @@ const PlaceOrder = () => {
                       </p>
                       <div className="space-y-2 mt-1.5">
                         {availableCoupons.map((coupon, index) => (
-                          <div key={index} className="flex items-center group">
+                          <div key={index} className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2 group">
                             <button
                               type="button"
                               onClick={() => setCouponCode(coupon.code)}
-                              className="font-medium text-pink-600 hover:text-pink-700 bg-white px-2 py-0.5 text-xs rounded border border-pink-100 shadow-sm hover:shadow group-hover:border-pink-200 transition-all mr-2"
+                              className="font-medium text-pink-600 hover:text-pink-700 bg-white px-2 py-0.5 text-xs rounded border border-pink-100 shadow-sm hover:shadow group-hover:border-pink-200 transition-all w-fit"
                             >
                               {coupon.code}
                             </button>
-                            <span className="text-gray-600">{coupon.description}</span>
+                            <span className="text-gray-600 text-xs sm:text-sm">{coupon.description}</span>
                           </div>
                         ))}
                       </div>
@@ -1188,7 +1186,7 @@ const PlaceOrder = () => {
                 ) : (
                   <div className="mb-6 border-b border-gray-100 pb-6">
                     <div className="border border-green-200 rounded-lg p-3 bg-gradient-to-r from-green-50 to-emerald-50 shadow-sm">
-                      <div className="flex justify-between items-center">
+                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 sm:gap-0">
                         <div>
                           <div className="flex items-center">
                             <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-green-500 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -1203,7 +1201,7 @@ const PlaceOrder = () => {
                         <button
                           type="button"
                           onClick={removeCoupon}
-                          className="bg-white text-red-600 hover:bg-red-50 text-sm font-medium px-3 py-1.5 rounded-full border border-red-200 hover:border-red-300 transition-colors shadow-sm hover:shadow"
+                          className="bg-white text-red-600 hover:bg-red-50 text-sm font-medium px-3 py-1.5 rounded-full border border-red-200 hover:border-red-300 transition-colors shadow-sm hover:shadow w-full sm:w-auto"
                         >
                           Remove
                         </button>

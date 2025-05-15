@@ -3,7 +3,7 @@ import { ShopContext } from '../context/ShopContext';
 import Title from '../components/Title';
 import { motion } from 'framer-motion';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { FaUser, FaMapMarkerAlt, FaPhone, FaEnvelope, FaCalendarAlt, FaShoppingBag, FaHeart, FaCog, FaArrowRight } from 'react-icons/fa';
+import { FaUser, FaMapMarkerAlt, FaPhone, FaEnvelope, FaCalendarAlt, FaShoppingBag, FaHeart, FaCog, FaArrowRight, FaShoppingCart } from 'react-icons/fa';
 import axios from 'axios';
 import { toast } from 'react-toastify';
 
@@ -549,7 +549,7 @@ const Profile = () => {
             </div>
             
             {wishlistItems && wishlistItems.length > 0 ? (
-              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                 {wishlistItems.map((productId) => {
                   const product = products.find(p => p._id === productId);
                   if (!product) return null;
@@ -560,22 +560,22 @@ const Profile = () => {
                       initial={{ opacity: 0, y: 10 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ duration: 0.4 }}
-                      className="border border-gray-200 rounded-lg overflow-hidden hover:shadow-md transition-shadow duration-300"
+                      className="group border border-gray-200 rounded-lg overflow-hidden hover:shadow-lg transition-all duration-300"
                     >
-                      <div className="relative">
+                      <div className="relative aspect-square">
                         <Link to={`/collection/${product._id}`}>
                           <img 
                             src={product.image[0]} 
                             alt={product.name} 
-                            className="w-full h-48 object-cover"
+                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                           />
                         </Link>
                         <button
                           onClick={() => removeFromWishlist(product._id)}
-                          className="absolute top-2 right-2 bg-white p-2 rounded-full shadow-md hover:shadow-lg transition-all duration-300"
+                          className="absolute top-3 right-3 bg-white p-2.5 rounded-full shadow-md hover:shadow-lg transition-all duration-300 hover:bg-pink-50"
                           aria-label="Remove from wishlist"
                         >
-                          <FaHeart className="text-red-500" />
+                          <FaHeart className="text-pink-500" />
                         </button>
                       </div>
                       
@@ -591,18 +591,22 @@ const Profile = () => {
                           <span>{product.price}</span>
                         </p>
                         
-                        <div className="mt-4 flex justify-between">
+                        <div className="mt-4 flex flex-col gap-2">
                           <button
-                            onClick={() => addToCart(product._id, product.sizes[0])}
-                            className="bg-black text-white text-xs px-4 py-2 rounded-sm hover:bg-gray-800 transition-colors"
+                            onClick={() => {
+                              addToCart(product._id, 1);
+                              toast.success("Added to cart!");
+                            }}
+                            className="w-full bg-gradient-to-r from-pink-500 to-rose-500 text-white px-4 py-2.5 rounded-md font-medium flex items-center justify-center gap-2 hover:from-pink-600 hover:to-rose-600 transition-all duration-300"
                           >
-                            ADD TO CART
+                            <FaShoppingCart className="text-sm" />
+                            Add to Cart
                           </button>
                           <button
                             onClick={() => removeFromWishlist(product._id)}
-                            className="text-gray-500 text-xs hover:text-gray-700 transition-colors duration-300"
+                            className="w-full text-gray-500 text-sm hover:text-gray-700 transition-colors duration-300 py-2"
                           >
-                            REMOVE
+                            Remove from Wishlist
                           </button>
                         </div>
                       </div>
@@ -619,7 +623,7 @@ const Profile = () => {
                 </p>
                 <Link 
                   to="/collection" 
-                  className="inline-block px-6 py-2 bg-black text-white rounded-md hover:bg-gray-800 transition-colors duration-300"
+                  className="inline-block px-6 py-2.5 bg-gradient-to-r from-pink-500 to-rose-500 text-white rounded-md hover:from-pink-600 hover:to-rose-600 transition-all duration-300"
                 >
                   Browse Collection
                 </Link>

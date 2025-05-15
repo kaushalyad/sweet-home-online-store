@@ -87,18 +87,19 @@ const ProductItem = ({ id, image, name, price, index = 0, featured = false, best
             className="w-full h-full object-cover transition-all duration-700 group-hover:scale-110"
             src={image[currentImage]}
             alt={name}
+            loading="lazy"
           />
           
           {/* Image indicator dots */}
           {image.length > 1 && (
-            <div className="absolute bottom-3 left-0 right-0 flex justify-center gap-1.5">
+            <div className="absolute bottom-2 sm:bottom-3 left-0 right-0 flex justify-center gap-1 sm:gap-1.5">
               {image.map((_, idx) => (
                 <div 
                   key={idx}
-                  className={`h-1.5 rounded-full transition-all duration-300 ${
+                  className={`h-1 sm:h-1.5 rounded-full transition-all duration-300 ${
                     currentImage === idx 
-                      ? 'w-4 bg-pink-500' 
-                      : 'w-1.5 bg-white bg-opacity-70'
+                      ? 'w-3 sm:w-4 bg-pink-500' 
+                      : 'w-1 sm:w-1.5 bg-white bg-opacity-70'
                   }`}
                 />
               ))}

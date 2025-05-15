@@ -13,11 +13,11 @@ import wishlistRouter from "./routes/wishlistRoute.js";
 import analyticsRouter from "./routes/analyticsRoute.js";
 import cookieParser from "cookie-parser";
 import trackUserBehavior from "./middleware/trackUserBehavior.js";
-import { errorHandler } from "./middleware/errorHandler.js";
+import { errorHandler } from './middleware/errorHandler.js';
 
 // App Config
 const app = express();
-const port = process.env.PORT || 4000;
+const port = process.env.PORT || 4000; 
 
 // Connect to database and cloudinary
 connectDB();
@@ -29,6 +29,7 @@ const allowedOrigins = [
   "http://localhost:3000", // Frontend
   "http://localhost:5173", // Vite dev server
   "http://localhost:5174", // Vite dev server
+  "http://localhost:5175", // Additional Vite dev server
   "https://www.sweethome-store.com",
   "https://api.sweethome-store.com",
 ];
@@ -45,17 +46,21 @@ const corsOptions = {
     }
   },
   credentials: true,
-  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-  allowedHeaders: ["Content-Type", "Authorization", "token"],
+  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
+  allowedHeaders: ["Content-Type", "Authorization", "token", "X-Requested-With", "Accept", "Origin"],
+  exposedHeaders: ["Content-Range", "X-Content-Range"],
   maxAge: 86400, // 24 hours
 };
 
 // Apply CORS middleware
 app.use(cors(corsOptions));
 
+// Add pre-flight OPTIONS handler for all routes
+app.options('*', cors(corsOptions));
+
 // Increase JSON payload limit
-app.use(express.json({ limit: "50mb" }));
-app.use(express.urlencoded({ limit: "50mb", extended: true }));
+app.use(express.json({ limit: '50mb' }));
+app.use(express.urlencoded({ limit: '50mb', extended: true }));
 
 // Middlewares
 app.use(cookieParser());
@@ -64,9 +69,9 @@ app.use(trackUserBehavior);
 
 // Add security headers
 app.use((req, res, next) => {
-  res.setHeader("X-Content-Type-Options", "nosniff");
-  res.setHeader("X-Frame-Options", "DENY");
-  res.setHeader("X-XSS-Protection", "1; mode=block");
+  res.setHeader('X-Content-Type-Options', 'nosniff');
+  res.setHeader('X-Frame-Options', 'DENY');
+  res.setHeader('X-XSS-Protection', '1; mode=block');
   next();
 });
 
@@ -92,7 +97,7 @@ app.use((req, res) => {
 app.use(errorHandler);
 
 // Server listener
-app.listen(port, "0.0.0.0", () => {
+app.listen(port, '0.0.0.0', () => {
   logger.info(`Server started on PORT : ${port}`);
-  logger.info(`Environment: ${process.env.NODE_ENV || "development"}`);
+  logger.info(`Environment: ${process.env.NODE_ENV || 'development'}`);
 });

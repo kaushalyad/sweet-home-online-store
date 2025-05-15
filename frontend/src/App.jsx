@@ -95,11 +95,11 @@ const App = () => {
 
   return (
     <ShopContextProvider>
-      <div className='relative'>
+      <div className='relative min-h-screen'>
         <ToastContainer />
         <Navbar />
         <div 
-          className='transition-all duration-300'
+          className='transition-all duration-300 min-h-[calc(100vh-140px)]'
           style={{ 
             paddingTop: showPromoBanner ? '180px' : '140px'
           }}
@@ -107,7 +107,7 @@ const App = () => {
           <div className="flex justify-center mb-6">
             <SearchBar />
           </div>
-          <div className='px-4 sm:px-[5vw] md:px-[7vw] lg:px-[9vw]'>
+          <div className='px-4 sm:px-[5vw] md:px-[7vw] lg:px-[9vw] min-h-full'>
             <Routes>
               <Route path='/' element={<Home />} />
               <Route path='/collection' element={<Collection />} />

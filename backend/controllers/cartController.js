@@ -18,24 +18,36 @@ const getCart = async (req, res) => {
         // Ensure cartData is an object
         const cartData = user.cartData || {};
         
-        // Clean up any invalid values
-        Object.keys(cartData).forEach(key => {
-            if (!cartData[key] || cartData[key] < 1) {
-                delete cartData[key];
+        // Clean up any invalid values and verify products exist
+        const cleanedCartData = {};
+        const productIds = Object.keys(cartData);
+        
+        // Get all products in one query for better performance
+        const products = await productModel.find({ _id: { $in: productIds } });
+        const validProductIds = new Set(products.map(p => p._id.toString()));
+        
+        // Only keep valid products with positive quantities
+        for (const [productId, quantity] of Object.entries(cartData)) {
+            if (validProductIds.has(productId) && quantity > 0) {
+                cleanedCartData[productId] = quantity;
             }
-        });
+        }
 
-        // Save the cleaned cart data
-        if (Object.keys(cartData).length !== Object.keys(user.cartData || {}).length) {
-            await userModel.findByIdAndUpdate(userId, { $set: { cartData } });
+        // Update user's cart data if there are changes
+        if (JSON.stringify(cartData) !== JSON.stringify(cleanedCartData)) {
+            await userModel.findByIdAndUpdate(
+                userId,
+                { $set: { cartData: cleanedCartData } },
+                { new: true }
+            );
         }
 
         return res.status(200).json({
             success: true,
-            cartData
+            cartData: cleanedCartData
         });
     } catch (error) {
-        console.error("Error getting cart:", error);
+        logger.error("Error getting cart:", error);
         return res.status(500).json({
             success: false,
             message: "Error getting cart",
@@ -195,45 +207,58 @@ const updateCartItem = async (req, res) => {
 
 // Remove from cart
 const removeFromCart = async (req, res) => {
-  try {
-    const userId = req.user.id;
-    const { itemId } = req.params;
+    try {
+        const userId = req.user.id;
+        const { itemId } = req.params;
 
-    const user = await userModel.findById(userId);
-    
-    if (!user) {
-      return res.status(404).json({
-        success: false,
-        message: "User not found"
-      });
+        const user = await userModel.findById(userId);
+        
+        if (!user) {
+            return res.status(404).json({
+                success: false,
+                message: "User not found"
+            });
+        }
+
+        if (!user.cartData || !user.cartData[itemId]) {
+            return res.status(404).json({
+                success: false,
+                message: "Item not found in cart"
+            });
+        }
+
+        // Create a new cartData object without the removed item
+        const updatedCartData = { ...user.cartData };
+        delete updatedCartData[itemId];
+
+        // Update user with new cart data
+        const updatedUser = await userModel.findByIdAndUpdate(
+            userId,
+            { $set: { cartData: updatedCartData } },
+            { new: true }
+        );
+
+        if (!updatedUser) {
+            return res.status(500).json({
+                success: false,
+                message: "Failed to update cart"
+            });
+        }
+
+        logger.info(`Item removed from cart for user: ${userId}`);
+
+        return res.status(200).json({
+            success: true,
+            message: "Item removed from cart",
+            cartData: updatedUser.cartData
+        });
+    } catch (error) {
+        logger.error('Error removing from cart:', error);
+        return res.status(500).json({
+            success: false,
+            message: "Failed to remove from cart"
+        });
     }
-
-    if (!user.cartData || !user.cartData[itemId]) {
-      return res.status(404).json({
-        success: false,
-        message: "Item not found in cart"
-      });
-    }
-
-    // Remove item
-    delete user.cartData[itemId];
-
-    await user.save();
-
-    logger.info(`Item removed from cart for user: ${userId}`);
-
-    return res.status(200).json({
-      success: true,
-      message: "Item removed from cart",
-      cartData: user.cartData
-    });
-  } catch (error) {
-    logger.error('Error removing from cart:', error);
-    return res.status(500).json({
-      success: false,
-      message: "Failed to remove from cart"
-    });
-  }
 };
 
 // Clear cart

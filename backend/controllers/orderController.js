@@ -177,8 +177,15 @@ const verifyStripe = async (req,res) => {
 // Placing orders using Razorpay Method
 const placeOrderRazorpay = async (req, res) => {
   try {
-    const { userId, items, amount, address } = req.body;
+    const { userId, items, amount, address, additionalCosts, discount, appliedCoupon } = req.body;
     console.log("Creating Razorpay order for amount:", amount);
+
+    if (!amount || amount <= 0) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid order amount"
+      });
+    }
 
     // Transform items to include full product data
     const orderItems = items.map(item => ({
@@ -194,10 +201,14 @@ const placeOrderRazorpay = async (req, res) => {
       userId,
       items: orderItems,
       address,
-      amount,
+      totalAmount: amount,
+      amount: amount,
       paymentMethod: "Razorpay",
       payment: false,
       date: Date.now(),
+      additionalCosts: additionalCosts || 0,
+      discount: discount || 0,
+      appliedCoupon: appliedCoupon || null
     };
 
     // Create order in database
@@ -205,14 +216,15 @@ const placeOrderRazorpay = async (req, res) => {
     const savedOrder = await newOrder.save();
     console.log("Created order in database with ID:", savedOrder._id);
 
-    // Clear the user's cart after successful order creation
-    await userModel.findByIdAndUpdate(userId, { cartData: {} });
-
     // Create Razorpay order
     const options = {
-      amount: Math.round(amount * 100),
-      currency: "INR",
+      amount: Math.round(amount * 100), // Convert to paise
+      currency: "INR", // Always use INR for Razorpay
       receipt: savedOrder._id.toString(),
+      notes: {
+        orderId: savedOrder._id.toString(),
+        userId: userId.toString()
+      }
     };
 
     console.log("Creating Razorpay order with options:", options);
@@ -241,7 +253,7 @@ const placeOrderRazorpay = async (req, res) => {
         order: {
           id: order.id,
           amount: order.amount,
-          currency: order.currency.toLowerCase(),
+          currency: "INR", // Always return INR
           receipt: order.receipt
         } 
       });
@@ -249,11 +261,17 @@ const placeOrderRazorpay = async (req, res) => {
       console.error("Razorpay order creation error:", error);
       // Delete the order from our database if Razorpay order creation fails
       await Order.findByIdAndDelete(savedOrder._id);
-      return res.json({ success: false, message: error.message || "Failed to create payment order" });
+      return res.status(400).json({ 
+        success: false, 
+        message: error.message || "Failed to create payment order" 
+      });
     }
   } catch (error) {
     console.error("Order placement error:", error);
-    res.json({ success: false, message: error.message || "Failed to place order" });
+    res.status(500).json({ 
+      success: false, 
+      message: error.message || "Failed to place order" 
+    });
   }
 };
 

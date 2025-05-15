@@ -146,19 +146,19 @@ const Product = () => {
 
       {/* Main Product Section */}
       <div className="bg-white rounded-2xl shadow-md border border-gray-100 overflow-hidden hover:shadow-lg transition-shadow duration-300 backdrop-blur-sm bg-white/90">
-        <div className="flex flex-col md:flex-row">
+        <div className="flex flex-col lg:flex-row">
           {/* Product Images Section */}
-          <div className="w-full md:w-1/2 p-4 lg:p-8">
-            <div className="flex flex-row gap-6">
-              {/* Thumbnails */}
-              <div className="flex flex-col gap-4 overflow-y-auto pb-0 pr-2 max-h-[500px] scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100 w-20">
+          <div className="w-full lg:w-1/2 p-2 sm:p-4 lg:p-8">
+            <div className="flex flex-col sm:flex-row gap-2 sm:gap-4 lg:gap-6">
+              {/* Thumbnails - Horizontal on mobile, Vertical on larger screens */}
+              <div className="flex sm:flex-col gap-2 sm:gap-4 overflow-x-auto sm:overflow-y-auto sm:overflow-x-hidden pb-2 sm:pb-0 sm:pr-2 max-h-[500px] scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100 w-full sm:w-20">
                 {productData.image.map((img, index) => (
                   <motion.div
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
                     key={index}
                     onClick={() => setImage(img)}
-                    className={`relative cursor-pointer rounded-lg overflow-hidden min-w-20 h-20 shadow-sm ${
+                    className={`relative cursor-pointer rounded-lg overflow-hidden min-w-16 sm:min-w-20 h-16 sm:h-20 flex-shrink-0 shadow-sm ${
                       image === img 
                         ? 'ring-2 ring-pink-500 ring-offset-2 shadow-md' 
                         : 'border border-gray-200 hover:border-pink-300 hover:shadow'
@@ -169,6 +169,7 @@ const Product = () => {
                         src={img}
                         className="w-full h-full object-cover"
                         alt={`${productData.name} view ${index + 1}`}
+                        loading="lazy"
                       />
                     </div>
                   </motion.div>
@@ -182,7 +183,7 @@ const Product = () => {
                 className="relative flex-1 rounded-xl overflow-hidden bg-gradient-to-br from-white to-gray-50 shadow-sm border border-gray-200"
               >
                 <div 
-                  className="group relative pt-[100%] overflow-hidden cursor-zoom-in"
+                  className="group relative aspect-square overflow-hidden cursor-zoom-in"
                   onClick={() => setShowImageModal(true)}
                 >
                   <motion.img 
@@ -193,47 +194,49 @@ const Product = () => {
                       transition: { duration: 0.3 }
                     }}
                     src={image} 
-                    className="absolute inset-0 w-full h-full object-contain p-6 transition-transform duration-500 group-hover:scale-110"
-                    alt={productData.name} 
+                    className="absolute inset-0 w-full h-full object-contain p-2 sm:p-4 lg:p-6 transition-transform duration-500 group-hover:scale-110"
+                    alt={productData.name}
+                    loading="eager"
                   />
                   
                   {/* Beautiful overlay with gradient */}
                   <div className="absolute inset-0 bg-gradient-to-t from-black/5 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                   
                   {/* Zoom hint overlay */}
-                  <div className="absolute bottom-0 inset-x-0 bg-gradient-to-t from-black/10 to-transparent h-20 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"></div>
+                  <div className="absolute bottom-0 inset-x-0 bg-gradient-to-t from-black/10 to-transparent h-16 sm:h-20 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"></div>
                   
                   {/* Zoom text hint */}
-                  <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 bg-white/80 px-3 py-1.5 rounded-full text-xs font-medium text-gray-700 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none shadow-sm flex items-center">
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-3.5 w-3.5 mr-1 text-gray-600" viewBox="0 0 20 20" fill="currentColor">
+                  <div className="absolute bottom-2 sm:bottom-4 left-1/2 transform -translate-x-1/2 bg-white/80 px-2 sm:px-3 py-1 sm:py-1.5 rounded-full text-xs font-medium text-gray-700 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none shadow-sm flex items-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3 sm:h-3.5 sm:w-3.5 mr-1 text-gray-600" viewBox="0 0 20 20" fill="currentColor">
                       <path d="M5 8a1 1 0 011-1h1V6a1 1 0 012 0v1h1a1 1 0 110 2H9v1a1 1 0 11-2 0V9H6a1 1 0 01-1-1z" />
                       <path fillRule="evenodd" d="M2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8zm6-4a4 4 0 100 8 4 4 0 000-8z" clipRule="evenodd" />
                     </svg>
-                    Click to zoom
+                    <span className="hidden sm:inline">Click to zoom</span>
+                    <span className="sm:hidden">Zoom</span>
                   </div>
                 </div>
                 
                 {/* Product Badges */}
-                <div className="absolute top-4 left-4 flex flex-col gap-2 z-10">
+                <div className="absolute top-2 sm:top-4 left-2 sm:left-4 flex flex-wrap gap-1 sm:gap-2 z-10">
                   {productData.bestseller && (
-                    <div className="bg-gradient-to-r from-pink-500 to-pink-600 text-white text-xs px-3 py-1.5 rounded-full flex items-center shadow-md">
-                      <FaStar className="mr-1.5" /> Bestseller
+                    <div className="bg-gradient-to-r from-pink-500 to-pink-600 text-white text-[10px] sm:text-xs px-2 sm:px-3 py-1 sm:py-1.5 rounded-full flex items-center shadow-md">
+                      <FaStar className="mr-1 sm:mr-1.5 text-[8px] sm:text-xs" /> Bestseller
                     </div>
                   )}
                   {productData.newArrival && (
-                    <div className="bg-gradient-to-r from-blue-500 to-indigo-500 text-white text-xs px-3 py-1.5 rounded-full shadow-md">
+                    <div className="bg-gradient-to-r from-blue-500 to-indigo-500 text-white text-[10px] sm:text-xs px-2 sm:px-3 py-1 sm:py-1.5 rounded-full shadow-md">
                       New Arrival
                     </div>
                   )}
                   {productData.discountPrice && (
-                    <div className="bg-gradient-to-r from-amber-500 to-orange-500 text-white text-xs px-3 py-1.5 rounded-full shadow-md">
+                    <div className="bg-gradient-to-r from-amber-500 to-orange-500 text-white text-[10px] sm:text-xs px-2 sm:px-3 py-1 sm:py-1.5 rounded-full shadow-md">
                       Sale
                     </div>
                   )}
                 </div>
                 
                 {/* Action Buttons */}
-                <div className="absolute top-4 right-4 flex flex-col gap-2 z-10">
+                <div className="absolute top-2 sm:top-4 right-2 sm:right-4 flex flex-wrap gap-1 sm:gap-2 z-10">
                   {/* Wishlist Button */}
                   <motion.button
                     whileHover={{ scale: 1.1 }}
@@ -242,11 +245,11 @@ const Product = () => {
                       e.stopPropagation();
                       toggleWishlist();
                     }}
-                    className="bg-white p-3 rounded-full shadow-md hover:shadow-lg transition-all duration-300"
+                    className="bg-white p-2 sm:p-3 rounded-full shadow-md hover:shadow-lg transition-all duration-300"
                     aria-label={inWishlist ? "Remove from wishlist" : "Add to wishlist"}
                   >
                     <FaHeart 
-                      className={`text-xl ${inWishlist ? 'text-red-500' : 'text-gray-400'}`} 
+                      className={`text-lg sm:text-xl ${inWishlist ? 'text-red-500' : 'text-gray-400'}`} 
                     />
                   </motion.button>
                   
@@ -258,10 +261,10 @@ const Product = () => {
                       e.stopPropagation();
                       setShowShareOptions(!showShareOptions);
                     }}
-                    className="bg-white p-3 rounded-full shadow-md hover:shadow-lg transition-all duration-300"
+                    className="bg-white p-2 sm:p-3 rounded-full shadow-md hover:shadow-lg transition-all duration-300"
                     aria-label="Share product"
                   >
-                    <FaShare className="text-gray-600" />
+                    <FaShare className="text-gray-600 text-lg sm:text-xl" />
                   </motion.button>
                   
                   {/* Share Options Popup */}
@@ -271,20 +274,20 @@ const Product = () => {
                         initial={{ opacity: 0, scale: 0.8 }}
                         animate={{ opacity: 1, scale: 1 }}
                         exit={{ opacity: 0, scale: 0.8 }}
-                        className="absolute top-16 right-0 bg-white rounded-lg shadow-lg p-3 flex gap-2"
+                        className="absolute top-12 sm:top-16 right-0 bg-white rounded-lg shadow-lg p-2 sm:p-3 flex gap-1 sm:gap-2"
                         onClick={(e) => e.stopPropagation()}
                       >
-                        <button className="bg-blue-500 text-white p-2 rounded-full hover:bg-blue-600 transition-colors">
-                          <FaFacebook />
+                        <button className="bg-blue-500 text-white p-1.5 sm:p-2 rounded-full hover:bg-blue-600 transition-colors">
+                          <FaFacebook className="text-sm sm:text-base" />
                         </button>
-                        <button className="bg-blue-400 text-white p-2 rounded-full hover:bg-blue-500 transition-colors">
-                          <FaTwitter />
+                        <button className="bg-blue-400 text-white p-1.5 sm:p-2 rounded-full hover:bg-blue-500 transition-colors">
+                          <FaTwitter className="text-sm sm:text-base" />
                         </button>
-                        <button className="bg-red-500 text-white p-2 rounded-full hover:bg-red-600 transition-colors">
-                          <FaPinterest />
+                        <button className="bg-red-500 text-white p-1.5 sm:p-2 rounded-full hover:bg-red-600 transition-colors">
+                          <FaPinterest className="text-sm sm:text-base" />
                         </button>
-                        <button className="bg-green-500 text-white p-2 rounded-full hover:bg-green-600 transition-colors">
-                          <FaWhatsapp />
+                        <button className="bg-green-500 text-white p-1.5 sm:p-2 rounded-full hover:bg-green-600 transition-colors">
+                          <FaWhatsapp className="text-sm sm:text-base" />
                         </button>
                       </motion.div>
                     )}
@@ -295,7 +298,7 @@ const Product = () => {
           </div>
 
           {/* Product Info Section */}
-          <div className="w-full md:w-1/2 p-4 lg:p-8 border-t md:border-t-0 md:border-l border-gray-100">
+          <div className="w-full lg:w-1/2 p-4 lg:p-8 border-t lg:border-t-0 lg:border-l border-gray-100">
             <motion.div
               initial="hidden"
               animate="visible"
@@ -312,7 +315,7 @@ const Product = () => {
               </div>
               
               {/* Product Title */}
-              <h1 className="text-2xl sm:text-3xl font-semibold text-gray-800 mb-3 leading-tight">
+              <h1 className="text-xl sm:text-2xl lg:text-3xl font-semibold text-gray-800 mb-3 leading-tight">
                 {productData.name}
               </h1>
               
@@ -331,8 +334,8 @@ const Product = () => {
               
               {/* Price */}
               <div className="mb-6 bg-gray-50 p-4 rounded-lg">
-                <div className="flex items-center gap-3">
-                  <span className="text-3xl font-bold text-gray-900 bg-gradient-to-r from-pink-500 to-rose-500 bg-clip-text text-transparent">
+                <div className="flex flex-wrap items-center gap-3">
+                  <span className="text-2xl sm:text-3xl font-bold text-gray-900 bg-gradient-to-r from-pink-500 to-rose-500 bg-clip-text text-transparent">
                     {currency}{productData.price}
                   </span>
                   {productData.discountPrice && (
@@ -353,7 +356,7 @@ const Product = () => {
               
               {/* Description */}
               <div className="mb-6">
-                <p className="text-gray-600 leading-relaxed">
+                <p className="text-gray-600 leading-relaxed text-sm sm:text-base">
                   {productData.description}
                 </p>
               </div>
@@ -407,7 +410,7 @@ const Product = () => {
               {/* Product Features */}
               <div className="border-t border-gray-100 pt-6">
                 <h3 className="font-medium text-gray-800 mb-3">Product Highlights</h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div className="flex items-center gap-2 text-sm text-gray-600">
                     <FaCheck className="text-green-500" />
                     <span>100% Authentic</span>
@@ -431,7 +434,7 @@ const Product = () => {
               {(productData.ingredients || productData.weight || productData.shelfLife || productData.storage) && (
                 <div className="mt-6 border-t border-gray-100 pt-4">
                   <h3 className="font-medium text-gray-800 mb-3">Product Specifications</h3>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-y-2 gap-x-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-y-2 gap-x-4">
                     {productData.ingredients && (
                       <div className="flex flex-col">
                         <span className="text-xs text-gray-500">Ingredients</span>

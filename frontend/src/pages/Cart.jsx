@@ -2,7 +2,7 @@ import { useEffect, useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ShopContext } from '../context/ShopContext';
 import { useContext } from 'react';
-import { FaShoppingCart } from 'react-icons/fa';
+import { FaShoppingCart, FaTrash, FaHeart, FaMinus, FaPlus } from 'react-icons/fa';
 import CartTotal from '../components/CartTotal';
 import Title from '../components/Title';
 import { toast } from "react-toastify";
@@ -170,17 +170,32 @@ const Cart = () => {
   if (isCartEmpty) {
     return (
       <div className="container mx-auto px-4 py-8">
-        <Title title="Your Cart" />
-        <div className="text-center py-8">
-          <FaShoppingCart className="mx-auto text-6xl text-gray-400 mb-4" />
-          <h2 className="text-2xl font-semibold mb-2">Your cart is empty</h2>
-          <p className="text-gray-600 mb-4">Add some delicious items to your cart!</p>
-          <button
-            onClick={() => navigate('/shop')}
-            className="bg-primary text-white px-6 py-2 rounded-full hover:bg-primary-dark transition-colors"
-          >
-            Continue Shopping
-          </button>
+        <Title title="Your Sweet Cart" />
+        <div className="text-center py-12 bg-white rounded-lg shadow-sm">
+          <div className="max-w-md mx-auto">
+            <div className="w-24 h-24 bg-pink-50 rounded-full flex items-center justify-center mx-auto mb-6">
+              <FaShoppingCart className="text-4xl text-pink-500" />
+            </div>
+            <h2 className="text-2xl font-bold text-gray-800 mb-3">Your Cart is Waiting for Sweet Treats!</h2>
+            <p className="text-gray-600 mb-8">
+              Discover our delightful collection of handcrafted sweets and treats. From traditional favorites to modern delights, we have something special for every sweet tooth!
+            </p>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <button
+                onClick={() => navigate('/collection')}
+                className="px-8 py-3 bg-gradient-to-r from-pink-500 to-rose-500 text-white rounded-md font-medium hover:from-pink-600 hover:to-rose-600 transition-all duration-300 flex items-center justify-center gap-2"
+              >
+                <FaShoppingCart className="text-lg" />
+                Explore Sweet Collection
+              </button>
+              <button
+                onClick={() => navigate('/')}
+                className="px-8 py-3 border border-gray-300 text-gray-700 rounded-md font-medium hover:bg-gray-50 transition-all duration-300"
+              >
+                Back to Home
+              </button>
+            </div>
+          </div>
         </div>
       </div>
     );
@@ -188,12 +203,12 @@ const Cart = () => {
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <Title title="Your Cart" />
+      <Title title="Your Sweet Collection" />
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         <div className="lg:col-span-2">
           {/* Cart Items Table Header */}
           <div className="hidden md:grid grid-cols-12 gap-4 mb-4 p-4 bg-gray-50 rounded-lg font-semibold text-gray-700">
-            <div className="col-span-4">Product</div>
+            <div className="col-span-4">Sweet Treat</div>
             <div className="col-span-2 text-center">Price</div>
             <div className="col-span-3 text-center">Quantity</div>
             <div className="col-span-2 text-center">Total</div>
@@ -202,16 +217,21 @@ const Cart = () => {
 
           {/* Cart Items */}
           {cartProducts.map((product) => (
-            <div key={product._id} className="grid grid-cols-12 gap-4 items-center mb-4 p-4 bg-white rounded-lg shadow">
+            <div 
+              key={product._id} 
+              className="group grid grid-cols-12 gap-4 items-center mb-4 p-4 bg-white rounded-lg shadow-sm hover:shadow-md transition-all duration-300"
+            >
               {/* Product Info */}
               <div className="col-span-12 md:col-span-4 flex items-center gap-4">
-                <img
-                  src={product.image[0]}
-                  alt={product.name}
-                  className="w-20 h-20 object-cover rounded"
-                />
+                <div className="relative w-20 h-20 overflow-hidden rounded-lg">
+                  <img
+                    src={product.image[0]}
+                    alt={product.name}
+                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
+                  />
+                </div>
                 <div>
-                  <h3 className="font-semibold text-gray-800">{product.name}</h3>
+                  <h3 className="font-semibold text-gray-800 group-hover:text-pink-600 transition-colors duration-300">{product.name}</h3>
                   <p className="text-sm text-gray-500">{product.category}</p>
                 </div>
               </div>
@@ -219,25 +239,40 @@ const Cart = () => {
               {/* Price */}
               <div className="col-span-6 md:col-span-2 text-center">
                 <span className="md:hidden font-semibold mr-2">Price:</span>
-                <span className="text-gray-800">₹{product.price.toFixed(2)}</span>
+                <span className="text-gray-800 font-medium">₹{product.price.toFixed(2)}</span>
               </div>
 
               {/* Quantity Controls */}
-              <div className="col-span-6 md:col-span-3 flex items-center justify-center gap-2">
-                <span className="md:hidden font-semibold mr-2">Quantity:</span>
-                <button
-                  onClick={() => handleQuantityChange(product._id, product.quantity - 1)}
-                  className="w-8 h-8 flex items-center justify-center border rounded-full hover:bg-gray-100"
-                >
-                  -
-                </button>
-                <span className="w-8 text-center">{product.quantity}</span>
-                <button
-                  onClick={() => handleQuantityChange(product._id, product.quantity + 1)}
-                  className="w-8 h-8 flex items-center justify-center border rounded-full hover:bg-gray-100"
-                >
-                  +
-                </button>
+              <div className="col-span-6 md:col-span-3 flex items-center justify-center gap-4">
+                <div className="flex items-center gap-4">
+                  <div className="flex items-center bg-gray-50 rounded-lg border border-gray-200">
+                    <button
+                      onClick={() => handleQuantityChange(product._id, product.quantity - 1)}
+                      disabled={product.quantity <= 1}
+                      className="p-2 text-gray-600 hover:text-primary-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                      aria-label="Decrease quantity"
+                    >
+                      <FaMinus className="w-3 h-3" />
+                    </button>
+                    <span className="px-3 py-1 text-sm font-medium min-w-[2rem] text-center">
+                      {product.quantity}
+                    </span>
+                    <button
+                      onClick={() => handleQuantityChange(product._id, product.quantity + 1)}
+                      className="p-2 text-gray-600 hover:text-primary-600 transition-colors"
+                      aria-label="Increase quantity"
+                    >
+                      <FaPlus className="w-3 h-3" />
+                    </button>
+                  </div>
+                  <button
+                    onClick={() => handleRemoveItem(product._id)}
+                    className="p-2 text-gray-400 hover:text-red-500 transition-colors"
+                    aria-label="Remove item"
+                  >
+                    <FaTrash className="w-4 h-4" />
+                  </button>
+                </div>
               </div>
 
               {/* Total */}
@@ -246,16 +281,6 @@ const Cart = () => {
                 <span className="font-semibold text-gray-800">
                   ₹{(product.price * product.quantity).toFixed(2)}
                 </span>
-              </div>
-
-              {/* Remove Button */}
-              <div className="col-span-6 md:col-span-1 text-center">
-                <button
-                  onClick={() => handleRemoveItem(product._id)}
-                  className="text-red-500 hover:text-red-700 transition-colors"
-                >
-                  Remove
-                </button>
               </div>
             </div>
           ))}
