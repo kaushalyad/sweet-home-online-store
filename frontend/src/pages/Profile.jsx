@@ -295,7 +295,12 @@ const Profile = () => {
       const response = await axios.post(
         backendUrl + '/api/user/update-notifications',
         notificationSettings,
-        { headers: { token } }
+        { 
+          headers: { 
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
+        }
       );
 
       if (response.data.success) {

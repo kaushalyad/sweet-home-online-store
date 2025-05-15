@@ -109,7 +109,10 @@ const Addresses = () => {
     try {
       const token = localStorage.getItem('token');
       await axios.delete(`http://localhost:5000/api/addresses/${addressId}`, {
-        headers: { Authorization: `Bearer ${token}` }
+        headers: { 
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
       });
       toast.success('Address deleted successfully');
       loadAddresses();
