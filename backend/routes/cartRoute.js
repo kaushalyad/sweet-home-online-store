@@ -11,16 +11,16 @@ import authUser from "../middleware/auth.js";
 const cartRouter = express.Router();
 
 // Get user's cart
-cartRouter.post("/", authUser, getCart);
+cartRouter.get("/", authUser, getCart);
 
 // Add item to cart
 cartRouter.post("/add", authUser, addToCart);
 
 // Update cart item quantity
-cartRouter.post("/update", authUser, updateCartItem);
+cartRouter.put("/:itemId", authUser, updateCartItem);
 
 // Remove item from cart
-cartRouter.delete("/remove/:itemId", authUser, removeFromCart);
+cartRouter.delete("/:itemId", authUser, removeFromCart);
 
 // Clear cart
 cartRouter.delete("/clear", authUser, clearCart);
