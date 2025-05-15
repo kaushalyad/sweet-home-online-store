@@ -1,4 +1,5 @@
 import jwt from 'jsonwebtoken';
+import userModel from '../models/userModel.js';
 import logger from '../config/logger.js';
 
 // Protect routes
@@ -9,11 +10,14 @@ const protect = async (req, res, next) => {
     // Get token from header or cookie
     if (req.headers.authorization?.startsWith('Bearer')) {
       token = req.headers.authorization.split(' ')[1];
+    } else if (req.headers.token) {
+      token = req.headers.token;
     } else if (req.cookies?.token) {
       token = req.cookies.token;
     }
 
     if (!token) {
+      logger.warn('No token provided');
       return res.status(401).json({
         success: false,
         message: 'Not authorized, no token'
@@ -24,22 +28,35 @@ const protect = async (req, res, next) => {
       // Verify token
       const decoded = jwt.verify(token, process.env.JWT_SECRET);
       
-      // For hardcoded admin, we only need to check the email
-      if (decoded.email === 'sweethomeonlinestorehelp@gmail.com' && decoded.role === 'admin') {
-        req.user = {
-          email: decoded.email,
-          role: 'admin',
-          name: 'Admin User'
-        };
-        next();
-      } else {
+      // Find user in database
+      const user = await userModel.findById(decoded.id);
+      
+      if (!user) {
+        logger.warn(`User not found for ID: ${decoded.id}`);
         return res.status(401).json({
           success: false,
-          message: 'Not authorized, invalid token'
+          message: 'Not authorized, user not found'
         });
       }
+
+      // Add user to request object
+      req.user = {
+        id: user._id,
+        email: user.email,
+        role: user.role,
+        name: user.name
+      };
+
+      logger.info(`User authenticated: ${user.email} (${user.role})`);
+      next();
     } catch (error) {
       logger.error(`Token verification error: ${error.message}`);
+      if (error.name === 'TokenExpiredError') {
+        return res.status(401).json({
+          success: false,
+          message: 'Token expired. Please login again.'
+        });
+      }
       return res.status(401).json({
         success: false,
         message: 'Not authorized, invalid token'
@@ -59,6 +76,7 @@ const admin = (req, res, next) => {
   if (req.user && req.user.role === 'admin') {
     next();
   } else {
+    logger.warn(`Unauthorized admin access attempt by user: ${req.user?.email}`);
     return res.status(403).json({
       success: false,
       message: 'Not authorized as admin'

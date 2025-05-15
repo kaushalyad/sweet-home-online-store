@@ -8,34 +8,36 @@ import PropTypes from 'prop-types';
 // Backend URL configuration
 const backendUrl = import.meta.env.VITE_BACKEND_URL || "http://localhost:4000";
 
-// API configuration
-const api = axios.create({
-  baseURL: backendUrl + '/api',
-  withCredentials: true,
+// Create axios instance with default config
+const axiosInstance = axios.create({
+  baseURL: backendUrl,
   headers: {
-    'Content-Type': 'application/json',
+    'Content-Type': 'application/json'
   }
 });
 
 // Add request interceptor to add token to all requests
-api.interceptors.request.use((config) => {
-  const token = localStorage.getItem('token');
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
+axiosInstance.interceptors.request.use(
+  (config) => {
+    const token = localStorage.getItem('token');
+    if (token) {
+      config.headers.token = token;
+    }
+    return config;
+  },
+  (error) => {
+    return Promise.reject(error);
   }
-  return config;
-});
+);
 
-// Add response interceptor to handle errors
-api.interceptors.response.use(
+// Add response interceptor to handle token expiration
+axiosInstance.interceptors.response.use(
   (response) => response,
   (error) => {
-    logger.error('API Error:', error);
-    if (error.response) {
-      logger.error('Response data:', error.response.data);
-      logger.error('Response status:', error.response.status);
-    } else if (error.request) {
-      logger.error('No response received:', error.request);
+    if (error.response?.status === 401) {
+      // Clear token and redirect to login
+      localStorage.removeItem('token');
+      window.location.href = '/login';
     }
     return Promise.reject(error);
   }
@@ -76,7 +78,7 @@ export const ShopContextProvider = ({ children }) => {
     }
 
     try {
-      const response = await api.post("/user/verify-token");
+      const response = await axiosInstance.post("/user/verify-token");
       
       if (!response.data.success) {
         logger.warn("Token validation failed:", response.data.message);
@@ -118,7 +120,7 @@ export const ShopContextProvider = ({ children }) => {
   // Fetch user data
   const fetchUserData = async () => {
     try {
-      const response = await api.post("/user/profile");
+      const response = await axiosInstance.post("/user/profile");
       if (response.data.success) {
         setUserData(response.data.user);
       } else {
@@ -246,7 +248,7 @@ export const ShopContextProvider = ({ children }) => {
     
     try {
       logger.info("Fetching user cart from backend");
-      const response = await api.post("/cart");
+      const response = await axiosInstance.post("/cart");
       
       if (response.data.success) {
         const cartData = response.data.cartData || {};
@@ -278,7 +280,7 @@ export const ShopContextProvider = ({ children }) => {
       setCartItems({});
       return { success: false, message: "Failed to fetch cart" };
     }
-  }, [api, navigate, setToken]);
+  }, [axiosInstance, navigate, setToken]);
 
   const removeFromCart = async (itemId) => {
     if (!token) {
@@ -288,7 +290,7 @@ export const ShopContextProvider = ({ children }) => {
     }
 
     try {
-      const response = await api.delete(`/cart/remove/${itemId}`);
+      const response = await axiosInstance.delete(`/cart/remove/${itemId}`);
       
       if (response.data.success) {
         // Update local cart state with the response data
@@ -319,7 +321,7 @@ export const ShopContextProvider = ({ children }) => {
     }
 
     try {
-      const response = await api.post("/cart/update", { itemId, quantity });
+      const response = await axiosInstance.post("/cart/update", { itemId, quantity });
       
       if (response.data.success) {
         // Update local cart state with the response data
@@ -352,7 +354,7 @@ export const ShopContextProvider = ({ children }) => {
     try {
       logger.info(`Adding to cart - Item: ${itemId}, Quantity: ${quantity}`);
       
-      const response = await api.post("/cart/add", { 
+      const response = await axiosInstance.post("/cart/add", { 
         itemId, 
         quantity: Number(quantity)
       });
@@ -409,7 +411,7 @@ export const ShopContextProvider = ({ children }) => {
 
   const getProductsData = async () => {
     try {
-      const response = await api.get("/product/list");
+      const response = await axiosInstance.get("/product/list");
       if (response.data.success) {
         setBuffer(false);
         setProducts(response.data.products.reverse());
