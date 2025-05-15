@@ -1,51 +1,37 @@
-import { useEffect, useState } from 'react'
-import { Routes, Route } from 'react-router-dom'
-import { ToastContainer } from 'react-toastify'
-import Login from './components/Login'
-import Layout from './components/Layout'
-import Dashboard from './pages/Dashboard'
-import Products from './pages/Products'
-import Orders from './pages/Orders'
-import Users from './pages/Users'
-import Analytics from './pages/Analytics'
-import UserBehavior from './pages/UserBehavior'
-
-export const backendUrl = import.meta.env.VITE_BACKEND_URL
-export const currency = '₹'
+import { Routes, Route } from 'react-router-dom';
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+import Login from './pages/Login';
+import Dashboard from './pages/Dashboard';
+import ProductRoutes from './routes/ProductRoutes';
+import PrivateRoute from './components/auth/PrivateRoute';
+import { AuthProvider } from './context/AuthContext';
+import Layout from './components/Layout';
 
 function App() {
-  const [token, setToken] = useState(() => {
-    const savedToken = localStorage.getItem('token');
-    return savedToken || '';
-  });
-
-  useEffect(() => {
-    if (token) {
-      localStorage.setItem('token', token);
-    } else {
-      localStorage.removeItem('token');
-    }
-  }, [token]);
-
-  if (!token) {
-    return <Login setToken={setToken} />;
-  }
-
   return (
-    <div className='bg-gray-50 min-h-screen'>
-      <ToastContainer />
-      <Routes>
-        <Route path="/" element={<Layout setToken={setToken} />}>
-          <Route index element={<Dashboard token={token} />} />
-          <Route path="products" element={<Products token={token} />} />
-          <Route path="orders" element={<Orders token={token} />} />
-          <Route path="users" element={<Users token={token} />} />
-          <Route path="analytics" element={<Analytics token={token} />} />
-          <Route path="user-behavior" element={<UserBehavior token={token} />} />
-        </Route>
-      </Routes>
-    </div>
-  )
+    <AuthProvider>
+      <div className="min-h-screen bg-gray-100">
+        <Routes>
+          <Route path="/login" element={<Login />} />
+          <Route 
+            path="/*" 
+            element={
+              <PrivateRoute>
+                <Layout>
+                  <Routes>
+                    <Route path="/" element={<Dashboard />} />
+                    <Route path="/products/*" element={<ProductRoutes />} />
+                  </Routes>
+                </Layout>
+              </PrivateRoute>
+            } 
+          />
+        </Routes>
+        <ToastContainer position="top-right" autoClose={3000} />
+      </div>
+    </AuthProvider>
+  );
 }
 
-export default App
+export default App;

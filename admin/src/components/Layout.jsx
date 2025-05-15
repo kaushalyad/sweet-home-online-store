@@ -1,7 +1,8 @@
 import { Box, Drawer, List, ListItem, ListItemIcon, ListItemText, AppBar, Toolbar, Typography, IconButton } from '@mui/material';
 import { Menu as MenuIcon, Dashboard as DashboardIcon, Inventory as InventoryIcon, ShoppingCart as ShoppingCartIcon, People as PeopleIcon, Analytics as AnalyticsIcon, Timeline as TimelineIcon, Logout as LogoutIcon } from '@mui/icons-material';
-import { useState } from 'react';
-import { useNavigate, useLocation, Outlet } from 'react-router-dom';
+import { useState, useContext } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
+import { AuthContext } from '../context/AuthContext';
 
 const menuItems = [
   { text: 'Dashboard', icon: <DashboardIcon sx={{ fontSize: 24 }} />, path: '/' },
@@ -12,10 +13,11 @@ const menuItems = [
   { text: 'User Behavior', icon: <TimelineIcon sx={{ fontSize: 24 }} />, path: '/user-behavior' }
 ];
 
-const Layout = ({ setToken }) => {
+const Layout = ({ children }) => {
   const [mobileOpen, setMobileOpen] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
+  const { setToken } = useContext(AuthContext);
 
   const handleDrawerToggle = () => {
     setMobileOpen(!mobileOpen);
@@ -23,7 +25,7 @@ const Layout = ({ setToken }) => {
 
   const handleLogout = () => {
     setToken('');
-    navigate('/');
+    navigate('/login');
   };
 
   const drawer = (
@@ -60,6 +62,9 @@ const Layout = ({ setToken }) => {
         sx={{
           width: { sm: `calc(100% - 250px)` },
           ml: { sm: `250px` },
+          bgcolor: 'white',
+          color: 'black',
+          boxShadow: 1
         }}
       >
         <Toolbar>
@@ -115,7 +120,7 @@ const Layout = ({ setToken }) => {
           mt: '64px'
         }}
       >
-        <Outlet />
+        {children}
       </Box>
     </Box>
   );

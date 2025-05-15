@@ -12,30 +12,75 @@ const Verify = () => {
 
   const success = searchParams.get("success");
   const orderId = searchParams.get("orderId");
+  const razorpay_order_id = searchParams.get("razorpay_order_id");
+  const razorpay_payment_id = searchParams.get("razorpay_payment_id");
+  const razorpay_signature = searchParams.get("razorpay_signature");
 
   const verifyPayment = async () => {
     try {
       if (!token) {
-        return null;
+        toast.error("Authentication required");
+        navigate("/login");
+        return;
       }
 
-      const response = await axios.post(
-        backendUrl + "/api/order/verifyStripe",
-        { success, orderId },
-        { headers: { token } }
-      );
+      // Get user ID from token
+      const userId = JSON.parse(atob(token.split('.')[1])).id;
 
-      if (response.data.success) {
-        setCartItems({});
-        navigate("/orders");
-        toast.success("Payment successful!");
+      if (razorpay_order_id && razorpay_payment_id && razorpay_signature) {
+        // Razorpay verification
+        const response = await axios.post(
+          `${backendUrl}/api/order/verifyRazorpay`,
+          {
+            razorpay_order_id,
+            razorpay_payment_id,
+            razorpay_signature,
+            userId
+          },
+          { 
+            headers: { 
+              token,
+              'Content-Type': 'application/json'
+            } 
+          }
+        );
+
+        if (response.data.success) {
+          setCartItems({});
+          navigate("/orders");
+          toast.success("Payment successful!");
+        } else {
+          toast.error(response.data.message || "Payment verification failed");
+          navigate("/cart");
+        }
+      } else if (success && orderId) {
+        // Stripe verification
+        const response = await axios.post(
+          `${backendUrl}/api/order/verifyStripe`,
+          { success, orderId },
+          { 
+            headers: { 
+              token,
+              'Content-Type': 'application/json'
+            } 
+          }
+        );
+
+        if (response.data.success) {
+          setCartItems({});
+          navigate("/orders");
+          toast.success("Payment successful!");
+        } else {
+          toast.error(response.data.message || "Payment verification failed");
+          navigate("/cart");
+        }
       } else {
-        toast.error("Payment failed or was cancelled");
+        toast.error("Invalid payment response");
         navigate("/cart");
       }
     } catch (error) {
-      console.log(error);
-      toast.error(error.message || "Payment verification failed");
+      console.error("Payment verification error:", error);
+      toast.error(error.response?.data?.message || error.message || "Payment verification failed");
       navigate("/cart");
     }
   };

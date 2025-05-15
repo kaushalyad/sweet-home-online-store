@@ -1,7 +1,5 @@
 import jwt from 'jsonwebtoken';
-import userModel from '../models/userModel.js';
 import logger from '../config/logger.js';
-import mongoose from 'mongoose';
 
 // Protect routes
 const protect = async (req, res, next) => {
@@ -26,25 +24,20 @@ const protect = async (req, res, next) => {
       // Verify token
       const decoded = jwt.verify(token, process.env.JWT_SECRET);
       
-      // Handle both string IDs and ObjectIds
-      let user;
-      if (decoded.id === 'admin-user-id') {
-        // Special case for admin user
-        user = await userModel.findOne({ role: 'admin' }).select('-password');
+      // For hardcoded admin, we only need to check the email
+      if (decoded.email === 'sweethomeonlinestorehelp@gmail.com' && decoded.role === 'admin') {
+        req.user = {
+          email: decoded.email,
+          role: 'admin',
+          name: 'Admin User'
+        };
+        next();
       } else {
-        // Normal case - find by ObjectId
-        user = await userModel.findById(decoded.id).select('-password');
-      }
-      
-      if (!user) {
         return res.status(401).json({
           success: false,
-          message: 'Not authorized, user not found'
+          message: 'Not authorized, invalid token'
         });
       }
-
-      req.user = user;
-      next();
     } catch (error) {
       logger.error(`Token verification error: ${error.message}`);
       return res.status(401).json({

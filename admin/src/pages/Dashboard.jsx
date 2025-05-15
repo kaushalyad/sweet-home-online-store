@@ -1,6 +1,5 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useContext } from 'react';
 import axios from 'axios';
-import PropTypes from 'prop-types';
 import {
   Box,
   Typography,
@@ -24,9 +23,11 @@ import {
   TimelineContent,
   TimelineDot
 } from '@mui/lab';
-import { backendUrl, currency } from '../App';
+import { backendUrl, currency } from '../config';
+import { AuthContext } from '../context/AuthContext';
 
-const Dashboard = ({ token }) => {
+const Dashboard = () => {
+  const { token } = useContext(AuthContext);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [timeRange, setTimeRange] = useState('week');
@@ -74,19 +75,19 @@ const Dashboard = ({ token }) => {
         const cleanToken = token.replace(/^Bearer\s+/i, '');
         const authToken = `Bearer ${cleanToken}`;
 
+        const axiosConfig = {
+          headers: { 
+            Authorization: authToken,
+            'Content-Type': 'application/json'
+          },
+          withCredentials: true
+        };
+
         const [salesRes, behaviorRes, segmentsRes, pageVisitsRes] = await Promise.all([
-          axios.get(`${backendUrl}/api/analytics/sales-analytics?timeRange=${timeRange}`, {
-            headers: { Authorization: authToken }
-          }),
-          axios.get(`${backendUrl}/api/analytics/user-behavior?timeRange=${timeRange}`, {
-            headers: { Authorization: authToken }
-          }),
-          axios.get(`${backendUrl}/api/analytics/customer-segments?timeRange=${timeRange}`, {
-            headers: { Authorization: authToken }
-          }),
-          axios.get(`${backendUrl}/api/analytics/page-visits?timeRange=${timeRange}`, {
-            headers: { Authorization: authToken }
-          })
+          axios.get(`${backendUrl}/api/analytics/sales-analytics?timeRange=${timeRange}`, axiosConfig),
+          axios.get(`${backendUrl}/api/analytics/user-behavior?timeRange=${timeRange}`, axiosConfig),
+          axios.get(`${backendUrl}/api/analytics/customer-segments?timeRange=${timeRange}`, axiosConfig),
+          axios.get(`${backendUrl}/api/analytics/page-visits?timeRange=${timeRange}`, axiosConfig)
         ]);
 
         const salesData = salesRes.data?.data || {};
@@ -498,10 +499,6 @@ const Dashboard = ({ token }) => {
       </Paper>
     </Box>
   );
-};
-
-Dashboard.propTypes = {
-  token: PropTypes.string.isRequired
 };
 
 export default Dashboard; 

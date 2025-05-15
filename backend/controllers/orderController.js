@@ -3,6 +3,7 @@ import userModel from "../models/userModel.js";
 import Stripe from 'stripe'
 import razorpay from 'razorpay'
 import logger from '../config/logger.js';
+import crypto from 'crypto';
 
 // global variables
 const currency = 'inr'
@@ -286,12 +287,29 @@ const verifyRazorpay = async (req, res) => {
       signatureReceived: razorpay_signature ? 'Yes' : 'No'
     });
 
-    if (!razorpay_order_id || !razorpay_payment_id) {
+    if (!razorpay_order_id || !razorpay_payment_id || !razorpay_signature) {
       console.error("Missing payment details in request");
-      return res.json({ success: false, message: "Payment verification failed: Missing payment details" });
+      return res.status(400).json({ 
+        success: false, 
+        message: "Payment verification failed: Missing payment details" 
+      });
     }
 
     try {
+      // Verify the signature
+      const generated_signature = crypto
+        .createHmac('sha256', process.env.RAZORPAY_KEY_SECRET)
+        .update(razorpay_order_id + "|" + razorpay_payment_id)
+        .digest('hex');
+
+      if (generated_signature !== razorpay_signature) {
+        console.error("Invalid signature");
+        return res.status(400).json({ 
+          success: false, 
+          message: "Payment verification failed: Invalid signature" 
+        });
+      }
+
       // Fetch the order details from Razorpay
       const orderInfo = await razorpayInstance.orders.fetch(razorpay_order_id);
       console.log("Order info from Razorpay:", {
@@ -305,19 +323,34 @@ const verifyRazorpay = async (req, res) => {
       // Get our order ID from the receipt
       const orderId = orderInfo.receipt;
       
+      if (!orderId) {
+        console.error("No order ID found in Razorpay receipt");
+        return res.status(400).json({ 
+          success: false, 
+          message: "Payment verification failed: Invalid order" 
+        });
+      }
+
       console.log(`Updating order ${orderId} to paid status`);
       
-      // Update the order status to paid without any additional checks
-      // This assumes that if Razorpay sent us a payment_id, the payment succeeded
+      // Update the order status to paid
       const updatedOrder = await Order.findByIdAndUpdate(
         orderId,
-        { payment: true },
+        { 
+          payment: true,
+          paymentStatus: 'completed',
+          razorpayPaymentId: razorpay_payment_id,
+          razorpayOrderId: razorpay_order_id
+        },
         { new: true }
       );
       
       if (!updatedOrder) {
         console.error(`Order ${orderId} not found in database`);
-        return res.json({ success: false, message: "Order not found in database" });
+        return res.status(404).json({ 
+          success: false, 
+          message: "Order not found in database" 
+        });
       }
 
       console.log(`Successfully updated order ${orderId}`);
@@ -328,14 +361,24 @@ const verifyRazorpay = async (req, res) => {
         console.log(`Cleared cart for user ${userId}`);
       }
       
-      return res.json({ success: true, message: "Payment successful" });
+      return res.json({ 
+        success: true, 
+        message: "Payment successful",
+        order: updatedOrder
+      });
     } catch (error) {
       console.error("Error during Razorpay verification:", error);
-      return res.json({ success: false, message: "Payment verification failed: " + error.message });
+      return res.status(500).json({ 
+        success: false, 
+        message: "Payment verification failed: " + error.message 
+      });
     }
   } catch (error) {
     console.error("Payment verification error:", error);
-    res.json({ success: false, message: error.message || "Payment verification failed" });
+    res.status(500).json({ 
+      success: false, 
+      message: error.message || "Payment verification failed" 
+    });
   }
 };
 
