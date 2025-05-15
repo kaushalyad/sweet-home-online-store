@@ -10,7 +10,7 @@ const backendUrl = import.meta.env.VITE_BACKEND_URL || "http://localhost:4000";
 
 // Create axios instance with default config
 const axiosInstance = axios.create({
-  baseURL: backendUrl,
+  baseURL: `${backendUrl}/api`,
   headers: {
     'Content-Type': 'application/json'
   }
@@ -120,7 +120,7 @@ export const ShopContextProvider = ({ children }) => {
   // Fetch user data
   const fetchUserData = async () => {
     try {
-      const response = await axiosInstance.post("/user/profile");
+      const response = await axiosInstance.get("/user/profile");
       if (response.data.success) {
         setUserData(response.data.user);
       } else {
@@ -248,7 +248,7 @@ export const ShopContextProvider = ({ children }) => {
     
     try {
       logger.info("Fetching user cart from backend");
-      const response = await axiosInstance.post("/cart");
+      const response = await axiosInstance.get("/cart");
       
       if (response.data.success) {
         const cartData = response.data.cartData || {};
@@ -290,7 +290,7 @@ export const ShopContextProvider = ({ children }) => {
     }
 
     try {
-      const response = await axiosInstance.delete(`/cart/remove/${itemId}`);
+      const response = await axiosInstance.delete(`/cart/${itemId}`);
       
       if (response.data.success) {
         // Update local cart state with the response data
@@ -321,7 +321,7 @@ export const ShopContextProvider = ({ children }) => {
     }
 
     try {
-      const response = await axiosInstance.post("/cart/update", { itemId, quantity });
+      const response = await axiosInstance.put(`/cart/${itemId}`, { quantity });
       
       if (response.data.success) {
         // Update local cart state with the response data
@@ -354,7 +354,7 @@ export const ShopContextProvider = ({ children }) => {
     try {
       logger.info(`Adding to cart - Item: ${itemId}, Quantity: ${quantity}`);
       
-      const response = await axiosInstance.post("/cart/add", { 
+      const response = await axiosInstance.post("/cart", { 
         itemId, 
         quantity: Number(quantity)
       });
