@@ -21,6 +21,7 @@ axiosInstance.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem('token');
     if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
       config.headers.token = token;
     }
     return config;
@@ -35,9 +36,11 @@ axiosInstance.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response?.status === 401) {
-      // Clear token and redirect to login
-      localStorage.removeItem('token');
-      window.location.href = '/login';
+      // Only clear token and redirect if it's not a token validation request
+      if (!error.config.url.includes('/verify-token')) {
+        localStorage.removeItem('token');
+        window.location.href = '/login';
+      }
     }
     return Promise.reject(error);
   }
@@ -78,7 +81,12 @@ export const ShopContextProvider = ({ children }) => {
     }
 
     try {
-      const response = await axiosInstance.post("/user/verify-token");
+      const response = await axiosInstance.post("/user/verify-token", {}, {
+        headers: {
+          Authorization: `Bearer ${tokenToValidate}`,
+          token: tokenToValidate
+        }
+      });
       
       if (!response.data.success) {
         logger.warn("Token validation failed:", response.data.message);
@@ -91,28 +99,21 @@ export const ShopContextProvider = ({ children }) => {
       } else {
         setIsAuthenticated(true);
         // Fetch user data after successful token validation
-        fetchUserData();
+        await fetchUserData();
         logger.info("Token validated successfully");
         return true;
       }
     } catch (error) {
       logger.error("Token validation error:", error);
-      setToken("");
-      setIsAuthenticated(false);
-      setUserData(null);
       
-      if (error.response) {
-        if (error.response.status === 401) {
-          toast.error(error.response.data.message || "Your session has expired. Please login again.");
-        } else {
-          toast.error("Authentication failed. Please login again.");
-        }
-      } else if (error.request) {
-        toast.error("Network error. Please check your connection.");
-      } else {
-        toast.error("Authentication failed. Please login again.");
+      // Only clear token if it's a real authentication error
+      if (error.response?.status === 401 && !error.config.url.includes('/verify-token')) {
+        setToken("");
+        setIsAuthenticated(false);
+        setUserData(null);
+        toast.error("Your session has expired. Please login again.");
+        navigate("/login");
       }
-      navigate("/login");
       return false;
     }
   };
