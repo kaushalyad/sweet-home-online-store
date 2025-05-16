@@ -300,8 +300,12 @@ const TrackOrder = () => {
               <h3 className="text-sm font-medium text-[#212121] mb-2">Payment Information</h3>
               <p className="text-[#878787]">
                 Method: {orderData.paymentMethod}<br />
-                Status: <span className={orderData.payment ? 'text-green-600' : 'text-red-600'}>
-                  {orderData.payment ? 'Paid' : 'Payment Pending'}
+                Status: <span className={
+                  orderData.status === 'Delivered' ? 'text-green-600' :
+                  orderData.payment ? 'text-green-600' : 'text-red-600'
+                }>
+                  {orderData.status === 'Delivered' ? 'Completed' :
+                   orderData.payment ? 'Paid' : 'Payment Pending'}
                 </span><br />
                 Amount: {currency}{orderData.amount}
               </p>

@@ -59,6 +59,7 @@ const UserBehavior = () => {
   const [selectedLocation, setSelectedLocation] = useState(null);
   const [activeTab, setActiveTab] = useState(0);
   const [mapLoaded, setMapLoaded] = useState(false);
+  const [googleLoaded, setGoogleLoaded] = useState(false);
 
   console.log('Current state:', {
     token: !!token,
@@ -74,7 +75,7 @@ const UserBehavior = () => {
   };
 
   const center = {
-    lat: 20.5937, // Default to India's center
+    lat: 20.5937, // Center of India
     lng: 78.9629
   };
 
@@ -235,6 +236,24 @@ const UserBehavior = () => {
     setMapLoaded(true);
   }, []);
 
+  const onGoogleLoad = useCallback(() => {
+    console.log('Google Maps API loaded');
+    setGoogleLoaded(true);
+  }, []);
+
+  const getMarkerIcon = (amount) => {
+    if (!googleLoaded) return null;
+    
+    return {
+      path: google.maps.SymbolPath.CIRCLE,
+      fillColor: getMarkerColor(amount),
+      fillOpacity: 0.7,
+      strokeWeight: 2,
+      strokeColor: '#000',
+      scale: 10
+    };
+  };
+
   const renderMap = () => {
     console.log('Rendering map...');
     if (!import.meta.env.VITE_GOOGLE_MAPS_API_KEY) {
@@ -248,78 +267,123 @@ const UserBehavior = () => {
       );
     }
 
-    // Group locations by city and state to handle duplicates
+    console.log('Purchase locations before grouping:', purchaseLocations);
+
+    // Group locations by exact coordinates and user
     const groupedLocations = purchaseLocations.reduce((acc, location) => {
-      const key = `${location.city}-${location.state}`;
+      const key = `${location.latitude}-${location.longitude}-${location.userId}`;
       if (!acc[key]) {
         acc[key] = {
-          ...location,
-          orderCount: 0,
+          city: location.city,
+          state: location.state,
+          latitude: location.latitude,
+          longitude: location.longitude,
+          hasCoordinates: location.hasCoordinates,
+          userId: location.userId,
+          userName: location.userName,
+          userEmail: location.userEmail,
           totalAmount: 0,
+          items: [],
+          orderCount: 0,
+          lastPurchase: null,
           statuses: new Set()
         };
       }
-      acc[key].orderCount += location.orderCount;
+      
+      // Add item to the user's items array
+      acc[key].items.push({
+        itemId: location.itemId,
+        itemName: location.itemName,
+        itemQuantity: location.itemQuantity,
+        totalAmount: location.totalAmount,
+        statuses: location.statuses
+      });
+      
+      // Update user's total amount and other stats
       acc[key].totalAmount += location.totalAmount;
-      location.statuses.forEach(status => acc[key].statuses.add(status));
+      acc[key].orderCount += location.orderCount;
+      if (!acc[key].lastPurchase || new Date(location.lastPurchase) > new Date(acc[key].lastPurchase)) {
+        acc[key].lastPurchase = location.lastPurchase;
+      }
+      // Only add Delivered status if it exists
+      if (location.statuses.includes('Delivered')) {
+        acc[key].statuses.add('Delivered');
+      }
+      
       return acc;
     }, {});
 
-    // Convert grouped locations to array and format statuses
+    // Convert grouped locations to array and convert statuses Set to Array
     const uniqueLocations = Object.values(groupedLocations).map(location => ({
       ...location,
-      statuses: Array.from(location.statuses),
-      id: `${location.city}-${location.state}-${location.latitude}-${location.longitude}`
+      statuses: Array.from(location.statuses)
     }));
 
-    console.log('Map state:', {
-      locations: uniqueLocations,
-      mapLoaded,
-      apiKey: import.meta.env.VITE_GOOGLE_MAPS_API_KEY
-    });
+    console.log('Grouped locations:', groupedLocations);
+    console.log('Unique locations:', uniqueLocations);
 
     return (
       <LoadScript 
         googleMapsApiKey={import.meta.env.VITE_GOOGLE_MAPS_API_KEY}
-        onLoad={onMapLoad}
+        onLoad={onGoogleLoad}
       >
         <GoogleMap
           mapContainerStyle={mapContainerStyle}
           center={center}
           zoom={5}
+          onLoad={onMapLoad}
         >
-          {mapLoaded && uniqueLocations.map((location) => {
-            console.log('Rendering marker for location:', location);
-            if (!location.hasCoordinates) {
-              return null; // Skip locations without coordinates
+          {mapLoaded && googleLoaded && uniqueLocations.map((location) => {
+            console.log('Processing location:', location);
+            if (!location.hasCoordinates || !location.latitude || !location.longitude) {
+              console.log('Skipping location without coordinates:', location);
+              return null;
             }
+
+            const lat = parseFloat(location.latitude);
+            const lng = parseFloat(location.longitude);
+
+            console.log('Creating marker for user:', {
+              user: location,
+              position: { lat, lng }
+            });
+
+            const icon = getMarkerIcon(location.totalAmount);
+            if (!icon) return null;
+
             return (
               <Marker
-                key={location.id}
-                position={{ lat: location.latitude, lng: location.longitude }}
-                icon={{
-                  path: google.maps.SymbolPath.CIRCLE,
-                  fillColor: getMarkerColor(location.totalAmount),
-                  fillOpacity: 0.7,
-                  strokeWeight: 2,
-                  strokeColor: '#000',
-                  scale: 10
-                }}
+                key={`${location.latitude}-${location.longitude}-${location.userId}`}
+                position={{ lat, lng }}
+                icon={icon}
                 onClick={() => setSelectedLocation(location)}
               />
             );
           })}
-          {selectedLocation && (
+          {selectedLocation && googleLoaded && (
             <InfoWindow
-              position={{ lat: selectedLocation.latitude, lng: selectedLocation.longitude }}
+              position={{ 
+                lat: parseFloat(selectedLocation.latitude), 
+                lng: parseFloat(selectedLocation.longitude)
+              }}
               onCloseClick={() => setSelectedLocation(null)}
             >
               <div>
                 <h3>{selectedLocation.city}, {selectedLocation.state}</h3>
-                <p>Total Orders: {selectedLocation.orderCount}</p>
+                <p>User: {selectedLocation.userName || selectedLocation.userEmail}</p>
                 <p>Total Amount: ₹{selectedLocation.totalAmount.toLocaleString()}</p>
+                <p>Order Count: {selectedLocation.orderCount}</p>
                 <p>Last Purchase: {new Date(selectedLocation.lastPurchase).toLocaleDateString()}</p>
-                <p>Order Statuses: {selectedLocation.statuses.join(', ')}</p>
+                <p>Status: {selectedLocation.statuses.includes('Delivered') ? 'Delivered' : 'Processing'}</p>
+                <h4>Items Purchased:</h4>
+                <ul>
+                  {selectedLocation.items.map((item, index) => (
+                    <li key={index}>
+                      {item.itemName} - Quantity: {item.itemQuantity} - Amount: ₹{item.totalAmount.toLocaleString()}
+                      {item.statuses.includes('Delivered') && ' ✓'}
+                    </li>
+                  ))}
+                </ul>
               </div>
             </InfoWindow>
           )}

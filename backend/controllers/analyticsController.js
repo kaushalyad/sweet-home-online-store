@@ -833,15 +833,21 @@ export const getPurchaseLocations = async (req, res) => {
         }
       },
       {
+        $unwind: '$items' // Unwind the items array to get individual items
+      },
+      {
         $group: {
           _id: {
             city: '$shippingAddress.city',
             state: '$shippingAddress.state',
             latitude: { $ifNull: ['$shippingAddress.latitude', 0] },
-            longitude: { $ifNull: ['$shippingAddress.longitude', 0] }
+            longitude: { $ifNull: ['$shippingAddress.longitude', 0] },
+            itemId: '$items.product', // Group by item ID
+            itemName: '$items.name' // Include item name in grouping
           },
-          orderCount: { $sum: 1 },
-          totalAmount: { $sum: '$totalAmount' },
+          orderCount: { $sum: 1 }, // Count number of orders for this item
+          totalAmount: { $sum: { $multiply: ['$items.price', '$items.quantity'] } }, // Total amount = price * quantity
+          itemQuantity: { $sum: '$items.quantity' }, // Sum of quantities across all orders
           lastPurchase: { $max: '$createdAt' },
           statuses: { $addToSet: '$status' }
         }
@@ -853,6 +859,9 @@ export const getPurchaseLocations = async (req, res) => {
           state: '$_id.state',
           latitude: '$_id.latitude',
           longitude: '$_id.longitude',
+          itemId: '$_id.itemId',
+          itemName: '$_id.itemName',
+          itemQuantity: 1,
           orderCount: 1,
           totalAmount: 1,
           lastPurchase: 1,
