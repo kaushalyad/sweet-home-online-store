@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useContext } from 'react';
 import {
   Box,
   Typography,
@@ -21,7 +21,8 @@ import {
 } from '@mui/material';
 import { Edit as EditIcon, Delete as DeleteIcon } from '@mui/icons-material';
 import axios from 'axios';
-import { backendUrl } from '../App';
+import { backendUrl } from '../config';
+import { AuthContext } from '../context/AuthContext';
 
 const Users = () => {
   const [users, setUsers] = useState([]);
@@ -34,21 +35,21 @@ const Users = () => {
     email: '',
     role: 'user'
   });
+  const { token } = useContext(AuthContext);
 
   useEffect(() => {
     fetchUsers();
-  }, []);
+  }, [token]);
 
   const fetchUsers = async () => {
     try {
       setLoading(true);
-      const token = localStorage.getItem('token');
       if (!token) {
         setError('Not authorized. Please login again.');
         return;
       }
       const response = await axios.get(`${backendUrl}/api/user/list`, {
-        headers: { Authorization: token }
+        headers: { Authorization: `Bearer ${token}` }
       });
       if (response.data.success) {
         setUsers(response.data.users);
@@ -101,7 +102,6 @@ const Users = () => {
     e.preventDefault();
     try {
       setLoading(true);
-      const token = localStorage.getItem('token');
       if (!token) {
         setError('Not authorized. Please login again.');
         return;
@@ -111,7 +111,7 @@ const Users = () => {
           `${backendUrl}/api/user/${selectedUser._id}`,
           formData,
           {
-            headers: { Authorization: token }
+            headers: { Authorization: `Bearer ${token}` }
           }
         );
       } else {
@@ -119,7 +119,7 @@ const Users = () => {
           `${backendUrl}/api/user/add`,
           formData,
           {
-            headers: { Authorization: token }
+            headers: { Authorization: `Bearer ${token}` }
           }
         );
       }
@@ -136,13 +136,12 @@ const Users = () => {
     if (window.confirm('Are you sure you want to delete this user?')) {
       try {
         setLoading(true);
-        const token = localStorage.getItem('token');
         if (!token) {
           setError('Not authorized. Please login again.');
           return;
         }
         await axios.delete(`${backendUrl}/api/user/${userId}`, {
-          headers: { Authorization: token }
+          headers: { Authorization: `Bearer ${token}` }
         });
         fetchUsers();
       } catch (err) {

@@ -1,30 +1,30 @@
 import React from 'react'
 import { useEffect } from 'react'
-import { useState } from 'react'
+import { useState, useContext } from 'react'
 import axios from 'axios'
-import { backendUrl, currency } from '../App'
+import { backendUrl, currency } from '../config'
 import { toast } from 'react-toastify'
 import { assets } from '../assets/assets'
 import { FaSnowflake, FaGift, FaHandHoldingHeart, FaDoorClosed, FaBox } from 'react-icons/fa'
+import { AuthContext } from '../context/AuthContext'
 
 const Orders = () => {
   const [orders, setOrders] = useState([])
   const [filter, setFilter] = useState('all')
+  const { token } = useContext(AuthContext)
 
   const fetchAllOrders = async () => {
-    const token = localStorage.getItem('token')
     if (!token) {
       toast.error('Please login again')
       return
     }
 
     try {
-      const response = await axios.post(
+      const response = await axios.get(
         backendUrl + '/api/order/list', 
-        {}, 
         { 
           headers: { 
-            Authorization: token 
+            Authorization: `Bearer ${token}`
           } 
         }
       )
@@ -44,7 +44,6 @@ const Orders = () => {
   }
 
   const statusHandler = async (event, orderId) => {
-    const token = localStorage.getItem('token')
     if (!token) {
       toast.error('Please login again')
       return
@@ -61,7 +60,7 @@ const Orders = () => {
         { status: event.target.value }, 
         { 
           headers: {
-            Authorization: token
+            Authorization: `Bearer ${token}`
           }
         }
       )
@@ -76,7 +75,7 @@ const Orders = () => {
 
   useEffect(() => {
     fetchAllOrders()
-  }, [])
+  }, [token])
 
   // Filter orders based on selection
   const filteredOrders = filter === 'all' 
@@ -91,7 +90,9 @@ const Orders = () => {
 
   // Check if an order contains perishable items (milk-based sweets)
   const hasPerishableItems = (items) => {
+    if (!items || !Array.isArray(items)) return false;
     return items.some(item => {
+      if (!item || !item.name) return false;
       const name = item.name.toLowerCase();
       return name.includes('rasgulla') || name.includes('gulab') || 
              name.includes('jalebi') || name.includes('milk') ||

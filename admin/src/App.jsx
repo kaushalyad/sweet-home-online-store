@@ -4,6 +4,10 @@ import 'react-toastify/dist/ReactToastify.css';
 import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
 import ProductRoutes from './routes/ProductRoutes';
+import Orders from './pages/Orders';
+import Users from './pages/Users';
+import Analytics from './pages/Analytics';
+import UserBehavior from './pages/UserBehavior';
 import PrivateRoute from './components/auth/PrivateRoute';
 import { AuthProvider } from './context/AuthContext';
 import Layout from './components/Layout';
@@ -22,6 +26,10 @@ function App() {
                   <Routes>
                     <Route path="/" element={<Dashboard />} />
                     <Route path="/products/*" element={<ProductRoutes />} />
+                    <Route path="/orders" element={<Orders />} />
+                    <Route path="/users" element={<Users />} />
+                    <Route path="/analytics" element={<Analytics />} />
+                    <Route path="/user-behavior" element={<UserBehavior />} />
                   </Routes>
                 </Layout>
               </PrivateRoute>

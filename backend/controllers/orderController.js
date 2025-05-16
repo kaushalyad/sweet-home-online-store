@@ -4,6 +4,7 @@ import Stripe from 'stripe'
 import razorpay from 'razorpay'
 import logger from '../config/logger.js';
 import crypto from 'crypto';
+import axios from 'axios';
 
 // global variables
 const currency = 'inr'
@@ -17,16 +18,47 @@ const razorpayInstance = new razorpay({
     key_secret : process.env.RAZORPAY_KEY_SECRET,
 })
 
+// Helper function to geocode address
+const geocodeAddress = async (address) => {
+  try {
+    const addressString = `${address.street || ''}, ${address.city}, ${address.state}, ${address.country}`;
+    const response = await axios.get(
+      `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(addressString)}&key=${process.env.GOOGLE_MAPS_API_KEY}`
+    );
+
+    if (response.data.results && response.data.results.length > 0) {
+      const { lat, lng } = response.data.results[0].geometry.location;
+      return { latitude: lat, longitude: lng };
+    }
+    return null;
+  } catch (error) {
+    logger.error('Geocoding error:', error);
+    return null;
+  }
+};
+
 // Placing orders using COD Method
-const placeOrder = async (req,res) => {
+const placeOrder = async (req, res) => {
     try {
-        const { items, amount, address, paymentMethod, status, date, additionalCosts, discount, appliedCoupon } = req.body;
+        const { items, amount, totalAmount, address, paymentMethod, status, date, additionalCosts, discount, appliedCoupon } = req.body;
         const userId = req.user.id;
 
-        if (!items || !amount || !address || !paymentMethod) {
+        // Validate required fields
+        if (!items || !amount || !totalAmount || !address || !paymentMethod) {
             return res.status(400).json({
                 success: false,
                 message: "Please provide all required fields"
+            });
+        }
+
+        // Validate address fields
+        const requiredAddressFields = ['firstName', 'lastName', 'email', 'phone', 'street', 'city', 'state', 'country', 'zipCode'];
+        const missingAddressFields = requiredAddressFields.filter(field => !address[field]);
+        
+        if (missingAddressFields.length > 0) {
+            return res.status(400).json({
+                success: false,
+                message: `Missing required address fields: ${missingAddressFields.join(', ')}`
             });
         }
 
@@ -50,23 +82,29 @@ const placeOrder = async (req,res) => {
             });
         }
 
+        // Create order with new schema
         const order = await Order.create({
-            userId: userId,
+            userId,
             items: orderItems,
-            totalAmount: amount,
+            totalAmount,
+            amount,
             shippingAddress: {
                 firstName: address.firstName,
                 lastName: address.lastName,
                 email: address.email,
                 phone: address.phone,
-                street: address.address,
+                street: address.street,
                 city: address.city,
                 state: address.state,
                 country: address.country,
-                zipCode: address.pincode
+                zipCode: address.zipCode,
+                deliveryInstructions: address.deliveryInstructions,
+                specialRequirements: address.specialRequirements,
+                latitude: address.latitude,
+                longitude: address.longitude
             },
             paymentMethod: paymentMethod.toLowerCase(),
-            status: status || 'pending',
+            status: status || 'Order Placed',
             paymentStatus: 'pending',
             additionalCosts: additionalCosts || 0,
             discount: discount || 0,
@@ -76,6 +114,8 @@ const placeOrder = async (req,res) => {
 
         // Clear the user's cart after successful order placement
         await userModel.findByIdAndUpdate(userId, { cartData: {} });
+
+        logger.info(`Order placed successfully: ${order._id}`);
 
         res.status(201).json({
             success: true,
@@ -91,7 +131,7 @@ const placeOrder = async (req,res) => {
             error: error.message
         });
     }
-}
+};
 
 // Placing orders using Stripe Method
 const placeOrderStripe = async (req,res) => {
@@ -198,10 +238,21 @@ const placeOrderRazorpay = async (req, res) => {
         product: item.product
     }));
 
+    // Geocode the address
+    const coordinates = await geocodeAddress({
+        street: address.address,
+        city: address.city,
+        state: address.state,
+        country: address.country
+    });
+
     const orderData = {
       userId,
       items: orderItems,
-      address,
+      address: {
+        ...address,
+        ...(coordinates && coordinates)
+      },
       totalAmount: amount,
       amount: amount,
       paymentMethod: "Razorpay",

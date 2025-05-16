@@ -67,9 +67,8 @@ const Profile = () => {
         }
         
         setIsLoading(true);
-        const response = await axios.post(
+        const response = await axios.get(
           backendUrl + '/api/user/profile', 
-          {}, 
           { 
             headers: { 
               'Authorization': `Bearer ${token}`,

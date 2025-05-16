@@ -22,10 +22,12 @@ axiosInstance.interceptors.request.use(
     const token = localStorage.getItem('token');
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
+      config.headers.token = token; // Add token in both formats for compatibility
     }
     return config;
   },
   (error) => {
+    console.error("Request interceptor error:", error);
     return Promise.reject(error);
   }
 );
@@ -34,6 +36,8 @@ axiosInstance.interceptors.request.use(
 axiosInstance.interceptors.response.use(
   (response) => response,
   (error) => {
+    console.error("Response interceptor error:", error.response?.data || error.message);
+    
     if (error.response?.status === 401) {
       // Only clear token and redirect if it's not a token validation request
       if (!error.config.url.includes('/verify-token')) {
@@ -73,6 +77,7 @@ export const ShopContextProvider = ({ children }) => {
   // Validate token with the backend to ensure it's still valid
   const validateToken = async (tokenToValidate) => {
     if (!tokenToValidate) {
+      console.log("No token provided for validation");
       setToken("");
       setIsAuthenticated(false);
       setUserData(null);
@@ -80,6 +85,7 @@ export const ShopContextProvider = ({ children }) => {
     }
 
     try {
+      console.log("Validating token...");
       const response = await axiosInstance.post("/user/verify-token", {}, {
         headers: {
           Authorization: `Bearer ${tokenToValidate}`,
@@ -87,11 +93,14 @@ export const ShopContextProvider = ({ children }) => {
         }
       });
       
+      console.log("Token validation response:", response.data);
+      
       if (!response.data.success) {
-        logger.warn("Token validation failed:", response.data.message);
+        console.warn("Token validation failed:", response.data.message);
         setToken("");
         setIsAuthenticated(false);
         setUserData(null);
+        localStorage.removeItem("token");
         toast.error(response.data.message || "Your session has expired. Please login again.");
         navigate("/login");
         return false;
@@ -99,17 +108,18 @@ export const ShopContextProvider = ({ children }) => {
         setIsAuthenticated(true);
         // Fetch user data after successful token validation
         await fetchUserData();
-        logger.info("Token validated successfully");
+        console.log("Token validated successfully");
         return true;
       }
     } catch (error) {
-      logger.error("Token validation error:", error);
+      console.error("Token validation error:", error.response?.data || error.message);
       
       // Only clear token if it's a real authentication error
       if (error.response?.status === 401 && !error.config.url.includes('/verify-token')) {
         setToken("");
         setIsAuthenticated(false);
         setUserData(null);
+        localStorage.removeItem("token");
         toast.error("Your session has expired. Please login again.");
         navigate("/login");
       }
@@ -120,14 +130,27 @@ export const ShopContextProvider = ({ children }) => {
   // Fetch user data
   const fetchUserData = async () => {
     try {
+      console.log("Fetching user data...");
       const response = await axiosInstance.get("/user/profile");
+      console.log("User data response:", response.data);
+      
       if (response.data.success) {
         setUserData(response.data.user);
+        console.log("User data set successfully");
       } else {
-        logger.warn("Failed to fetch user data:", response.data.message);
+        console.warn("Failed to fetch user data:", response.data.message);
+        toast.error(response.data.message || "Failed to fetch user data");
       }
     } catch (error) {
-      logger.error("Error fetching user data:", error);
+      console.error("Error fetching user data:", error.response?.data || error.message);
+      if (error.response?.status === 401) {
+        setToken("");
+        setIsAuthenticated(false);
+        setUserData(null);
+        localStorage.removeItem("token");
+        toast.error("Session expired. Please login again.");
+        navigate("/login");
+      }
     }
   };
 
@@ -424,7 +447,7 @@ export const ShopContextProvider = ({ children }) => {
   const getProductsData = async () => {
     try {
       logger.info("Fetching products from:", `${backendUrl}/api/product/list`);
-      const response = await axiosInstance.get("/product/list");
+      const response = await axios.get(`${backendUrl}/api/product/list`);
       if (response.data.success) {
         setBuffer(false);
         setProducts(response.data.products.reverse());

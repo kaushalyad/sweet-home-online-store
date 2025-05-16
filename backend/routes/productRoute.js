@@ -22,22 +22,14 @@ productRouter.get('/single/:id', singleProduct)
 productRouter.get('/related/:id', relatedProducts)
 productRouter.get('/categories', getCategories)
 
+// Protected user routes
+productRouter.post('/rate', protect, addRating)
+
 // Protected admin routes
 productRouter.use(protect, admin)
-productRouter.post('/add', upload.fields([
-  { name: 'mainImage', maxCount: 1 },
-  { name: 'images', maxCount: 5 }
-]), addProduct)
-
-productRouter.put('/:id', upload.fields([
-  { name: 'mainImage', maxCount: 1 },
-  { name: 'images', maxCount: 5 }
-]), updateProduct)
-
-productRouter.delete('/:id', removeProduct)
-productRouter.put('/:id/stock', updateStock)
-
-// User routes
-productRouter.post('/rating', userAuth, addRating)
+productRouter.post('/add', upload.array('images', 5), addProduct)
+productRouter.put('/update/:id', upload.array('images', 5), updateProduct)
+productRouter.delete('/remove/:id', removeProduct)
+productRouter.put('/stock/:id', updateStock)
 
 export default productRouter

@@ -1,5 +1,4 @@
 import jwt from 'jsonwebtoken';
-import userModel from '../models/userModel.js';
 import logger from '../config/logger.js';
 
 // Protect routes
@@ -7,13 +6,9 @@ const protect = async (req, res, next) => {
   try {
     let token;
 
-    // Get token from header or cookie
+    // Get token from header
     if (req.headers.authorization?.startsWith('Bearer')) {
       token = req.headers.authorization.split(' ')[1];
-    } else if (req.headers.token) {
-      token = req.headers.token;
-    } else if (req.cookies?.token) {
-      token = req.cookies.token;
     }
 
     if (!token) {
@@ -28,26 +23,14 @@ const protect = async (req, res, next) => {
       // Verify token
       const decoded = jwt.verify(token, process.env.JWT_SECRET);
       
-      // Find user in database
-      const user = await userModel.findById(decoded.id);
-      
-      if (!user) {
-        logger.warn(`User not found for ID: ${decoded.id}`);
-        return res.status(401).json({
-          success: false,
-          message: 'Not authorized, user not found'
-        });
-      }
-
-      // Add user to request object
+      // Add user info from token to request object
       req.user = {
-        id: user._id,
-        email: user.email,
-        role: user.role,
-        name: user.name
+        id: decoded.id,
+        email: decoded.email,
+        role: decoded.role
       };
 
-      logger.info(`User authenticated: ${user.email} (${user.role})`);
+      logger.info(`User authenticated: ${decoded.email} (${decoded.role})`);
       next();
     } catch (error) {
       logger.error(`Token verification error: ${error.message}`);

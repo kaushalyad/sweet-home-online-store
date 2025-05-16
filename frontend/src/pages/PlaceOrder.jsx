@@ -1,4 +1,4 @@
-import { useContext, useState } from "react";
+import { useContext, useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Title from "../components/Title";
 import { assets } from "../assets/assets";
@@ -35,6 +35,7 @@ const PlaceOrder = () => {
     country: "",
     phone: "",
   });
+  const [userLocation, setUserLocation] = useState({ latitude: null, longitude: null });
   
   const {
     backendUrl,
@@ -45,6 +46,22 @@ const PlaceOrder = () => {
     delivery_fee,
     products,
   } = useContext(ShopContext);
+
+  useEffect(() => {
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          setUserLocation({
+            latitude: position.coords.latitude,
+            longitude: position.coords.longitude
+          });
+        },
+        (error) => {
+          console.warn("Geolocation error:", error);
+        }
+      );
+    }
+  }, []);
 
   // Debug logging for cart items and context
   console.log("Full ShopContext:", {
@@ -549,6 +566,28 @@ const PlaceOrder = () => {
       return;
     }
 
+    // Extract userId from token with better error handling
+    let userId;
+    try {
+      const tokenParts = token.split('.');
+      if (tokenParts.length !== 3) {
+        throw new Error('Invalid token format');
+      }
+      const payload = JSON.parse(atob(tokenParts[1]));
+      userId = payload.id;
+      
+      if (!userId) {
+        throw new Error('User ID not found in token');
+      }
+      
+      console.log("Extracted userId from token:", userId);
+    } catch (error) {
+      console.error("Error extracting userId:", error);
+      toast.error("Authentication error. Please login again.");
+      navigate("/login");
+      return;
+    }
+
     // Updated cart validation for new structure
     const hasItems = cartItems && 
       typeof cartItems === 'object' && 
@@ -583,18 +622,6 @@ const PlaceOrder = () => {
     setIsSubmitting(true);
     
     try {
-      // Extract userId from token
-      const tokenParts = token.split('.');
-      if (tokenParts.length !== 3) {
-        throw new Error('Invalid token format');
-      }
-      const payload = JSON.parse(atob(tokenParts[1]));
-      const userId = payload.id;
-
-      if (!userId) {
-        throw new Error('User ID not found in token');
-      }
-
       // Process cart items with new structure
       let orderItems = [];
       console.log("Processing cart items:", cartItems);
@@ -616,14 +643,12 @@ const PlaceOrder = () => {
 
           console.log(`Adding item - Product: ${product.name}, Quantity: ${quantity}`);
           orderItems.push({
-            name: product.name,
-            price: product.price,
+            product: productId,
             quantity: quantity,
-            size: "regular", // Default size since it's not in the new structure
-            image: Array.isArray(product.image) ? product.image : [product.image],
-            product: {
-              amount: product.price * quantity
-            }
+            price: product.price,
+            name: product.name,
+            size: "regular",
+            image: Array.isArray(product.image) ? product.image[0] : product.image
           });
         }
       }
@@ -648,8 +673,15 @@ const PlaceOrder = () => {
       }
 
       const orderData = {
-        userId,
-        items: orderItems,
+        userId: userId,
+        items: orderItems.map(item => ({
+          product: item.product,
+          quantity: item.quantity,
+          price: item.price,
+          name: item.name,
+          size: item.size,
+          image: item.image
+        })),
         address: {
           firstName: formData.firstName,
           lastName: formData.lastName,
@@ -658,19 +690,21 @@ const PlaceOrder = () => {
           street: formData.street,
           city: formData.city,
           state: formData.state,
-          zipcode: formData.zipcode,
           country: formData.country,
-          deliveryInstructions,
-          specialRequirements
+          zipCode: formData.zipcode,
+          deliveryInstructions: deliveryInstructions || '',
+          specialRequirements: JSON.stringify(specialRequirements) || '',
+          latitude: userLocation.latitude || null,
+          longitude: userLocation.longitude || null
         },
         amount: totalAmount,
-        totalAmount: totalAmount, // Add totalAmount field
-        additionalCosts,
-        discount: discount,
+        totalAmount: totalAmount,
+        additionalCosts: additionalCosts || 0,
+        discount: discount || 0,
         appliedCoupon: appliedCoupon ? appliedCoupon.code : null,
         paymentMethod: method.toLowerCase(),
-        payment: method === "razorpay",
         status: "Order Placed",
+        paymentStatus: "pending",
         date: Date.now()
       };
 
@@ -691,9 +725,7 @@ const PlaceOrder = () => {
             }
           );
           if (response.data.success) {
-            // Show success animation first
             setShowSuccess(true);
-            // Clear cart after showing success
             setTimeout(() => {
               setCartItems({});
               navigate("/orders");
@@ -714,7 +746,7 @@ const PlaceOrder = () => {
                   'Authorization': `Bearer ${token}`,
                   'Content-Type': 'application/json'
                 },
-                timeout: 10000 // Add timeout of 10 seconds
+                timeout: 10000
               }
             );
             
@@ -1085,27 +1117,27 @@ const PlaceOrder = () => {
               </div>
               
               <div className="p-6">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 gap-4">
                   <div
                     onClick={() => {
                       setMethod("razorpay");
                       console.log("Payment method set to razorpay");
                     }}
-                    className={`border rounded-lg p-4 cursor-pointer transition-all duration-200 ${
+                    className={`border rounded-xl p-4 cursor-pointer transition-all duration-200 ${
                       method === "razorpay" 
                         ? "border-green-500 bg-green-50 shadow-sm" 
                         : "border-gray-200 hover:border-gray-300 hover:bg-gray-50"
                     }`}
                   >
                     <div className="flex items-center">
-                      <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${
+                      <div className={`w-[24px] h-[24px] sm:w-7 sm:h-7 rounded-[50%] border-2 flex items-center justify-center ${
                         method === "razorpay" ? "border-green-500" : "border-gray-400"
                       }`}>
                         {method === "razorpay" && (
-                          <div className="w-3 h-3 bg-green-500 rounded-full"></div>
+                          <div className="w-[16px] h-[16px] sm:w-5 sm:h-5 bg-green-500 rounded-[50%]"></div>
                         )}
                       </div>
-                      <div className="ml-3">
+                      <div className="ml-1">
                         <p className={`font-medium ${method === "razorpay" ? "text-green-600" : "text-gray-700"}`}>
                           Online Payment
                         </p>
@@ -1115,38 +1147,33 @@ const PlaceOrder = () => {
                       </div>
                     </div>
                     <div className="mt-3 flex items-center justify-end space-x-2">
-                      {/* VISA logo */}
-                      <svg className="h-6" viewBox="0 0 780 500" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M293.2 348.73L320.1 143.79H365.52L338.55 348.73H293.2Z" fill="#00579F"/>
-                        <path d="M566.61 147.37C557.55 143.79 543.31 140.04 526.15 140.04C461.25 140.04 416.72 172.48 416.37 218.72C416.02 252.42 447.37 270.96 471.22 281.77C495.5 292.75 502.82 299.57 502.64 309.48C502.46 324.22 483.62 330.86 466.1 330.86C441.64 330.86 428.7 327.11 408.23 317.76L400.54 313.94L392.32 353.26C403.11 358.83 425 363.89 447.54 364.06C516.18 364.06 559.98 332.14 560.51 283.05C560.86 256.42 544.96 236.06 508.1 219.25C486.14 208.62 473.19 201.61 473.38 190.31C473.38 180.22 485.25 169.44 509.71 169.44C529.66 169.24 544.07 173.59 554.92 178.13L560.33 181.01L568.56 143.44L566.61 147.37Z" fill="#00579F"/>
-                        <path d="M661.85 143.79H626.81C615.32 143.79 606.44 146.84 601.14 160.12L512.76 348.73H581.4C581.4 348.73 592 322.43 594.3 317.06C600.25 317.06 659.38 317.06 667.09 317.06C668.85 324.05 674.8 348.73 674.8 348.73H736.15L661.85 143.79ZM610.37 275.84C614.61 265.16 635.1 214.71 635.1 214.71C634.75 215.07 639.87 202.65 642.91 195.19L647.5 214.01C647.5 214.01 659.73 266.63 661.73 275.84H610.37Z" fill="#00579F"/>
-                        <path d="M233.98 143.79L168.76 283.22L162.45 252.96C151.31 218.19 122.43 180.76 90.02 161.75L150.41 348.56H219.56L320.09 143.79H233.98Z" fill="#00579F"/>
-                        <path d="M109.77 143.79H7.06L6 148.47C86.12 167.13 136.77 206.27 159.38 252.96L136.24 160.14C132.71 147.56 122.79 144 109.77 143.79Z" fill="#FAA61A"/>
-                      </svg>
+                      {/* Payment logos */}
+                      <div className="flex items-center space-x-2 bg-white rounded-xl p-2 shadow-sm">
+                        {/* VISA logo */}
+                        <svg className="h-6" viewBox="0 0 780 500" fill="none" xmlns="http://www.w3.org/2000/svg">
+                          <path d="M293.2 348.73L320.1 143.79H365.52L338.55 348.73H293.2Z" fill="#00579F"/>
+                          <path d="M566.61 147.37C557.55 143.79 543.31 140.04 526.15 140.04C461.25 140.04 416.72 172.48 416.37 218.72C416.02 252.42 447.37 270.96 471.22 281.77C495.5 292.75 502.82 299.57 502.64 309.48C502.46 324.22 483.62 330.86 466.1 330.86C441.64 330.86 428.7 327.11 408.23 317.76L400.54 313.94L392.32 353.26C403.11 358.83 425 363.89 447.54 364.06C516.18 364.06 559.98 332.14 560.51 283.05C560.86 256.42 544.96 236.06 508.1 219.25C486.14 208.62 473.19 201.61 473.38 190.31C473.38 180.22 485.25 169.44 509.71 169.44C529.66 169.24 544.07 173.59 554.92 178.13L560.33 181.01L568.56 143.44L566.61 147.37Z" fill="#00579F"/>
+                          <path d="M661.85 143.79H626.81C615.32 143.79 606.44 146.84 601.14 160.12L512.76 348.73H581.4C581.4 348.73 592 322.43 594.3 317.06C600.25 317.06 659.38 317.06 667.09 317.06C668.85 324.05 674.8 348.73 674.8 348.73H736.15L661.85 143.79ZM610.37 275.84C614.61 265.16 635.1 214.71 635.1 214.71C634.75 215.07 639.87 202.65 642.91 195.19L647.5 214.01C647.5 214.01 659.73 266.63 661.73 275.84H610.37Z" fill="#00579F"/>
+                          <path d="M233.98 143.79L168.76 283.22L162.45 252.96C151.31 218.19 122.43 180.76 90.02 161.75L150.41 348.56H219.56L320.09 143.79H233.98Z" fill="#00579F"/>
+                          <path d="M109.77 143.79H7.06L6 148.47C86.12 167.13 136.77 206.27 159.38 252.96L136.24 160.14C132.71 147.56 122.79 144 109.77 143.79Z" fill="#FAA61A"/>
+                        </svg>
 
-                      {/* Mastercard logo */}
-                      <svg className="h-6" viewBox="0 0 131.39 86.9" xmlns="http://www.w3.org/2000/svg">
-                        <rect width="131.39" height="86.9" rx="4" fill="white"/>
-                        <path d="M51.87 15.24H79.52V65.67H51.87V15.24Z" fill="#FF5F00"/>
-                        <path d="M54.08 40.45C54.08 30.64 58.77 21.97 65.7 15.24C59.56 10.4 51.76 7.65 43.42 7.65C26.81 7.65 13.26 22.4 13.26 40.45C13.26 58.5 26.81 73.25 43.42 73.25C51.76 73.25 59.56 70.5 65.7 65.67C58.77 58.93 54.08 50.26 54.08 40.45Z" fill="#EB001B"/>
-                        <path d="M118.13 40.45C118.13 58.5 104.58 73.25 87.97 73.25C79.63 73.25 71.83 70.5 65.69 65.67C72.62 58.93 77.31 50.26 77.31 40.45C77.31 30.64 72.62 21.97 65.69 15.24C71.83 10.4 79.63 7.65 87.97 7.65C104.58 7.65 118.13 22.4 118.13 40.45Z" fill="#F79E1B"/>
-                      </svg>
+                        {/* Mastercard logo */}
+                        <svg className="h-6" viewBox="0 0 131.39 86.9" xmlns="http://www.w3.org/2000/svg">
+                          <rect width="131.39" height="86.9" rx="4" fill="white"/>
+                          <path d="M51.87 15.24H79.52V65.67H51.87V15.24Z" fill="#FF5F00"/>
+                          <path d="M54.08 40.45C54.08 30.64 58.77 21.97 65.7 15.24C59.56 10.4 51.76 7.65 43.42 7.65C26.81 7.65 13.26 22.4 13.26 40.45C13.26 58.5 26.81 73.25 43.42 73.25C51.76 73.25 59.56 70.5 65.7 65.67C58.77 58.93 54.08 50.26 54.08 40.45Z" fill="#EB001B"/>
+                          <path d="M118.13 40.45C118.13 58.5 104.58 73.25 87.97 73.25C79.63 73.25 71.83 70.5 65.69 65.67C72.62 58.93 77.31 50.26 77.31 40.45C77.31 30.64 72.62 21.97 65.69 15.24C71.83 10.4 79.63 7.65 87.97 7.65C104.58 7.65 118.13 22.4 118.13 40.45Z" fill="#F79E1B"/>
+                        </svg>
 
-                      {/* RuPay logo */}
-                      <svg className="h-6" viewBox="0 0 601 211" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M111.3 20.4H16.9C10.5 20.4 5.3 25.6 5.3 32V178.9C5.3 185.3 10.5 190.5 16.9 190.5H111.3C117.7 190.5 122.9 185.3 122.9 178.9V32C122.9 25.6 117.7 20.4 111.3 20.4Z" fill="#097DC6"/>
-                        <path d="M381.9 20.4H128C121.6 20.4 116.4 25.6 116.4 32V178.9C116.4 185.3 121.6 190.5 128 190.5H381.9C388.3 190.5 393.5 185.3 393.5 178.9V32C393.5 25.6 388.3 20.4 381.9 20.4Z" fill="#F7B600"/>
-                        <path d="M583.8 20.4H395.1C388.7 20.4 383.5 25.6 383.5 32V178.9C383.5 185.3 388.7 190.5 395.1 190.5H583.8C590.2 190.5 595.4 185.3 595.4 178.9V32C595.4 25.6 590.2 20.4 583.8 20.4Z" fill="#008C44"/>
-                        <path d="M180.8 105.5C180.8 115.2 175.2 123.2 163.8 123.2H150.1V87.6H163.8C175.1 87.7 180.8 95.7 180.8 105.5ZM168.6 105.5C168.6 101 166.6 97.8 161.9 97.8H161.7V113.1H161.9C166.6 113.1 168.6 109.9 168.6 105.5ZM202.5 123.2H190.7L178.9 87.6H191.6L196.7 108L201.8 87.6H214.4L202.5 123.2ZM225.5 123.2H214V87.6H225.5V123.2ZM261.5 105.4C261.5 117.7 253.2 124.1 240.6 124.1C228 124.1 219.7 117.7 219.7 105.4C219.7 93.1 228 86.7 240.6 86.7C253.2 86.7 261.5 93.1 261.5 105.4ZM248.9 105.4C248.9 100.6 246.4 96.5 240.6 96.5C234.8 96.5 232.3 100.6 232.3 105.4C232.3 110.2 234.8 114.3 240.6 114.3C246.4 114.3 248.9 110.2 248.9 105.4ZM293.2 87.6V123.2H281.7V110H272.2V123.2H260.7V87.6H272.2V100.4H281.7V87.6H293.2ZM312.5 123.2H301V87.6H312.5V123.2ZM353.3 123.2H344L342.3 118.5H329.7L327.9 123.2H318.7L330.5 87.6H341.6L353.3 123.2ZM339.7 110.3L336 98.8L332.2 110.3H339.7ZM372.9 123.2L365.9 108.8L363.5 112.6V123.2H352V87.6H363.5V99.9L371.9 87.6H385.5L375.4 101.2L385.5 123.2H372.9ZM386.9 87.6H398.4V123.2H386.9V87.6Z" fill="white"/>
-                      </svg>
-
-                      {/* UPI logo */}
-                      <svg className="h-6" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M32.94 17.42L25.76 5.2C25.66 5.08 25.54 4.98 25.4 4.91C25.26 4.84 25.11 4.8 24.95 4.8H15.05C14.89 4.8 14.74 4.84 14.6 4.91C14.46 4.98 14.34 5.08 14.24 5.2L7.06 17.42C6.96 17.55 6.9 17.7 6.89 17.86C6.88 18.01 6.91 18.17 6.99 18.31L14.16 30.74C14.34 31.06 14.68 31.25 15.05 31.25H24.95C25.11 31.25 25.26 31.21 25.4 31.14C25.54 31.07 25.66 30.97 25.76 30.85L32.94 18.31C33.01 18.17 33.05 18.02 33.03 17.86C33.02 17.7 32.96 17.55 32.86 17.42H32.94Z" fill="#097DC6"/>
-                        <path d="M32.06 17.41L24.88 28.81C24.78 28.94 24.66 29.04 24.52 29.11C24.38 29.18 24.23 29.21 24.07 29.21H14.17C14.01 29.21 13.86 29.18 13.72 29.11C13.58 29.04 13.46 28.94 13.36 28.81L6.18 17.41C6.1 17.28 6.06 17.13 6.06 16.97C6.06 16.82 6.1 16.66 6.18 16.53L13.36 5.2C13.46 5.08 13.58 4.98 13.72 4.91C13.86 4.84 14.01 4.8 14.17 4.8H24.07C24.23 4.8 24.38 4.84 24.52 4.91C24.66 4.98 24.78 5.08 24.88 5.2L32.06 16.53C32.14 16.66 32.18 16.82 32.18 16.97C32.18 17.13 32.14 17.28 32.06 17.41Z" fill="#097DC6"/>
-                        <path d="M10.91 13.97C10.91 13.92 10.94 13.87 10.99 13.85L13.85 12.33C13.87 12.32 13.89 12.32 13.91 12.32C13.93 12.32 13.96 12.32 13.98 12.33C14 12.35 14.02 12.36 14.03 12.38C14.05 12.4 14.06 12.42 14.06 12.45V13.65C14.06 13.7 14.09 13.75 14.13 13.78C14.16 13.8 14.21 13.8 14.25 13.78L17.61 12.01C17.63 12 17.66 12 17.68 12C17.71 12 17.73 12 17.75 12.01C17.77 12.02 17.79 12.04 17.81 12.06C17.82 12.08 17.83 12.1 17.83 12.13V13.33C17.83 13.38 17.86 13.43 17.9 13.45L19.22 14.16C19.24 14.18 19.26 14.18 19.28 14.18C19.31 14.18 19.33 14.18 19.35 14.16C19.37 14.15 19.39 14.13 19.4 14.11C19.41 14.09 19.42 14.07 19.42 14.04V11.46C19.42 11.3 19.37 11.14 19.27 11.01C19.18 10.88 19.05 10.79 18.9 10.74L10.98 7.38C10.96 7.37 10.94 7.37 10.91 7.37C10.89 7.37 10.87 7.38 10.85 7.39C10.83 7.4 10.81 7.41 10.8 7.43C10.79 7.45 10.78 7.47 10.78 7.49V24.3C10.78 24.32 10.79 24.34 10.8 24.36C10.81 24.38 10.83 24.39 10.85 24.4C10.87 24.41 10.89 24.42 10.91 24.42C10.94 24.42 10.96 24.41 10.98 24.41L19.27 20.75C19.35 20.71 19.39 20.61 19.35 20.53C19.32 20.45 19.22 20.41 19.14 20.44L13.98 23.35C13.96 23.36 13.94 23.37 13.91 23.37C13.89 23.37 13.87 23.36 13.85 23.35C13.83 23.34 13.81 23.33 13.8 23.31C13.79 23.29 13.78 23.26 13.78 23.24V15.47C13.78 15.42 13.75 15.37 13.71 15.35L10.99 13.85C10.94 13.83 10.91 13.87 10.91 13.93V13.97Z" fill="white"/>
-                        <path d="M29.09 15.35V19.78C29.09 19.8 29.08 19.82 29.07 19.84C29.06 19.86 29.04 19.87 29.02 19.88C29 19.89 28.98 19.9 28.96 19.9C28.94 19.9 28.91 19.89 28.89 19.88L20.6 15.47C20.45 15.38 20.28 15.33 20.1 15.33C19.92 15.33 19.75 15.38 19.6 15.47L19.35 15.6C19.31 15.62 19.28 15.67 19.28 15.72V20.73C19.28 20.78 19.31 20.83 19.35 20.85L20.65 21.61C20.68 21.63 20.7 21.63 20.72 21.63C20.75 21.63 20.77 21.62 20.79 21.61C20.81 21.6 20.83 21.58 20.84 21.56C20.85 21.54 20.86 21.52 20.86 21.49V17.86C20.86 17.83 20.87 17.81 20.88 17.79C20.89 17.77 20.91 17.76 20.93 17.75C20.95 17.74 20.97 17.73 20.99 17.73C21.02 17.73 21.04 17.74 21.06 17.75L26.22 20.65C26.24 20.66 26.26 20.67 26.29 20.67C26.31 20.67 26.33 20.66 26.35 20.65C26.37 20.64 26.39 20.63 26.4 20.61C26.41 20.59 26.42 20.57 26.42 20.54V16.67C26.42 16.64 26.43 16.62 26.44 16.61C26.45 16.59 26.47 16.58 26.49 16.56C26.51 16.55 26.53 16.55 26.56 16.55C26.58 16.55 26.6 16.56 26.62 16.56L28.89 17.96C28.91 17.97 28.93 17.98 28.96 17.98C28.98 17.98 29 17.97 29.02 17.96C29.04 17.95 29.06 17.94 29.07 17.92C29.08 17.9 29.09 17.88 29.09 17.86V15.32L29.09 15.35Z" fill="white"/>
-                      </svg>
+                        {/* UPI logo */}
+                        <svg className="h-6" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+                          <path d="M32.94 17.42L25.76 5.2C25.66 5.08 25.54 4.98 25.4 4.91C25.26 4.84 25.11 4.8 24.95 4.8H15.05C14.89 4.8 14.74 4.84 14.6 4.91C14.46 4.98 14.34 5.08 14.24 5.2L7.06 17.42C6.96 17.55 6.9 17.7 6.89 17.86C6.88 18.01 6.91 18.17 6.99 18.31L14.16 30.74C14.34 31.06 14.68 31.25 15.05 31.25H24.95C25.11 31.25 25.26 31.21 25.4 31.14C25.54 31.07 25.66 30.97 25.76 30.85L32.94 18.31C33.01 18.17 33.05 18.02 33.03 17.86C33.02 17.7 32.96 17.55 32.86 17.42H32.94Z" fill="#097DC6"/>
+                          <path d="M32.06 17.41L24.88 28.81C24.78 28.94 24.66 29.04 24.52 29.11C24.38 29.18 24.23 29.21 24.07 29.21H14.17C14.01 29.21 13.86 29.18 13.72 29.11C13.58 29.04 13.46 28.94 13.36 28.81L6.18 17.41C6.1 17.28 6.06 17.13 6.06 16.97C6.06 16.82 6.1 16.66 6.18 16.53L13.36 5.2C13.46 5.08 13.58 4.98 13.72 4.91C13.86 4.84 14.01 4.8 14.17 4.8H24.07C24.23 4.8 24.38 4.84 24.52 4.91C24.66 4.98 24.78 5.08 24.88 5.2L32.06 16.53C32.14 16.66 32.18 16.82 32.18 16.97C32.18 17.13 32.14 17.28 32.06 17.41Z" fill="#097DC6"/>
+                          <path d="M10.91 13.97C10.91 13.92 10.94 13.87 10.99 13.85L13.85 12.33C13.87 12.32 13.89 12.32 13.91 12.32C13.93 12.32 13.96 12.32 13.98 12.33C14 12.35 14.02 12.36 14.03 12.38C14.05 12.4 14.06 12.42 14.06 12.45V13.65C14.06 13.7 14.09 13.75 14.13 13.78C14.16 13.8 14.21 13.8 14.25 13.78L17.61 12.01C17.63 12 17.66 12 17.68 12C17.71 12 17.73 12 17.75 12.01C17.77 12.02 17.79 12.04 17.81 12.06C17.82 12.08 17.83 12.1 17.83 12.13V13.33C17.83 13.38 17.86 13.43 17.9 13.45L19.22 14.16C19.24 14.18 19.26 14.18 19.28 14.18C19.31 14.18 19.33 14.18 19.35 14.16C19.37 14.15 19.39 14.13 19.4 14.11C19.41 14.09 19.42 14.07 19.42 14.04V11.46C19.42 11.3 19.37 11.14 19.27 11.01C19.18 10.88 19.05 10.79 18.9 10.74L10.98 7.38C10.96 7.37 10.94 7.37 10.91 7.37C10.89 7.37 10.87 7.38 10.85 7.39C10.83 7.4 10.81 7.41 10.8 7.43C10.79 7.45 10.78 7.47 10.78 7.49V24.3C10.78 24.32 10.79 24.34 10.8 24.36C10.81 24.38 10.83 24.39 10.85 24.4C10.87 24.41 10.89 24.42 10.91 24.42C10.94 24.42 10.96 24.41 10.98 24.41L19.27 20.75C19.35 20.71 19.39 20.61 19.35 20.53C19.32 20.45 19.22 20.41 19.14 20.44L13.98 23.35C13.96 23.36 13.94 23.37 13.91 23.37C13.89 23.37 13.87 23.36 13.85 23.35C13.83 23.34 13.81 23.33 13.8 23.31C13.79 23.29 13.78 23.26 13.78 23.24V15.47C13.78 15.42 13.75 15.37 13.71 15.35L10.99 13.85C10.94 13.83 10.91 13.87 10.91 13.93V13.97Z" fill="white"/>
+                          <path d="M29.09 15.35V19.78C29.09 19.8 29.08 19.82 29.07 19.84C29.06 19.86 29.04 19.87 29.02 19.88C29 19.89 28.98 19.9 28.96 19.9C28.94 19.9 28.91 19.89 28.89 19.88L20.6 15.47C20.45 15.38 20.28 15.33 20.1 15.33C19.92 15.33 19.75 15.38 19.6 15.47L19.35 15.6C19.31 15.62 19.28 15.67 19.28 15.72V20.73C19.28 20.78 19.31 20.83 19.35 20.85L20.65 21.61C20.68 21.63 20.7 21.63 20.72 21.63C20.75 21.63 20.77 21.62 20.79 21.61C20.81 21.6 20.83 21.58 20.84 21.56C20.85 21.54 20.86 21.52 20.86 21.49V17.86C20.86 17.83 20.87 17.81 20.88 17.79C20.89 17.77 20.91 17.76 20.93 17.75C20.95 17.74 20.97 17.73 20.99 17.73C21.02 17.73 21.04 17.74 21.06 17.75L26.22 20.65C26.24 20.66 26.26 20.67 26.29 20.67C26.31 20.67 26.33 20.66 26.35 20.65C26.37 20.64 26.39 20.63 26.4 20.61C26.41 20.59 26.42 20.57 26.42 20.54V16.67C26.42 16.64 26.43 16.62 26.44 16.61C26.45 16.59 26.47 16.58 26.49 16.56C26.51 16.55 26.53 16.55 26.56 16.55C26.58 16.55 26.6 16.56 26.62 16.56L28.89 17.96C28.91 17.97 28.93 17.98 28.96 17.98C28.98 17.98 29 17.97 29.02 17.96C29.04 17.95 29.06 17.94 29.07 17.92C29.08 17.9 29.09 17.88 29.09 17.86V15.32L29.09 15.35Z" fill="white"/>
+                        </svg>
+                      </div>
                     </div>
                   </div>
 
@@ -1155,21 +1182,21 @@ const PlaceOrder = () => {
                       setMethod("cod");
                       console.log("Payment method set to cod");
                     }}
-                    className={`border rounded-lg p-4 cursor-pointer transition-all duration-200 ${
+                    className={`border rounded-xl p-4 cursor-pointer transition-all duration-200 ${
                       method === "cod" 
                         ? "border-amber-500 bg-amber-50 shadow-sm" 
                         : "border-gray-200 hover:border-gray-300 hover:bg-gray-50"
                     }`}
                   >
                     <div className="flex items-center">
-                      <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${
+                      <div className={`w-[24px] h-[24px] sm:w-7 sm:h-7 rounded-[50%] border-2 flex items-center justify-center ${
                         method === "cod" ? "border-amber-500" : "border-gray-400"
                       }`}>
                         {method === "cod" && (
-                          <div className="w-3 h-3 bg-amber-500 rounded-full"></div>
+                          <div className="w-[16px] h-[16px] sm:w-5 sm:h-5 bg-amber-500 rounded-[50%]"></div>
                         )}
                       </div>
-                      <div className="ml-3">
+                      <div className="ml-1">
                         <p className={`font-medium ${method === "cod" ? "text-amber-600" : "text-gray-700"}`}>
                           Cash on Delivery
                         </p>
@@ -1179,7 +1206,7 @@ const PlaceOrder = () => {
                       </div>
                     </div>
                     <div className="flex justify-end mt-3">
-                      <div className="bg-amber-100 rounded-md p-1.5">
+                      <div className="bg-amber-100 rounded-xl p-2 shadow-sm">
                         <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-amber-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" />
                         </svg>

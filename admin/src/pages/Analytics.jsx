@@ -1,7 +1,8 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useContext } from 'react';
 import axios from 'axios';
-import { backendUrl } from '../App';
+import { backendUrl } from '../config';
 import { toast } from 'react-toastify';
+import { AuthContext } from '../context/AuthContext';
 import {
   Box,
   Grid,
@@ -40,7 +41,8 @@ import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 
 const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884D8'];
 
-const Analytics = ({ token }) => {
+const Analytics = () => {
+  const { token } = useContext(AuthContext);
   const [loading, setLoading] = useState(true);
   const [timeRange, setTimeRange] = useState('week');
   const [startDate, setStartDate] = useState(new Date(Date.now() - 7 * 24 * 60 * 60 * 1000));
@@ -54,7 +56,7 @@ const Analytics = ({ token }) => {
 
   useEffect(() => {
     fetchAnalytics();
-  }, [timeRange, startDate, endDate]);
+  }, [timeRange, startDate, endDate, token]);
 
   const fetchAnalytics = async () => {
     setLoading(true);
@@ -63,24 +65,21 @@ const Analytics = ({ token }) => {
         throw new Error('No authentication token found');
       }
 
-      const cleanToken = token.replace(/^Bearer\s+/i, '');
-      const authToken = `Bearer ${cleanToken}`;
-
       const [userBehavior, sales, conversion, segments] = await Promise.all([
         axios.get(`${backendUrl}/api/analytics/user-behavior`, {
-          headers: { Authorization: authToken },
+          headers: { Authorization: `Bearer ${token}` },
           params: { timeRange, startDate, endDate }
         }),
         axios.get(`${backendUrl}/api/analytics/sales-analytics`, {
-          headers: { Authorization: authToken },
+          headers: { Authorization: `Bearer ${token}` },
           params: { timeRange, startDate, endDate }
         }),
         axios.get(`${backendUrl}/api/analytics/conversion-rates`, {
-          headers: { Authorization: authToken },
+          headers: { Authorization: `Bearer ${token}` },
           params: { timeRange, startDate, endDate }
         }),
         axios.get(`${backendUrl}/api/analytics/customer-segments`, {
-          headers: { Authorization: authToken },
+          headers: { Authorization: `Bearer ${token}` },
           params: { timeRange, startDate, endDate }
         })
       ]);

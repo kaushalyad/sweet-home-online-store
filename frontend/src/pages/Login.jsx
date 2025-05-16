@@ -35,19 +35,31 @@ const Login = () => {
         ? { email: formData.email, password: formData.password }
         : { phone: formData.phone, password: formData.password };
 
+      console.log("Attempting login with:", { endpoint, payload });
+
       const response = await axios.post(backendUrl + endpoint, payload, {
         withCredentials: true
       });
 
+      console.log("Login response:", response.data);
+
       if (response.data.success) {
         const token = response.data.token;
+        if (!token) {
+          console.error("No token received in response");
+          toast.error("Login failed: No token received");
+          return;
+        }
         setToken(token);
+        localStorage.setItem("token", token);
         toast.success("Login successful!");
         navigate("/");
       } else {
-        toast.error(response.data.message);
+        console.error("Login failed:", response.data.message);
+        toast.error(response.data.message || "Login failed");
       }
     } catch (error) {
+      console.error("Login error:", error.response?.data || error.message);
       toast.error(error.response?.data?.message || "Login failed. Please try again.");
     } finally {
       setLoading(false);

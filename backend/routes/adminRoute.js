@@ -1,6 +1,7 @@
 import express from 'express';
 import jwt from 'jsonwebtoken';
 import logger from '../config/logger.js';
+import { protect, admin } from '../middleware/authMiddleware.js';
 
 const router = express.Router();
 
@@ -70,6 +71,19 @@ router.post('/login', async (req, res) => {
       message: "Login failed. Please try again."
     });
   }
+});
+
+// Admin token verification route
+router.get('/verify-token', protect, admin, (req, res) => {
+  res.json({
+    success: true,
+    user: {
+      id: req.user._id,
+      name: req.user.name,
+      email: req.user.email,
+      role: req.user.role
+    }
+  });
 });
 
 export default router; 

@@ -68,19 +68,16 @@ const Dashboard = () => {
         setLoading(true);
         setError(null);
         
-        if (!token) {
+        const adminToken = localStorage.getItem('adminToken');
+        if (!adminToken) {
           throw new Error('No authentication token found');
         }
 
-        const cleanToken = token.replace(/^Bearer\s+/i, '');
-        const authToken = `Bearer ${cleanToken}`;
-
         const axiosConfig = {
           headers: { 
-            Authorization: authToken,
+            Authorization: `Bearer ${adminToken}`,
             'Content-Type': 'application/json'
-          },
-          withCredentials: true
+          }
         };
 
         const [salesRes, behaviorRes, segmentsRes, pageVisitsRes] = await Promise.all([

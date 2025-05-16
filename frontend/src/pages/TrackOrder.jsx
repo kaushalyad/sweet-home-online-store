@@ -13,9 +13,35 @@ const TrackOrder = () => {
   const [orderData, setOrderData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [lastStatus, setLastStatus] = useState(null);
+  const [showStatusUpdate, setShowStatusUpdate] = useState(false);
+  const [purchaseLocation, setPurchaseLocation] = useState(null);
 
   // Base64 encoded placeholder image (1x1 transparent pixel)
   const PLACEHOLDER_IMAGE = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=';
+
+  const loadPurchaseLocation = async () => {
+    try {
+      const response = await axios.get(
+        `${backendUrl}/api/analytics/purchase-locations`,
+        {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
+        }
+      );
+
+      if (response.data.success && response.data.data.length > 0) {
+        // Get the most recent purchase location
+        const locations = response.data.data;
+        const mostRecentLocation = locations[0]; // Assuming the API returns locations sorted by date
+        setPurchaseLocation(mostRecentLocation);
+      }
+    } catch (error) {
+      console.error("Error loading purchase location:", error);
+    }
+  };
 
   const loadOrderData = async () => {
     try {
@@ -38,7 +64,17 @@ const TrackOrder = () => {
       );
 
       if (response.data.success) {
+        // Check if status has changed
+        if (lastStatus && lastStatus !== response.data.order.status) {
+          setShowStatusUpdate(true);
+          toast.success(`Order status updated to: ${response.data.order.status}`);
+          // Hide the notification after 5 seconds
+          setTimeout(() => setShowStatusUpdate(false), 5000);
+        }
+        setLastStatus(response.data.order.status);
         setOrderData(response.data.order);
+        // Load purchase location after order data is loaded
+        await loadPurchaseLocation();
       } else {
         setError('Failed to load order data');
         toast.error('Failed to load order data');
@@ -52,8 +88,11 @@ const TrackOrder = () => {
     }
   };
 
+  // Poll for status updates every 30 seconds
   useEffect(() => {
     loadOrderData();
+    const interval = setInterval(loadOrderData, 30000);
+    return () => clearInterval(interval);
   }, [token, orderId]);
 
   // Mock delivery timeline steps based on order status
@@ -75,10 +114,10 @@ const TrackOrder = () => {
       { 
         id: 2, 
         title: 'Processing', 
-        description: 'Your sweets are being freshly prepared', 
+        description: 'Your order is being processed', 
         icon: <FaCheck />, 
         completed: ['Processing', 'Preparing', 'Packing', 'Quality Check', 'Shipped', 'Out for delivery', 'Delivered'].includes(status),
-        date: orderData ? new Date(new Date(orderData.date).getTime() + 1000*60*60*4).toLocaleString('en-US', { 
+        date: orderData ? new Date(new Date(orderData.date).getTime() + 1000*60*60*2).toLocaleString('en-US', { 
           month: 'short', 
           day: 'numeric', 
           hour: '2-digit', 
@@ -87,51 +126,81 @@ const TrackOrder = () => {
       },
       { 
         id: 3, 
-        title: 'Shipped', 
-        description: 'Your order has been packaged with care and shipped', 
-        icon: <FaShippingFast />, 
-        completed: ['Shipped', 'Out for delivery', 'Delivered'].includes(status),
-        date: status === 'Order Placed' ? 'Estimated: ' + new Date(new Date().getTime() + 1000*60*60*24).toLocaleString('en-US', { 
-          month: 'short', 
-          day: 'numeric'
-        }) : new Date(new Date(orderData?.date).getTime() + 1000*60*60*24).toLocaleString('en-US', { 
+        title: 'Preparing', 
+        description: 'Your sweets are being freshly prepared', 
+        icon: <FaCheck />, 
+        completed: ['Preparing', 'Packing', 'Quality Check', 'Shipped', 'Out for delivery', 'Delivered'].includes(status),
+        date: orderData ? new Date(new Date(orderData.date).getTime() + 1000*60*60*4).toLocaleString('en-US', { 
           month: 'short', 
           day: 'numeric', 
           hour: '2-digit', 
           minute: '2-digit' 
-        })
+        }) : ''
       },
       { 
         id: 4, 
+        title: 'Packing', 
+        description: 'Your order is being carefully packed', 
+        icon: <FaBox />, 
+        completed: ['Packing', 'Quality Check', 'Shipped', 'Out for delivery', 'Delivered'].includes(status),
+        date: orderData ? new Date(new Date(orderData.date).getTime() + 1000*60*60*6).toLocaleString('en-US', { 
+          month: 'short', 
+          day: 'numeric', 
+          hour: '2-digit', 
+          minute: '2-digit' 
+        }) : ''
+      },
+      { 
+        id: 5, 
+        title: 'Quality Check', 
+        description: 'Final quality check before shipping', 
+        icon: <FaCheck />, 
+        completed: ['Quality Check', 'Shipped', 'Out for delivery', 'Delivered'].includes(status),
+        date: orderData ? new Date(new Date(orderData.date).getTime() + 1000*60*60*8).toLocaleString('en-US', { 
+          month: 'short', 
+          day: 'numeric', 
+          hour: '2-digit', 
+          minute: '2-digit' 
+        }) : ''
+      },
+      { 
+        id: 6, 
+        title: 'Shipped', 
+        description: 'Your order has been shipped', 
+        icon: <FaShippingFast />, 
+        completed: ['Shipped', 'Out for delivery', 'Delivered'].includes(status),
+        date: orderData ? new Date(new Date(orderData.date).getTime() + 1000*60*60*24).toLocaleString('en-US', { 
+          month: 'short', 
+          day: 'numeric', 
+          hour: '2-digit', 
+          minute: '2-digit' 
+        }) : ''
+      },
+      { 
+        id: 7, 
         title: 'Out for Delivery', 
         description: 'Your sweets are out for delivery in temperature-controlled packaging', 
         icon: <FaTruck />, 
         completed: ['Out for delivery', 'Delivered'].includes(status),
-        date: status !== 'Delivered' && status !== 'Out for delivery' ? 'Estimated: ' + new Date(new Date().getTime() + 1000*60*60*48).toLocaleString('en-US', { 
-          month: 'short', 
-          day: 'numeric'
-        }) : new Date(new Date(orderData?.date).getTime() + 1000*60*60*48).toLocaleString('en-US', { 
+        date: orderData ? new Date(new Date(orderData.date).getTime() + 1000*60*60*48).toLocaleString('en-US', { 
           month: 'short', 
           day: 'numeric', 
           hour: '2-digit', 
           minute: '2-digit' 
-        })
+        }) : ''
       },
       { 
-        id: 5, 
+        id: 8, 
         title: 'Delivered', 
         description: 'Your package has been delivered. Enjoy your delicious treats!', 
         icon: <FaMapMarkerAlt />, 
         completed: status === 'Delivered',
-        date: status !== 'Delivered' ? 'Estimated: ' + new Date(new Date().getTime() + 1000*60*60*72).toLocaleString('en-US', { 
-          month: 'short', 
-          day: 'numeric'
-        }) : new Date(new Date(orderData?.date).getTime() + 1000*60*60*72).toLocaleString('en-US', { 
+        date: orderData ? new Date(new Date(orderData.date).getTime() + 1000*60*60*72).toLocaleString('en-US', { 
           month: 'short', 
           day: 'numeric', 
           hour: '2-digit', 
           minute: '2-digit' 
-        })
+        }) : ''
       }
     ];
     
@@ -201,13 +270,16 @@ const TrackOrder = () => {
             </p>
           </div>
           <div className="text-right">
-            <div className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${
+            <div className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium transition-all duration-500 ${
               orderData.status === 'Delivered' ? 'bg-green-50 text-green-700' :
               orderData.status === 'Processing' ? 'bg-blue-50 text-blue-700' :
               orderData.status === 'Cancelled' ? 'bg-red-50 text-red-700' :
               'bg-yellow-50 text-yellow-700'
-            }`}>
+            } ${showStatusUpdate ? 'animate-bounce' : ''}`}>
               {orderData.status}
+              {showStatusUpdate && (
+                <span className="ml-2 animate-pulse">●</span>
+              )}
             </div>
           </div>
         </div>
@@ -223,15 +295,45 @@ const TrackOrder = () => {
               {orderData.address.phone}
             </p>
           </div>
-          <div>
-            <h3 className="text-sm font-medium text-[#212121] mb-2">Payment Information</h3>
-            <p className="text-[#878787]">
-              Method: {orderData.paymentMethod}<br />
-              Status: <span className={orderData.payment ? 'text-green-600' : 'text-red-600'}>
-                {orderData.payment ? 'Paid' : 'Payment Pending'}
-              </span><br />
-              Amount: {currency}{orderData.amount}
-            </p>
+          <div className="space-y-6">
+            <div>
+              <h3 className="text-sm font-medium text-[#212121] mb-2">Payment Information</h3>
+              <p className="text-[#878787]">
+                Method: {orderData.paymentMethod}<br />
+                Status: <span className={orderData.payment ? 'text-green-600' : 'text-red-600'}>
+                  {orderData.payment ? 'Paid' : 'Payment Pending'}
+                </span><br />
+                Amount: {currency}{orderData.amount}
+              </p>
+            </div>
+            <div>
+              <h3 className="text-sm font-medium text-[#212121] mb-2">Purchase Location</h3>
+              <div className="flex items-start space-x-2">
+                <FaMapMarkerAlt className="text-[#2874f0] mt-1 flex-shrink-0" />
+                <div className="text-[#878787]">
+                  {purchaseLocation ? (
+                    <>
+                      <p className="font-medium text-[#212121]">{purchaseLocation.storeName || 'Sweet Home Store'}</p>
+                      <p>{purchaseLocation.address}</p>
+                      <p>{purchaseLocation.city}, {purchaseLocation.state}</p>
+                      <p className="text-sm mt-1">
+                        Order placed from {purchaseLocation.storeType || 'our store'}
+                        {purchaseLocation.timestamp && (
+                          <span> on {new Date(purchaseLocation.timestamp).toLocaleDateString()}</span>
+                        )}
+                      </p>
+                    </>
+                  ) : (
+                    <>
+                      <p className="font-medium text-[#212121]">Sweet Home Store</p>
+                      <p>123 Sweet Street</p>
+                      <p>Delhi, India</p>
+                      <p className="text-sm mt-1">Order placed from our main store</p>
+                    </>
+                  )}
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -290,26 +392,29 @@ const TrackOrder = () => {
             <div key={step.id} className="relative">
               {/* Connector line */}
               {index < timelineSteps.length - 1 && (
-                <div className={`absolute top-10 left-6 w-0.5 h-full -translate-x-1/2 ${
+                <div className={`absolute top-10 left-6 w-0.5 h-full -translate-x-1/2 transition-colors duration-500 ${
                   step.completed ? 'bg-[#2874f0]' : 'bg-[#dbdbdb]'
                 }`}></div>
               )}
               
               <div className="flex items-start">
                 {/* Icon */}
-                <div className={`flex-shrink-0 w-12 h-12 flex items-center justify-center rounded-full z-10 ${
-                  step.completed ? 'bg-[#2874f0] bg-opacity-10 text-[#2874f0]' : 'bg-gray-100 text-[#878787]'
-                }`}>
+                <div className={`flex-shrink-0 w-12 h-12 flex items-center justify-center rounded-full z-10 transition-all duration-500 ${
+                  step.completed ? 'bg-[#2874f0] bg-opacity-10 text-[#2874f0] scale-110' : 'bg-gray-100 text-[#878787]'
+                } ${step.title === orderData.status ? 'ring-4 ring-[#2874f0] ring-opacity-30' : ''}`}>
                   {step.icon}
                 </div>
                 
                 {/* Content */}
                 <div className="ml-4 flex-grow">
                   <div className="flex justify-between">
-                    <h3 className={`font-medium ${
+                    <h3 className={`font-medium transition-colors duration-500 ${
                       step.completed ? 'text-[#212121]' : 'text-[#878787]'
-                    }`}>
+                    } ${step.title === orderData.status ? 'text-[#2874f0] font-semibold' : ''}`}>
                       {step.title}
+                      {step.title === orderData.status && (
+                        <span className="ml-2 text-sm text-[#2874f0]">(Current)</span>
+                      )}
                     </h3>
                     <span className="text-sm text-[#878787]">{step.date}</span>
                   </div>

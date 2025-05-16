@@ -4,6 +4,7 @@ import Product from '../models/product.js';
 import User from '../models/user.js';
 import logger from '../config/logger.js';
 import { getStartDate } from '../routes/analyticsRoute.js';
+import axios from 'axios';
 
 // Get overall user behavior analytics
 export const getUserBehavior = async (req, res) => {
@@ -816,6 +817,128 @@ export const getProductPerformance = async (req, res) => {
   } catch (error) {
     logger.error(`Error in getProductPerformance: ${error.message}`);
     res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+// Get purchase locations data
+export const getPurchaseLocations = async (req, res) => {
+  try {
+    console.log('Fetching purchase locations...');
+    
+    const locations = await Order.aggregate([
+      {
+        $match: {
+          'shippingAddress.city': { $exists: true },
+          'shippingAddress.state': { $exists: true }
+        }
+      },
+      {
+        $group: {
+          _id: {
+            city: '$shippingAddress.city',
+            state: '$shippingAddress.state',
+            latitude: { $ifNull: ['$shippingAddress.latitude', 0] },
+            longitude: { $ifNull: ['$shippingAddress.longitude', 0] }
+          },
+          orderCount: { $sum: 1 },
+          totalAmount: { $sum: '$totalAmount' },
+          lastPurchase: { $max: '$createdAt' },
+          statuses: { $addToSet: '$status' }
+        }
+      },
+      {
+        $project: {
+          _id: 0,
+          city: '$_id.city',
+          state: '$_id.state',
+          latitude: '$_id.latitude',
+          longitude: '$_id.longitude',
+          orderCount: 1,
+          totalAmount: 1,
+          lastPurchase: 1,
+          statuses: 1,
+          hasCoordinates: { $and: [
+            { $ne: ['$_id.latitude', 0] },
+            { $ne: ['$_id.longitude', 0] }
+          ]}
+        }
+      }
+    ]);
+
+    console.log('Found locations:', locations);
+
+    res.json({
+      success: true,
+      data: locations
+    });
+  } catch (error) {
+    console.error('Error in getPurchaseLocations:', error);
+    logger.error(`Error in getPurchaseLocations: ${error.message}`);
+    res.status(500).json({ 
+      success: false, 
+      message: error.message,
+      stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
+    });
+  }
+};
+
+// Update existing orders with coordinates
+export const updateOrderCoordinates = async (req, res) => {
+  try {
+    console.log('Updating order coordinates...');
+    
+    // Get all orders without coordinates
+    const orders = await Order.find({
+      $or: [
+        { 'shippingAddress.latitude': { $exists: false } },
+        { 'shippingAddress.longitude': { $exists: false } }
+      ]
+    });
+
+    console.log(`Found ${orders.length} orders to update`);
+
+    let updatedCount = 0;
+    for (const order of orders) {
+      const address = order.shippingAddress;
+      const addressString = `${address.street || ''}, ${address.city}, ${address.state}, ${address.country}`;
+      
+      try {
+        const response = await axios.get(
+          `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(addressString)}&key=${process.env.GOOGLE_MAPS_API_KEY}`
+        );
+
+        if (response.data.results && response.data.results.length > 0) {
+          const { lat, lng } = response.data.results[0].geometry.location;
+          
+          await Order.findByIdAndUpdate(order._id, {
+            'shippingAddress.latitude': lat,
+            'shippingAddress.longitude': lng
+          });
+          
+          updatedCount++;
+        }
+      } catch (error) {
+        console.error(`Error geocoding order ${order._id}:`, error);
+        continue;
+      }
+    }
+
+    console.log(`Updated ${updatedCount} orders with coordinates`);
+
+    res.json({
+      success: true,
+      message: `Updated ${updatedCount} orders with coordinates`,
+      totalProcessed: orders.length,
+      updatedCount
+    });
+  } catch (error) {
+    console.error('Error updating order coordinates:', error);
+    logger.error(`Error updating order coordinates: ${error.message}`);
+    res.status(500).json({ 
+      success: false, 
+      message: error.message,
+      stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
+    });
   }
 };
 
