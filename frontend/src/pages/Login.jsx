@@ -30,14 +30,20 @@ const Login = () => {
     setLoading(true);
 
     try {
-      const endpoint = loginMethod === "email" ? "/api/user/login" : "/api/user/login/phone";
-      const payload = loginMethod === "email" 
-        ? { email: formData.email, password: formData.password }
-        : { phone: formData.phone, password: formData.password };
+      const payload = {
+        password: formData.password
+      };
 
-      console.log("Attempting login with:", { endpoint, payload });
+      // Add either email or phone based on login method
+      if (loginMethod === "email") {
+        payload.email = formData.email;
+      } else {
+        payload.phone = formData.phone;
+      }
 
-      const response = await axios.post(backendUrl + endpoint, payload, {
+      console.log("Attempting login with:", { payload });
+
+      const response = await axios.post(backendUrl + "/api/user/login", payload, {
         withCredentials: true
       });
 

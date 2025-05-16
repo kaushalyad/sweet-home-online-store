@@ -110,22 +110,28 @@ const registerUser = async (req, res) => {
 // Login user
 const loginUser = async (req, res) => {
   try {
-    const { email, password } = req.body;
+    const { email, phone, password } = req.body;
 
     // Validate input
-    if (!email || !password) {
+    if ((!email && !phone) || !password) {
       return res.status(400).json({
         success: false,
-        message: "Please provide email and password"
+        message: "Please provide either email or phone number and password"
       });
     }
 
-    // Find user
-    const user = await userModel.findOne({ email }).select('+password');
+    // Find user by email or phone
+    const user = await userModel.findOne({
+      $or: [
+        { email: email },
+        { phone: phone }
+      ]
+    }).select('+password');
+
     if (!user) {
       return res.status(401).json({
         success: false,
-        message: "Invalid email or password"
+        message: "Invalid credentials"
       });
     }
 
@@ -134,7 +140,7 @@ const loginUser = async (req, res) => {
     if (!isMatch) {
       return res.status(401).json({
         success: false,
-        message: "Invalid email or password"
+        message: "Invalid credentials"
       });
     }
 
