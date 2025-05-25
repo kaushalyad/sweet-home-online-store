@@ -16,6 +16,7 @@ import Profile from './pages/Profile'
 import ProductListing from './pages/ProductListing'
 import Addresses from './pages/Addresses'
 import OrderSuccess from './pages/OrderSuccess'
+import SharedContent from './pages/SharedContent'
 import Navbar from './components/Navbar'
 import Footer from './components/Footer'
 import SearchBar from './components/SearchBar'
@@ -131,6 +132,7 @@ const App = () => {
               <Route path='/products' element={<ProductListing />} />
               <Route path='/products/:productId' element={<ProductRedirect />} />
               <Route path='/order-success' element={<ProtectedRoute element={<OrderSuccess />} />} />
+              <Route path='/shared/:contentId' element={<SharedContent />} />
               <Route path='*' element={<NotFound />} />
             </Routes>
             <Footer />

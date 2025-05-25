@@ -15,6 +15,7 @@ import adminRouter from "./routes/adminRoute.js";
 import cookieParser from "cookie-parser";
 import trackUserBehavior from "./middleware/trackUserBehavior.js";
 import { errorHandler } from './middleware/errorHandler.js';
+import sharedContentRouter from './routes/sharedContentRoute.js';
 
 // App Config
 const app = express();
@@ -96,6 +97,7 @@ const startServer = async () => {
     app.use("/api/wishlist", wishlistRouter);
     app.use("/api/analytics", analyticsRouter);
     app.use("/api/admin", adminRouter);
+    app.use("/api/shared", sharedContentRouter);
 
     // Root endpoint
     app.get("/", (req, res) => {
