@@ -162,7 +162,7 @@ const Products = ({ token }) => {
       try {
         setLoading(true);
         await axios.delete(`${backendUrl}/api/product/${productId}`, {
-          headers: { Authorization: token }
+          headers: { Authorization: `Bearer ${token}` }
         });
         fetchProducts();
       } catch (err) {

@@ -28,8 +28,8 @@ const List = ({ token }) => {
   const removeProduct = async (id) => {
     try {
       const response = await axios.delete(
-        `${backendUrl}/api/product/remove/${id}`,
-        { headers: { token } }
+        `${backendUrl}/api/product/${id}`,
+        { headers: { Authorization: `Bearer ${token}` } }
       );
 
       if (response.data.success) {
