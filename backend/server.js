@@ -16,6 +16,8 @@ import cookieParser from "cookie-parser";
 import trackUserBehavior from "./middleware/trackUserBehavior.js";
 import { errorHandler } from './middleware/errorHandler.js';
 import sharedContentRouter from './routes/sharedContentRoute.js';
+import uploadRouter from './routes/uploadRoute.js';
+import messageRouter from './routes/messageRoute.js';
 
 // App Config
 const app = express();
@@ -98,6 +100,8 @@ const startServer = async () => {
     app.use("/api/analytics", analyticsRouter);
     app.use("/api/admin", adminRouter);
     app.use("/api/shared", sharedContentRouter);
+      app.use("/api/upload", uploadRouter);
+      app.use("/api/messages", messageRouter);
 
     // Root endpoint
     app.get("/", (req, res) => {

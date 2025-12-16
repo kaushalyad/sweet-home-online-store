@@ -17,45 +17,195 @@ const Add = ({ token }) => {
   const [subCategory, setSubCategory] = useState("Sugar");
   const [bestseller, setBestseller] = useState(false);
 
+  const uploadFileToCloudinary = async (file) => {
+    try {
+      console.log('Starting Cloudinary upload for file:', file.name);
+      
+      // Request signature from backend (protected)
+      const sigResp = await axios.get(backendUrl + '/api/upload/cloudinary/signature', {
+        headers: { Authorization: `Bearer ${token}`, token }
+      });
+
+      console.log('Signature response:', sigResp.data);
+
+      if (!sigResp.data.success) throw new Error('Failed to get upload signature');
+
+      const { signature, timestamp, api_key, cloud_name } = sigResp.data.data;
+      
+      if (!signature || !timestamp || !api_key || !cloud_name) {
+        throw new Error(`Missing required Cloudinary parameters: signature=${!!signature}, timestamp=${!!timestamp}, api_key=${!!api_key}, cloud_name=${!!cloud_name}`);
+      }
+
+      console.log('Cloudinary params:', { timestamp, api_key, cloud_name, signature: signature.substring(0, 20) + '...' });
+
+      const fd = new FormData();
+      fd.append('file', file);
+      fd.append('api_key', api_key);
+      fd.append('timestamp', timestamp);
+      fd.append('signature', signature);
+
+      // Upload to Cloudinary using fetch (more reliable with multipart)
+      const uploadUrl = `https://api.cloudinary.com/v1_1/${cloud_name}/image/upload`;
+      console.log('Uploading to:', uploadUrl);
+      
+      const uploadResp = await fetch(uploadUrl, {
+        method: 'POST',
+        body: fd
+      });
+      
+      console.log('Cloudinary upload response status:', uploadResp.status);
+      
+      const uploadData = await uploadResp.json();
+      console.log('Cloudinary upload response data:', uploadData);
+
+      if (!uploadResp.ok) {
+        throw new Error(`Cloudinary upload failed: ${uploadData.error?.message || uploadResp.statusText}`);
+      }
+
+      if (!uploadData.secure_url) {
+        console.error('No secure URL in response:', uploadData);
+        throw new Error('No secure URL returned from Cloudinary. Response: ' + JSON.stringify(uploadData));
+      }
+      
+      const secureUrl = uploadData.secure_url;
+      console.log('Successfully uploaded:', secureUrl);
+      return secureUrl;
+    } catch (error) {
+      console.error('Cloudinary upload error full:', error);
+      throw new Error(`Image upload failed: ${error.message}`);
+    }
+  };
+
   const onSubmitHandler = async (e) => {
     e.preventDefault();
 
     try {
-      const formData = new FormData();
+      // Validate form fields
+      if (!name.trim()) {
+        toast.error('Product name is required');
+        return;
+      }
+      if (!description.trim()) {
+        toast.error('Product description is required');
+        return;
+      }
+      if (!price) {
+        toast.error('Product price is required');
+        return;
+      }
 
-      formData.append("name", name);
-      formData.append("description", description);
-      formData.append("price", price);
-      formData.append("category", category);
-      formData.append("subCategory", subCategory);
-      formData.append("bestseller", bestseller);
+      // Get images to upload
+      const imagesToUpload = [image1, image2, image3, image4].filter(Boolean);
+      
+      if (imagesToUpload.length === 0) {
+        toast.error('At least one product image is required');
+        return;
+      }
 
-      image1 && formData.append("image1", image1);
-      image2 && formData.append("image2", image2);
-      image3 && formData.append("image3", image3);
-      image4 && formData.append("image4", image4);
+      // Try direct Cloudinary upload first
+      let uploadedUrls = [];
+      let useDirectUpload = true;
+
+      try {
+        toast.info('Uploading images to Cloudinary...');
+        
+        for (const file of imagesToUpload) {
+          try {
+            const url = await uploadFileToCloudinary(file);
+            uploadedUrls.push(url);
+            console.log('Added URL to uploadedUrls:', url, 'Total:', uploadedUrls.length);
+          } catch (uploadError) {
+            console.error('Direct upload failed for this file:', uploadError.message);
+            useDirectUpload = false;
+            break;
+          }
+        }
+      } catch (error) {
+        console.error('Direct upload failed:', error.message);
+        useDirectUpload = false;
+      }
+
+      // If direct upload failed, fall back to server-side upload via multipart
+      if (!useDirectUpload || uploadedUrls.length === 0) {
+        console.log('Falling back to server-side upload...');
+        toast.info('Uploading images via server...');
+        uploadedUrls = [];
+
+        // Send multipart form data instead
+        const formData = new FormData();
+        formData.append("name", name);
+        formData.append("description", description);
+        formData.append("price", price);
+        formData.append("category", category);
+        formData.append("subCategory", subCategory);
+        formData.append("bestseller", bestseller);
+
+        image1 && formData.append("image1", image1);
+        image2 && formData.append("image2", image2);
+        image3 && formData.append("image3", image3);
+        image4 && formData.append("image4", image4);
+
+        console.log('Sending multipart form data to backend');
+
+        const response = await axios.post(
+          backendUrl + '/api/product/add',
+          formData,
+          { headers: { Authorization: `Bearer ${token}`, token } }
+        );
+
+        console.log('Backend response:', response.data);
+
+        if (response.data.success) {
+          toast.success(response.data.message);
+          setName('');
+          setDescription('');
+          setImage1(false);
+          setImage2(false);
+          setImage3(false);
+          setImage4(false);
+          setPrice('');
+        } else {
+          toast.error(response.data.message);
+        }
+        return;
+      }
+
+      // If direct upload succeeded, send JSON to backend
+      const payload = {
+        name,
+        description,
+        price,
+        category,
+        subCategory,
+        bestseller,
+        images: uploadedUrls
+      };
+
+      console.log('Sending payload to backend:', payload);
 
       const response = await axios.post(
-        backendUrl + "/api/product/add",
-        formData,
-        { headers: { token } }
+        backendUrl + '/api/product/add',
+        payload,
+        { headers: { Authorization: `Bearer ${token}`, token, 'Content-Type': 'application/json' } }
       );
+
+      console.log('Backend response:', response.data);
 
       if (response.data.success) {
         toast.success(response.data.message);
-        setName("");
-        setDescription("");
+        setName('');
+        setDescription('');
         setImage1(false);
         setImage2(false);
         setImage3(false);
         setImage4(false);
-        setPrice("");
+        setPrice('');
       } else {
         toast.error(response.data.message);
       }
     } catch (error) {
-      console.log(error);
-      toast.error(error.message);
+      console.error('Error in form submission:', error.response?.data || error.message);
+      toast.error(error.response?.data?.message || error.message);
     }
   };
 

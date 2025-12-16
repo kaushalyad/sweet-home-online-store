@@ -1,6 +1,9 @@
 import Slider from "../components/Slider";
 import LatestCollection from "../components/LatestCollection";
 import BestSeller from "../components/BestSeller";
+import OnSale from "../components/OnSale";
+import NewArrivals from "../components/NewArrivals";
+import Upcoming from "../components/Upcoming";
 import OurPolicy from "../components/OurPolicy";
 import NewsletterBox from "../components/NewsletterBox";
 import { motion } from "framer-motion";
@@ -305,6 +308,39 @@ const Home = () => {
         className="container mx-auto px-4 py-16 sm:py-20"
       >
         <BestSeller />
+      </motion.div>
+
+      {/* On Sale Section */}
+      <motion.div
+        initial={{ opacity: 0 }}
+        whileInView={{ opacity: 1 }}
+        viewport={{ once: true }}
+        transition={{ duration: 0.8 }}
+        className="container mx-auto px-4 py-16"
+      >
+        <OnSale />
+      </motion.div>
+
+      {/* New Arrivals Section */}
+      <motion.div
+        initial={{ opacity: 0 }}
+        whileInView={{ opacity: 1 }}
+        viewport={{ once: true }}
+        transition={{ duration: 0.8 }}
+        className="container mx-auto px-4 py-16"
+      >
+        <NewArrivals />
+      </motion.div>
+
+      {/* Upcoming Section */}
+      <motion.div
+        initial={{ opacity: 0 }}
+        whileInView={{ opacity: 1 }}
+        viewport={{ once: true }}
+        transition={{ duration: 0.8 }}
+        className="container mx-auto px-4 py-16"
+      >
+        <Upcoming />
       </motion.div>
 
       {/* Special Occasions Section */}
