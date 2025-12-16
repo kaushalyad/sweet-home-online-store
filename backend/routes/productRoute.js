@@ -28,7 +28,7 @@ productRouter.post('/rate', protect, addRating)
 productRouter.use(protect, admin)
 productRouter.post('/add', upload.any(), addProduct)
 productRouter.put('/update/:id', upload.any(), updateProduct)
-productRouter.delete('/remove/:id', removeProduct)
+productRouter.delete('/:id', removeProduct)
 productRouter.put('/stock/:id', updateStock)
 
 export default productRouter
