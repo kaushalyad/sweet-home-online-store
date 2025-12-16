@@ -27,9 +27,8 @@ const List = ({ token }) => {
 
   const removeProduct = async (id) => {
     try {
-      const response = await axios.post(
-        backendUrl + "/api/product/remove",
-        { id },
+      const response = await axios.delete(
+        `${backendUrl}/api/product/remove/${id}`,
         { headers: { token } }
       );
 
