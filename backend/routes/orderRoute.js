@@ -44,5 +44,37 @@ orderRouter.use(protect, admin)
 orderRouter.get('/list', listOrders)
 orderRouter.post('/list', listOrders)
 orderRouter.put('/status/:orderId', updateOrderStatus)
+orderRouter.get('/recent-notifications', async (req, res) => {
+  try {
+    const recentOrders = await Order.find({})
+      .sort({ createdAt: -1 })
+      .limit(10)
+      .populate('userId', 'name email')
+      .select('userId totalAmount items paymentMethod createdAt shippingAddress');
+
+    const notifications = recentOrders.map(order => ({
+      orderId: order._id,
+      userId: order.userId?._id,
+      totalAmount: order.totalAmount,
+      items: order.items?.length || 0,
+      paymentMethod: order.paymentMethod,
+      timestamp: order.createdAt,
+      customerEmail: order.shippingAddress?.email,
+      customerName: order.shippingAddress ? 
+        `${order.shippingAddress.firstName} ${order.shippingAddress.lastName}` : 
+        order.userId?.name || 'Unknown'
+    }));
+
+    res.json({
+      success: true,
+      notifications
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message
+    });
+  }
+});
 
 export default orderRouter

@@ -31,6 +31,10 @@ const Profile = () => {
     newPassword: '',
     confirmPassword: ''
   });
+  const [passwordStrength, setPasswordStrength] = useState({
+    score: 0,
+    feedback: []
+  });
   const [notificationSettings, setNotificationSettings] = useState({
     orderUpdates: true,
     promotionalOffers: true,
@@ -194,12 +198,40 @@ const Profile = () => {
     }));
   };
 
+  // Password strength calculation
+  const calculatePasswordStrength = (password) => {
+    let score = 0;
+    const feedback = [];
+
+    if (password.length >= 8) score += 1;
+    else feedback.push('At least 8 characters');
+
+    if (/[a-z]/.test(password)) score += 1;
+    else feedback.push('Lowercase letter');
+
+    if (/[A-Z]/.test(password)) score += 1;
+    else feedback.push('Uppercase letter');
+
+    if (/[0-9]/.test(password)) score += 1;
+    else feedback.push('Number');
+
+    if (/[^A-Za-z0-9]/.test(password)) score += 1;
+    else feedback.push('Special character');
+
+    return { score, feedback };
+  };
+
   const handlePasswordChange = (e) => {
     const { name, value } = e.target;
     setPasswordData(prev => ({
       ...prev,
       [name]: value
     }));
+
+    if (name === 'newPassword') {
+      const strength = calculatePasswordStrength(value);
+      setPasswordStrength(strength);
+    }
   };
 
   const handleNotificationToggle = (setting) => {
@@ -732,6 +764,41 @@ const Profile = () => {
                       className="w-full px-4 py-2 border border-[#dbdbdb] rounded-md focus:outline-none focus:ring-2 focus:ring-[#2874f0] focus:border-transparent"
                       placeholder="Enter new password"
                     />
+                    {passwordData.newPassword && (
+                      <div className="mt-2">
+                        <div className="flex items-center space-x-2 mb-1">
+                          <div className="flex-1 bg-gray-200 rounded-full h-2">
+                            <div 
+                              className={`h-2 rounded-full transition-all duration-300 ${
+                                passwordStrength.score <= 2 ? 'bg-red-500' :
+                                passwordStrength.score <= 3 ? 'bg-yellow-500' :
+                                passwordStrength.score <= 4 ? 'bg-blue-500' : 'bg-green-500'
+                              }`}
+                              style={{ width: `${(passwordStrength.score / 5) * 100}%` }}
+                            ></div>
+                          </div>
+                          <span className={`text-xs font-medium ${
+                            passwordStrength.score <= 2 ? 'text-red-500' :
+                            passwordStrength.score <= 3 ? 'text-yellow-500' :
+                            passwordStrength.score <= 4 ? 'text-blue-500' : 'text-green-500'
+                          }`}>
+                            {passwordStrength.score <= 2 ? 'Weak' :
+                             passwordStrength.score <= 3 ? 'Fair' :
+                             passwordStrength.score <= 4 ? 'Good' : 'Strong'}
+                          </span>
+                        </div>
+                        {passwordStrength.feedback.length > 0 && (
+                          <div className="text-xs text-gray-600">
+                            <p className="mb-1">Password should include:</p>
+                            <ul className="list-disc list-inside space-y-1">
+                              {passwordStrength.feedback.map((item, index) => (
+                                <li key={index}>{item}</li>
+                              ))}
+                            </ul>
+                          </div>
+                        )}
+                      </div>
+                    )}
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-[#212121] mb-2">Confirm New Password</label>

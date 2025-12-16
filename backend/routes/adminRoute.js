@@ -15,9 +15,9 @@ router.post('/login', async (req, res) => {
       passwordLength: password?.length
     });
 
-    // Hardcoded admin credentials
-    const ADMIN_EMAIL = 'sweethomeonlinestorehelp@gmail.com';
-    const ADMIN_PASSWORD = 'Kaushalyad@123';
+    // Admin credentials from environment variables
+    const ADMIN_EMAIL = process.env.ADMIN_EMAIL || 'sweethomeonlinestorehelp@gmail.com';
+    const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'Kaushalyad@123';
 
     if (!email || !password) {
       console.log('Missing credentials:', { email, hasPassword: !!password });

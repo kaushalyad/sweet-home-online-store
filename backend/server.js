@@ -18,10 +18,33 @@ import { errorHandler } from './middleware/errorHandler.js';
 import sharedContentRouter from './routes/sharedContentRoute.js';
 import uploadRouter from './routes/uploadRoute.js';
 import messageRouter from './routes/messageRoute.js';
+import { createServer } from 'http';
+import { Server } from 'socket.io';
 
 // App Config
 const app = express();
 const port = process.env.PORT || 4000;
+
+// Create HTTP server
+const server = createServer(app);
+
+// Initialize Socket.IO
+const io = new Server(server, {
+  cors: {
+    origin: [
+      "http://localhost:4173", // Admin panel
+      "http://localhost:3000", // Frontend
+      "http://localhost:5173", // Vite dev server
+      "http://localhost:5174", // Vite dev server
+      "http://localhost:5175", // Additional Vite dev server
+      "https://www.sweethome-store.com",
+      "https://sweethome-store.com",
+      "https://api.sweethome-store.com",
+    ],
+    credentials: true,
+    methods: ["GET", "POST"]
+  }
+});
 
 // Connect to database and cloudinary
 const startServer = async () => {
@@ -117,8 +140,44 @@ const startServer = async () => {
     // Error handler
     app.use(errorHandler);
 
+    // Socket.IO connection handling
+    io.on('connection', (socket) => {
+      logger.info(`User connected: ${socket.id}`);
+
+      // Join user to their room for personalized updates
+      socket.on('join-user-room', (userId) => {
+        if (userId) {
+          socket.join(`user_${userId}`);
+          logger.info(`User ${userId} joined their room`);
+        }
+      });
+
+      // Join admin room for real-time analytics
+      socket.on('join-admin-room', () => {
+        socket.join('admin_room');
+        logger.info('Admin joined admin room');
+      });
+
+      // Handle real-time tracking events
+      socket.on('user-activity', (data) => {
+        // Broadcast to admin room for live traffic monitoring
+        io.to('admin_room').emit('live-traffic', {
+          ...data,
+          timestamp: new Date(),
+          socketId: socket.id
+        });
+      });
+
+      socket.on('disconnect', () => {
+        logger.info(`User disconnected: ${socket.id}`);
+      });
+    });
+
+    // Make io available to routes
+    app.set('io', io);
+
     // Start server
-    app.listen(port, '0.0.0.0', () => {
+    server.listen(port, '0.0.0.0', () => {
       logger.info(`Server started on PORT : ${port}`);
       logger.info(`Environment: ${process.env.NODE_ENV || 'development'}`);
     });

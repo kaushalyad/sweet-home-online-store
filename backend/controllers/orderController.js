@@ -5,6 +5,7 @@ import razorpay from 'razorpay'
 import logger from '../config/logger.js';
 import crypto from 'crypto';
 import axios from 'axios';
+import { sendOrderConfirmationEmail, sendAdminOrderNotification, sendOrderStatusUpdateEmail } from '../utils/emailService.js';
 
 // global variables
 const currency = 'inr'
@@ -117,6 +118,52 @@ const placeOrder = async (req, res) => {
 
         logger.info(`Order placed successfully: ${order._id}`);
 
+        // Send confirmation email to customer
+        const emailData = {
+          orderId: order._id,
+          customerName: `${address.firstName} ${address.lastName}`,
+          customerEmail: address.email,
+          items: orderItems,
+          totalAmount,
+          shippingAddress: {
+            firstName: address.firstName,
+            lastName: address.lastName,
+            email: address.email,
+            phone: address.phone,
+            street: address.street,
+            city: address.city,
+            state: address.state,
+            country: address.country,
+            zipCode: address.zipCode
+          },
+          paymentMethod: paymentMethod.toLowerCase(),
+          orderDate: order.date || order.createdAt
+        };
+
+        // Send emails asynchronously (don't wait for them to complete)
+        sendOrderConfirmationEmail(emailData).catch(err =>
+          logger.error('Failed to send order confirmation email:', err)
+        );
+
+        sendAdminOrderNotification(emailData).catch(err =>
+          logger.error('Failed to send admin notification email:', err)
+        );
+
+        // Emit real-time notification for new order
+        const io = req.app.get('io');
+        if (io) {
+          io.to('admin_room').emit('new-order', {
+            orderId: order._id,
+            userId,
+            totalAmount,
+            items: orderItems.length,
+            paymentMethod,
+            timestamp: new Date(),
+            customerEmail: address.email,
+            customerName: `${address.firstName} ${address.lastName}`
+          });
+        }
+
         res.status(201).json({
             success: true,
             message: "Order placed successfully",
@@ -183,6 +230,42 @@ const placeOrderStripe = async (req,res) => {
 
         // Clear the user's cart after successful order creation
         await userModel.findByIdAndUpdate(userId, { cartData: {} });
+
+        // Send confirmation email to customer
+        const emailData = {
+          orderId: newOrder._id,
+          customerName: `${address.firstName} ${address.lastName}`,
+          customerEmail: address.email,
+          items,
+          totalAmount: amount,
+          shippingAddress: address,
+          paymentMethod: "Stripe",
+          orderDate: newOrder.date || newOrder.createdAt
+        };
+
+        // Send emails asynchronously
+        sendOrderConfirmationEmail(emailData).catch(err =>
+          logger.error('Failed to send Stripe order confirmation email:', err)
+        );
+
+        sendAdminOrderNotification(emailData).catch(err =>
+          logger.error('Failed to send Stripe admin notification email:', err)
+        );
+
+        // Emit real-time notification for new order
+        const io = req.app.get('io');
+        if (io) {
+          io.to('admin_room').emit('new-order', {
+            orderId: newOrder._id,
+            userId,
+            totalAmount: amount,
+            items: items.length,
+            paymentMethod: "Stripe",
+            timestamp: new Date(),
+            customerEmail: address.email,
+            customerName: `${address.firstName} ${address.lastName}`
+          });
+        }
 
         res.json({success:true,session_url:session.url});
 
@@ -724,6 +807,22 @@ const updateOrderStatus = async (req, res) => {
         message: "Order not found"
       });
     }
+
+    // Send status update email to customer
+    const statusEmailData = {
+      orderId: order._id,
+      customerName: `${order.shippingAddress.firstName} ${order.shippingAddress.lastName}`,
+      customerEmail: order.shippingAddress.email,
+      newStatus: status.toLowerCase().replace(' ', '_'),
+      orderDate: order.date || order.createdAt
+    };
+
+    // Send email asynchronously
+    sendOrderStatusUpdateEmail(statusEmailData).catch(err =>
+      logger.error('Failed to send order status update email:', err)
+    );
+
+    logger.info(`Order ${orderId} status updated to ${status}`);
 
     res.json({
       success: true,

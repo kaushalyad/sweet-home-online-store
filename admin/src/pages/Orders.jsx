@@ -2,6 +2,7 @@ import React from 'react'
 import { useEffect } from 'react'
 import { useState, useContext } from 'react'
 import axios from 'axios'
+import { io } from 'socket.io-client'
 import { backendUrl, currency } from '../config'
 import { toast } from 'react-toastify'
 import { assets } from '../assets/assets'
@@ -11,6 +12,8 @@ import { AuthContext } from '../context/AuthContext'
 const Orders = () => {
   const [orders, setOrders] = useState([])
   const [filter, setFilter] = useState('all')
+  const [socket, setSocket] = useState(null)
+  const [newOrderNotifications, setNewOrderNotifications] = useState([])
   const { token } = useContext(AuthContext)
 
   const fetchAllOrders = async () => {
@@ -40,6 +43,26 @@ const Orders = () => {
       }
     } catch (error) {
       toast.error(error.response?.data?.message || 'Error fetching orders')
+    }
+  }
+
+  const fetchRecentNotifications = async () => {
+    if (!token) return
+
+    try {
+      const response = await axios.get(
+        backendUrl + '/api/order/recent-notifications',
+        {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        }
+      )
+      if (response.data.success) {
+        setNewOrderNotifications(response.data.notifications)
+      }
+    } catch (error) {
+      console.error('Error fetching recent notifications:', error)
     }
   }
 
@@ -75,7 +98,54 @@ const Orders = () => {
 
   useEffect(() => {
     fetchAllOrders()
+    fetchRecentNotifications()
   }, [token])
+
+  // Real-time order notifications
+  useEffect(() => {
+    if (token) {
+      const socketConnection = io('http://localhost:4000', {
+        auth: {
+          token: token
+        }
+      });
+
+      socketConnection.on('connect', () => {
+        console.log('Connected to real-time order notifications');
+        socketConnection.emit('join-admin-room');
+      });
+
+      socketConnection.on('new-order', (orderData) => {
+        console.log('New order received:', orderData);
+        
+        // Add to notifications
+        setNewOrderNotifications(prev => [orderData, ...prev.slice(0, 9)]); // Keep last 10
+        
+        // Show toast notification
+        toast.success(`New order received! ₹${orderData.totalAmount} from ${orderData.customerName}`, {
+          position: "top-right",
+          autoClose: 5000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+        });
+        
+        // Refresh orders list
+        fetchAllOrders();
+      });
+
+      socketConnection.on('disconnect', () => {
+        console.log('Disconnected from real-time order notifications');
+      });
+
+      setSocket(socketConnection);
+
+      return () => {
+        socketConnection.disconnect();
+      };
+    }
+  }, [token]);
 
   // Filter orders based on selection
   const filteredOrders = filter === 'all' 
@@ -126,6 +196,36 @@ const Orders = () => {
           </button>
         </div>
       </div>
+
+      {/* Real-time Order Notifications */}
+      {newOrderNotifications.length > 0 && (
+        <div className="bg-green-50 border-l-4 border-green-400 p-4 mb-6">
+          <div className="flex">
+            <div className="flex-shrink-0">
+              <FaBox className="h-5 w-5 text-green-400" />
+            </div>
+            <div className="ml-3">
+              <h3 className="text-sm font-medium text-green-800">
+                New Orders ({newOrderNotifications.length})
+              </h3>
+              <div className="mt-2 text-sm text-green-700">
+                <div className="space-y-1">
+                  {newOrderNotifications.slice(0, 3).map((notification, index) => (
+                    <div key={index} className="flex justify-between items-center">
+                      <span>
+                        ₹{notification.totalAmount} - {notification.customerName}
+                      </span>
+                      <span className="text-xs">
+                        {new Date(notification.timestamp).toLocaleTimeString()}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {filteredOrders.length === 0 ? (
         <div className="text-center py-8 text-gray-500">

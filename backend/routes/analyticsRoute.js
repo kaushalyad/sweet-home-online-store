@@ -9,7 +9,8 @@ import {
   getCustomerSegments,
   getAllUserBehavior,
   getAnalytics,
-  getPurchaseLocations
+  getPurchaseLocations,
+  getUserSegments
 } from '../controllers/analyticsController.js';
 import UserBehavior from '../models/userBehavior.js';
 import Order from '../models/order.js';
@@ -285,6 +286,7 @@ router.get('/conversion-rates', getConversionRates);
 router.get('/sales-analytics', getSalesAnalytics);
 router.get('/product-performance', getProductPerformance);
 router.get('/customer-segments', getCustomerSegments);
+router.get('/user-segments', getUserSegments);
 router.get('/all-behavior', getAllUserBehavior);
 router.get('/purchase-locations', getPurchaseLocations);
 router.get('/', getAnalytics);

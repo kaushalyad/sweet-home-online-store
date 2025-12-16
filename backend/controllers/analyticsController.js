@@ -1262,4 +1262,229 @@ export const getAnalytics = async (req, res) => {
       message: "Failed to fetch analytics data"
     });
   }
+};
+
+// User Segmentation: Group users by behavior patterns
+export const getUserSegments = async (req, res) => {
+  try {
+    const { timeRange = '30d' } = req.query;
+    const startDate = getStartDate(timeRange);
+
+    // Get all users with their behavior data
+    const users = await User.find({});
+
+    const segments = {
+      frequent_buyers: [],
+      browsers: [],
+      cart_abandoners: [],
+      new_users: [],
+      loyal_customers: []
+    };
+
+    for (const user of users) {
+      // Check orders in time range
+      const orders = await Order.find({
+        userId: user._id,
+        createdAt: { $gte: startDate },
+        status: { $ne: 'cancelled' }
+      });
+
+      // Check behavior data
+      const behaviors = await UserBehavior.find({
+        userId: user._id,
+        timestamp: { $gte: startDate }
+      });
+
+      // Check cart actions
+      const cartAbandonDate = new Date();
+      cartAbandonDate.setDate(cartAbandonDate.getDate() - 7);
+      const recentCartActions = behaviors.filter(b =>
+        b.cartActions && b.cartActions.some(action => action.type === 'add' && action.timestamp > cartAbandonDate)
+      );
+
+      const hasRecentPurchase = orders.length > 0;
+      const accountAge = (new Date() - user.createdAt) / (1000 * 60 * 60 * 24); // days
+
+      // Segmentation logic
+      if (orders.length > 5) {
+        segments.frequent_buyers.push({
+          userId: user._id,
+          name: user.name,
+          email: user.email,
+          orders: orders.length,
+          totalSpent: orders.reduce((sum, order) => sum + order.totalAmount, 0)
+        });
+      } else if (behaviors.length > 10 && orders.length === 0) {
+        segments.browsers.push({
+          userId: user._id,
+          name: user.name,
+          email: user.email,
+          pageViews: behaviors.length
+        });
+      } else if (recentCartActions.length > 0 && !hasRecentPurchase) {
+        segments.cart_abandoners.push({
+          userId: user._id,
+          name: user.name,
+          email: user.email,
+          cartItems: recentCartActions.length
+        });
+      } else if (accountAge <= 7) {
+        segments.new_users.push({
+          userId: user._id,
+          name: user.name,
+          email: user.email,
+          accountAge: Math.floor(accountAge)
+        });
+      } else if (orders.length >= 3 && accountAge > 90) {
+        segments.loyal_customers.push({
+          userId: user._id,
+          name: user.name,
+          email: user.email,
+          orders: orders.length,
+          accountAge: Math.floor(accountAge)
+        });
+      }
+    }
+
+    // Calculate segment statistics
+    const segmentStats = {};
+    Object.keys(segments).forEach(segment => {
+      segmentStats[segment] = {
+        count: segments[segment].length,
+        percentage: users.length > 0 ? Math.round((segments[segment].length / users.length) * 100) : 0
+      };
+    });
+
+    res.json({
+      success: true,
+      data: {
+        segments,
+        statistics: segmentStats,
+        totalUsers: users.length
+      }
+    });
+  } catch (error) {
+    logger.error(`Error in getUserSegments: ${error.message}`);
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+// Get user segments
+export const getUserSegments = async (req, res) => {
+  try {
+    const now = new Date();
+    const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+    const sevenDaysAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+    const ninetyDaysAgo = new Date(now.getTime() - 90 * 24 * 60 * 60 * 1000);
+
+    // Get all users
+    const users = await User.find({ isActive: true }).select('_id name email createdAt');
+
+    const segments = {
+      frequent_buyers: [],
+      browsers: [],
+      cart_abandoners: [],
+      new_users: [],
+      loyal_customers: []
+    };
+
+    for (const user of users) {
+      // Check orders in last 30 days
+      const recentOrders = await Order.find({
+        userId: user._id,
+        createdAt: { $gte: thirtyDaysAgo },
+        status: { $ne: 'cancelled' }
+      });
+
+      // Check total orders
+      const totalOrders = await Order.countDocuments({
+        userId: user._id,
+        status: { $ne: 'cancelled' }
+      });
+
+      // Check page views
+      const pageViews = await UserBehavior.countDocuments({
+        userId: user._id
+      });
+
+      // Check cart actions in last 7 days
+      const cartActions = await UserBehavior.find({
+        userId: user._id,
+        'cartActions.timestamp': { $gte: sevenDaysAgo }
+      });
+
+      // Check if user has orders in last 7 days after cart actions
+      const hasRecentPurchase = await Order.findOne({
+        userId: user._id,
+        createdAt: { $gte: sevenDaysAgo },
+        status: { $ne: 'cancelled' }
+      });
+
+      // Determine segments
+      if (recentOrders.length > 5) {
+        segments.frequent_buyers.push({
+          _id: user._id,
+          name: user.name,
+          email: user.email,
+          orderCount: recentOrders.length
+        });
+      }
+
+      if (pageViews > 10 && totalOrders === 0) {
+        segments.browsers.push({
+          _id: user._id,
+          name: user.name,
+          email: user.email,
+          pageViews
+        });
+      }
+
+      if (cartActions.length > 0 && !hasRecentPurchase) {
+        segments.cart_abandoners.push({
+          _id: user._id,
+          name: user.name,
+          email: user.email,
+          cartActionsCount: cartActions.length
+        });
+      }
+
+      if (user.createdAt >= sevenDaysAgo) {
+        segments.new_users.push({
+          _id: user._id,
+          name: user.name,
+          email: user.email,
+          registeredAt: user.createdAt
+        });
+      }
+
+      if (totalOrders > 3 && user.createdAt <= ninetyDaysAgo) {
+        segments.loyal_customers.push({
+          _id: user._id,
+          name: user.name,
+          email: user.email,
+          totalOrders,
+          accountAge: Math.floor((now - user.createdAt) / (1000 * 60 * 60 * 24))
+        });
+      }
+    }
+
+    // Calculate segment statistics
+    const segmentStats = Object.entries(segments).map(([segment, users]) => ({
+      segment,
+      count: users.length,
+      percentage: users.length > 0 ? (users.length / users.length) * 100 : 0
+    }));
+
+    res.json({
+      success: true,
+      data: {
+        segments,
+        statistics: segmentStats,
+        totalUsers: users.length
+      }
+    });
+  } catch (error) {
+    logger.error(`Error in getUserSegments: ${error.message}`);
+    res.status(500).json({ success: false, message: error.message });
+  }
 }; 

@@ -11,7 +11,9 @@ import {
   updatePassword,
   downloadUserData,
   deleteAccount,
-  verifyAdmin
+  verifyAdmin,
+  forgotPassword,
+  resetPassword
 } from '../controllers/userController.js';
 import { protect, admin } from '../middleware/authMiddleware.js';
 
@@ -22,6 +24,8 @@ router.post('/register', registerUser);
 router.post('/login', loginUser);
 router.post('/admin/login', adminLogin);
 router.post('/refresh', refreshToken);
+router.post('/forgot-password', forgotPassword);
+router.post('/reset-password', resetPassword);
 
 // Protected routes
 router.post('/verify', protect, verifyToken);
