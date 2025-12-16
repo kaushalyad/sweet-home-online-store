@@ -106,6 +106,32 @@ const OrderSuccess = () => {
           </div>
         </div>
 
+        {/* Email Confirmation */}
+        <div className="bg-blue-50 border-l-4 border-blue-400 p-4 mb-6">
+          <div className="flex">
+            <div className="flex-shrink-0">
+              <svg className="h-5 w-5 text-blue-400" viewBox="0 0 20 20" fill="currentColor">
+                <path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z" />
+                <path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z" />
+              </svg>
+            </div>
+            <div className="ml-3">
+              <h3 className="text-sm font-medium text-blue-800">
+                Order Confirmation Email Sent
+              </h3>
+              <div className="mt-2 text-sm text-blue-700">
+                <p>
+                  We've sent a confirmation email to <strong>{orderDetails.shippingAddress?.email}</strong> with your order details.
+                  Please check your inbox (and spam folder) for the email.
+                </p>
+                <p className="mt-2">
+                  You'll also receive email updates when your order status changes (processing, shipped, delivered).
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+
         {/* Order Status */}
         <div className="bg-white rounded-lg shadow-md p-6 mb-6">
           <h2 className="text-xl font-semibold mb-4">Order Status</h2>

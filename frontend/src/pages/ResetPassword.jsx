@@ -45,7 +45,7 @@ const ResetPassword = () => {
 
       const response = await axios.post(`${import.meta.env.VITE_BACKEND_URL}/api/user/reset-password`, {
         token: resetToken,
-        password
+        newPassword: password
       }, { withCredentials: true });
 
       if (response.data.success) {

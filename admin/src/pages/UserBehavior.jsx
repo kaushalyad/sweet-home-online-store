@@ -1,6 +1,7 @@
 /** @jsxImportSource react */
 import { useState, useEffect, useContext, useCallback } from 'react';
 import axios from 'axios';
+import { io } from 'socket.io-client';
 import { backendUrl } from '../config';
 import { AuthContext } from '../context/AuthContext';
 import {
@@ -55,6 +56,20 @@ const UserBehavior = () => {
     browserDistribution: {},
     osDistribution: {}
   });
+  const [userSegments, setUserSegments] = useState({
+    segments: {
+      frequent_buyers: [],
+      browsers: [],
+      cart_abandoners: [],
+      new_users: [],
+      loyal_customers: []
+    },
+    statistics: [],
+    totalUsers: 0
+  });
+  const [liveTraffic, setLiveTraffic] = useState([]);
+  const [socket, setSocket] = useState(null);
+  const [isRealTimeEnabled, setIsRealTimeEnabled] = useState(false);
   const [purchaseLocations, setPurchaseLocations] = useState([]);
   const [selectedLocation, setSelectedLocation] = useState(null);
   const [activeTab, setActiveTab] = useState(0);
@@ -98,11 +113,14 @@ const UserBehavior = () => {
 
       console.log('Making API requests...');
       
-      const [behaviorResponse, locationsResponse] = await Promise.all([
+      const [behaviorResponse, locationsResponse, segmentsResponse] = await Promise.all([
         axios.get(`${backendUrl}/api/analytics/all-behavior?${params}`, {
           headers: { Authorization: `Bearer ${token}` }
         }),
         axios.get(`${backendUrl}/api/analytics/purchase-locations`, {
+          headers: { Authorization: `Bearer ${token}` }
+        }),
+        axios.get(`${backendUrl}/api/analytics/user-segments`, {
           headers: { Authorization: `Bearer ${token}` }
         })
       ]);
@@ -122,6 +140,10 @@ const UserBehavior = () => {
         console.log('Setting purchase locations:', locationsResponse.data.data);
         setPurchaseLocations(locationsResponse.data.data);
       }
+
+      if (segmentsResponse.data.success) {
+        setUserSegments(segmentsResponse.data.data);
+      }
     } catch (error) {
       console.error('Error fetching data:', error);
       console.error('Error details:', error.response?.data);
@@ -133,6 +155,39 @@ const UserBehavior = () => {
   useEffect(() => {
     console.log('useEffect triggered');
     fetchData();
+  }, [token]);
+
+  // Socket.IO for real-time tracking
+  useEffect(() => {
+    if (token) {
+      const socketConnection = io('http://localhost:4000', {
+        auth: {
+          token: token
+        }
+      });
+
+      socketConnection.on('connect', () => {
+        console.log('Connected to real-time server');
+        socketConnection.emit('join-admin-room');
+        setIsRealTimeEnabled(true);
+      });
+
+      socketConnection.on('live-traffic', (data) => {
+        console.log('Live traffic event:', data);
+        setLiveTraffic(prev => [data, ...prev.slice(0, 9)]); // Keep last 10 events
+      });
+
+      socketConnection.on('disconnect', () => {
+        console.log('Disconnected from real-time server');
+        setIsRealTimeEnabled(false);
+      });
+
+      setSocket(socketConnection);
+
+      return () => {
+        socketConnection.disconnect();
+      };
+    }
   }, [token]);
 
   const handleChangePage = (event, newPage) => {
@@ -401,6 +456,8 @@ const UserBehavior = () => {
 
         <Tabs value={activeTab} onChange={handleTabChange} sx={{ mb: 3 }}>
           <Tab label="Analytics" />
+          <Tab label="User Segments" />
+          <Tab label="Real-time Traffic" />
           <Tab label="Purchase Locations" />
         </Tabs>
 
@@ -631,6 +688,172 @@ const UserBehavior = () => {
                 onRowsPerPageChange={handleChangeRowsPerPage}
               />
             </TableContainer>
+          </>
+        ) : activeTab === 1 ? (
+          <>
+            {/* User Segments */}
+            <Grid container spacing={3} sx={{ mb: 4 }}>
+              <Grid item xs={12} md={3}>
+                <Card>
+                  <CardContent>
+                    <Typography variant="h6">Total Users</Typography>
+                    <Typography variant="h4">{userSegments.totalUsers.toLocaleString()}</Typography>
+                  </CardContent>
+                </Card>
+              </Grid>
+              <Grid item xs={12} md={3}>
+                <Card>
+                  <CardContent>
+                    <Typography variant="h6">Frequent Buyers</Typography>
+                    <Typography variant="h4">{userSegments.segments.frequent_buyers.length}</Typography>
+                  </CardContent>
+                </Card>
+              </Grid>
+              <Grid item xs={12} md={3}>
+                <Card>
+                  <CardContent>
+                    <Typography variant="h6">Browsers</Typography>
+                    <Typography variant="h4">{userSegments.segments.browsers.length}</Typography>
+                  </CardContent>
+                </Card>
+              </Grid>
+              <Grid item xs={12} md={3}>
+                <Card>
+                  <CardContent>
+                    <Typography variant="h6">Cart Abandoners</Typography>
+                    <Typography variant="h4">{userSegments.segments.cart_abandoners.length}</Typography>
+                  </CardContent>
+                </Card>
+              </Grid>
+            </Grid>
+
+            {/* Segments Chart */}
+            <Grid container spacing={3} sx={{ mb: 4 }}>
+              <Grid item xs={12}>
+                <Card>
+                  <CardContent>
+                    <Typography variant="h6" gutterBottom>User Segments Distribution</Typography>
+                    {renderSegmentsChart(userSegments.statistics)}
+                  </CardContent>
+                </Card>
+              </Grid>
+            </Grid>
+
+            {/* Segment Details */}
+            <Grid container spacing={3}>
+              {Object.entries(userSegments.segments).map(([segment, users]) => (
+                <Grid item xs={12} md={6} key={segment}>
+                  <Card>
+                    <CardContent>
+                      <Typography variant="h6" gutterBottom>
+                        {segment.replace('_', ' ').toUpperCase()} ({users.length})
+                      </Typography>
+                      <TableContainer>
+                        <Table size="small">
+                          <TableHead>
+                            <TableRow>
+                              <TableCell>Name</TableCell>
+                              <TableCell>Email</TableCell>
+                              {segment === 'frequent_buyers' && <TableCell>Orders</TableCell>}
+                              {segment === 'browsers' && <TableCell>Page Views</TableCell>}
+                              {segment === 'cart_abandoners' && <TableCell>Cart Actions</TableCell>}
+                              {segment === 'loyal_customers' && <TableCell>Account Age</TableCell>}
+                            </TableRow>
+                          </TableHead>
+                          <TableBody>
+                            {users.slice(0, 5).map((user) => (
+                              <TableRow key={user._id}>
+                                <TableCell>{user.name}</TableCell>
+                                <TableCell>{user.email}</TableCell>
+                                {segment === 'frequent_buyers' && <TableCell>{user.orderCount}</TableCell>}
+                                {segment === 'browsers' && <TableCell>{user.pageViews}</TableCell>}
+                                {segment === 'cart_abandoners' && <TableCell>{user.cartActionsCount}</TableCell>}
+                                {segment === 'loyal_customers' && <TableCell>{user.accountAge} days</TableCell>}
+                              </TableRow>
+                            ))}
+                          </TableBody>
+                        </Table>
+                      </TableContainer>
+                    </CardContent>
+                  </Card>
+                </Grid>
+              ))}
+            </Grid>
+          </>
+        ) : activeTab === 2 ? (
+          <>
+            {/* Real-time Traffic */}
+            <Grid container spacing={3} sx={{ mb: 4 }}>
+              <Grid item xs={12} md={4}>
+                <Card>
+                  <CardContent>
+                    <Typography variant="h6">Real-time Status</Typography>
+                    <Box sx={{ display: 'flex', alignItems: 'center', mt: 1 }}>
+                      <Box
+                        sx={{
+                          width: 12,
+                          height: 12,
+                          borderRadius: '50%',
+                          bgcolor: isRealTimeEnabled ? 'success.main' : 'error.main',
+                          mr: 1
+                        }}
+                      />
+                      <Typography variant="body2">
+                        {isRealTimeEnabled ? 'Connected' : 'Disconnected'}
+                      </Typography>
+                    </Box>
+                  </CardContent>
+                </Card>
+              </Grid>
+              <Grid item xs={12} md={4}>
+                <Card>
+                  <CardContent>
+                    <Typography variant="h6">Active Users</Typography>
+                    <Typography variant="h4">{liveTraffic.length}</Typography>
+                    <Typography variant="body2" color="text.secondary">
+                      Last 10 activities
+                    </Typography>
+                  </CardContent>
+                </Card>
+              </Grid>
+            </Grid>
+
+            <Paper sx={{ p: 2 }}>
+              <Typography variant="h6" gutterBottom>
+                Live Traffic Feed
+              </Typography>
+              <TableContainer>
+                <Table size="small">
+                  <TableHead>
+                    <TableRow>
+                      <TableCell>Time</TableCell>
+                      <TableCell>Type</TableCell>
+                      <TableCell>User</TableCell>
+                      <TableCell>Path</TableCell>
+                      <TableCell>Device</TableCell>
+                    </TableRow>
+                  </TableHead>
+                  <TableBody>
+                    {liveTraffic.map((event, index) => (
+                      <TableRow key={index}>
+                        <TableCell>
+                          {new Date(event.timestamp).toLocaleTimeString()}
+                        </TableCell>
+                        <TableCell>{event.type}</TableCell>
+                        <TableCell>
+                          {event.userId ? 'Logged In' : 'Anonymous'}
+                        </TableCell>
+                        <TableCell>{event.path}</TableCell>
+                        <TableCell>
+                          {event.deviceInfo?.isMobile ? 'Mobile' :
+                           event.deviceInfo?.isTablet ? 'Tablet' : 'Desktop'}
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </TableContainer>
+            </Paper>
           </>
         ) : (
           <Paper sx={{ p: 2 }}>

@@ -54,6 +54,19 @@ const trackUserBehavior = async (req, res, next) => {
     // Save to database
     await UserBehavior.create(behaviorData);
 
+    // Emit real-time event for live traffic monitoring
+    const io = req.app.get('io');
+    if (io) {
+      io.to('admin_room').emit('live-traffic', {
+        type: 'page_visit',
+        userId,
+        path,
+        timestamp,
+        deviceInfo,
+        isAnonymous: !userId
+      });
+    }
+
     next();
   } catch (error) {
     console.error('Error tracking user behavior:', error);
