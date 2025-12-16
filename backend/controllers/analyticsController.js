@@ -114,74 +114,28 @@ export const getSalesAnalytics = async (req, res) => {
           status: { $ne: 'cancelled' }
         }
       },
-      {
-        $unwind: '$items'
-      },
-      {
-        $addFields: {
-          "productId": {
-            $cond: {
-              if: { $eq: [{ $type: "$items.product" }, "objectId"] },
-              then: "$items.product",
-              else: {
-                $cond: {
-                  if: { $eq: [{ $type: "$items.product._id" }, "objectId"] },
-                  then: "$items.product._id",
-                  else: { $toObjectId: "$items.product._id" }
-                }
-              }
-            }
-          }
-        }
-      },
-      {
-        $lookup: {
-          from: "products",
-          localField: "productId",
-          foreignField: "_id",
-          as: "productData"
-        }
-      },
+      { $unwind: '$items' },
       {
         $group: {
-          _id: {
-            $cond: {
-              if: { $gt: [{ $size: "$productData" }, 0] },
-              then: { $arrayElemAt: ["$productData.category", 0] },
-              else: {
-                $cond: {
-                  if: { $ifNull: ["$items.product.category", false] },
-                  then: "$items.product.category",
-                  else: "Uncategorized"
-                }
-              }
-            }
-          },
-          total: { $sum: { $multiply: ["$items.price", "$items.quantity"] } },
-          count: { $sum: "$items.quantity" },
+          _id: { $ifNull: ['$items.product.category', 'Uncategorized'] },
+          totalSales: { $sum: { $multiply: ['$items.price', '$items.quantity'] } },
+          quantity: { $sum: '$items.quantity' },
           orderCount: { $sum: 1 }
         }
       },
       {
         $project: {
-          category: "$_id",
-          totalSales: "$total",
-          count: 1,
-          orderCount: 1,
-          percentage: {
-            $multiply: [
-              { $divide: ["$total", salesData[0]?.totalRevenue || 1] },
-              100
-            ]
-          }
+          _id: 0,
+          category: '$_id',
+          totalSales: 1,
+          quantity: 1,
+          orderCount: 1
         }
       },
-      {
-        $sort: { totalSales: -1 }
-      }
+      { $sort: { totalSales: -1 } }
     ]);
 
-    // Get top selling products
+    // Get top products
     const topProducts = await Order.aggregate([
       {
         $match: {
@@ -189,89 +143,22 @@ export const getSalesAnalytics = async (req, res) => {
           status: { $ne: 'cancelled' }
         }
       },
-      {
-        $unwind: '$items'
-      },
-      {
-        $addFields: {
-          "productId": {
-            $cond: {
-              if: { $eq: [{ $type: "$items.product" }, "objectId"] },
-              then: "$items.product",
-              else: {
-                $cond: {
-                  if: { $eq: [{ $type: "$items.product._id" }, "objectId"] },
-                  then: "$items.product._id",
-                  else: { $toObjectId: "$items.product._id" }
-                }
-              }
-            }
-          }
-        }
-      },
-      {
-        $lookup: {
-          from: "products",
-          localField: "productId",
-          foreignField: "_id",
-          as: "productData"
-        }
-      },
+      { $unwind: '$items' },
       {
         $group: {
-          _id: {
-            $cond: {
-              if: { $gt: [{ $size: "$productData" }, 0] },
-              then: { $arrayElemAt: ["$productData._id", 0] },
-              else: "$productId"
-            }
-          },
-          name: {
-            $first: {
-              $cond: {
-                if: { $gt: [{ $size: "$productData" }, 0] },
-                then: { $arrayElemAt: ["$productData.name", 0] },
-                else: {
-                  $cond: {
-                    if: { $ifNull: ["$items.product.name", false] },
-                    then: "$items.product.name",
-                    else: "Unknown Product"
-                  }
-                }
-              }
-            }
-          },
-          category: {
-            $first: {
-              $cond: {
-                if: { $gt: [{ $size: "$productData" }, 0] },
-                then: { $arrayElemAt: ["$productData.category", 0] },
-                else: {
-                  $cond: {
-                    if: { $ifNull: ["$items.product.category", false] },
-                    then: "$items.product.category",
-                    else: "Uncategorized"
-                  }
-                }
-              }
-            }
-          },
-          totalSales: { $sum: { $multiply: ["$items.price", "$items.quantity"] } },
-          quantity: { $sum: "$items.quantity" },
+          _id: { $ifNull: ['$items.product._id', '$items.product.name'] },
+          name: { $first: { $ifNull: ['$items.product.name', 'Unknown Product'] } },
+          category: { $first: { $ifNull: ['$items.product.category', 'Uncategorized'] } },
+          totalSales: { $sum: { $multiply: ['$items.price', '$items.quantity'] } },
+          quantity: { $sum: '$items.quantity' },
           orderCount: { $sum: 1 },
-          averagePrice: { $avg: "$items.price" },
+          averagePrice: { $avg: '$items.price' },
           image: {
             $first: {
               $cond: {
-                if: { $gt: [{ $size: "$productData" }, 0] },
-                then: { $arrayElemAt: ["$productData.images", 0] },
-                else: {
-                  $cond: {
-                    if: { $ifNull: ["$items.product.image", false] },
-                    then: "$items.product.image",
-                    else: []
-                  }
-                }
+                if: { $gt: [{ $size: { $ifNull: ['$items.product.image', []] } }, 0] },
+                then: { $arrayElemAt: ['$items.product.image', 0] },
+                else: []
               }
             }
           }
@@ -280,15 +167,11 @@ export const getSalesAnalytics = async (req, res) => {
       {
         $match: {
           _id: { $ne: null },
-          name: { $ne: "Unknown Product" }
+          name: { $ne: 'Unknown Product' }
         }
       },
-      {
-        $sort: { totalSales: -1 }
-      },
-      {
-        $limit: 10
-      }
+      { $sort: { totalSales: -1 } },
+      { $limit: 10 }
     ]);
 
     // Calculate average order value
@@ -1264,112 +1147,6 @@ export const getAnalytics = async (req, res) => {
   }
 };
 
-// User Segmentation: Group users by behavior patterns
-export const getUserSegments = async (req, res) => {
-  try {
-    const { timeRange = '30d' } = req.query;
-    const startDate = getStartDate(timeRange);
-
-    // Get all users with their behavior data
-    const users = await User.find({});
-
-    const segments = {
-      frequent_buyers: [],
-      browsers: [],
-      cart_abandoners: [],
-      new_users: [],
-      loyal_customers: []
-    };
-
-    for (const user of users) {
-      // Check orders in time range
-      const orders = await Order.find({
-        userId: user._id,
-        createdAt: { $gte: startDate },
-        status: { $ne: 'cancelled' }
-      });
-
-      // Check behavior data
-      const behaviors = await UserBehavior.find({
-        userId: user._id,
-        timestamp: { $gte: startDate }
-      });
-
-      // Check cart actions
-      const cartAbandonDate = new Date();
-      cartAbandonDate.setDate(cartAbandonDate.getDate() - 7);
-      const recentCartActions = behaviors.filter(b =>
-        b.cartActions && b.cartActions.some(action => action.type === 'add' && action.timestamp > cartAbandonDate)
-      );
-
-      const hasRecentPurchase = orders.length > 0;
-      const accountAge = (new Date() - user.createdAt) / (1000 * 60 * 60 * 24); // days
-
-      // Segmentation logic
-      if (orders.length > 5) {
-        segments.frequent_buyers.push({
-          userId: user._id,
-          name: user.name,
-          email: user.email,
-          orders: orders.length,
-          totalSpent: orders.reduce((sum, order) => sum + order.totalAmount, 0)
-        });
-      } else if (behaviors.length > 10 && orders.length === 0) {
-        segments.browsers.push({
-          userId: user._id,
-          name: user.name,
-          email: user.email,
-          pageViews: behaviors.length
-        });
-      } else if (recentCartActions.length > 0 && !hasRecentPurchase) {
-        segments.cart_abandoners.push({
-          userId: user._id,
-          name: user.name,
-          email: user.email,
-          cartItems: recentCartActions.length
-        });
-      } else if (accountAge <= 7) {
-        segments.new_users.push({
-          userId: user._id,
-          name: user.name,
-          email: user.email,
-          accountAge: Math.floor(accountAge)
-        });
-      } else if (orders.length >= 3 && accountAge > 90) {
-        segments.loyal_customers.push({
-          userId: user._id,
-          name: user.name,
-          email: user.email,
-          orders: orders.length,
-          accountAge: Math.floor(accountAge)
-        });
-      }
-    }
-
-    // Calculate segment statistics
-    const segmentStats = {};
-    Object.keys(segments).forEach(segment => {
-      segmentStats[segment] = {
-        count: segments[segment].length,
-        percentage: users.length > 0 ? Math.round((segments[segment].length / users.length) * 100) : 0
-      };
-    });
-
-    res.json({
-      success: true,
-      data: {
-        segments,
-        statistics: segmentStats,
-        totalUsers: users.length
-      }
-    });
-  } catch (error) {
-    logger.error(`Error in getUserSegments: ${error.message}`);
-    res.status(500).json({ success: false, message: error.message });
-  }
-};
-
-// Get user segments
 export const getUserSegments = async (req, res) => {
   try {
     const now = new Date();
@@ -1469,10 +1246,11 @@ export const getUserSegments = async (req, res) => {
     }
 
     // Calculate segment statistics
-    const segmentStats = Object.entries(segments).map(([segment, users]) => ({
+    const totalUsers = users.length;
+    const segmentStats = Object.entries(segments).map(([segment, segmentUsers]) => ({
       segment,
-      count: users.length,
-      percentage: users.length > 0 ? (users.length / users.length) * 100 : 0
+      count: segmentUsers.length,
+      percentage: totalUsers > 0 ? Math.round((segmentUsers.length / totalUsers) * 100) : 0
     }));
 
     res.json({
