@@ -47,6 +47,7 @@ const startServer = async () => {
       "http://localhost:5174", // Vite dev server
       "http://localhost:5175", // Additional Vite dev server
       "https://www.sweethome-store.com",
+      "https://sweethome-store.com",
       "https://api.sweethome-store.com",
     ];
 
