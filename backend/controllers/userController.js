@@ -1,6 +1,7 @@
 import validator from "validator";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
+import crypto from "crypto";
 import userModel from "../models/userModel.js";
 import logger from "../config/logger.js";
 
