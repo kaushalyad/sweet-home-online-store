@@ -365,7 +365,7 @@ const listProducts = async (req, res) => {
 // function for removing product
 const removeProduct = async (req, res) => {
     try {
-        const { id } = req.body
+        const { id } = req.params
         
         if (!id) {
             return res.json({ success: false, message: "Product ID is required" })
