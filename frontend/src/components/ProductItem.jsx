@@ -91,7 +91,7 @@ const ProductItem = ({ id, image, name, price, index = 0, featured = false, best
         }}
       >
         {/* Product image with hover effect */}
-        <div className="overflow-hidden rounded-2xl shadow-md relative bg-gray-50 aspect-square border border-gray-100 transform transition-all duration-300 group-hover:shadow-lg group-hover:border-pink-100">
+        <div className="overflow-hidden rounded-2xl shadow-md relative bg-gray-50 border border-gray-100 transform transition-all duration-300 group-hover:shadow-lg group-hover:border-pink-100 h-44 sm:h-48 md:h-56 lg:h-64">
           <img
             className="w-full h-full object-cover transition-all duration-700 group-hover:scale-110"
             src={image[currentImage]}
@@ -189,15 +189,15 @@ const ProductItem = ({ id, image, name, price, index = 0, featured = false, best
         </div>
         
         {/* Product info with improved design */}
-        <div className="mt-4 px-1">
-          <h3 className="font-medium text-gray-800 group-hover:text-pink-500 transition-colors duration-300 line-clamp-2 min-h-[2.5rem]">
+        <div className="mt-3 px-1">
+          <h3 className="font-medium text-gray-800 group-hover:text-pink-500 transition-colors duration-300 line-clamp-2 min-h-[2.25rem] text-sm sm:text-base">
             {name}
           </h3>
           <div className="flex justify-between items-center mt-2.5">
             <div className="flex flex-col">
               <p className="font-bold text-gray-900 flex items-center">
                 <span className="text-sm text-pink-500 mr-1">{currency}</span>
-                <span className="text-lg">{price}</span>
+                <span className="text-base sm:text-lg">{price}</span>
               </p>
               {/* Optional: Add original price for comparison if on sale */}
               {featured && <p className="text-xs text-gray-500 line-through">₹{Math.round(price * 1.2)}</p>}

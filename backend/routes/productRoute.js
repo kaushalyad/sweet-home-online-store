@@ -12,7 +12,6 @@ import {
   updateStock
 } from '../controllers/productController.js'
 import { upload } from '../middleware/uploadMiddleware.js'
-import userAuth from '../middleware/userAuth.js'
 
 const productRouter = express.Router()
 
@@ -25,10 +24,10 @@ productRouter.get('/categories', getCategories)
 // Protected user routes
 productRouter.post('/rate', protect, addRating)
 
-// Protected admin routes
+// Protected admin routes (support both JSON with image URLs and multipart with files)
 productRouter.use(protect, admin)
-productRouter.post('/add', upload.array('images', 5), addProduct)
-productRouter.put('/update/:id', upload.array('images', 5), updateProduct)
+productRouter.post('/add', upload.any(), addProduct)
+productRouter.put('/update/:id', upload.any(), updateProduct)
 productRouter.delete('/remove/:id', removeProduct)
 productRouter.put('/stock/:id', updateStock)
 

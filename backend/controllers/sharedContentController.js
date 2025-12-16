@@ -1,6 +1,6 @@
 import SharedContent from '../models/sharedContent.js';
 import { v4 as uuidv4 } from 'uuid';
-import logger from '../utils/logger.js';
+// import logger from '../utils/logger.js';
 
 // Create shared content
 export const createSharedContent = async (req, res) => {
@@ -27,7 +27,7 @@ export const createSharedContent = async (req, res) => {
       }
     });
   } catch (error) {
-    logger.error(`Error creating shared content: ${error.message}`);
+    // logger.error(`Error creating shared content: ${error.message}`);
     res.status(500).json({
       success: false,
       message: 'Failed to create shared content'

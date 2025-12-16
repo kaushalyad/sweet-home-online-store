@@ -8,6 +8,7 @@ import Orders from './pages/Orders';
 import Users from './pages/Users';
 import Analytics from './pages/Analytics';
 import UserBehavior from './pages/UserBehavior';
+import Messages from './pages/Messages';
 import PrivateRoute from './components/auth/PrivateRoute';
 import { AuthProvider } from './context/AuthContext';
 import Layout from './components/Layout';
@@ -30,6 +31,7 @@ function App() {
                     <Route path="/users" element={<Users />} />
                     <Route path="/analytics" element={<Analytics />} />
                     <Route path="/user-behavior" element={<UserBehavior />} />
+                    <Route path="/messages" element={<Messages />} />
                   </Routes>
                 </Layout>
               </PrivateRoute>
