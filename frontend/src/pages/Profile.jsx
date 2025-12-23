@@ -1,6 +1,7 @@
 import React, { useContext, useState, useEffect } from 'react';
 import { ShopContext } from '../context/ShopContext';
 import Title from '../components/Title';
+import ProfileSkeleton from '../components/ProfileSkeleton';
 import { motion } from 'framer-motion';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { FaUser, FaMapMarkerAlt, FaPhone, FaEnvelope, FaCalendarAlt, FaShoppingBag, FaHeart, FaCog, FaArrowRight, FaShoppingCart } from 'react-icons/fa';
@@ -397,11 +398,7 @@ const Profile = () => {
 
   const renderTabContent = () => {
     if (isLoading) {
-      return (
-        <div className="flex justify-center items-center h-64">
-          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#2874f0]"></div>
-        </div>
-      );
+      return <ProfileSkeleton />;
     }
 
     switch (activeTab) {
@@ -411,65 +408,65 @@ const Profile = () => {
             initial="hidden"
             animate="visible"
             variants={fadeIn}
-            className="bg-white p-6 rounded-lg shadow-sm"
+            className="bg-white p-4 sm:p-6 rounded-lg shadow-sm"
           >
-            <h3 className="text-xl font-bold text-gray-800 mb-6">Profile Information</h3>
+            <h3 className="text-lg sm:text-xl font-bold text-gray-800 mb-4 sm:mb-6">Profile Information</h3>
             
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-              <div className="flex flex-col space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8">
+              <div className="flex flex-col space-y-4 sm:space-y-6">
                 <div className="flex items-start">
-                  <div className="bg-pink-50 p-2 rounded-full mr-4">
-                    <FaUser className="text-pink-500" />
+                  <div className="bg-pink-50 p-2 rounded-full mr-3 sm:mr-4 flex-shrink-0">
+                    <FaUser className="text-pink-500 text-sm sm:text-base" />
                   </div>
-                  <div>
-                    <p className="text-sm text-gray-500">Full Name</p>
-                    <p className="font-medium text-gray-800">{userData.name}</p>
+                  <div className="min-w-0 flex-1">
+                    <p className="text-xs sm:text-sm text-gray-500">Full Name</p>
+                    <p className="font-medium text-gray-800 text-sm sm:text-base break-words">{userData.name}</p>
                   </div>
                 </div>
                 
                 <div className="flex items-start">
-                  <div className="bg-blue-50 p-2 rounded-full mr-4">
-                    <FaEnvelope className="text-blue-500" />
+                  <div className="bg-blue-50 p-2 rounded-full mr-3 sm:mr-4 flex-shrink-0">
+                    <FaEnvelope className="text-blue-500 text-sm sm:text-base" />
                   </div>
-                  <div>
-                    <p className="text-sm text-gray-500">Email Address</p>
-                    <p className="font-medium text-gray-800">{userData.email}</p>
+                  <div className="min-w-0 flex-1">
+                    <p className="text-xs sm:text-sm text-gray-500">Email Address</p>
+                    <p className="font-medium text-gray-800 text-sm sm:text-base break-all">{userData.email}</p>
                   </div>
                 </div>
                 
                 <div className="flex items-start">
-                  <div className="bg-green-50 p-2 rounded-full mr-4">
-                    <FaPhone className="text-green-500" />
+                  <div className="bg-green-50 p-2 rounded-full mr-3 sm:mr-4 flex-shrink-0">
+                    <FaPhone className="text-green-500 text-sm sm:text-base" />
                   </div>
-                  <div>
-                    <p className="text-sm text-gray-500">Phone Number</p>
-                    <p className="font-medium text-gray-800">
+                  <div className="min-w-0 flex-1">
+                    <p className="text-xs sm:text-sm text-gray-500">Phone Number</p>
+                    <p className="font-medium text-gray-800 text-sm sm:text-base">
                       {userData.phone && userData.phone !== '' ? userData.phone : 'Not provided'}
                     </p>
                   </div>
                 </div>
               </div>
               
-              <div className="flex flex-col space-y-6">
+              <div className="flex flex-col space-y-4 sm:space-y-6">
                 <div className="flex items-start">
-                  <div className="bg-purple-50 p-2 rounded-full mr-4">
-                    <FaMapMarkerAlt className="text-purple-500" />
+                  <div className="bg-purple-50 p-2 rounded-full mr-3 sm:mr-4 flex-shrink-0">
+                    <FaMapMarkerAlt className="text-purple-500 text-sm sm:text-base" />
                   </div>
-                  <div>
-                    <p className="text-sm text-gray-500">Delivery Address</p>
-                    <p className="font-medium text-gray-800">
+                  <div className="min-w-0 flex-1">
+                    <p className="text-xs sm:text-sm text-gray-500">Delivery Address</p>
+                    <p className="font-medium text-gray-800 text-sm sm:text-base break-words">
                       {userData.address && userData.address !== '' ? userData.address : 'Not provided'}
                     </p>
                   </div>
                 </div>
                 
                 <div className="flex items-start">
-                  <div className="bg-orange-50 p-2 rounded-full mr-4">
-                    <FaCalendarAlt className="text-orange-500" />
+                  <div className="bg-orange-50 p-2 rounded-full mr-3 sm:mr-4 flex-shrink-0">
+                    <FaCalendarAlt className="text-orange-500 text-sm sm:text-base" />
                   </div>
-                  <div>
-                    <p className="text-sm text-gray-500">Customer Since</p>
-                    <p className="font-medium text-gray-800">
+                  <div className="min-w-0 flex-1">
+                    <p className="text-xs sm:text-sm text-gray-500">Customer Since</p>
+                    <p className="font-medium text-gray-800 text-sm sm:text-base">
                       {userData.createdAt ? new Date(userData.createdAt).toLocaleDateString('en-US', {
                         year: 'numeric',
                         month: 'long',
@@ -481,10 +478,10 @@ const Profile = () => {
               </div>
             </div>
             
-            <div className="mt-8 border-t border-gray-100 pt-6">
+            <div className="mt-6 sm:mt-8 border-t border-gray-100 pt-4 sm:pt-6">
               <button 
                 onClick={() => setActiveTab('settings')}
-                className="bg-black text-white px-6 py-3 rounded-md hover:bg-gray-800 transition-colors duration-300"
+                className="w-full sm:w-auto bg-black text-white px-6 py-3 rounded-md hover:bg-gray-800 transition-colors duration-300 text-sm sm:text-base"
               >
                 Edit Profile
               </button>
@@ -883,25 +880,6 @@ const Profile = () => {
                   </button>
                 </div>
               </div>
-
-              {/* Account Actions */}
-              <div className="border border-[#dbdbdb] rounded-lg p-6">
-                <h4 className="text-lg font-medium text-[#212121] mb-4">Account Actions</h4>
-                <div className="space-y-4">
-                  <button 
-                    onClick={handleDownloadData}
-                    className="w-full px-6 py-3 border border-[#dbdbdb] text-[#212121] rounded-md hover:bg-gray-50 transition-colors"
-                  >
-                    Download Account Data
-                  </button>
-                  <button 
-                    onClick={handleDeleteAccount}
-                    className="w-full px-6 py-3 border border-red-500 text-red-500 rounded-md hover:bg-red-50 transition-colors"
-                  >
-                    Delete Account
-                  </button>
-                </div>
-              </div>
             </div>
           </motion.div>
         );
@@ -912,67 +890,65 @@ const Profile = () => {
   };
 
   return (
-    <div className="py-12 border-t">
-      <div className="text-center mb-10">
-        <motion.div
-          initial={{ opacity: 0, y: -10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
-        >
-          <Title text1={"MY"} text2={"ACCOUNT"} />
-          <div className="w-20 h-1 bg-[#2874f0] mx-auto mt-4"></div>
-        </motion.div>
-      </div>
-      
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-        {/* Sidebar Navigation */}
-        <motion.div 
-          initial={{ opacity: 0, x: -20 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.5 }}
-          className="md:col-span-1"
-        >
-          <div className="bg-white p-6 rounded-lg shadow-sm">
-            {isLoading ? (
-              <div className="flex justify-center items-center h-24">
-                <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-[#2874f0]"></div>
-              </div>
-            ) : (
-              <>
-                <div className="flex items-center gap-4 mb-6">
-                  <div className="w-12 h-12 bg-[#2874f0] bg-opacity-10 rounded-full flex items-center justify-center text-[#2874f0] font-bold">
-                    {userData.name.charAt(0)}
-              </div>
-              <div>
-                    <p className="font-semibold text-[#212121]">{userData.name}</p>
-                    <p className="text-sm text-[#878787]">{userData.email}</p>
-              </div>
-            </div>
-            
-            <div className="space-y-1">
-              {profileItems.map((item) => (
-                <button
-                  key={item.id}
-                      onClick={() => handleTabChange(item.id)}
-                  className={`w-full flex items-center gap-3 px-4 py-3 rounded-md text-left transition-colors duration-300 ${
-                    activeTab === item.id 
-                          ? 'bg-[#2874f0] bg-opacity-10 text-[#2874f0]'
-                          : 'text-[#212121] hover:bg-gray-50'
-                  }`}
-                >
-                  <span className="text-lg">{item.icon}</span>
-                  <span>{item.label}</span>
-                </button>
-              ))}
-            </div>
-              </>
-            )}
-          </div>
-        </motion.div>
+    <div className="py-8 sm:py-12 px-4 sm:px-6 lg:px-8 border-t min-h-screen bg-gray-50">
+      <div className="max-w-7xl mx-auto">
+        <div className="text-center mb-8 sm:mb-10">
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+          >
+            <Title text1={"MY"} text2={"ACCOUNT"} />
+            <div className="w-20 h-1 bg-[#2874f0] mx-auto mt-4"></div>
+          </motion.div>
+        </div>
         
-        {/* Main Content Area */}
-        <div className="md:col-span-3">
-          {renderTabContent()}
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 lg:gap-8">
+          {/* Sidebar Navigation */}
+          <motion.div 
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.5 }}
+            className="lg:col-span-1"
+          >
+            <div className="bg-white p-4 sm:p-6 rounded-lg shadow-sm sticky top-4">
+              {!isLoading && (
+                <>
+                  <div className="flex items-center gap-3 sm:gap-4 mb-6 pb-6 border-b">
+                    <div className="w-12 h-12 sm:w-14 sm:h-14 bg-[#2874f0] bg-opacity-10 rounded-full flex items-center justify-center text-[#2874f0] font-bold text-lg sm:text-xl flex-shrink-0">
+                      {userData.name.charAt(0).toUpperCase()}
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <p className="font-semibold text-[#212121] truncate">{userData.name}</p>
+                      <p className="text-xs sm:text-sm text-[#878787] truncate">{userData.email}</p>
+                    </div>
+                  </div>
+                  
+                  <div className="space-y-1">
+                    {profileItems.map((item) => (
+                      <button
+                        key={item.id}
+                        onClick={() => handleTabChange(item.id)}
+                        className={`w-full flex items-center gap-3 px-3 sm:px-4 py-2.5 sm:py-3 rounded-md text-left transition-colors duration-300 text-sm sm:text-base ${
+                          activeTab === item.id 
+                            ? 'bg-[#2874f0] bg-opacity-10 text-[#2874f0] font-medium'
+                            : 'text-[#212121] hover:bg-gray-50'
+                        }`}
+                      >
+                        <span className="text-base sm:text-lg flex-shrink-0">{item.icon}</span>
+                        <span className="truncate">{item.label}</span>
+                      </button>
+                    ))}
+                  </div>
+                </>
+              )}
+            </div>
+          </motion.div>
+          
+          {/* Main Content Area */}
+          <div className="lg:col-span-3">
+            {renderTabContent()}
+          </div>
         </div>
       </div>
     </div>

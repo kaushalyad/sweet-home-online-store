@@ -2,7 +2,8 @@ import { useContext, useState, useEffect, useRef } from "react";
 import { assets } from "../assets/assets";
 import { Link, NavLink, useLocation, useNavigate } from "react-router-dom";
 import { ShopContext } from "../context/ShopContext";
-import { FaGift, FaBirthdayCake, FaHeart, FaSearch, FaShoppingCart, FaUserAlt } from "react-icons/fa";
+import { FaGift, FaBirthdayCake, FaHeart, FaSearch, FaShoppingCart, FaUserAlt, FaTruck, FaExclamationTriangle } from "react-icons/fa";
+import AccountMenuSkeleton from "./AccountMenuSkeleton";
 
 // Define as a named function declaration instead of a function expression
 const Navbar = () => {
@@ -10,10 +11,64 @@ const Navbar = () => {
   const [scrolled, setScrolled] = useState(false);
   const [showCategoryMenu, setShowCategoryMenu] = useState(false);
   const [showPromoBanner, setShowPromoBanner] = useState(true);
+  const [activeDropdown, setActiveDropdown] = useState(null);
+  const [showSearchBar, setShowSearchBar] = useState(false);
+  const [scrollPosition, setScrollPosition] = useState(0);
   const bannerRef = useRef(null);
   const categoryRef = useRef(null);
+  const navScrollRef = useRef(null);
   const location = useLocation();
   const navigate = useNavigate();
+
+  // Navigation menu structure - Haldiram's style
+  const navigationMenu = {
+    "Christmas Special": {
+      type: "simple",
+      path: "/collection?occasion=christmas",
+      badge: "New"
+    },
+    "Wedding Special": {
+      type: "simple",
+      path: "/collection?occasion=wedding",
+      badge: "Popular"
+    },
+    "Sweets": {
+      type: "dropdown",
+      items: [
+        { name: "Packed Sweets", path: "/collection?category=packed-sweets", hasOffer: false },
+        { name: "Exotic Collection", path: "/collection?category=exotic", hasOffer: false },
+        { name: "Tin Sweets", path: "/collection?category=tin-sweets", hasOffer: false },
+        { name: "Festive Treats", path: "/collection?category=festive", hasOffer: false },
+        { name: "Signature Collection", path: "/collection?category=signature", hasOffer: false },
+        { name: "Fresh Pops", path: "/collection?category=fresh-pops", hasOffer: true }
+      ]
+    },
+    "Savories": {
+      type: "dropdown",
+      items: [
+        { name: "Namkeen", path: "/collection?category=namkeen", hasOffer: true },
+        { name: "Papad", path: "/collection?category=papad", hasOffer: false },
+        { name: "Ready to Cook", path: "/collection?category=ready-to-cook", hasOffer: true },
+        { name: "Chai Ke Saath", path: "/collection?category=chai-snacks", hasOffer: false }
+      ]
+    },
+    "Cookies": {
+      type: "simple",
+      path: "/collection?category=cookies"
+    },
+    "Ready to Eat": {
+      type: "simple",
+      path: "/collection?category=ready-to-eat"
+    },
+    "Ghee": {
+      type: "simple",
+      path: "/collection?category=ghee"
+    },
+    "Refreshments": {
+      type: "simple",
+      path: "/collection?category=refreshments"
+    }
+  };
 
   // Quick order categories
   const sweetCategories = [
@@ -40,7 +95,10 @@ const Navbar = () => {
     token,
     logout,
     showSearch,
-    userData
+    userData,
+    userDataLoading,
+    search,
+    setSearch
   } = useContext(ShopContext);
 
   const [showProfileMenu, setShowProfileMenu] = useState(false);
@@ -137,519 +195,464 @@ const Navbar = () => {
 
   return (
     <>
-      {/* Beautiful Promotional Banner */}
+      {/* Top Announcement Banner - Haldiram's Style */}
       {showPromoBanner && (
         <div 
           ref={bannerRef}
-          className="fixed top-0 left-0 right-0 z-[60] h-10 bg-gradient-to-r from-pink-600 via-pink-500 to-rose-500 shadow-md"
+          className="fixed top-0 left-0 right-0 z-[60] bg-gradient-to-r from-orange-300 via-yellow-300 to-orange-400 overflow-hidden shadow-md"
         >
-          <div className="container mx-auto h-full">
-            <div className="flex items-center justify-between h-full px-4">
-              <div className="flex items-center gap-1 sm:gap-3">
-                <div className="hidden sm:flex">
-                  <svg className="w-4 h-4 text-pink-200 animate-spin-slow" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v13m0-13V6a2 2 0 112 2h-2zm0 0V5.5A2.5 2.5 0 109.5 8H12zm-7 4h14M5 12a2 2 0 110-4h14a2 2 0 110 4M5 12v7a2 2 0 002 2h10a2 2 0 002-2v-7"></path>
-                  </svg>
-                </div>
-                <div className="flex items-center">
-                  <p className="text-white text-xs sm:text-sm">
-                    <span className="font-bold">FREE SHIPPING</span>
-                    <span className="hidden xs:inline"> on orders above </span>
-                    <span className="font-bold">₹500</span>
-                  </p>
-                </div>
-                <div className="hidden sm:block h-4 w-px bg-pink-300 mx-1"></div>
-                <div className="flex items-center">
-                  <p className="text-white text-xs sm:text-sm">
-                    Use code: <span className="font-bold tracking-wider bg-white text-pink-600 px-1.5 py-0.5 rounded">SWEETFREE</span>
-                  </p>
-                </div>
-              </div>
-              
-              <div className="flex items-center gap-3">
-                <a href="/collection" className="hidden sm:flex items-center text-white hover:text-pink-100 transition-colors text-xs">
-                  <span>Shop Now</span>
-                  <svg className="w-3 h-3 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7"></path>
-                  </svg>
-                </a>
-                <button 
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    closePromoBanner();
-                  }}
-                  className="text-pink-100 hover:text-white transition-colors"
-                  aria-label="Close promotion banner"
-                >
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path>
-                  </svg>
-                </button>
-              </div>
+          <div className="flex items-center justify-between py-1.5">
+            <div className="animate-marquee inline-flex items-center gap-4 text-black text-base font-medium">
+              <FaTruck className="text-black flex-shrink-0 w-5 h-5" />
+              <span className="font-bold">Delivering PAN India</span>
+              <span>& Free Shipping across India on Orders above</span>
+              <span className="font-bold">₹500</span>
+              <span className="hidden sm:inline">|</span>
+              <span className="hidden sm:inline">Estimated Standard Delivery Timeline of 3-5 Working Days, Though Delivery Time May Vary Depending On Pin Code</span>
+              <span className="hidden sm:inline">|</span>
+              <span className="hidden sm:inline text-red-600 font-bold">CAUTION - Beware of Fraud!!</span>
+              <span className="hidden sm:inline text-sm">We do not accept/encourage online payments with respect to super stockist/distributorship/franchisee/employment.</span>
+            </div>
+            <div className="flex items-center gap-4 text-base font-medium pr-4 hidden md:flex">
+              <Link 
+                to="/track-order" 
+                className="text-black hover:text-gray-800 transition-colors whitespace-nowrap"
+              >
+                Track Order
+              </Link>
+              <span className="text-black">|</span>
+              <Link 
+                to="/e-coupons" 
+                className="text-black hover:text-gray-800 transition-colors whitespace-nowrap"
+              >
+                E-Coupons
+              </Link>
             </div>
           </div>
         </div>
       )}
 
-      {/* Fixed navbar with adjusted top position */}
-      {/* 
-        Navbar height calculation:
-        - Promo banner height: 40px (when visible)
-        - Navbar padding: py-3 small_mobile:py-4 tablet:py-5 (average ~16px top + bottom)
-        - Navbar content: logo (approx. 24px) + padding
-        - Quick order bar height: approx 40px
-        - Total height: ~100px without promo banner, ~140px with promo banner
-      */}
+      {/* Main Navbar - Haldiram's Style */}
       <div 
-        className={`fixed left-0 right-0 z-50 transition-all duration-300 ${scrolled ? "bg-white shadow-md py-2 small_mobile:py-3" : "bg-white/90 py-3 small_mobile:py-4 tablet:py-5"}`} 
-        style={{ top: showPromoBanner ? '40px' : '0' }}
+        className={`fixed left-0 right-0 z-[57] bg-white shadow-md transition-all duration-300`}
+        style={{ top: showPromoBanner ? '32px' : '0' }}
       >
-        <div className="container mx-auto px-3 small_mobile:px-5 md:px-6 flex items-center justify-between font-medium">
-          <div className="flex items-center gap-5 small_mobile:gap-7 tablet:gap-12">
-            <Link to="/" className="transition-transform duration-300 hover:scale-105">
+        <div className="container mx-auto px-4">
+          {/* Top Row: Logo, Search, Icons */}
+          <div className="flex items-center justify-between py-2.5">
+            {/* Logo */}
+            <Link to="/" className="flex-shrink-0">
               <img 
                 src={assets.logo} 
-                className="w-11 small_mobile:w-14 mobile:w-16 tablet:w-20 desktop:w-24 h-auto transition-all duration-300" 
+                className="w-14 sm:w-16 md:w-20 h-auto transition-transform duration-300 hover:scale-105" 
                 alt="Sweet Home Logo" 
               />
             </Link>
 
-            <ul className="hidden sm:flex gap-6 mobile:gap-8 text-xs mobile:text-sm text-gray-700">
-              <NavLink 
-                to="/" 
-                className={({ isActive }) => 
-                  `flex flex-col items-center gap-1 hover:text-black transition-colors duration-300 ${isActive ? 'text-black font-semibold' : ''}`
-                }
-              >
-                <p>HOME</p>
-                <div className={`w-2/4 h-[2px] bg-black transition-all duration-300 ${location.pathname === '/' ? 'opacity-100' : 'opacity-0'}`} />
-              </NavLink>
-              
-              {/* Categories with Dropdown */}
-              <div className="relative" ref={categoryRef}>
+            {/* Left Search Bar */}
+            <div className="flex-1 max-w-md ml-4 mr-auto hidden md:block">
+              <div className="relative group">
+                <div className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-hover:text-orange-500 transition-colors pointer-events-none">
+                  <FaSearch className="w-4 h-4" />
+                </div>
+                <input 
+                  type="text" 
+                  placeholder="Search for sweets, snacks, ghee..."
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                  className="w-full pl-11 pr-5 py-2.5 bg-gray-50 border border-gray-200 rounded-full focus:outline-none focus:bg-white focus:border-orange-500 focus:ring-2 focus:ring-orange-100 text-sm transition-all shadow-sm hover:shadow-md hover:border-orange-300 placeholder:text-gray-400"
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' && search.trim()) {
+                      navigate(`/collection?search=${encodeURIComponent(search.trim())}`);
+                    }
+                  }}
+                  onClick={() => setShowSearch(true)}
+                />
                 <button 
-                  onClick={toggleCategoryMenu}
-                  className={`flex flex-col items-center gap-1 hover:text-black transition-colors duration-300 ${location.pathname === '/collection' ? 'text-black font-semibold' : ''}`}
+                  onClick={() => {
+                    if (search.trim()) {
+                      navigate(`/collection?search=${encodeURIComponent(search.trim())}`);
+                    } else {
+                      navigate('/collection');
+                    }
+                  }}
+                  className="absolute right-2 top-1/2 -translate-y-1/2 px-3 py-1 bg-gradient-to-r from-orange-500 to-orange-600 text-white rounded-full hover:from-orange-600 hover:to-orange-700 transition-all shadow-md hover:shadow-lg text-xs font-semibold"
                 >
-                  <div className="flex items-center">
-                    <p>SWEETS</p>
-                    <svg className={`ml-1 w-4 h-4 transition-transform duration-300 ${showCategoryMenu ? 'rotate-180' : ''}`} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-                      <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" />
-                    </svg>
-                  </div>
-                  <div className={`w-2/4 h-[2px] bg-black transition-all duration-300 ${location.pathname === '/collection' ? 'opacity-100' : 'opacity-0'}`} />
+                  Search
                 </button>
-                
-                {/* Enhanced Menu Dropdown */}
-                {showCategoryMenu && (
-                  <div className="absolute left-0 mt-3 w-64 bg-white shadow-lg rounded-md border border-gray-100 z-50 p-5">
-                    <div className="grid gap-3">
-                      <h3 className="font-semibold text-gray-900 border-b pb-2.5 mb-2.5">Browse Categories</h3>
-                      {sweetCategories.map((category, index) => (
-                        <Link 
-                          key={index} 
-                          to={category.path}
-                          className="text-gray-700 hover:text-pink-500 hover:bg-pink-50 px-3.5 py-2.5 rounded transition-colors duration-200 block"
-                          onClick={() => setShowCategoryMenu(false)}
-                        >
-                          {category.name}
-                        </Link>
-                      ))}
-                      <div className="border-t border-gray-100 mt-2 pt-2">
-                        <h3 className="font-semibold text-gray-900 mb-2">Special Occasions</h3>
-                        {specialOccasions.map((occasion, index) => (
-                          <Link 
-                            key={index} 
-                            to={occasion.path}
-                            className="text-gray-700 hover:text-pink-500 hover:bg-pink-50 px-3 py-2 rounded transition-colors duration-200 flex items-center"
-                            onClick={() => setShowCategoryMenu(false)}
-                          >
-                            {occasion.icon}
-                            {occasion.name}
-                          </Link>
-                        ))}
-                      </div>
-                      <div className="bg-pink-50 mt-2 p-3 rounded-md">
-                        <p className="font-medium text-pink-700 text-sm">Quick Order Popular Items</p>
-                        <div className="flex flex-wrap gap-2 mt-2">
-                          <button 
-                            onClick={() => {
-                              handleNavigation('/collection/rasgulla');
-                            }} 
-                            className="bg-white text-xs px-2 py-1 rounded border border-pink-200 text-pink-600 hover:bg-pink-100 transition-colors"
-                          >
-                            Rasgulla
-                          </button>
-                          <button 
-                            onClick={() => {
-                              handleNavigation('/collection/kaju-barfi');
-                            }}
-                            className="bg-white text-xs px-2 py-1 rounded border border-pink-200 text-pink-600 hover:bg-pink-100 transition-colors"
-                          >
-                            Kaju Barfi
-                          </button>
-                          <button 
-                            onClick={() => {
-                              handleNavigation('/collection/jalebi');
-                            }}
-                            className="bg-white text-xs px-2 py-1 rounded border border-pink-200 text-pink-600 hover:bg-pink-100 transition-colors"
-                          >
-                            Jalebi
-                          </button>
-                          <button 
-                            onClick={() => {
-                              handleNavigation('/collection/gulab-jamun');
-                            }}
-                            className="bg-white text-xs px-2 py-1 rounded border border-pink-200 text-pink-600 hover:bg-pink-100 transition-colors"
-                          >
-                            Gulab Jamun
-                          </button>
-                          <button 
-                            onClick={() => {
-                              handleNavigation('/collection/mysore-pak');
-                            }}
-                            className="bg-white text-xs px-2 py-1 rounded border border-pink-200 text-pink-600 hover:bg-pink-100 transition-colors"
-                          >
-                            Mysore Pak
-                          </button>
-                          <button 
-                            onClick={() => {
-                              handleNavigation('/collection/besan-ladoo');
-                            }}
-                            className="bg-white text-xs px-2 py-1 rounded border border-pink-200 text-pink-600 hover:bg-pink-100 transition-colors"
-                          >
-                            Besan Ladoo
-                          </button>
-                          <button 
-                            onClick={() => {
-                              handleNavigation('/collection/kalakand');
-                            }}
-                            className="bg-white text-xs px-2 py-1 rounded border border-pink-200 text-pink-600 hover:bg-pink-100 transition-colors"
-                          >
-                            Kalakand
-                          </button>
+              </div>
+            </div>
+
+            {/* Right Icons: Wishlist, Profile, Cart */}
+            <div className="flex items-center gap-2 sm:gap-3">
+              {/* Mobile Search Icon */}
+              <button 
+                onClick={() => setShowSearchBar(!showSearchBar)}
+                className="md:hidden p-2 hover:bg-orange-50 rounded-full transition-all group"
+              >
+                <FaSearch className="w-5 h-5 text-gray-700 group-hover:text-orange-600 transition-colors" />
+              </button>
+
+              {/* Wishlist */}
+              <Link to="/wishlist" className="p-2 hover:bg-orange-50 rounded-full transition-all relative group hidden sm:flex items-center justify-center">
+                <FaHeart className="w-5 h-5 text-gray-700 group-hover:text-orange-600 group-hover:scale-110 transition-all" />
+                <span className="absolute -bottom-6 left-1/2 -translate-x-1/2 text-xs text-gray-600 opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">Wishlist</span>
+              </Link>
+
+              {/* User Profile */}
+              <div className="relative profile-menu">
+                {token ? (
+                  <>
+                    <button
+                      onClick={toggleProfileMenu}
+                      className="p-2 hover:bg-orange-50 rounded-full transition-all group relative"
+                    >
+                      <FaUserAlt className="w-5 h-5 text-gray-700 group-hover:text-orange-600 group-hover:scale-110 transition-all" />
+                      <span className="absolute -bottom-6 left-1/2 -translate-x-1/2 text-xs text-gray-600 opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">Profile</span>
+                    </button>
+                    
+                    {showProfileMenu && (
+                      userDataLoading ? (
+                        <AccountMenuSkeleton />
+                      ) : (
+                        <div className="absolute right-0 top-full mt-2 w-60 bg-white shadow-xl rounded-lg border border-gray-200 py-2 z-50">
+                          <div className="px-4 py-3 border-b border-gray-200">
+                            <p className="text-sm text-gray-500">Welcome back!</p>
+                            <p className="font-semibold text-gray-800">{userData?.name || 'Guest'}</p>
+                            <p className="text-xs text-gray-400 mt-1">{userData?.email || ''}</p>
+                          </div>
+                          <div className="py-2">
+                            <button 
+                              onClick={() => handleNavigation('/profile')}
+                              className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-orange-50 hover:text-orange-600 transition-colors flex items-center gap-2"
+                            >
+                              <span>Profile Information</span>
+                            </button>
+                            <button 
+                              onClick={() => handleNavigation('/orders')}
+                              className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-orange-50 hover:text-orange-600 transition-colors flex items-center gap-2"
+                            >
+                              <span>My Orders</span>
+                            </button>
+                            <button 
+                              onClick={() => handleNavigation('/wishlist')}
+                              className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-orange-50 hover:text-orange-600 transition-colors flex items-center gap-2"
+                            >
+                              <span>My Wishlist</span>
+                            </button>
+                            <button 
+                              onClick={() => handleNavigation('/settings')}
+                              className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-orange-50 hover:text-orange-600 transition-colors flex items-center gap-2"
+                            >
+                              <span>Account Settings</span>
+                            </button>
+                            <div className="border-t border-gray-200 mt-2 pt-2">
+                              <button 
+                                onClick={() => {
+                                  logout();
+                                  closeProfileMenu();
+                                }}
+                                className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors"
+                              >
+                                Logout
+                              </button>
+                            </div>
+                          </div>
                         </div>
-                      </div>
-                    </div>
-                  </div>
+                      )
+                    )}
+                  </>
+                ) : (
+                  <button
+                    onClick={() => navigate("/login")}
+                    className="px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition-colors text-sm font-medium"
+                  >
+                    Login
+                  </button>
                 )}
               </div>
 
-              <NavLink 
-                to="/collection" 
-                className={({ isActive }) => 
-                  `flex flex-col items-center gap-1 hover:text-black transition-colors duration-300 ${isActive ? 'text-black font-semibold' : ''}`
-                }
-              >
-                <p>COLLECTION</p>
-                <div className={`w-2/4 h-[2px] bg-black transition-all duration-300 ${location.pathname === '/collection' ? 'opacity-100' : 'opacity-0'}`} />
-              </NavLink>
-              <NavLink 
-                to="/about" 
-                className={({ isActive }) => 
-                  `flex flex-col items-center gap-1 hover:text-black transition-colors duration-300 ${isActive ? 'text-black font-semibold' : ''}`
-                }
-              >
-                <p>ABOUT</p>
-                <div className={`w-2/4 h-[2px] bg-black transition-all duration-300 ${location.pathname === '/about' ? 'opacity-100' : 'opacity-0'}`} />
-              </NavLink>
-              <NavLink 
-                to="/contact" 
-                className={({ isActive }) => 
-                  `flex flex-col items-center gap-1 hover:text-black transition-colors duration-300 ${isActive ? 'text-black font-semibold' : ''}`
-                }
-              >
-                <p>CONTACT</p>
-                <div className={`w-2/4 h-[2px] bg-black transition-all duration-300 ${location.pathname === '/contact' ? 'opacity-100' : 'opacity-0'}`} />
-              </NavLink>
-            </ul>
-          </div>
-          
-          <div className="flex items-center gap-5 small_mobile:gap-7">
-            <div 
-              onClick={() => {
-                setShowSearch(!showSearch);
-                if (!location.pathname.includes('collection')) {
-                  navigate("/collection");
-                }
-              }}
-              className="relative group cursor-pointer"
-            >
-              <div className="bg-pink-50 hover:bg-pink-100 p-2 rounded-full transition-all duration-300 group-hover:scale-110 relative">
-                {!showSearch && (
-                  <span className="absolute -top-1.5 -right-1.5 flex h-4 w-4">
-                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-pink-400 opacity-75"></span>
-                    <span className="relative inline-flex rounded-full h-4 w-4 bg-pink-500 text-xs text-white flex items-center justify-center">!</span>
-                  </span>
-                )}
-                <FaSearch className="w-4 h-4 small_mobile:w-5 small_mobile:h-5 text-pink-500" />
-              </div>
-              <span className="absolute -bottom-5 left-1/2 transform -translate-x-1/2 text-xs opacity-0 group-hover:opacity-100 transition-opacity duration-300">Search</span>
-            </div>
-
-            <div className="relative profile-menu">
-              {token ? (
-                <div className="flex flex-row items-center">
-                  <FaUserAlt
-                    onClick={toggleProfileMenu}
-                    className="w-4 h-4 small_mobile:w-5 small_mobile:h-5 cursor-pointer hover:text-pink-600 transition-colors duration-300"
-                  />
-                </div>
-              ) : (
-                <button
-                  onClick={() => navigate("/login")}
-                  className="bg-black text-white text-xs small_mobile:text-sm px-3 small_mobile:px-6 py-1.5 small_mobile:py-2 rounded hover:bg-gray-800 transition-colors duration-300"
-                >
-                  Login
-                </button>
-              )}
-              
-              {/* Profile Dropdown Menu - Using buttons for direct navigation */}
-              {token && showProfileMenu && (
-                <div className="absolute dropdown-menu right-0 pt-4 z-40 transition-all duration-300 transform origin-top-right">
-                  <div className="w-60 py-4 px-5 bg-white shadow-lg rounded-md border border-gray-200">
-                    <div className="border-b border-gray-200 pb-3.5 mb-3.5">
-                      <p className="text-sm text-gray-500">Welcome back!</p>
-                      <p className="font-semibold">{userData?.name ? `Hello, ${userData.name}!` : 'Welcome to Sweet Home!'}</p>
-                    </div>
-                    <div className="flex flex-col gap-3.5 text-gray-700">
-                      <button 
-                        onClick={() => handleNavigation('/profile')}
-                        className="flex items-center gap-2 hover:text-black transition-colors duration-200 text-left"
-                      >
-                        <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                        </svg>
-                        <span>My Profile</span>
-                      </button>
-                      <button 
-                        onClick={() => handleNavigation('/orders')}
-                        className="flex items-center gap-2 hover:text-black transition-colors duration-200 text-left"
-                      >
-                        <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
-                        </svg>
-                        <span>My Orders</span>
-                      </button>
-                      {/* <button 
-                        onClick={() => handleNavigation('/track-order')}
-                        className="flex items-center gap-2 hover:text-black transition-colors duration-200 text-left"
-                      >
-                        <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-                        </svg>
-                        <span>Track Order</span>
-                      </button> */}
-                      <button 
-                        onClick={() => handleNavigation('/wishlist')}
-                        className="flex items-center gap-2 hover:text-black transition-colors duration-200 text-left"
-                      >
-                        <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-                        </svg>
-                        <span>Wishlist</span>
-                      </button>
-                      <button 
-                        onClick={() => handleNavigation('/settings')}
-                        className="flex items-center gap-2 hover:text-black transition-colors duration-200 text-left"
-                      >
-                        <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                        </svg>
-                        <span>Settings</span>
-                      </button>
-                      <div className="border-t border-gray-200 my-2 pt-2">
-                        <button 
-                          onClick={() => {
-                            logout();
-                            closeProfileMenu();
-                          }}
-                          className="flex items-center gap-2 text-red-500 hover:text-red-700 transition-colors duration-200"
-                        >
-                          <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-                          </svg>
-                          <span>Logout</span>
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              )}
-            </div>
-            
-            <Link to="/cart" className="relative group">
-              <div className="relative">
-                <FaShoppingCart className="w-4 h-4 small_mobile:w-5 small_mobile:h-5 min-w-4 small_mobile:min-w-5 transition-transform duration-300 group-hover:scale-110 text-gray-800" />
-                <p className="absolute right-[-5px] bottom-[-5px] w-4 small_mobile:w-5 h-4 small_mobile:h-5 flex items-center justify-center bg-pink-500 text-white rounded-full text-[10px] small_mobile:text-xs font-medium transition-transform duration-300 group-hover:scale-110">
+              {/* Cart */}
+              <Link to="/cart" className="relative p-2 hover:bg-orange-50 rounded-full transition-all group flex items-center justify-center">
+                <FaShoppingCart className="w-5 h-5 text-gray-700 group-hover:text-orange-600 group-hover:scale-110 transition-all" />
+                <span className="absolute -top-1 -right-1 w-5 h-5 bg-gradient-to-r from-orange-500 to-orange-600 text-white rounded-full text-[10px] flex items-center justify-center font-bold shadow-md animate-pulse">
                   {getCartCount()}
-                </p>
-              </div>
-              <span className="absolute -bottom-5 left-1/2 transform -translate-x-1/2 text-xs opacity-0 group-hover:opacity-100 transition-opacity duration-300">Cart</span>
-            </Link>
-            
-            <img
-              onClick={() => setVisible(true)}
-              src={assets.menu_icon}
-              className="w-4 small_mobile:w-5 cursor-pointer sm:hidden transition-transform duration-300 hover:scale-110"
-              alt="Menu"
-            />
-          </div>
-        </div>
+                </span>
+                <span className="absolute -bottom-6 left-1/2 -translate-x-1/2 text-xs text-gray-600 opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">Cart</span>
+              </Link>
 
-        {/* Quick Order Bar */}
-        <div className="hidden lg:block bg-pink-50 shadow-sm border-t border-pink-100">
-          <div className="container mx-auto px-6">
-            <div className="flex items-center justify-between py-2.5 text-sm">
-              <div className="flex items-center space-x-8">
-                <span className="font-medium text-pink-600">Quick Order:</span>
-                <button 
-                  onClick={() => handleNavigation('/collection/rasgulla')}
-                  className="text-gray-700 hover:text-pink-600 transition-colors"
-                >
-                  Rasgulla
-                </button>
-                <button 
-                  onClick={() => handleNavigation('/collection/kaju-barfi')}
-                  className="text-gray-700 hover:text-pink-600 transition-colors"
-                >
-                  Kaju Barfi
-                </button>
-                <button 
-                  onClick={() => handleNavigation('/collection/gulab-jamun')}
-                  className="text-gray-700 hover:text-pink-600 transition-colors"
-                >
-                  Gulab Jamun
-                </button>
-                <button 
-                  onClick={() => handleNavigation('/collection/jalebi')}
-                  className="text-gray-700 hover:text-pink-600 transition-colors"
-                >
-                  Jalebi
-                </button>
-                <button 
-                  onClick={() => handleNavigation('/collection/soan-papdi')}
-                  className="text-gray-700 hover:text-pink-600 transition-colors"
-                >
-                  Soan Papdi
-                </button>
-                <button 
-                  onClick={() => handleNavigation('/collection/mysore-pak')}
-                  className="text-gray-700 hover:text-pink-600 transition-colors"
-                >
-                  Mysore Pak
-                </button>
-                <button 
-                  onClick={() => handleNavigation('/collection/besan-ladoo')}
-                  className="text-gray-700 hover:text-pink-600 transition-colors"
-                >
-                  Besan Ladoo
-                </button>
-                <button 
-                  onClick={() => handleNavigation('/collection/kalakand')}
-                  className="text-gray-700 hover:text-pink-600 transition-colors"
-                >
-                  Kalakand
-                </button>
-              </div>
-              <div>
-                <button 
-                  onClick={() => handleNavigation('/collection?category=giftbox')}
-                  className="flex items-center text-pink-600 hover:text-pink-700 transition-colors"
-                >
-                  <FaGift className="mr-1" /> 
-                  <span>Gift Boxes</span>
-                </button>
-              </div>
+              {/* Mobile Menu Toggle */}
+              <button
+                onClick={() => setVisible(true)}
+                className="lg:hidden p-2 hover:bg-orange-50 rounded transition-all group"
+              >
+                <svg className="w-6 h-6 text-gray-700 group-hover:text-orange-600 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h16"></path>
+                </svg>
+              </button>
+            </div>
+          </div>
+
+          {/* Bottom Row: Navigation Menu */}
+          <div className="hidden lg:block border-t border-gray-100 bg-gradient-to-b from-gray-50 to-white">
+            <div className="flex items-center justify-evenly py-2.5 px-4">
+              {Object.entries(navigationMenu).map(([key, value]) => (
+                  <div key={key} className="relative group flex-shrink-0">
+                    {value.type === "simple" ? (
+                      <button
+                        onClick={() => navigate(value.path)}
+                        className="relative text-gray-800 hover:text-orange-600 font-semibold text-sm transition-all py-2 px-6 hover:bg-white hover:shadow-sm rounded-lg group/item whitespace-nowrap"
+                      >
+                        <span className="relative">
+                          {key}
+                          {value.badge && (
+                            <span className="absolute -top-3 -right-3 bg-red-500 text-white text-[9px] font-bold px-1.5 py-0.5 rounded-full shadow-md">
+                              {value.badge}
+                            </span>
+                          )}
+                        </span>
+                        <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-0 group-hover/item:w-3/4 h-0.5 bg-orange-600 transition-all duration-300"></div>
+                      </button>
+                    ) : (
+                      <>
+                        <button
+                          onClick={() => setActiveDropdown(activeDropdown === key ? null : key)}
+                          onMouseEnter={() => setActiveDropdown(key)}
+                          className="flex items-center justify-center gap-1 text-gray-800 hover:text-orange-600 font-semibold text-sm transition-all py-2 px-6 hover:bg-white hover:shadow-sm rounded-lg group/item whitespace-nowrap"
+                        >
+                          <span className="relative">{key}</span>
+                          <svg 
+                            className={`w-3.5 h-3.5 transition-transform duration-200 ${activeDropdown === key ? 'rotate-180' : ''}`} 
+                            fill="none" 
+                            stroke="currentColor" 
+                            viewBox="0 0 24 24"
+                          >
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path>
+                          </svg>
+                          <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-0 group-hover/item:w-3/4 h-0.5 bg-orange-600 transition-all duration-300"></div>
+                        </button>
+
+                      {/* Enhanced Dropdown Menu */}
+                      {activeDropdown === key && (
+                        <div 
+                          className="absolute left-0 top-full mt-1 w-64 bg-white shadow-2xl rounded-xl border border-gray-100 py-3 z-50 animate-fadeIn"
+                          onMouseLeave={() => setActiveDropdown(null)}
+                        >
+                          <div className="px-3 pb-2 mb-2 border-b border-gray-100">
+                            <h3 className="text-xs font-bold text-gray-500 uppercase tracking-wider">{key}</h3>
+                          </div>
+                          {value.items.map((item, index) => (
+                            <button
+                              key={index}
+                              onClick={() => {
+                                navigate(item.path);
+                                setActiveDropdown(null);
+                              }}
+                              className="w-full text-left px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-gradient-to-r hover:from-orange-50 hover:to-yellow-50 hover:text-orange-600 transition-all flex items-center justify-between group/item relative"
+                            >
+                              <span>{item.name}</span>
+                              <div className="flex items-center gap-2">
+                                {item.hasOffer && (
+                                  <span className="bg-red-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full animate-pulse">
+                                    OFFER
+                                  </span>
+                                )}
+                                <svg 
+                                  className="w-4 h-4 opacity-0 group-hover/item:opacity-100 transition-opacity text-orange-600" 
+                                  fill="none" 
+                                  stroke="currentColor" 
+                                  viewBox="0 0 24 24"
+                                >
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7"></path>
+                                </svg>
+                              </div>
+                            </button>
+                          ))}
+                        </div>
+                      )}
+                    </>
+                  )}
+                </div>
+              ))}
             </div>
           </div>
         </div>
+
+        {/* Mobile Search Dropdown */}
+        {showSearchBar && (
+          <div className="md:hidden absolute left-0 right-0 top-full bg-white shadow-xl border-t border-gray-100 p-4 z-50 animate-fadeIn">
+            <div className="flex items-center gap-2">
+              <input 
+                type="text" 
+                placeholder="Search here..."
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                className="flex-1 px-4 py-2.5 border-2 border-gray-200 rounded-full focus:outline-none focus:border-orange-500 text-sm"
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' && search.trim()) {
+                    setShowSearchBar(false);
+                    navigate(`/collection?search=${encodeURIComponent(search.trim())}`);
+                  }
+                }}
+              />
+              <button 
+                onClick={() => {
+                  setShowSearchBar(false);
+                  if (search.trim()) {
+                    navigate(`/collection?search=${encodeURIComponent(search.trim())}`);
+                  } else {
+                    navigate('/collection');
+                  }
+                }}
+                className="px-4 py-2.5 bg-orange-600 text-white rounded-full hover:bg-orange-700 transition-colors"
+              >
+                <FaSearch />
+              </button>
+            </div>
+          </div>
+        )}
       </div>
 
-      {/* Improved Sidebar menu for small screens */}
+      {/* Mobile Sidebar Menu */}
       <div
-        className={`fixed top-0 right-0 bottom-0 z-50 w-full max-w-xs bg-white shadow-xl transition-transform duration-300 ease-in-out ${
+        className={`fixed top-0 right-0 bottom-0 z-[70] w-full max-w-sm bg-white shadow-2xl transition-transform duration-300 ease-in-out ${
           visible ? "translate-x-0" : "translate-x-full"
         }`}
       >
         <div className="flex flex-col h-full">
-          <div className="p-5 border-b border-gray-200">
-            <div
+          {/* Header */}
+          <div className="flex items-center justify-between p-4 border-b border-gray-200 bg-orange-600 text-white">
+            <h2 className="text-lg font-bold">Menu</h2>
+            <button
               onClick={() => setVisible(false)}
-              className="flex items-center justify-between cursor-pointer"
+              className="p-2 hover:bg-orange-700 rounded-full transition-colors"
             >
-              <p className="font-semibold text-lg">Menu</p>
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path>
               </svg>
-            </div>
+            </button>
           </div>
           
+          {/* Menu Items */}
           <div className="flex-1 overflow-y-auto">
-            <div className="flex flex-col py-4">
-              <div 
-                onClick={() => handleNavigation("/")}
-                className={`py-3 px-6 border-b border-gray-100 hover:bg-gray-50 transition-colors duration-200 cursor-pointer ${location.pathname === '/' ? 'font-semibold' : ''}`}
-              >
-                HOME
-              </div>
-              <div
-                onClick={() => handleNavigation("/collection")}
-                className={`py-3 px-6 border-b border-gray-100 hover:bg-gray-50 transition-colors duration-200 cursor-pointer ${location.pathname === '/collection' ? 'font-semibold' : ''}`}
-              >
-                COLLECTION
-              </div>
-              <div
-                onClick={() => handleNavigation("/about")}
-                className={`py-3 px-6 border-b border-gray-100 hover:bg-gray-50 transition-colors duration-200 cursor-pointer ${location.pathname === '/about' ? 'font-semibold' : ''}`}
-              >
-                ABOUT
-              </div>
-              <div
-                onClick={() => handleNavigation("/contact")}
-                className={`py-3 px-6 border-b border-gray-100 hover:bg-gray-50 transition-colors duration-200 cursor-pointer ${location.pathname === '/contact' ? 'font-semibold' : ''}`}
-              >
-                CONTACT
-              </div>
+            <div className="py-2">
+              {Object.entries(navigationMenu).map(([key, value]) => (
+                <div key={key} className="border-b border-gray-100">
+                  {value.type === "simple" ? (
+                    <button
+                      onClick={() => {
+                        navigate(value.path);
+                        setVisible(false);
+                      }}
+                      className="w-full text-left px-4 py-3 text-gray-800 hover:bg-orange-50 hover:text-orange-600 transition-colors font-medium"
+                    >
+                      {key}
+                    </button>
+                  ) : (
+                    <div>
+                      <button
+                        onClick={() => setActiveDropdown(activeDropdown === key ? null : key)}
+                        className="w-full text-left px-4 py-3 text-gray-800 hover:bg-orange-50 transition-colors font-medium flex items-center justify-between"
+                      >
+                        {key}
+                        <svg 
+                          className={`w-4 h-4 transition-transform duration-200 ${activeDropdown === key ? 'rotate-180' : ''}`} 
+                          fill="none" 
+                          stroke="currentColor" 
+                          viewBox="0 0 24 24"
+                        >
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path>
+                        </svg>
+                      </button>
+                      
+                      {activeDropdown === key && (
+                        <div className="bg-gray-50 py-2">
+                          {value.items.map((item, index) => (
+                            <button
+                              key={index}
+                              onClick={() => {
+                                navigate(item.path);
+                                setVisible(false);
+                                setActiveDropdown(null);
+                              }}
+                              className="w-full text-left px-8 py-2 text-sm text-gray-700 hover:text-orange-600 transition-colors"
+                            >
+                              {item.name}
+                            </button>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
+              ))}
               
+              {/* Additional Links */}
+              <div className="mt-4 px-4 py-2">
+                <p className="text-xs text-gray-500 font-semibold mb-2">QUICK LINKS</p>
+                <button
+                  onClick={() => {
+                    navigate('/about');
+                    setVisible(false);
+                  }}
+                  className="w-full text-left py-2 text-gray-700 hover:text-orange-600 transition-colors"
+                >
+                  About Us
+                </button>
+                <button
+                  onClick={() => {
+                    navigate('/contact');
+                    setVisible(false);
+                  }}
+                  className="w-full text-left py-2 text-gray-700 hover:text-orange-600 transition-colors"
+                >
+                  Contact
+                </button>
+              </div>
+
+              {/* User Section */}
               {token ? (
-                <>
-                  <div className="mt-4 px-6 py-2 text-sm text-gray-500">Account</div>
-                  <div 
+                <div className="mt-4 px-4 py-2 border-t border-gray-200">
+                  <p className="text-xs text-gray-500 font-semibold mb-2">MY ACCOUNT</p>
+                  <button 
                     onClick={() => handleNavigation("/profile")}
-                    className="py-3 px-6 border-b border-gray-100 hover:bg-gray-50 transition-colors duration-200 cursor-pointer"
+                    className="w-full text-left py-2 text-gray-700 hover:text-orange-600 transition-colors"
                   >
                     My Profile
-                  </div>
-                  <div 
+                  </button>
+                  <button 
                     onClick={() => handleNavigation("/orders")}
-                    className="py-3 px-6 border-b border-gray-100 hover:bg-gray-50 transition-colors duration-200 cursor-pointer"
+                    className="w-full text-left py-2 text-gray-700 hover:text-orange-600 transition-colors"
                   >
                     My Orders
-                  </div>
-                  <div 
+                  </button>
+                  <button 
                     onClick={() => handleNavigation("/wishlist")}
-                    className="py-3 px-6 border-b border-gray-100 hover:bg-gray-50 transition-colors duration-200 cursor-pointer"
+                    className="w-full text-left py-2 text-gray-700 hover:text-orange-600 transition-colors"
                   >
                     Wishlist
-                  </div>
+                  </button>
                   <button
                     onClick={() => {
                       logout();
                       setVisible(false);
                     }}
-                    className="py-3 px-6 text-left text-red-500 hover:bg-gray-50 transition-colors duration-200"
+                    className="w-full text-left py-2 text-red-600 hover:text-red-700 transition-colors font-medium"
                   >
                     Logout
                   </button>
-                </>
+                </div>
               ) : (
-                <div
-                  onClick={() => handleNavigation("/login")}
-                  className="mx-6 mt-6 bg-black text-white py-3 rounded text-center hover:bg-gray-800 transition-colors duration-200 cursor-pointer"
-                >
-                  Login / Sign Up
+                <div className="p-4">
+                  <button
+                    onClick={() => {
+                      navigate("/login");
+                      setVisible(false);
+                    }}
+                    className="w-full bg-orange-600 text-white py-3 rounded-lg hover:bg-orange-700 transition-colors font-medium"
+                  >
+                    Login / Sign Up
+                  </button>
                 </div>
               )}
             </div>

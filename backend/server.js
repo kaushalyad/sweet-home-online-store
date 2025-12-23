@@ -18,6 +18,7 @@ import { errorHandler } from './middleware/errorHandler.js';
 import sharedContentRouter from './routes/sharedContentRoute.js';
 import uploadRouter from './routes/uploadRoute.js';
 import messageRouter from './routes/messageRoute.js';
+import newsletterRouter from './routes/newsletterRoute.js';
 import { createServer } from 'http';
 import { Server } from 'socket.io';
 
@@ -126,6 +127,7 @@ const startServer = async () => {
     app.use("/api/shared", sharedContentRouter);
       app.use("/api/upload", uploadRouter);
       app.use("/api/messages", messageRouter);
+      app.use("/api/newsletter", newsletterRouter);
 
     // Root endpoint
     app.get("/", (req, res) => {

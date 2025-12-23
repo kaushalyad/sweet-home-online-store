@@ -24,7 +24,7 @@ import {
   FaArrowLeft
 } from "react-icons/fa";
 import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useNavigate, useLocation, useParams } from 'react-router-dom';
 
 const MAX_IMAGE_SIZE = 5 * 1024 * 1024; // 5MB
 const ALLOWED_IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/webp'];
@@ -33,10 +33,13 @@ const MAX_IMAGES = 6;
 const ProductManager = () => {
   const navigate = useNavigate();
   const location = useLocation();
+  const { id } = useParams();
   const { token } = useContext(AuthContext);
   const isAddMode = location.pathname === '/products/add';
-  const isEditMode = location.pathname.startsWith('/products/edit/');
-  const editId = isEditMode ? location.pathname.split('/').pop() : null;
+  const isEditMode = !!id; // Convert to boolean
+  const editId = id;
+
+  console.log('ProductManager:', { location: location.pathname, id, isEditMode, isAddMode });
 
   // Product form state
   const [productForm, setProductForm] = useState({
@@ -61,6 +64,7 @@ const ProductManager = () => {
 
   // UI state
   const [images, setImages] = useState(Array(MAX_IMAGES).fill(null));
+  const [existingImages, setExistingImages] = useState([]); // Store existing image URLs
   const [imageErrors, setImageErrors] = useState(Array(MAX_IMAGES).fill(null));
   const [editMode, setEditMode] = useState(false);
   const [products, setProducts] = useState([]);
@@ -163,7 +167,52 @@ const ProductManager = () => {
   // Modify useEffect to handle edit mode
   useEffect(() => {
     if (isEditMode && editId) {
-      const product = products.find(p => p._id === editId);
+      if (products.length > 0) {
+        const product = products.find(p => p._id === editId);
+        if (product) {
+          setProductForm({
+            id: product._id,
+            name: product.name,
+            description: product.description,
+            price: product.price,
+            discountPrice: product.discountPrice || "",
+            category: product.category || "traditional",
+            subCategory: product.subCategory || "milk-based",
+            stock: product.stock || 100,
+            bestseller: product.bestseller || false,
+            featured: product.featured || false,
+            newArrival: product.newArrival || false,
+            ingredients: product.ingredients || "",
+            nutrition: product.nutrition || "",
+            weight: product.weight || "",
+            shelfLife: product.shelfLife || "",
+            storage: product.storage || "",
+            tags: product.tags || []
+          });
+          // Store existing images from the product
+          setExistingImages(product.image || []);
+          setImages(Array(MAX_IMAGES).fill(null));
+        } else if (token) {
+          // If product not found in list, fetch it directly
+          fetchProductById(editId);
+        }
+      } else if (token) {
+        // If products not loaded yet, fetch product directly
+        fetchProductById(editId);
+      }
+    }
+  }, [isEditMode, editId, products, token]);
+
+  // Fetch a specific product by ID
+  const fetchProductById = async (id) => {
+    try {
+      const response = await axios.get(`${backendUrl}/api/product/single/${id}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+      const product = response.data.product;
       if (product) {
         setProductForm({
           id: product._id,
@@ -184,10 +233,15 @@ const ProductManager = () => {
           storage: product.storage || "",
           tags: product.tags || []
         });
+        setExistingImages(product.image || []);
         setImages(Array(MAX_IMAGES).fill(null));
       }
+    } catch (error) {
+      console.error('Error fetching product:', error);
+      toast.error('Failed to load product details');
+      navigate('/products');
     }
-  }, [isEditMode, editId, products]);
+  };
 
   // Handle form changes
   const handleChange = (e) => {
@@ -333,16 +387,22 @@ const ProductManager = () => {
         }
       });
 
-      // Append images
-      images.forEach((image, index) => {
-        if (image) {
-          if (index === 0) {
-            formData.append('mainImage', image);
-          } else {
-            formData.append('images', image);
+      // Append new images
+      const hasNewImages = images.some(img => img !== null);
+      if (hasNewImages) {
+        images.forEach((image, index) => {
+          if (image) {
+            if (index === 0) {
+              formData.append('mainImage', image);
+            } else {
+              formData.append('images', image);
+            }
           }
-        }
-      });
+        });
+      } else if (isEditMode) {
+        // If no new images and in edit mode, keep existing images
+        formData.append('keepExistingImages', 'true');
+      }
 
       const config = {
         headers: {
@@ -352,7 +412,7 @@ const ProductManager = () => {
       };
 
       if (isEditMode) {
-        await axios.put(`${backendUrl}/api/product/${editId}`, formData, config);
+        await axios.put(`${backendUrl}/api/product/update/${editId}`, formData, config);
         toast.success('Product updated successfully');
       } else {
         await axios.post(`${backendUrl}/api/product/add`, formData, config);
@@ -694,6 +754,19 @@ const ProductManager = () => {
                                         </button>
                                       </div>
                                     </>
+                                  ) : existingImages[index] ? (
+                                    <>
+                                      <img
+                                        src={existingImages[index]}
+                                        alt={`Existing ${index + 1}`}
+                                        className="h-full w-full object-cover"
+                                      />
+                                      <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-40 transition-opacity flex items-center justify-center">
+                                        <span className="text-white text-xs bg-green-500 px-2 py-1 rounded">
+                                          Current Image
+                                        </span>
+                                      </div>
+                                    </>
                                   ) : (
                                     <div className="text-gray-400 flex flex-col items-center">
                                       <FaUpload size={24} />
@@ -953,6 +1026,17 @@ const ProductManager = () => {
                       <img
                         src={URL.createObjectURL(image)}
                         alt={`Preview ${index + 1}`}
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                  )
+                ))}
+                {existingImages.map((imageUrl, index) => (
+                  !images[index] && imageUrl && (
+                    <div key={`existing-${index}`} className="aspect-square rounded-lg overflow-hidden border border-gray-200">
+                      <img
+                        src={imageUrl}
+                        alt={`Existing ${index + 1}`}
                         className="w-full h-full object-cover"
                       />
                     </div>

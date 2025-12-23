@@ -72,6 +72,7 @@ export const ShopContextProvider = ({ children }) => {
   const [token, setToken] = useState(() => localStorage.getItem("token") || "");
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [userData, setUserData] = useState(null);
+  const [userDataLoading, setUserDataLoading] = useState(false);
   const navigate = useNavigate();
 
   // Validate token with the backend to ensure it's still valid
@@ -81,10 +82,12 @@ export const ShopContextProvider = ({ children }) => {
       setToken("");
       setIsAuthenticated(false);
       setUserData(null);
+      setUserDataLoading(false);
       return false;
     }
 
     try {
+      setUserDataLoading(true);
       console.log("Validating token...");
       const response = await axiosInstance.post("/user/verify-token", {}, {
         headers: {
@@ -100,6 +103,7 @@ export const ShopContextProvider = ({ children }) => {
         setToken("");
         setIsAuthenticated(false);
         setUserData(null);
+        setUserDataLoading(false);
         localStorage.removeItem("token");
         toast.error(response.data.message || "Your session has expired. Please login again.");
         navigate("/login");
@@ -123,6 +127,7 @@ export const ShopContextProvider = ({ children }) => {
         toast.error("Your session has expired. Please login again.");
         navigate("/login");
       }
+      setUserDataLoading(false);
       return false;
     }
   };
@@ -151,6 +156,8 @@ export const ShopContextProvider = ({ children }) => {
         toast.error("Session expired. Please login again.");
         navigate("/login");
       }
+    } finally {
+      setUserDataLoading(false);
     }
   };
 
@@ -528,6 +535,7 @@ export const ShopContextProvider = ({ children }) => {
     logout,
     isAuthenticated,
     userData,
+    userDataLoading,
     // Add wishlist functions to context
     wishlistItems,
     addToWishlist,

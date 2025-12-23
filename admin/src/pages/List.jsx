@@ -2,10 +2,12 @@ import axios from "axios";
 import React, { useEffect, useState } from "react";
 import { backendUrl, currency } from "../App";
 import { toast } from "react-toastify";
-import { MdDelete } from "react-icons/md";
+import { MdDelete, MdEdit } from "react-icons/md";
+import { useNavigate } from "react-router-dom";
 
 const List = ({ token }) => {
   const [list, setList] = useState([]);
+  const navigate = useNavigate();
 
   const fetchList = async () => {
     try {
@@ -59,7 +61,7 @@ const List = ({ token }) => {
           <b>Name</b>
           <b>Category</b>
           <b>Price</b>
-          <b className="text-center">Action</b>
+          <b className="text-center">Actions</b>
         </div>
 
         {/* ------ Product List ------ */}
@@ -76,13 +78,22 @@ const List = ({ token }) => {
               {currency}
               {item.price}
             </p>
-            <button
-              onClick={() => removeProduct(item._id)}
-              className="text-right flex justify-center items-center gap-1 md:text-center cursor-pointer text-red-800"
-            >
-              <MdDelete className="text-xl" />
-              <p className=" text-black text-sx">Remove</p>
-            </button>
+            <div className="flex justify-center items-center gap-2">
+              <button
+                onClick={() => navigate(`/products/edit/${item._id}`)}
+                className="flex justify-center items-center gap-1 cursor-pointer text-blue-600 hover:text-blue-800"
+              >
+                <MdEdit className="text-xl" />
+                <p className="text-black text-xs">Edit</p>
+              </button>
+              <button
+                onClick={() => removeProduct(item._id)}
+                className="flex justify-center items-center gap-1 cursor-pointer text-red-600 hover:text-red-800"
+              >
+                <MdDelete className="text-xl" />
+                <p className="text-black text-xs">Remove</p>
+              </button>
+            </div>
           </div>
         ))}
       </div>

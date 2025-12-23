@@ -1,7 +1,6 @@
 import React, { useState } from "react";
 import Title from "../components/Title";
 import { assets } from "../assets/assets";
-import NewsletterBox from "../components/NewsletterBox";
 import { FaPhoneAlt, FaEnvelope, FaMapMarkerAlt, FaClock, FaCheck, FaDirections, FaGift, FaBoxOpen, FaSnowflake, FaTruck, FaQuestionCircle, FaPlus, FaMinus } from "react-icons/fa";
 
 const Contact = () => {
@@ -437,11 +436,6 @@ const Contact = () => {
             </div>
           </div>
         </div>
-      </div>
-
-      {/* Newsletter Section */}
-      <div className="mt-16">
-        <NewsletterBox />
       </div>
     </div>
   );
