@@ -190,8 +190,12 @@ const updateProduct = async (req, res) => {
             storage,
             tags,
             image,
-            images
+            images,
+            existingImages
         } = req.body
+
+        logger.info('Update product request body:', req.body);
+        logger.info('Update product request files:', req.files ? req.files.length : 0);
 
         // Validate if product exists
         const existingProduct = await productModel.findById(id)
@@ -199,11 +203,72 @@ const updateProduct = async (req, res) => {
             return res.json({ success: false, message: "Product not found" })
         }
 
-        // Process images from client (use provided URLs or keep existing)
-        let imagesUrl = existingProduct.image
-        if (images || image) {
-            const provided = images || image
-            imagesUrl = Array.isArray(provided) ? provided : (typeof provided === 'string' ? JSON.parse(provided) : existingProduct.image)
+        // Build final image array
+        let imagesUrl = []
+
+        // First, add existing images that should be kept
+        if (existingImages) {
+            try {
+                const existingImgsArray = typeof existingImages === 'string' 
+                    ? JSON.parse(existingImages) 
+                    : existingImages;
+                if (Array.isArray(existingImgsArray)) {
+                    imagesUrl = [...existingImgsArray];
+                    logger.info('Keeping existing images:', imagesUrl);
+                }
+            } catch (err) {
+                logger.error('Error parsing existing images:', err);
+            }
+        }
+
+        // Then, upload and add new images
+        if (req.files && Array.isArray(req.files) && req.files.length > 0) {
+            logger.info('Processing new image uploads...');
+            const imageFiles = req.files.filter(f => f.fieldname && (f.fieldname.startsWith('image') || f.fieldname === 'mainImage'));
+            
+            if (imageFiles.length > 0) {
+                try {
+                    const newImageUrls = await Promise.all(
+                        imageFiles.map(async (file) => {
+                            try {
+                                const filePath = file.path || '';
+                                logger.info(`Uploading file: ${filePath}`);
+                                
+                                const result = await cloudinary.uploader.upload(filePath, { resource_type: 'image' });
+                                logger.info(`Upload success: ${result.secure_url}`);
+                                
+                                // Clean up temp file
+                                try {
+                                    await fs.unlink(filePath);
+                                } catch (err) {
+                                    logger.error(`Failed to remove temp file: ${err.message}`);
+                                }
+                                
+                                return result.secure_url;
+                            } catch (uploadErr) {
+                                logger.error(`Upload error: ${uploadErr.message}`);
+                                throw uploadErr;
+                            }
+                        })
+                    );
+                    
+                    // Add new images to the array
+                    imagesUrl = [...imagesUrl, ...newImageUrls];
+                    logger.info('New images uploaded and added:', newImageUrls);
+                } catch (uploadError) {
+                    logger.error('Error uploading images:', uploadError);
+                    return res.status(500).json({ success: false, message: 'Failed to upload images' });
+                }
+            }
+        } else if ((images || image) && imagesUrl.length === 0) {
+            // Use provided image URLs only if no existing images were kept
+            const provided = images || image;
+            imagesUrl = Array.isArray(provided) ? provided : (typeof provided === 'string' ? JSON.parse(provided) : existingProduct.image);
+            logger.info('Using provided image URLs:', imagesUrl);
+        } else if (imagesUrl.length === 0) {
+            // If still no images, keep the original product images
+            imagesUrl = existingProduct.image;
+            logger.info('Keeping original product images');
         }
 
         const updatedProductData = {

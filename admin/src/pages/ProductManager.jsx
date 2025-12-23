@@ -72,6 +72,7 @@ const ProductManager = () => {
   // UI state
   const [images, setImages] = useState(Array(MAX_IMAGES).fill(null));
   const [existingImages, setExistingImages] = useState([]); // Store existing image URLs
+  const [deletedImageIndexes, setDeletedImageIndexes] = useState([]); // Track deleted existing images
   const [imageErrors, setImageErrors] = useState(Array(MAX_IMAGES).fill(null));
   const [editMode, setEditMode] = useState(false);
   const [products, setProducts] = useState([]);
@@ -304,11 +305,23 @@ const ProductManager = () => {
 
   // Handle image removal
   const handleImageRemove = (index) => {
+    if (existingImages[index]) {
+      // Mark existing image for deletion
+      setDeletedImageIndexes(prev => [...prev, index]);
+    }
+    
     setImages(prev => {
       const newImages = [...prev];
       newImages[index] = null;
       return newImages;
     });
+    
+    setExistingImages(prev => {
+      const newExisting = [...prev];
+      newExisting[index] = null;
+      return newExisting;
+    });
+    
     setImageErrors(prev => {
       const newErrors = [...prev];
       newErrors[index] = null;
@@ -394,9 +407,29 @@ const ProductManager = () => {
         }
       });
 
-      // Append new images
-      const hasNewImages = images.some(img => img !== null);
-      if (hasNewImages) {
+      if (isEditMode) {
+        // In edit mode, build final image array:
+        // 1. Keep existing images that weren't deleted
+        // 2. Add new images
+        const finalImages = [];
+        
+        // Process each slot
+        for (let i = 0; i < MAX_IMAGES; i++) {
+          if (images[i]) {
+            // New image uploaded at this position
+            formData.append('images', images[i]);
+          } else if (existingImages[i] && !deletedImageIndexes.includes(i)) {
+            // Existing image that should be kept
+            finalImages.push(existingImages[i]);
+          }
+        }
+        
+        // If we have images to keep, send them as JSON
+        if (finalImages.length > 0) {
+          formData.append('existingImages', JSON.stringify(finalImages));
+        }
+      } else {
+        // Add mode - append new images
         images.forEach((image, index) => {
           if (image) {
             if (index === 0) {
@@ -406,9 +439,6 @@ const ProductManager = () => {
             }
           }
         });
-      } else if (isEditMode) {
-        // If no new images and in edit mode, keep existing images
-        formData.append('keepExistingImages', 'true');
       }
 
       const config = {
@@ -437,34 +467,8 @@ const ProductManager = () => {
 
   // Edit a product
   const editProduct = (product) => {
-    setEditMode(true);
-    
-    // Set the form data
-    setProductForm({
-      id: product._id,
-      name: product.name,
-      description: product.description,
-      price: product.price,
-      discountPrice: product.discountPrice || "",
-      category: product.category || "traditional",
-      subCategory: product.subCategory || "milk-based",
-      stock: product.stock || 100,
-      bestseller: product.bestseller || false,
-      featured: product.featured || false,
-      newArrival: product.newArrival || false,
-      ingredients: product.ingredients || "",
-      nutrition: product.nutrition || "",
-      weight: product.weight || "",
-      shelfLife: product.shelfLife || "",
-      storage: product.storage || "",
-      tags: product.tags || []
-    });
-
-    // Reset images (they need to be re-uploaded when editing)
-    setImages(Array(MAX_IMAGES).fill(null));
-    
-    // Scroll to the form
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    // Navigate to edit page
+    navigate(`/products/edit/${product._id}`);
   };
 
   // Delete product
@@ -511,6 +515,8 @@ const ProductManager = () => {
       tags: []
     });
     setImages(Array(MAX_IMAGES).fill(null));
+    setExistingImages([]);
+    setDeletedImageIndexes([]);
     setEditMode(false);
   };
 
@@ -768,10 +774,21 @@ const ProductManager = () => {
                                         alt={`Existing ${index + 1}`}
                                         className="h-full w-full object-cover"
                                       />
-                                      <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-40 transition-opacity flex items-center justify-center">
+                                      <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-40 transition-opacity flex items-center justify-center gap-2">
                                         <span className="text-white text-xs bg-green-500 px-2 py-1 rounded">
                                           Current Image
                                         </span>
+                                        <button
+                                          type="button"
+                                          onClick={(e) => {
+                                            e.preventDefault();
+                                            handleImageRemove(index);
+                                          }}
+                                          className="bg-red-500 text-white rounded-full p-2 opacity-0 group-hover:opacity-100 transition-opacity"
+                                          title="Delete this image"
+                                        >
+                                          <FaTimes size={14} />
+                                        </button>
                                       </div>
                                     </>
                                   ) : (
