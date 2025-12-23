@@ -2,7 +2,7 @@ import React, { useContext, useEffect, useState } from "react";
 import { ShopContext } from "../context/ShopContext";
 import Title from "./Title";
 import ProductItem from "./ProductItem";
-import Buffer from "./Buffer";
+import ProductSkeleton from "./ProductSkeleton";
 import { motion } from "framer-motion";
 import { FaArrowRight } from "react-icons/fa";
 import { Link } from "react-router-dom";
@@ -45,7 +45,7 @@ const BestSeller = () => {
       </div>
 
       {buffer ? (
-        <Buffer />
+        <ProductSkeleton count={5} />
       ) : (
         <div className="px-4">
           <motion.div 

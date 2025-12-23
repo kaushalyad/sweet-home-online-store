@@ -5,6 +5,7 @@ import { useContext } from 'react';
 import { FaShoppingCart, FaTrash, FaHeart, FaMinus, FaPlus } from 'react-icons/fa';
 import CartTotal from '../components/CartTotal';
 import Title from '../components/Title';
+import CartSkeleton from '../components/CartSkeleton';
 import { toast } from "react-toastify";
 import { trackPageView, trackPurchaseSuccess, trackPurchaseFailure } from "../utils/analytics";
 
@@ -148,14 +149,7 @@ const Cart = () => {
   };
 
   if (loading) {
-    return (
-      <div className="container mx-auto px-4 py-8">
-        <Title title="Your Cart" />
-        <div className="flex justify-center items-center h-64">
-          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
-        </div>
-      </div>
-    );
+    return <CartSkeleton />;
   }
 
   if (error) {

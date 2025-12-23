@@ -2,7 +2,7 @@ import React, { useContext, useEffect, useState } from "react";
 import { ShopContext } from "../context/ShopContext";
 import Title from "./Title";
 import ProductItem from "./ProductItem";
-import Buffer from "./Buffer";
+import ProductSkeleton from "./ProductSkeleton";
 import { motion } from "framer-motion";
 import { FaArrowRight } from "react-icons/fa";
 import { Link } from "react-router-dom";
@@ -45,7 +45,7 @@ const LatestCollection = () => {
 
       {/* Rendering Products */}
       {buffer ? (
-        <Buffer />
+        <ProductSkeleton count={10} />
       ) : (
         <div className="px-4">
           <motion.div 
@@ -53,7 +53,7 @@ const LatestCollection = () => {
             initial="hidden"
             whileInView="visible"
             viewport={{ once: true }}
-            className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6 gap-y-10"
+            className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 xl:grid-cols-7 gap-3 gap-y-6"
           >
             {latestProducts.map((item, index) => (
               <ProductItem

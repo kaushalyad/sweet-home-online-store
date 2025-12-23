@@ -6,10 +6,10 @@ import Buffer from "../components/Buffer";
 import { FaSort, FaSortAmountDown, FaSortAmountUp, FaChevronDown, FaFilter, FaCheck, FaTimes } from "react-icons/fa";
 import { motion, AnimatePresence } from "framer-motion";
 import PropTypes from "prop-types";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 
 const Collection = () => {
-  const { products, search, showSearch, buffer } = useContext(ShopContext);
+  const { products, search, setSearch, showSearch, buffer } = useContext(ShopContext);
   const [showFilter, setShowFilter] = useState(false);
   const [filterProducts, setFilterProducts] = useState([]);
   const [category, setCategory] = useState([]);
@@ -18,6 +18,16 @@ const Collection = () => {
   const [showSortDropdown, setShowSortDropdown] = useState(false);
   const [priceRange, setPriceRange] = useState([0, 1000]);
   const [ratingFilter, setRatingFilter] = useState(0);
+  const location = useLocation();
+  
+  // Handle URL search parameter
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const searchParam = params.get('search');
+    if (searchParam) {
+      setSearch(decodeURIComponent(searchParam));
+    }
+  }, [location.search, setSearch]);
 
   // Sorting option configuration
   const sortOptions = [
@@ -303,7 +313,11 @@ const Collection = () => {
       <div className="container mx-auto px-4">
         <div className="flex flex-col sm:flex-row gap-5 sm:gap-10 pt-6 border-t border-gray-200">
           {/* Sticky Quick Filter Bar - For easy access to popular filters */}
-          <div className="sticky top-24 left-0 right-0 z-20 bg-white border border-gray-200 rounded-lg shadow-sm p-2 mb-6 hidden md:block w-[25%]">
+          <div className={`sticky top-24 left-0 right-0 z-20 bg-white border border-gray-200 rounded-lg shadow-sm p-2 mb-6 hidden md:block transition-all duration-300 ${
+            (category.length > 0 || subCategory.length > 0 || priceRange[0] > 0 || priceRange[1] < 1000 || ratingFilter > 0) 
+              ? 'w-[16%]' 
+              : 'w-[18%]'
+          }`}>
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <span className="text-sm font-medium text-gray-700">Quick Filters:</span>
@@ -711,7 +725,7 @@ const Collection = () => {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.6 }}
-              className="grid grid-cols-1 md:grid-cols-3 gap-8 gap-y-12"
+              className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4 gap-y-8"
             >
               {/* Show first 4 products as recommendations - this could be enhanced with actual recommendation logic */}
               {products.slice(0, 4).map((item, index) => (

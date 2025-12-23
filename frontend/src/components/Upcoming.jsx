@@ -3,27 +3,30 @@ import Title from "./Title";
 import { motion } from "framer-motion";
 import { useState } from "react";
 import NotifyMeWidget from "./NotifyMeWidget";
+import kesar_delight from "../assets/kesar_delight.png";
+import family_box from "../assets/family_box.png";
+import festive_gift_pack from "../assets/festive_gift_pack.png";
 
 // Static placeholders for upcoming products (replace with real data when available)
 const upcomingSeed = [
   {
     _id: "upcoming-1",
     name: "Kesar Delight (Coming Soon)",
-    image: ["https://placehold.co/600x400?text=Kesar+Delight"],
+    image: [kesar_delight],
     price: 0,
     tags: ["upcoming"],
   },
   {
     _id: "upcoming-2",
     name: "Family Box (Pre-order)",
-    image: ["https://placehold.co/600x400?text=Family+Box"],
+    image: [family_box],
     price: 0,
     tags: ["upcoming"],
   },
   {
     _id: "upcoming-3",
     name: "Festive Gift Pack",
-    image: ["https://placehold.co/600x400?text=Festive+Gift+Pack"],
+    image: [festive_gift_pack],
     price: 0,
     tags: ["upcoming"],
   },

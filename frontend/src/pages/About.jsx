@@ -1,7 +1,6 @@
 import React from "react";
 import Title from "../components/Title";
 import { assets } from "../assets/assets";
-import NewsletterBox from "../components/NewsletterBox";
 import { motion } from "framer-motion";
 import { FaCheckCircle, FaUsers, FaStar, FaShippingFast } from "react-icons/fa";
 import { Link } from "react-router-dom";
@@ -406,11 +405,6 @@ const About = () => {
             </Link>
           </motion.div>
         </div>
-      </div>
-      
-      {/* Newsletter Section */}
-      <div className="py-16">
-        <NewsletterBox />
       </div>
     </div>
   );

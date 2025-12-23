@@ -52,13 +52,15 @@ const ProductItem = ({ id, image, name, price, index = 0, featured = false, best
 
   // Animation variants
   const itemVariant = {
-    hidden: { opacity: 0, y: 20 },
+    hidden: { opacity: 0, y: 30, scale: 0.9 },
     visible: { 
       opacity: 1, 
       y: 0,
+      scale: 1,
       transition: { 
-        duration: 0.5,
-        ease: "easeOut"
+        duration: 0.6,
+        ease: [0.25, 0.46, 0.45, 0.94],
+        delay: index * 0.05
       }
     }
   };
