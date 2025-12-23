@@ -39,7 +39,14 @@ const ProductManager = () => {
   const isEditMode = !!id; // Convert to boolean
   const editId = id;
 
-  console.log('ProductManager:', { location: location.pathname, id, isEditMode, isAddMode });
+  console.log('ProductManager:', { 
+    location: location.pathname, 
+    id, 
+    isEditMode, 
+    isAddMode,
+    fullParams: useParams(),
+    pathname: window.location.pathname
+  });
 
   // Product form state
   const [productForm, setProductForm] = useState({
