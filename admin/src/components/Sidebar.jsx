@@ -8,14 +8,9 @@ const Sidebar = () => {
     <div className='w-[18%] min-h-screen border-r-2'>
         <div className='flex flex-col gap-4 pt-6 pl-[20%] text-[15px]'>
 
-            <NavLink className='flex items-center gap-3 border border-gray-300 border-r-0 px-3 py-2 rounded-l' to="/product-manager">
-                <FaBoxOpen className='w-5 h-5 text-pink-600' />
-                <p className='hidden md:block'>Product Manager</p>
-            </NavLink>
-
-            <NavLink className='flex items-center gap-3 border border-gray-300 border-r-0 px-3 py-2 rounded-l' to="/list">
+            <NavLink className='flex items-center gap-3 border border-gray-300 border-r-0 px-3 py-2 rounded-l' to="/products">
                 <FaBoxes className='w-5 h-5 text-pink-600' />
-                <p className='hidden md:block'>Products List</p>
+                <p className='hidden md:block'>Products</p>
             </NavLink>
 
             <NavLink className='flex items-center gap-3 border border-gray-300 border-r-0 px-3 py-2 rounded-l' to="/orders">
