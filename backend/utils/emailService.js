@@ -19,26 +19,6 @@ transporter.verify((error, success) => {
   }
 });
 
-// Generic send email function
-export const sendEmail = async ({ to, subject, html, text }) => {
-  try {
-    const mailOptions = {
-      from: `"Sweet Home Store" <${process.env.EMAIL_USER}>`,
-      to,
-      subject,
-      html,
-      text
-    };
-
-    const info = await transporter.sendMail(mailOptions);
-    logger.info(`Email sent to ${to}: ${info.messageId}`);
-    return { success: true, messageId: info.messageId };
-  } catch (error) {
-    logger.error('Error sending email:', error);
-    return { success: false, error: error.message };
-  }
-};
-
 // Order confirmation email template
 export const sendOrderConfirmationEmail = async (orderData) => {
   try {
