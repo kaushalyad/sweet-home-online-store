@@ -103,7 +103,11 @@ const subscribe = async (req, res) => {
         </html>
       `;
 
-      await sendEmail(email, emailSubject, emailHtml);
+      await sendEmail({ 
+        to: email, 
+        subject: emailSubject, 
+        html: emailHtml 
+      });
       logger.info(`Welcome email sent to: ${email}`);
     } catch (emailError) {
       logger.error('Error sending welcome email:', emailError);

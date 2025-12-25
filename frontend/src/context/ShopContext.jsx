@@ -40,7 +40,7 @@ axiosInstance.interceptors.response.use(
     
     if (error.response?.status === 401) {
       // Only clear token and redirect if it's not a token validation request
-      if (!error.config.url.includes('/verify-token')) {
+      if (!error.config?.url?.includes('/verify-token')) {
         localStorage.removeItem('token');
         window.location.href = '/login';
       }
@@ -119,7 +119,7 @@ export const ShopContextProvider = ({ children }) => {
       console.error("Token validation error:", error.response?.data || error.message);
       
       // Only clear token if it's a real authentication error
-      if (error.response?.status === 401 && !error.config.url.includes('/verify-token')) {
+      if (error.response?.status === 401 && !error.config?.url?.includes('/verify-token')) {
         setToken("");
         setIsAuthenticated(false);
         setUserData(null);
@@ -333,7 +333,6 @@ export const ShopContextProvider = ({ children }) => {
         // Update local cart state with the response data
         const updatedCartData = response.data.cartData || {};
         setCartItems(updatedCartData);
-        toast.success("Item removed from cart");
       } else {
         toast.error(response.data.message || "Failed to remove item from cart");
       }
@@ -364,7 +363,6 @@ export const ShopContextProvider = ({ children }) => {
         // Update local cart state with the response data
         const updatedCartData = response.data.cartData || {};
         setCartItems(updatedCartData);
-        toast.success("Cart updated successfully");
       } else {
         toast.error(response.data.message || "Failed to update cart");
       }
@@ -399,7 +397,6 @@ export const ShopContextProvider = ({ children }) => {
       if (response.data.success) {
         // Refresh cart data to ensure consistency
         await getUserCart(token);
-        toast.success("Product added to cart successfully");
       } else {
         toast.error(response.data.message || "Failed to add to cart");
       }

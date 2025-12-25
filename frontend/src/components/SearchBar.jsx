@@ -26,7 +26,13 @@ const SearchBar = () => {
         // Load recent searches from localStorage
         const savedSearches = localStorage.getItem('recentSearches');
         if (savedSearches) {
-            setRecentSearches(JSON.parse(savedSearches));
+            try {
+                setRecentSearches(JSON.parse(savedSearches));
+            } catch (error) {
+                console.error('Error parsing recent searches:', error);
+                localStorage.removeItem('recentSearches');
+                setRecentSearches([]);
+            }
         }
     }, []);
 

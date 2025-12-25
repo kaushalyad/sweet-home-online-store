@@ -154,7 +154,7 @@ const Cart = () => {
 
   if (error) {
     return (
-      <div className="container mx-auto px-4 py-8">
+      <div className="container mx-auto sm:px-4 py-8">
         <Title title="Your Cart" />
         <div className="text-center text-red-500">{error}</div>
       </div>
@@ -163,7 +163,7 @@ const Cart = () => {
 
   if (isCartEmpty) {
     return (
-      <div className="container mx-auto px-4 py-8">
+      <div className="container mx-auto sm:px-4 py-8">
         <Title title="Your Sweet Cart" />
         <div className="text-center py-12 bg-white rounded-lg shadow-sm">
           <div className="max-w-md mx-auto">
@@ -196,7 +196,7 @@ const Cart = () => {
   }
 
   return (
-    <div className="container mx-auto px-4 py-8">
+    <div className="container mx-auto sm:px-4 py-8">
       <Title title="Your Sweet Collection" />
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         <div className="lg:col-span-2">

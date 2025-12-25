@@ -365,11 +365,28 @@ const ProductManager = () => {
   const handleDragEnd = (result) => {
     if (!result.destination) return;
 
-    const items = Array.from(images);
-    const [reorderedItem] = items.splice(result.source.index, 1);
-    items.splice(result.destination.index, 0, reorderedItem);
+    const sourceIndex = result.source.index;
+    const destIndex = result.destination.index;
 
-    setImages(items);
+    // Reorder images array
+    const reorderedImages = Array.from(images);
+    const [movedImage] = reorderedImages.splice(sourceIndex, 1);
+    reorderedImages.splice(destIndex, 0, movedImage);
+
+    // Reorder existingImages array to keep them in sync
+    const reorderedExistingImages = Array.from(existingImages);
+    const [movedExistingImage] = reorderedExistingImages.splice(sourceIndex, 1);
+    reorderedExistingImages.splice(destIndex, 0, movedExistingImage);
+
+    // Reorder imageErrors array to keep them in sync
+    const reorderedErrors = Array.from(imageErrors);
+    const [movedError] = reorderedErrors.splice(sourceIndex, 1);
+    reorderedErrors.splice(destIndex, 0, movedError);
+
+    // Update all states together
+    setImages(reorderedImages);
+    setExistingImages(reorderedExistingImages);
+    setImageErrors(reorderedErrors);
   };
 
   // Add a tag

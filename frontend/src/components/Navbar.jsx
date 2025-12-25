@@ -237,14 +237,14 @@ const Navbar = () => {
         className={`fixed left-0 right-0 z-[57] bg-white shadow-md transition-all duration-300`}
         style={{ top: showPromoBanner ? '32px' : '0' }}
       >
-        <div className="container mx-auto px-4">
+        <div className="container mx-auto sm:px-4">
           {/* Top Row: Logo, Search, Icons */}
-          <div className="flex items-center justify-between py-2.5">
+          <div className="flex items-center justify-between py-2 sm:py-2.5">
             {/* Logo */}
             <Link to="/" className="flex-shrink-0">
               <img 
                 src={assets.logo} 
-                className="w-14 sm:w-16 md:w-20 h-auto transition-transform duration-300 hover:scale-105" 
+                className="w-11 sm:w-16 md:w-20 h-auto transition-transform duration-300 hover:scale-105" 
                 alt="Sweet Home Logo" 
               />
             </Link>
@@ -284,15 +284,7 @@ const Navbar = () => {
             </div>
 
             {/* Right Icons: Wishlist, Profile, Cart */}
-            <div className="flex items-center gap-2 sm:gap-3">
-              {/* Mobile Search Icon */}
-              <button 
-                onClick={() => setShowSearchBar(!showSearchBar)}
-                className="md:hidden p-2 hover:bg-orange-50 rounded-full transition-all group"
-              >
-                <FaSearch className="w-5 h-5 text-gray-700 group-hover:text-orange-600 transition-colors" />
-              </button>
-
+            <div className="flex items-center gap-1 sm:gap-3">
               {/* Wishlist */}
               <Link to="/wishlist" className="p-2 hover:bg-orange-50 rounded-full transition-all relative group hidden sm:flex items-center justify-center">
                 <FaHeart className="w-5 h-5 text-gray-700 group-hover:text-orange-600 group-hover:scale-110 transition-all" />
@@ -480,14 +472,14 @@ const Navbar = () => {
 
         {/* Mobile Search Dropdown */}
         {showSearchBar && (
-          <div className="md:hidden absolute left-0 right-0 top-full bg-white shadow-xl border-t border-gray-100 p-4 z-50 animate-fadeIn">
+          <div className="md:hidden absolute left-0 right-0 top-full bg-white shadow-xl border-t border-gray-100 p-2 z-50 animate-fadeIn">
             <div className="flex items-center gap-2">
               <input 
                 type="text" 
                 placeholder="Search here..."
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                className="flex-1 px-4 py-2.5 border-2 border-gray-200 rounded-full focus:outline-none focus:border-orange-500 text-sm"
+                className="flex-1 px-3 py-2 border-2 border-gray-200 rounded-full focus:outline-none focus:border-orange-500 text-sm"
                 onKeyDown={(e) => {
                   if (e.key === 'Enter' && search.trim()) {
                     setShowSearchBar(false);
@@ -504,7 +496,7 @@ const Navbar = () => {
                     navigate('/collection');
                   }
                 }}
-                className="px-4 py-2.5 bg-orange-600 text-white rounded-full hover:bg-orange-700 transition-colors"
+                className="px-3 py-2 bg-orange-600 text-white rounded-full hover:bg-orange-700 transition-colors"
               >
                 <FaSearch />
               </button>

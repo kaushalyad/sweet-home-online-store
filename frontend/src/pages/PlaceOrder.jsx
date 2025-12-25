@@ -217,7 +217,6 @@ const PlaceOrder = () => {
       
       setDiscount(discountAmount);
       setAppliedCoupon(coupon);
-      toast.success(`Coupon "${coupon.code}" applied successfully!`);
       setIsApplyingCoupon(false);
     }, 800); // Simulate network delay
   };
@@ -227,7 +226,6 @@ const PlaceOrder = () => {
     setDiscount(0);
     setAppliedCoupon(null);
     setCouponCode("");
-    toast.info("Coupon removed");
   };
 
   const handleSpecialRequirementsChange = (requirement) => {
@@ -441,45 +439,80 @@ const PlaceOrder = () => {
   const initPay = (order) => {
     console.log("initPay called with order:", order);
     
-    // Check if Razorpay script is loaded
-    if (!window.Razorpay) {
-      console.error("Razorpay script not loaded!");
-      toast.error("Payment gateway not available. Please try again later.");
-      return;
-    }
+    // Wait for Razorpay to be fully loaded
+    const checkRazorpay = () => {
+      return new Promise((resolve, reject) => {
+        if (window.Razorpay && typeof window.Razorpay === 'function') {
+          resolve(true);
+        } else {
+          let attempts = 0;
+          const maxAttempts = 50; // 5 seconds max wait
+          const interval = setInterval(() => {
+            attempts++;
+            if (window.Razorpay && typeof window.Razorpay === 'function') {
+              clearInterval(interval);
+              resolve(true);
+            } else if (attempts >= maxAttempts) {
+              clearInterval(interval);
+              reject(new Error('Razorpay failed to load'));
+            }
+          }, 100);
+        }
+      });
+    };
 
-    // Ensure currency is in correct format (uppercase)
-    const currency = (order.currency || "INR").toUpperCase();
-    console.log("Using currency:", currency);
+    checkRazorpay()
+      .then(() => {
+        // Validate order object
+        if (!order || !order.id) {
+          console.error("Invalid order object:", order);
+          toast.error("Order creation failed. Please try again.");
+          return;
+        }
 
-    // Validate amount
-    if (!order.amount || order.amount <= 0) {
-      console.error("Invalid order amount:", order.amount);
-      toast.error("Invalid order amount. Please try again.");
-      return;
-    }
+        // Ensure currency is in correct format (uppercase)
+        const currency = (order.currency || "INR").toUpperCase();
+        console.log("Order details:", { id: order.id, amount: order.amount, currency });
 
-    const options = {
-      key: import.meta.env.VITE_RAZORPAY_KEY_ID || "rzp_test_51OQwqPSHxQYwY",
-      amount: order.amount,
-      currency: currency,
-      name: "Sweet Home",
-      description: "Payment for your order",
-      order_id: order.id,
-      handler: async function (response) {
-        try {
+        // Validate amount
+        if (!order.amount || order.amount <= 0) {
+          console.error("Invalid order amount:", order.amount);
+          toast.error("Invalid order amount. Please try again.");
+          return;
+        }
+
+        // Get Razorpay key
+        const razorpayKey = import.meta.env.VITE_RAZORPAY_KEY_ID;
+        
+        if (!razorpayKey || razorpayKey.trim() === '') {
+          console.error("Razorpay key not configured");
+          toast.error("Payment gateway not configured. Please contact support.");
+          return;
+        }
+
+        console.log("Razorpay key loaded:", razorpayKey.substring(0, 10) + "...");
+
+        // Create simple handler outside options object
+        const paymentHandler = function (response) {
           console.log("Payment response received:", response);
           
           // Extract user ID from token
-          const tokenParts = token.split('.');
-          if (tokenParts.length !== 3) {
-            throw new Error('Invalid token format');
-          }
-          const payload = JSON.parse(atob(tokenParts[1]));
-          const userId = payload.id;
+          let userId;
+          try {
+            const tokenParts = token.split('.');
+            const payload = JSON.parse(atob(tokenParts[1]));
+            userId = payload.id;
 
-          if (!userId) {
-            throw new Error('User ID not found in token');
+            if (!userId) {
+              toast.error('Authentication error. Please login again.');
+              navigate('/login');
+              return;
+            }
+          } catch (error) {
+            console.error('Token parsing error:', error);
+            toast.error('Authentication error. Please login again.');
+            navigate('/login');
+            return;
           }
 
           console.log("Verifying payment with data:", {
@@ -489,7 +522,7 @@ const PlaceOrder = () => {
             userId: userId
           });
 
-          const { data } = await axios.post(
+          axios.post(
             backendUrl + "/api/order/verify-razorpay",
             {
               razorpay_order_id: response.razorpay_order_id,
@@ -502,58 +535,82 @@ const PlaceOrder = () => {
                 'Authorization': `Bearer ${token}`,
                 'Content-Type': 'application/json'
               },
-              timeout: 10000 // 10 second timeout
+              timeout: 10000
             }
-          );
+          ).then((result) => {
+            console.log("Payment verification response:", result.data);
 
-          console.log("Payment verification response:", data);
-
-          if (data.success) {
-            // Show success animation first
-            setShowSuccess(true);
-            // Clear cart and navigate only after successful payment
-            setTimeout(() => {
-              setCartItems({});
-              navigate("/orders");
-            }, 3000);
-          } else {
-            console.error("Payment verification failed:", data.message);
-            toast.error(data.message || "Payment verification failed. Please contact support.");
+            if (result.data.success) {
+              setShowSuccess(true);
+              setTimeout(() => {
+                setCartItems({});
+                navigate("/orders");
+              }, 3000);
+            } else {
+              console.error("Payment verification failed:", result.data.message);
+              toast.error(result.data.message || "Payment verification failed. Please contact support.");
+            }
+          }).catch((error) => {
+            console.error("Payment verification error:", error);
+            if (error.code === 'ECONNABORTED') {
+              toast.error("Payment verification timed out. Please check your order status.");
+            } else if (!error.response) {
+              toast.error("Network error. Please check your internet connection and try again.");
+            } else {
+              toast.error(error.response?.data?.message || "Payment verification failed. Please contact support.");
+            }
+          });
+        };
+        
+        // Create minimal options object - only required fields with primitive values
+        const userName = (formData.firstName + " " + formData.lastName).trim();
+        const userEmail = formData.email || "";
+        const userPhone = formData.phone || "";
+        
+        const options = {
+          key: razorpayKey,
+          amount: parseInt(order.amount),
+          currency: currency,
+          name: "Sweet Home",
+          description: "Payment for your order",
+          order_id: order.id,
+          handler: paymentHandler,
+          prefill: {
+            name: userName,
+            email: userEmail,
+            contact: userPhone
+          },
+          theme: {
+            color: "#F43F5E"
           }
+        };
+
+        try {
+          console.log("Creating Razorpay instance");
+          console.log("Options keys:", Object.keys(options));
+          
+          // Validate all required fields before creating instance
+          if (!options.key || !options.amount || !options.order_id) {
+            throw new Error("Missing required payment parameters");
+          }
+          
+          const razorpay = new window.Razorpay(options);
+          
+          razorpay.on('payment.failed', function (response) {
+            console.error("Payment failed:", response.error);
+            toast.error(`Payment failed: ${response.error.description || 'Unknown error'}`);
+          });
+          
+          razorpay.open();
         } catch (error) {
-          console.error("Payment verification error:", error);
-          if (error.code === 'ECONNABORTED') {
-            toast.error("Payment verification timed out. Please check your order status.");
-          } else if (!error.response) {
-            toast.error("Network error. Please check your internet connection and try again.");
-          } else {
-            toast.error(error.response?.data?.message || "Payment verification failed. Please contact support.");
-          }
+          console.error("Razorpay initialization error:", error);
+          toast.error("Failed to initialize payment. Please try again.");
         }
-      },
-      prefill: {
-        name: formData.firstName + " " + formData.lastName,
-        email: formData.email,
-        contact: formData.phone
-      },
-      theme: {
-        color: "#F43F5E"
-      },
-      modal: {
-        ondismiss: function() {
-          toast.info("Payment cancelled. You can try again.");
-        }
-      }
-    };
-
-    try {
-      console.log("Creating Razorpay instance with options:", { ...options, key: "[HIDDEN]" });
-      const razorpay = new window.Razorpay(options);
-      razorpay.open();
-    } catch (error) {
-      console.error("Razorpay initialization error:", error);
-      toast.error("Failed to initialize payment. Please try again.");
-    }
+      })
+      .catch((error) => {
+        console.error("Razorpay loading error:", error);
+        toast.error("Payment gateway not available. Please refresh the page and try again.");
+      });
   };
 
   const onSubmitHandler = async (event) => {
@@ -627,8 +684,17 @@ const PlaceOrder = () => {
       console.log("Processing cart items:", cartItems);
       console.log("Available products:", products);
 
-      // Ensure cartItems is in the correct format
-      const processedCartItems = typeof cartItems === 'string' ? JSON.parse(cartItems) : cartItems;
+      // Ensure cartItems is in the correct format with safe parsing
+      let processedCartItems = cartItems;
+      try {
+        if (typeof cartItems === 'string') {
+          processedCartItems = JSON.parse(cartItems);
+        }
+      } catch (error) {
+        console.error("Error parsing cart items:", error);
+        toast.error("Invalid cart data. Please try again.");
+        return;
+      }
       console.log("Processed cart items:", processedCartItems);
 
       for (const [productId, quantity] of Object.entries(processedCartItems)) {
@@ -797,7 +863,7 @@ const PlaceOrder = () => {
       <AnimatePresence>
         {showSuccess && <SuccessAnimation />}
       </AnimatePresence>
-      <div className="container mx-auto px-4">
+      <div className="container mx-auto sm:px-4">
         {/* Order Progress */}
         <div className="max-w-3xl mx-auto mb-8">
           <div className="flex items-center justify-between">
