@@ -1,32 +1,41 @@
-import { useContext, useState, useEffect } from 'react'
+import { useContext, useState, useEffect, lazy, Suspense } from 'react'
 import { Routes, Route, Navigate, useParams, Link } from 'react-router-dom'
-import Home from './pages/Home'
-import Collection from './pages/Collection'
-import About from './pages/About'
-import Contact from './pages/Contact'
-import Product from './pages/Product'
-import Cart from './pages/Cart'
-import Login from './pages/Login'
-import ForgotPassword from './pages/ForgotPassword'
-import ResetPassword from './pages/ResetPassword'
-import PlaceOrder from './pages/PlaceOrder'
-import Orders from './pages/Orders'
-import TrackOrder from './pages/TrackOrder'
-import Profile from './pages/Profile'
-import ProductListing from './pages/ProductListing'
-import Addresses from './pages/Addresses'
-import OrderSuccess from './pages/OrderSuccess'
-import SharedContent from './pages/SharedContent'
 import Navbar from './components/Navbar'
 import Footer from './components/Footer'
 import SearchBar from './components/SearchBar'
+import CookieConsent from './components/CookieConsent'
+import CookieDebug from './components/CookieDebug'
+import WhatsAppButton from './components/WhatsAppButton'
+import WelcomeBanner from './components/WelcomeBanner'
+import Loader from './components/Loader'
 import { ToastContainer } from 'react-toastify'
 import 'react-toastify/dist/ReactToastify.css'
-import Verify from './pages/Verify'
 import { ShopContext, ShopContextProvider } from './context/ShopContext'
 import PropTypes from 'prop-types'
 import { initGA } from "./utils/analytics"
-import Register from './pages/Register'
+
+// Lazy load all page components for code splitting
+const Home = lazy(() => import('./pages/Home'))
+const Collection = lazy(() => import('./pages/Collection'))
+const About = lazy(() => import('./pages/About'))
+const Contact = lazy(() => import('./pages/Contact'))
+const Product = lazy(() => import('./pages/Product'))
+const Cart = lazy(() => import('./pages/Cart'))
+const Login = lazy(() => import('./pages/Login'))
+const Register = lazy(() => import('./pages/Register'))
+const ForgotPassword = lazy(() => import('./pages/ForgotPassword'))
+const ResetPassword = lazy(() => import('./pages/ResetPassword'))
+const PlaceOrder = lazy(() => import('./pages/PlaceOrder'))
+const Orders = lazy(() => import('./pages/Orders'))
+const TrackOrder = lazy(() => import('./pages/TrackOrder'))
+const Profile = lazy(() => import('./pages/Profile'))
+const ProductListing = lazy(() => import('./pages/ProductListing'))
+const Addresses = lazy(() => import('./pages/Addresses'))
+const OrderSuccess = lazy(() => import('./pages/OrderSuccess'))
+const SharedContent = lazy(() => import('./pages/SharedContent'))
+const CookiePolicy = lazy(() => import('./pages/CookiePolicy'))
+const CookieSettings = lazy(() => import('./pages/CookieSettings'))
+const Verify = lazy(() => import('./pages/Verify'))
 
 export const backendUrl = import.meta.env.VITE_BACKEND_URL
 
@@ -97,7 +106,22 @@ const App = () => {
   return (
     <ShopContextProvider>
       <div className='relative min-h-screen w-full'>
-        <ToastContainer />
+        <ToastContainer 
+          position="top-right"
+          autoClose={2000}
+          hideProgressBar={false}
+          newestOnTop={true}
+          closeOnClick
+          rtl={false}
+          pauseOnFocusLoss={false}
+          draggable
+          pauseOnHover
+          limit={2}
+          theme="light"
+        />
+        <CookieConsent />
+        <CookieDebug />
+        <WelcomeBanner />
         <Navbar />
         <div 
           className='transition-all duration-300 min-h-[calc(100vh-140px)] w-full'
@@ -109,6 +133,7 @@ const App = () => {
             <SearchBar />
           </div>
           <div className='min-h-full w-full'>
+            <Suspense fallback={<Loader />}>
             <Routes>
               <Route path='/' element={<Home />} />
               <Route path='/collection' element={<Collection />} />
@@ -133,12 +158,16 @@ const App = () => {
               <Route path='/products/:productId' element={<ProductRedirect />} />
               <Route path='/order-success' element={<ProtectedRoute element={<OrderSuccess />} />} />
               <Route path='/shared/:contentId' element={<SharedContent />} />
+              <Route path='/cookie-policy' element={<CookiePolicy />} />
+              <Route path='/cookie-settings' element={<CookieSettings />} />
               <Route path='*' element={<NotFound />} />
             </Routes>
+            </Suspense>
             <Footer />
           </div>
         </div>
       </div>
+      <WhatsAppButton />
     </ShopContextProvider>
   )
 }

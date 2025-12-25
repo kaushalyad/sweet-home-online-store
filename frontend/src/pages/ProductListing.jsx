@@ -228,25 +228,25 @@ const ProductListing = () => {
   };
 
   return (
-    <div className="container mx-auto px-4 py-8">
+    <div className="container mx-auto px-0 sm:px-4 md:px-6 py-6 sm:py-8">
       <Title title="Our Sweet Collection" />
       
       {/* Search and Sort Bar */}
-      <div className="flex flex-col md:flex-row justify-between items-center mb-6 gap-4">
+      <div className="flex flex-col sm:flex-row justify-between items-stretch sm:items-center mb-4 sm:mb-6 gap-3 sm:gap-4">
         {/* Search Box */}
-        <div className="relative w-full md:w-auto">
+        <div className="relative w-full sm:flex-1 md:max-w-md">
           <div className="relative">
             <input
               type="text"
               placeholder="Search sweets..."
               value={searchQuery}
               onChange={handleSearchChange}
-              className="pl-10 pr-4 py-2 border border-gray-300 rounded-md w-full md:w-64 focus:outline-none focus:ring-2 focus:ring-pink-400"
+              className="pl-10 pr-16 py-3 sm:py-2.5 border border-gray-300 rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-pink-400 text-sm sm:text-base"
             />
-            <FaSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+            <FaSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 text-sm sm:text-base" />
             <button 
               onClick={applyFilters}
-              className="absolute right-3 top-1/2 transform -translate-y-1/2 text-pink-500 hover:text-pink-600"
+              className="absolute right-3 top-1/2 transform -translate-y-1/2 text-pink-500 hover:text-pink-600 font-medium text-sm"
             >
               Go
             </button>
@@ -257,14 +257,15 @@ const ProductListing = () => {
         </div>
         
         {/* Sort Dropdown */}
-        <div className="sort-dropdown relative">
+        <div className="sort-dropdown relative w-full sm:w-auto">
           <button
             onClick={() => setShowSortDropdown(!showSortDropdown)}
-            className="flex items-center gap-2 px-4 py-2 rounded-md border border-gray-300 bg-white hover:bg-gray-50 transition-colors"
+            className="flex items-center justify-center gap-2 px-4 py-3 sm:py-2.5 rounded-lg border border-gray-300 bg-white hover:bg-gray-50 transition-colors w-full sm:w-auto text-sm sm:text-base"
           >
             {selectedSortOption.icon}
-            <span>Sort: {selectedSortOption.label}</span>
-            <FaChevronDown className={`transition-transform ${showSortDropdown ? 'rotate-180' : ''}`} />
+            <span className="hidden sm:inline">Sort: {selectedSortOption.label}</span>
+            <span className="sm:hidden">{selectedSortOption.label}</span>
+            <FaChevronDown className={`transition-transform text-xs ${showSortDropdown ? 'rotate-180' : ''}`} />
           </button>
           
           {showSortDropdown && (
@@ -290,11 +291,11 @@ const ProductListing = () => {
       {/* Filter Button for Mobile */}
       <button
         onClick={() => setShowFilter(!showFilter)}
-        className="flex items-center gap-2 px-4 py-2 mb-5 rounded-md bg-gray-100 hover:bg-gray-200 transition-colors duration-200 md:hidden w-full justify-center"
+        className="flex items-center gap-2 px-4 py-3 mb-4 rounded-lg bg-gradient-to-r from-pink-500 to-pink-600 text-white hover:from-pink-600 hover:to-pink-700 shadow-md hover:shadow-lg transition-all duration-200 md:hidden w-full justify-center font-medium"
       >
-        <FaFilter className="text-gray-700" />
-        <span className="font-medium">FILTERS</span>
-        <FaChevronDown className={`ml-1 transition-transform duration-200 ${showFilter ? 'rotate-180' : ''}`} />
+        <FaFilter className="text-sm" />
+        <span className="text-sm tracking-wide">FILTERS</span>
+        <FaChevronDown className={`ml-1 transition-transform duration-200 text-xs ${showFilter ? 'rotate-180' : ''}`} />
       </button>
       
       <div className="flex flex-col md:flex-row gap-6">
@@ -476,8 +477,8 @@ const ProductListing = () => {
           ) : (
             <>
               {/* Results Summary */}
-              <div className="mb-6 flex justify-between items-center bg-white rounded-lg shadow-sm border border-gray-200 px-5 py-3">
-                <p className="text-gray-700">
+              <div className="mb-4 sm:mb-6 flex flex-col sm:flex-row justify-between sm:items-center gap-3 bg-white rounded-lg shadow-sm border border-gray-200 px-4 sm:px-5 py-3 sm:py-3">
+                <p className="text-gray-700 text-sm sm:text-base">
                   Showing <span className="font-medium">{products.length}</span> of {totalProducts} products
                 </p>
                 {selectedTags.length > 0 && (
@@ -499,7 +500,7 @@ const ProductListing = () => {
               </div>
               
               {/* Products Grid */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4 md:gap-5 lg:gap-6">
                 {products.map((product) => (
                   <ProductItem 
                     key={product._id} 
@@ -516,12 +517,12 @@ const ProductListing = () => {
               
               {/* Pagination */}
               {totalPages > 1 && (
-                <div className="flex justify-center mt-10">
-                  <div className="flex items-center space-x-2">
+                <div className="flex justify-center mt-8 sm:mt-10">
+                  <div className="flex items-center space-x-1.5 sm:space-x-2">
                     <button
                       onClick={() => handlePageChange(Math.max(1, currentPage - 1))}
                       disabled={currentPage === 1}
-                      className={`flex items-center justify-center w-10 h-10 rounded-md border ${
+                      className={`flex items-center justify-center w-9 h-9 sm:w-10 sm:h-10 rounded-md border ${
                         currentPage === 1
                           ? 'border-gray-200 text-gray-400 cursor-not-allowed'
                           : 'border-gray-300 hover:border-pink-500 text-gray-700 hover:text-pink-500'
@@ -548,7 +549,7 @@ const ProductListing = () => {
                         <button
                           key={i}
                           onClick={() => handlePageChange(pageNum)}
-                          className={`flex items-center justify-center w-10 h-10 rounded-md ${
+                          className={`flex items-center justify-center w-9 h-9 sm:w-10 sm:h-10 rounded-md text-sm sm:text-base ${
                             currentPage === pageNum
                               ? 'bg-pink-500 text-white font-medium'
                               : 'border border-gray-300 hover:border-pink-500 text-gray-700 hover:text-pink-500'
@@ -562,7 +563,7 @@ const ProductListing = () => {
                     <button
                       onClick={() => handlePageChange(Math.min(totalPages, currentPage + 1))}
                       disabled={currentPage === totalPages}
-                      className={`flex items-center justify-center w-10 h-10 rounded-md border ${
+                      className={`flex items-center justify-center w-9 h-9 sm:w-10 sm:h-10 rounded-md border ${
                         currentPage === totalPages
                           ? 'border-gray-200 text-gray-400 cursor-not-allowed'
                           : 'border-gray-300 hover:border-pink-500 text-gray-700 hover:text-pink-500'

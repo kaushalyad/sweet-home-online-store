@@ -1,0 +1,52 @@
+User-agent: *
+Allow: /
+
+# Priority pages
+Allow: /collection
+Allow: /about
+Allow: /contact
+
+# Disallow admin and user-specific pages
+Disallow: /profile
+Disallow: /orders
+Disallow: /addresses
+Disallow: /settings
+Disallow: /place-order
+Disallow: /verify
+Disallow: /login
+Disallow: /register
+Disallow: /reset-password
+Disallow: /forgot-password
+
+# Disallow tracking and dynamic URLs
+Disallow: /*?*utm_
+Disallow: /*?*sessionid
+Disallow: /*?*ref=
+
+# Allow CSS and JS
+Allow: /*.css$
+Allow: /*.js$
+Allow: /*.jsx$
+
+# Sitemap locations
+Sitemap: https://sweethome-store.com/sitemap.xml
+Sitemap: https://sweethome-store.com/sitemap-products.xml
+
+# Crawl-delay for polite crawling
+Crawl-delay: 1
+
+# Special rules for specific bots
+User-agent: Googlebot
+Allow: /
+Crawl-delay: 0
+
+User-agent: Googlebot-Image
+Allow: /assets/
+Allow: /*.jpg$
+Allow: /*.jpeg$
+Allow: /*.png$
+Allow: /*.webp$
+
+User-agent: Bingbot
+Allow: /
+Crawl-delay: 1

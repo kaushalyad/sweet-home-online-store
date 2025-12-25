@@ -1,20 +1,38 @@
 import React, { useState } from 'react'
 import { motion } from 'framer-motion'
 import { FaPaperPlane, FaCheckCircle } from 'react-icons/fa'
+import axios from 'axios'
+import { toast } from 'react-toastify'
 
 const NewsletterBox = () => {
     const [email, setEmail] = useState('');
     const [isSubmitted, setIsSubmitted] = useState(false);
+    const [loading, setLoading] = useState(false);
+    const backendUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:4000';
 
-    const onSubmitHandler = (event) => {
+    const onSubmitHandler = async (event) => {
         event.preventDefault();
         if (email) {
-            setIsSubmitted(true);
-            // Reset form after 5 seconds
-            setTimeout(() => {
-                setIsSubmitted(false);
-                setEmail('');
-            }, 5000);
+            setLoading(true);
+            try {
+                const response = await axios.post(`${backendUrl}/api/newsletter/subscribe`, { email });
+                if (response.data.success) {
+                    setIsSubmitted(true);
+                    toast.success(response.data.message);
+                    // Reset form after 5 seconds
+                    setTimeout(() => {
+                        setIsSubmitted(false);
+                        setEmail('');
+                    }, 5000);
+                } else {
+                    toast.error(response.data.message || 'Subscription failed');
+                }
+            } catch (error) {
+                console.error('Newsletter subscription error:', error);
+                toast.error(error.response?.data?.message || 'Failed to subscribe. Please try again.');
+            } finally {
+                setLoading(false);
+            }
         }
     }
 
@@ -85,9 +103,10 @@ const NewsletterBox = () => {
               />
               <button 
                 type="submit" 
-                className="bg-black text-white px-8 py-4 rounded-full hover:bg-gray-800 transition-colors duration-300 flex items-center justify-center sm:justify-start"
+                disabled={loading}
+                className="bg-black text-white px-8 py-4 rounded-full hover:bg-gray-800 transition-colors duration-300 flex items-center justify-center sm:justify-start disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                <span className="mr-2">SUBSCRIBE</span>
+                <span className="mr-2">{loading ? 'SUBSCRIBING...' : 'SUBSCRIBE'}</span>
                 <FaPaperPlane />
               </button>
             </div>

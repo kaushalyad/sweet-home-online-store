@@ -6,7 +6,7 @@ import { io } from 'socket.io-client'
 import { backendUrl, currency } from '../config'
 import { toast } from 'react-toastify'
 import { assets } from '../assets/assets'
-import { FaSnowflake, FaGift, FaHandHoldingHeart, FaDoorClosed, FaBox } from 'react-icons/fa'
+import { FaSnowflake, FaGift, FaHandHoldingHeart, FaDoorClosed, FaBox, FaBan, FaTrash } from 'react-icons/fa'
 import { AuthContext } from '../context/AuthContext'
 
 const Orders = () => {
@@ -14,6 +14,8 @@ const Orders = () => {
   const [filter, setFilter] = useState('all')
   const [socket, setSocket] = useState(null)
   const [newOrderNotifications, setNewOrderNotifications] = useState([])
+  const [showCancelDialog, setShowCancelDialog] = useState(false)
+  const [orderToCancel, setOrderToCancel] = useState(null)
   const { token } = useContext(AuthContext)
 
   const fetchAllOrders = async () => {
@@ -92,8 +94,48 @@ const Orders = () => {
         toast.success(`Order status updated to ${event.target.value}`)
       }
     } catch (error) {
-      toast.error(error.response?.data?.message || 'Error updating order status')
+   
+
+  const handleCancelOrder = (orderId) => {
+    setOrderToCancel(orderId)
+    setShowCancelDialog(true)
+  }
+
+  const confirmCancelOrder = async () => {
+    if (!orderToCancel || !token) {
+      toast.error('Invalid request')
+      return
     }
+
+    try {
+      const response = await axios.post(
+        backendUrl + '/api/order/cancel/' + orderToCancel,
+        {},
+        {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        }
+      )
+
+      if (response.data.success) {
+        toast.success('Order cancelled successfully!')
+        await fetchAllOrders()
+      } else {
+        toast.error(response.data.message || 'Failed to cancel order')
+      }
+    } catch (error) {
+      console.error('Error cancelling order:', error)
+      toast.error(error.response?.data?.message || 'Failed to cancel order')
+    } finally {
+      setShowCancelDialog(false)
+      setOrderToCancel(null)
+    }
+  }
+
+  const canCancelOrder = (order) => {
+    const cancellableStatuses = ['Order Placed', 'Processing', 'Preparing', 'Packing']
+    return cancellableStatuses.includes(order.status) && order.status !== 'Cancelled'
   }
 
   useEffect(() => {
@@ -271,28 +313,77 @@ const Orders = () => {
                       </span>
                     )}
                     {order.shippingAddress.specialRequirements.giftWrapping && (
-                      <span className="inline-flex items-center bg-purple-100 text-purple-800 px-2 py-1 rounded text-xs">
-                        <FaGift className="mr-1 w-4 h-4" /> Gift Wrapped
-                      </span>
-                    )}
-                    {order.shippingAddress.specialRequirements.fragileHandling && (
-                      <span className="inline-flex items-center bg-amber-100 text-amber-800 px-2 py-1 rounded text-xs">
-                        <FaHandHoldingHeart className="mr-1 w-4 h-4" /> Fragile
-                      </span>
-                    )}
-                    {order.shippingAddress.specialRequirements.noContact && (
-                      <span className="inline-flex items-center bg-gray-100 text-gray-800 px-2 py-1 rounded text-xs">
-                        <FaDoorClosed className="mr-1 w-4 h-4" /> No Contact
-                      </span>
-                    )}
-                  </div>
-                </div>
+                      <span classNamCancelled' ? 'bg-red-100' :
+                  order.status === 'Out for delivery' ? 'bg-blue-100' :
+                  'bg-amber-50'
+                }`}
+                disabled={order.status === 'Cancelled'}
+              >
+                <option value="Order Placed">Order Placed</option>
+                <option value="Processing">Processing</option>
+                <option value="Preparing">Preparing Fresh</option>
+                <option value="Packing">Packing</option>
+                <option value="Quality Check">Quality Check</option>
+                <option value="Shipped">Shipped</option>
+                <option value="Out for delivery">Out for Delivery</option>
+                <option value="Delivered">Delivered</option>
+                <option value="Cancelled">Cancelled</option>
+              </select>
+
+              {canCancelOrder(order) && (
+                <button
+                  onClick={() => handleCancelOrder(order._id)}
+                  className="mt-2 w-full flex items-center justify-center gap-2 bg-red-100 hover:bg-red-200 text-red-700 font-semibold py-2 px-4 rounded transition-colors"
+                >
+                  <FaBan /> Cancel Order
+                </button>
               )}
 
-              {/* Delivery Instructions */}
-              {order.shippingAddress.deliveryInstructions && (
-                <div className="mt-2">
-                  <p className="font-medium">Instructions:</p>
+              {hasPerishableItems(order.items) && (
+                <div className="mt-2 bg-pink-100 p-2 rounded text-xs text-pink-800">
+                  Contains perishable items - prioritize delivery
+                </div>
+              )}
+            </div>
+          </div>
+        ))
+      )}
+
+      {/* Cancel Confirmation Modal */}
+      {showCancelDialog && (
+        <div 
+          className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4"
+          onClick={() => setShowCancelDialog(false)}
+        >
+          <div 
+            className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-8 animate-scale-in"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="text-center">
+              <div className="w-20 h-20 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <FaBan className="w-10 h-10 text-red-600" />
+              </div>
+              <h3 className="text-2xl font-bold text-gray-800 mb-2">Cancel Order?</h3>
+              <p className="text-gray-600 mb-6">
+                Are you sure you want to cancel this order? This action cannot be undone and the customer will be notified.
+              </p>
+              <div className="flex gap-3">
+                <button
+                  onClick={() => setShowCancelDialog(false)}
+                  className="flex-1 px-6 py-3 bg-gray-100 text-gray-700 rounded-xl hover:bg-gray-200 transition-colors font-semibold"
+                >
+                  Keep Order
+                </button>
+                <button
+                  onClick={confirmCancelOrder}
+                  className="flex-1 px-6 py-3 bg-gradient-to-r from-red-500 to-red-600 text-white rounded-xl hover:from-red-600 hover:to-red-700 transition-all shadow-lg hover:shadow-xl font-semibold"
+                >
+                  Yes, Cancel
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>        <p className="font-medium">Instructions:</p>
                   <p className="text-gray-600 italic">{order.shippingAddress.deliveryInstructions}</p>
                 </div>
               )}

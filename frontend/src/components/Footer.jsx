@@ -1,6 +1,8 @@
-import React from "react";
+import React, { useState } from "react";
 import { assets } from "../assets/assets";
 import { Link, NavLink } from "react-router-dom";
+import axios from 'axios';
+import { toast } from 'react-toastify';
 import {
   FaPhoneAlt,
   FaEnvelope,
@@ -18,8 +20,33 @@ import {
 } from "react-icons/fa";
 
 const Footer = () => {
+  const [newsletterEmail, setNewsletterEmail] = useState('');
+  const [newsletterLoading, setNewsletterLoading] = useState(false);
+  const backendUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:4000';
+
+  const handleNewsletterSubmit = async (e) => {
+    e.preventDefault();
+    if (!newsletterEmail) return;
+    
+    setNewsletterLoading(true);
+    try {
+      const response = await axios.post(`${backendUrl}/api/newsletter/subscribe`, { 
+        email: newsletterEmail 
+      });
+      if (response.data.success) {
+        setNewsletterEmail('');
+      } else {
+        toast.error(response.data.message || 'Subscription failed');
+      }
+    } catch (error) {
+      console.error('Newsletter subscription error:', error);
+      toast.error(error.response?.data?.message || 'Failed to subscribe. Please try again.');
+    } finally {
+      setNewsletterLoading(false);
+    }
+  };
   return (
-    <footer className="w-full bg-white text-gray-700 border-t border-gray-200">
+    <footer className="w-full bg-white text-gray-700 border-t border-gray-200" role="contentinfo">
       {/* Newsletter Section */}
       <div className="w-full bg-gradient-to-r from-orange-600 to-orange-500 py-12">
         <div className="container mx-auto px-4">
@@ -30,16 +57,23 @@ const Footer = () => {
             <p className="text-white mb-6">
               Want To Get Latest Updates! Sign Up For Free.
             </p>
-            <div className="flex flex-col sm:flex-row gap-3 max-w-xl mx-auto">
+            <form onSubmit={handleNewsletterSubmit} className="flex flex-col sm:flex-row gap-3 max-w-xl mx-auto">
               <input
                 type="email"
                 placeholder="Enter your email address"
                 className="flex-1 px-6 py-4 rounded-full focus:outline-none focus:ring-2 focus:ring-white"
+                value={newsletterEmail}
+                onChange={(e) => setNewsletterEmail(e.target.value)}
+                required
               />
-              <button className="px-8 py-4 bg-white text-orange-600 rounded-full font-bold hover:bg-gray-100 transition-colors">
-                Subscribe
+              <button 
+                type="submit"
+                disabled={newsletterLoading}
+                className="px-8 py-4 bg-white text-orange-600 rounded-full font-bold hover:bg-gray-100 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {newsletterLoading ? 'Subscribing...' : 'Subscribe'}
               </button>
-            </div>
+            </form>
           </div>
         </div>
       </div>
@@ -230,13 +264,17 @@ const Footer = () => {
           </h4>
           <div className="flex justify-center gap-4">
             <a
-              href="#"
+              href="https://www.facebook.com/share/16jjrxdGV3/"
+              target="_blank"
+              rel="noopener noreferrer"
               className="w-10 h-10 rounded-full bg-gray-200 text-gray-700 flex items-center justify-center hover:bg-orange-500 hover:text-white transition-colors"
             >
               <FaFacebookF />
             </a>
             <a
-              href="#"
+              href="https://www.instagram.com/sweethome_ladania_store?igsh=MTlqbTEzeTI3a3Nrbw=="
+              target="_blank"
+              rel="noopener noreferrer"
               className="w-10 h-10 rounded-full bg-gray-200 text-gray-700 flex items-center justify-center hover:bg-orange-500 hover:text-white transition-colors"
             >
               <FaInstagram />
@@ -265,8 +303,29 @@ const Footer = () => {
 
       {/* Copyright */}
       <div className="w-full bg-gray-100 py-4 border-t border-gray-200">
-        <div className="container mx-auto px-4 text-center text-sm text-gray-600">
-          Copyright © 2025 Sweet Home India Pvt Ltd
+        <div className="container mx-auto px-4">
+          <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
+            <p className="text-sm text-gray-600 text-center sm:text-left">
+              Copyright © 2025 Sweet Home India Pvt Ltd
+            </p>
+            <div className="flex flex-wrap justify-center gap-3 text-xs text-gray-500">
+              <Link to="/privacy-policy" className="hover:text-orange-500 transition-colors">
+                Privacy Policy
+              </Link>
+              <span>•</span>
+              <Link to="/terms" className="hover:text-orange-500 transition-colors">
+                Terms of Service
+              </Link>
+              <span>•</span>
+              <Link to="/cookie-policy" className="hover:text-orange-500 transition-colors">
+                Cookie Policy
+              </Link>
+              <span>•</span>
+              <Link to="/cookie-settings" className="hover:text-orange-500 transition-colors">
+                Cookie Settings
+              </Link>
+            </div>
+          </div>
         </div>
       </div>
     </footer>

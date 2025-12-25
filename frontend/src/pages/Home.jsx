@@ -1,6 +1,7 @@
 import ImageCarousel from "../components/ImageCarousel";
 import LatestCollection from "../components/LatestCollection";
 import OurPolicy from "../components/OurPolicy";
+import FloatingElements from "../components/FloatingElements";
 import { motion } from "framer-motion";
 import { FaArrowRight } from "react-icons/fa";
 import { Link } from "react-router-dom";
@@ -16,7 +17,8 @@ const Home = () => {
 
 
   return (
-    <div className="bg-white">
+    <main className="bg-white">
+      <FloatingElements />
       {/* Full Width Image Carousel */}
       <motion.div
         initial={{ opacity: 0 }}
@@ -33,9 +35,9 @@ const Home = () => {
         whileInView={{ opacity: 1 }}
         viewport={{ once: true }}
         transition={{ duration: 0.8 }}
-        className="py-16 sm:py-20 bg-white"
+        className="py-8 sm:py-12 md:py-16 lg:py-20 bg-white"
       >
-        <div className="container mx-auto px-4">
+        <div className="container mx-auto sm:px-4">
           <div className="text-center mb-12">
             <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-800 mb-4">
               Discover Categories
@@ -58,8 +60,11 @@ const Home = () => {
               >
                 <img
                   src={category.image}
-                  alt={category.name}
+                  alt={`${category.name} - Indian Sweets & Snacks`}
                   className="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-500"
+                  loading="lazy"
+                  width="400"
+                  height="400"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent"></div>
                 <div className="absolute inset-0 flex flex-col items-center justify-center">
@@ -83,7 +88,7 @@ const Home = () => {
         whileInView={{ opacity: 1 }}
         viewport={{ once: true }}
         transition={{ duration: 0.8 }}
-        className="container mx-auto px-4 py-16 sm:py-20"
+        className="container sm:mx-auto sm:px-4 py-16 sm:py-20"
       >
         <LatestCollection />
       </motion.div>
@@ -94,7 +99,7 @@ const Home = () => {
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true }}
         transition={{ duration: 0.6 }}
-        className="container mx-auto px-4 py-12 sm:py-16"
+        className="container mx-auto sm:px-4 py-12 sm:py-16"
       >
         <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-orange-400 to-pink-500 py-20 px-8 md:py-24 md:px-12">
           <div className="max-w-lg relative z-10">
@@ -127,7 +132,7 @@ const Home = () => {
         transition={{ duration: 0.6 }}
         className="bg-white py-20 sm:py-24"
       >
-        <div className="container mx-auto px-4">
+        <div className="container mx-auto sm:px-4">
           <h2 className="text-4xl font-bold text-center text-gray-800 mb-4">
             Why Choose Sweet Home?
           </h2>
@@ -146,7 +151,7 @@ const Home = () => {
         transition={{ duration: 0.8 }}
         className="py-16 sm:py-20 bg-white"
       >
-        <div className="container mx-auto px-4">
+        <div className="container mx-auto sm:px-4">
           <div className="max-w-5xl mx-auto">
             <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-800 mb-8 text-center">
               About Us
@@ -173,7 +178,7 @@ const Home = () => {
           </div>
         </div>
       </motion.div>
-    </div>
+    </main>
   );
 };
 

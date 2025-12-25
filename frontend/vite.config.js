@@ -31,16 +31,57 @@ export default defineConfig({
     },
   },
   build: {
-    sourcemap: true,
+    sourcemap: false, // Disable sourcemaps in production for smaller size
+    chunkSizeWarningLimit: 1000,
     rollupOptions: {
       output: {
         manualChunks: {
-          vendor: ["react", "react-dom", "react-router-dom", "react-hot-toast"],
+          // Separate React core libraries
+          'react-vendor': ['react', 'react-dom', 'react-router-dom'],
+          // UI and animation libraries
+          'ui-vendor': ['framer-motion', 'react-icons', 'react-loading-skeleton'],
+          // Form and toast libraries
+          'utils-vendor': ['react-toastify', 'react-hot-toast'],
+          // Razorpay and analytics
+          'analytics-vendor': ['axios']
         },
+        // Generate unique filenames with content hash
+        entryFileNames: 'assets/[name].[hash].js',
+        chunkFileNames: 'assets/[name].[hash].js',
+        assetFileNames: 'assets/[name].[hash].[ext]'
       },
     },
+    // Minification settings
+    minify: 'terser',
+    terserOptions: {
+      compress: {
+        drop_console: true, // Remove console.logs in production
+        drop_debugger: true,
+        pure_funcs: ['console.log', 'console.info', 'console.debug', 'console.warn'],
+      },
+      mangle: {
+        safari10: true
+      },
+      format: {
+        comments: false
+      }
+    },
+    // CSS code splitting
+    cssCodeSplit: true,
+    // Asset optimization
+    assetsInlineLimit: 4096, // Inline assets smaller than 4kb
+    // Reduce chunk size
+    reportCompressedSize: false,
   },
   optimizeDeps: {
-    include: ["react", "react-dom", "react-router-dom", "react-hot-toast"],
+    include: [
+      'react', 
+      'react-dom', 
+      'react-router-dom', 
+      'react-hot-toast',
+      'framer-motion',
+      'react-icons',
+      'react-toastify'
+    ],
   },
 });

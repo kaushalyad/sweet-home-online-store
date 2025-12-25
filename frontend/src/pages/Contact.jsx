@@ -81,7 +81,7 @@ const Contact = () => {
     <div className="pb-16">
       {/* Hero Section with Decorative Elements */}
       <div className="relative bg-gradient-to-r from-pink-50 to-orange-50 py-16 overflow-hidden">
-        <div className="container mx-auto px-4 relative z-10">
+        <div className="container mx-auto sm:px-4 relative z-10">
           <div className="text-center max-w-2xl mx-auto">
             <h1 className="text-4xl font-bold text-gray-800 mb-4">Get In Touch With Us</h1>
             <p className="text-gray-600 text-lg mb-8">
@@ -113,7 +113,7 @@ const Contact = () => {
       </div>
 
       {/* Contact Information and Form Section */}
-      <div className="container mx-auto px-4 py-16">
+      <div className="container mx-auto sm:px-4 py-16">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
           {/* Contact Information */}
           <div className="lg:col-span-1">

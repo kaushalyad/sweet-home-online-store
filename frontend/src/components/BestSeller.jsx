@@ -53,7 +53,7 @@ const BestSeller = () => {
             initial="hidden"
             whileInView="visible"
             viewport={{ once: true }}
-            className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6 gap-y-10"
+            className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 sm:gap-4 md:gap-6 gap-y-5 sm:gap-y-6 md:gap-y-10"
           >
             {bestSeller.map((item, index) => (
               <ProductItem

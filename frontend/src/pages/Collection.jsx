@@ -2,7 +2,7 @@ import { useContext, useEffect, useState } from "react";
 import { ShopContext } from "../context/ShopContext";
 import Title from "../components/Title";
 import ProductItem from "../components/ProductItem";
-import Buffer from "../components/Buffer";
+import ProductSkeleton from "../components/ProductSkeleton";
 import { FaSort, FaSortAmountDown, FaSortAmountUp, FaChevronDown, FaFilter, FaCheck, FaTimes } from "react-icons/fa";
 import { motion, AnimatePresence } from "framer-motion";
 import PropTypes from "prop-types";
@@ -295,7 +295,7 @@ const Collection = () => {
         <div className="absolute inset-0 opacity-10" style={{ 
           backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23f472b6' fill-opacity='0.4'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
         }}></div>
-        <div className="container mx-auto px-4">
+        <div className="container mx-auto sm:px-4">
           <div className="text-center relative z-10">
             <h1 className="text-4xl font-bold text-gray-800 mb-2">Our Sweet Collection</h1>
             <p className="text-gray-600 max-w-xl mx-auto">Discover a world of authentic Indian sweets and delicacies made with traditional recipes and finest ingredients</p>
@@ -311,7 +311,7 @@ const Collection = () => {
       </div>
 
       <div className="container mx-auto px-4">
-        <div className="flex flex-col sm:flex-row gap-5 sm:gap-10 pt-6 border-t border-gray-200">
+        <div className="flex flex-col lg:flex-row gap-4 lg:gap-10 pt-4 lg:pt-6 border-t border-gray-200">
           {/* Sticky Quick Filter Bar - For easy access to popular filters */}
           <div className={`sticky top-24 left-0 right-0 z-20 bg-white border border-gray-200 rounded-lg shadow-sm p-2 mb-6 hidden md:block transition-all duration-300 ${
             (category.length > 0 || subCategory.length > 0 || priceRange[0] > 0 || priceRange[1] < 1000 || ratingFilter > 0) 
@@ -391,25 +391,25 @@ const Collection = () => {
           </div>
           
           {/* Filter Options */}
-          <div className="min-w-40 sm:max-w-40">
+          <div className="w-full lg:min-w-40 lg:max-w-60">
             <button
               onClick={() => setShowFilter(!showFilter)}
-              className="flex items-center gap-2 px-4 py-2 mb-5 rounded-md bg-gray-100 hover:bg-gray-200 transition-colors duration-200 sm:hidden w-full justify-center"
+              className="flex items-center gap-2 px-4 py-2 mb-4 rounded-md bg-gray-100 hover:bg-gray-200 transition-colors duration-200 lg:hidden w-full justify-center"
             >
               <FaFilter className="text-gray-700" />
               <span className="font-medium">FILTERS</span>
               <FaChevronDown className={`ml-1 transition-transform duration-200 ${showFilter ? 'rotate-180' : ''}`} />
             </button>
             
-            <div className="hidden sm:flex items-center mb-6">
-              <h3 className="text-xl font-semibold text-gray-800 flex items-center gap-2">
+            <div className="hidden lg:flex items-center mb-6">
+              <h3 className="text-lg font-semibold text-gray-800 flex items-center gap-2">
                 <FaFilter className="text-gray-600" />
                 <span>Filters</span>
               </h3>
             </div>
             
             <AnimatePresence>
-              {(showFilter || window.innerWidth >= 640) && (
+              {(showFilter || window.innerWidth >= 1024) && (
                 <motion.div
                   initial="hidden"
                   animate="visible"
@@ -604,20 +604,20 @@ const Collection = () => {
 
           {/* Right Side */}
           <div className="flex-1">
-            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
+            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-3 md:gap-4 mb-4 md:mb-6">
               <div>
                 <Title text1={"All"} text2={"Collections"} />
-                <p className="text-sm text-gray-500 mt-1">{filteredCount} products found</p>
+                <p className="text-xs md:text-sm text-gray-500 mt-1">{filteredCount} products found</p>
               </div>
               
-              <div className="flex items-center gap-3">
+              <div className="flex items-center gap-2 md:gap-3 w-full md:w-auto justify-between md:justify-end">
                 {/* Grid/List View Toggle */}
                 <div className="border border-gray-200 rounded-md overflow-hidden flex">
                   <button 
-                    className="p-2 bg-pink-50 text-pink-600 border-r border-gray-200"
+                    className="p-1.5 md:p-2 bg-pink-50 text-pink-600 border-r border-gray-200"
                     aria-label="Grid view"
                   >
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 md:h-5 md:w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6z" />
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6z" />
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2z" />
@@ -625,10 +625,10 @@ const Collection = () => {
                     </svg>
                   </button>
                   <button 
-                    className="p-2 text-gray-500 hover:bg-gray-50"
+                    className="p-1.5 md:p-2 text-gray-500 hover:bg-gray-50"
                     aria-label="List view"
                   >
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 md:h-5 md:w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
                     </svg>
                   </button>
@@ -638,10 +638,10 @@ const Collection = () => {
                 <div className="relative sort-dropdown">
                   <button 
                     onClick={() => setShowSortDropdown(!showSortDropdown)}
-                    className="flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-md bg-white hover:bg-gray-50 transition-colors duration-200 text-sm shadow-sm hover:shadow"
+                    className="flex items-center gap-1.5 md:gap-2 px-2 md:px-4 py-1.5 md:py-2 border border-gray-300 rounded-md bg-white hover:bg-gray-50 transition-colors duration-200 text-xs md:text-sm shadow-sm hover:shadow"
                   >
-                    <span className="text-gray-600">{selectedSortOption.icon}</span>
-                    <span>{selectedSortOption.label}</span>
+                    <span className="text-gray-600 hidden md:inline">{selectedSortOption.icon}</span>
+                    <span className="truncate">{selectedSortOption.label}</span>
                     <FaChevronDown className={`text-xs transition-transform duration-200 ${showSortDropdown ? 'rotate-180' : ''}`} />
                   </button>
                   
@@ -671,9 +671,9 @@ const Collection = () => {
 
             {/* Map Products */}
             {buffer ? (
-              <Buffer />
+              <ProductSkeleton count={6} />
             ) : (
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-8 gap-y-12 mt-3">
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-4 md:gap-8 gap-y-6 md:gap-y-12 mt-3">
                 {filterProducts.length > 0 ? (
                   filterProducts.map((item, index) => (
                     <ProductItem
@@ -711,7 +711,7 @@ const Collection = () => {
       {/* Recommended Products Section - Only show when there are products */}
       {filterProducts.length > 0 && (
         <div className="mt-16 py-16 bg-gradient-to-r from-pink-50 to-rose-50">
-          <div className="container mx-auto px-4">
+          <div className="container mx-auto sm:px-4">
             <div className="text-center mb-10">
               <h2 className="text-3xl font-bold text-gray-800 mb-2">Recommended For You</h2>
               <div className="w-24 h-1 bg-gradient-to-r from-pink-400 to-pink-600 mx-auto rounded-full"></div>

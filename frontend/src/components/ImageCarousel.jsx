@@ -1,22 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import { FaChevronLeft, FaChevronRight } from 'react-icons/fa';
+import { assets } from '../assets/assets';
 
 const ImageCarousel = () => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isAutoPlaying, setIsAutoPlaying] = useState(true);
 
-  // Placeholder images - replace these with your actual image URLs
   const images = [
-    'https://images.unsplash.com/photo-1596727147705-61a532a659bd?w=1920&h=600&fit=crop', // Indian sweets 1
-    'https://images.unsplash.com/photo-1606312619070-d48b4d42c937?w=1920&h=600&fit=crop', // Indian sweets 2
-    'https://images.unsplash.com/photo-1601050690597-df0568f70950?w=1920&h=600&fit=crop', // Indian sweets 3
-    'https://images.unsplash.com/photo-1579372786545-d24232daf58c?w=1920&h=600&fit=crop', // Sweets display 1
-    'https://images.unsplash.com/photo-1618897996318-5a901fa6ca71?w=1920&h=600&fit=crop', // Sweets display 2
-    'https://images.unsplash.com/photo-1607920591413-4ec007e70023?w=1920&h=600&fit=crop', // Desserts 1
-    'https://images.unsplash.com/photo-1619985632461-f33748ef8f3e?w=1920&h=600&fit=crop', // Desserts 2
-    'https://images.unsplash.com/photo-1586444248902-2f64eddc13df?w=1920&h=600&fit=crop', // Sweets platter 1
-    'https://images.unsplash.com/photo-1628840042765-356cda07504e?w=1920&h=600&fit=crop', // Indian desserts
-    'https://images.unsplash.com/photo-1631452180519-c014fe946bc7?w=1920&h=600&fit=crop', // Sweets collection
+    assets.hero4,
+    assets.hero1,
+    assets.hero2,
+    assets.hero3,
   ];
 
   // Auto-play carousel
@@ -46,7 +40,7 @@ const ImageCarousel = () => {
 
   return (
     <div 
-      className="relative w-full min-w-full h-[300px] md:h-[400px] lg:h-[450px] overflow-hidden bg-gray-100"
+      className="relative w-full min-w-full h-[250px] sm:h-[350px] md:h-[450px] lg:h-[550px] xl:h-[600px] overflow-hidden bg-gradient-to-b from-orange-50 to-white"
       onMouseEnter={() => setIsAutoPlaying(false)}
       onMouseLeave={() => setIsAutoPlaying(true)}
     >
@@ -58,16 +52,17 @@ const ImageCarousel = () => {
         {images.map((image, index) => (
           <div
             key={index}
-            className="min-w-full h-full relative"
+            className="min-w-full h-full relative flex items-center justify-center"
           >
             <img
               src={image}
-              alt={`Slide ${index + 1}`}
+              alt={`Sweet Home Indian Sweets - Slide ${index + 1}`}
               className="w-full h-full object-cover"
-              loading="lazy"
+              loading={index === 0 ? "eager" : "lazy"}
+              fetchpriority={index === 0 ? "high" : "low"}
+              width="1920"
+              height="600"
             />
-            {/* Optional overlay gradient */}
-            <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent"></div>
           </div>
         ))}
       </div>
@@ -75,25 +70,25 @@ const ImageCarousel = () => {
       {/* Previous Button */}
       <button
         onClick={goToPrevious}
-        className="absolute left-4 top-1/2 -translate-y-1/2 text-white transition-all duration-300 hover:scale-125 z-10"
+        className="absolute left-2 sm:left-4 top-1/2 -translate-y-1/2 text-white transition-all duration-300 hover:scale-125 z-10"
         aria-label="Previous slide"
         style={{ filter: 'drop-shadow(0 0 3px black) drop-shadow(0 0 2px black)' }}
       >
-        <FaChevronLeft className="w-16 h-16" style={{ stroke: 'black', strokeWidth: '8px' }} />
+        <FaChevronLeft className="w-10 h-10 sm:w-12 sm:h-12 md:w-16 md:h-16" style={{ stroke: 'black', strokeWidth: '8px' }} />
       </button>
 
       {/* Next Button */}
       <button
         onClick={goToNext}
-        className="absolute right-4 top-1/2 -translate-y-1/2 text-white transition-all duration-300 hover:scale-125 z-10"
+        className="absolute right-2 sm:right-4 top-1/2 -translate-y-1/2 text-white transition-all duration-300 hover:scale-125 z-10"
         aria-label="Next slide"
         style={{ filter: 'drop-shadow(0 0 3px black) drop-shadow(0 0 2px black)' }}
       >
-        <FaChevronRight className="w-16 h-16" style={{ stroke: 'black', strokeWidth: '8px' }} />
+        <FaChevronRight className="w-10 h-10 sm:w-12 sm:h-12 md:w-16 md:h-16" style={{ stroke: 'black', strokeWidth: '8px' }} />
       </button>
 
       {/* Dots Indicator */}
-      <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex gap-2 z-10">
+      <div className="absolute bottom-3 sm:bottom-4 md:bottom-6 left-1/2 -translate-x-1/2 flex gap-1.5 sm:gap-2 z-10">
         {images.map((_, index) => (
           <button
             key={index}

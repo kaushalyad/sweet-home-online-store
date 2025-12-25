@@ -19,6 +19,10 @@ import slider1 from "./sweets-1.jpg";
 import slider2 from "./sweets-2.jpg";
 import slider3 from "./sweets-3.jpg";
 import slider4 from "./sweets-4.jpg";
+import hero1 from "./hero-1.png";
+import hero2 from "./hero-2.png";
+import hero3 from "./hero-3.png";
+import hero4 from "./hero-4.png";
 import milk_sweets from "./milk-sweets.jpg";
 import namkeens from "./namkeens.jpg";
 import dry_fruits from "./dry_fruits.jpg";
@@ -29,6 +33,10 @@ export const assets = {
   slider2,
   slider3,
   slider4,
+  hero1,
+  hero2,
+  hero3,
+  hero4,
   milk_sweets,
   namkeens,
   dry_fruits,
