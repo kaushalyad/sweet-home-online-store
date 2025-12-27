@@ -739,14 +739,14 @@ const cancelOrder = async (req, res) => {
       });
     }
 
-    if (order.status === 'Delivered' || order.status === 'Cancelled') {
+    if (order.status === 'delivered' || order.status === 'cancelled') {
       return res.status(400).json({
         success: false,
         message: `Cannot cancel order in ${order.status} status`
       });
     }
 
-    order.status = 'Cancelled';
+    order.status = 'cancelled';
     await order.save();
 
     logger.info(`Order cancelled successfully: ${orderId}`);
