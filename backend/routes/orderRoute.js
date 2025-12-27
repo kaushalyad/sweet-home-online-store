@@ -14,7 +14,8 @@ import {
   cancelOrder, 
   updateOrderStatus, 
   listOrders, 
-  getOrderDetails 
+  getOrderDetails,
+  updateRefundStatus
 } from '../controllers/orderController.js'
 
 const orderRouter = express.Router()
@@ -43,6 +44,7 @@ orderRouter.post('/create', protect, createOrder)
 orderRouter.get('/list', protect, admin, listOrders)
 orderRouter.post('/list', protect, admin, listOrders)
 orderRouter.put('/status/:orderId', protect, admin, updateOrderStatus)
+orderRouter.put('/refund/:orderId', protect, admin, updateRefundStatus)
 orderRouter.get('/recent-notifications', protect, admin, async (req, res) => {
   try {
     const recentOrders = await Order.find({})

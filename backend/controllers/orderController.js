@@ -746,14 +746,33 @@ const cancelOrder = async (req, res) => {
       });
     }
 
+    // Check if payment was completed for online payment methods
+    const isOnlinePayment = ['stripe', 'razorpay', 'card', 'online'].includes(order.paymentMethod.toLowerCase());
+    const isPaid = order.paymentStatus === 'completed' || order.payment === true;
+
     order.status = 'cancelled';
+
+    // Set refund status if payment was completed
+    if (isOnlinePayment && isPaid) {
+      order.refund = {
+        status: 'pending',
+        amount: order.totalAmount || order.amount,
+        initiatedDate: new Date(),
+        refundMethod: order.paymentMethod,
+        reason: 'Customer cancellation'
+      };
+      order.paymentStatus = 'refunded';
+    }
+
     await order.save();
 
-    logger.info(`Order cancelled successfully: ${orderId}`);
+    logger.info(`Order cancelled successfully: ${orderId}${isOnlinePayment && isPaid ? ' - Refund initiated' : ''}`);
 
     return res.status(200).json({
       success: true,
-      message: "Order cancelled successfully"
+      message: "Order cancelled successfully",
+      refundInitiated: isOnlinePayment && isPaid,
+      refundAmount: isOnlinePayment && isPaid ? (order.totalAmount || order.amount) : 0
     });
   } catch (error) {
     logger.error('Error cancelling order:', error);
@@ -912,4 +931,67 @@ const listOrders = async (req, res) => {
   }
 };
 
-export {verifyRazorpay, verifyStripe, placeOrder, placeOrderStripe, placeOrderRazorpay, allOrders, userOrders, updateStatus, createOrder, getOrderDetails, trackOrder, cancelOrder, updateOrderStatus, listOrders}
+// Update refund status (admin only)
+const updateRefundStatus = async (req, res) => {
+  try {
+    const { orderId } = req.params;
+    const { refundStatus, transactionId } = req.body;
+
+    if (!refundStatus) {
+      return res.status(400).json({
+        success: false,
+        message: "Please provide refund status"
+      });
+    }
+
+    const validRefundStatuses = ['none', 'pending', 'processing', 'completed', 'failed'];
+    if (!validRefundStatuses.includes(refundStatus)) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid refund status"
+      });
+    }
+
+    const order = await Order.findById(orderId);
+
+    if (!order) {
+      return res.status(404).json({
+        success: false,
+        message: "Order not found"
+      });
+    }
+
+    // Initialize refund object if it doesn't exist
+    if (!order.refund) {
+      order.refund = {};
+    }
+
+    order.refund.status = refundStatus;
+    
+    if (refundStatus === 'completed') {
+      order.refund.completedDate = new Date();
+    }
+
+    if (transactionId) {
+      order.refund.transactionId = transactionId;
+    }
+
+    await order.save();
+
+    logger.info(`Refund status updated for order ${orderId}: ${refundStatus}`);
+
+    return res.status(200).json({
+      success: true,
+      message: "Refund status updated successfully",
+      order
+    });
+  } catch (error) {
+    logger.error('Error updating refund status:', error);
+    return res.status(500).json({
+      success: false,
+      message: "Failed to update refund status"
+    });
+  }
+};
+
+export {verifyRazorpay, verifyStripe, placeOrder, placeOrderStripe, placeOrderRazorpay, allOrders, userOrders, updateStatus, createOrder, getOrderDetails, trackOrder, cancelOrder, updateOrderStatus, listOrders, updateRefundStatus}
