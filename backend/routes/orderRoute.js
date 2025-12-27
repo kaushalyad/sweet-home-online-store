@@ -39,12 +39,11 @@ orderRouter.post('/verify-stripe', protect, verifyStripe)
 orderRouter.post('/verify-razorpay', protect, verifyRazorpay)
 orderRouter.post('/create', protect, createOrder)
 
-// Protected admin routes
-orderRouter.use(protect, admin)
-orderRouter.get('/list', listOrders)
-orderRouter.post('/list', listOrders)
-orderRouter.put('/status/:orderId', updateOrderStatus)
-orderRouter.get('/recent-notifications', async (req, res) => {
+// Protected admin routes (with admin middleware)
+orderRouter.get('/list', protect, admin, listOrders)
+orderRouter.post('/list', protect, admin, listOrders)
+orderRouter.put('/status/:orderId', protect, admin, updateOrderStatus)
+orderRouter.get('/recent-notifications', protect, admin, async (req, res) => {
   try {
     const recentOrders = await Order.find({})
       .sort({ createdAt: -1 })
