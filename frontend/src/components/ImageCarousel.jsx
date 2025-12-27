@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { FaChevronLeft, FaChevronRight } from 'react-icons/fa';
+import { FaArrowLeft, FaArrowRight } from 'react-icons/fa';
 import { assets } from '../assets/assets';
 
 const ImageCarousel = () => {
@@ -40,9 +40,7 @@ const ImageCarousel = () => {
 
   return (
     <div 
-      className="relative w-full min-w-full h-[250px] sm:h-[350px] md:h-[450px] lg:h-[550px] xl:h-[600px] overflow-hidden bg-gradient-to-b from-orange-50 to-white"
-      onMouseEnter={() => setIsAutoPlaying(false)}
-      onMouseLeave={() => setIsAutoPlaying(true)}
+      className="relative w-full min-w-full h-[180px] sm:h-[280px] md:h-[400px] lg:h-[500px] xl:h-[550px] overflow-hidden bg-gradient-to-b from-orange-50 to-white"
     >
       {/* Images */}
       <div 
@@ -70,25 +68,23 @@ const ImageCarousel = () => {
       {/* Previous Button */}
       <button
         onClick={goToPrevious}
-        className="absolute left-2 sm:left-4 top-1/2 -translate-y-1/2 text-white transition-all duration-300 hover:scale-125 z-10"
+        className="absolute left-2 sm:left-4 top-1/2 -translate-y-1/2 bg-white/95 hover:bg-white text-gray-900 p-3 sm:p-4 rounded-full transition-all duration-300 hover:scale-110 z-10 shadow-strong backdrop-blur-sm"
         aria-label="Previous slide"
-        style={{ filter: 'drop-shadow(0 0 3px black) drop-shadow(0 0 2px black)' }}
       >
-        <FaChevronLeft className="w-10 h-10 sm:w-12 sm:h-12 md:w-16 md:h-16" style={{ stroke: 'black', strokeWidth: '8px' }} />
+        <FaArrowLeft className="w-5 h-5 sm:w-6 sm:h-6" />
       </button>
 
       {/* Next Button */}
       <button
         onClick={goToNext}
-        className="absolute right-2 sm:right-4 top-1/2 -translate-y-1/2 text-white transition-all duration-300 hover:scale-125 z-10"
+        className="absolute right-2 sm:right-4 top-1/2 -translate-y-1/2 bg-white/95 hover:bg-white text-gray-900 p-3 sm:p-4 rounded-full transition-all duration-300 hover:scale-110 z-10 shadow-strong backdrop-blur-sm"
         aria-label="Next slide"
-        style={{ filter: 'drop-shadow(0 0 3px black) drop-shadow(0 0 2px black)' }}
       >
-        <FaChevronRight className="w-10 h-10 sm:w-12 sm:h-12 md:w-16 md:h-16" style={{ stroke: 'black', strokeWidth: '8px' }} />
+        <FaArrowRight className="w-5 h-5 sm:w-6 sm:h-6" />
       </button>
 
       {/* Dots Indicator */}
-      <div className="absolute bottom-3 sm:bottom-4 md:bottom-6 left-1/2 -translate-x-1/2 flex gap-1.5 sm:gap-2 z-10">
+      <div className="absolute bottom-4 sm:bottom-6 md:bottom-8 left-1/2 -translate-x-1/2 flex gap-2 z-10 bg-black/20 backdrop-blur-md px-4 py-2 rounded-full">
         {images.map((_, index) => (
           <button
             key={index}
@@ -96,7 +92,7 @@ const ImageCarousel = () => {
             className={`transition-all duration-300 rounded-full ${
               index === currentIndex
                 ? 'bg-white w-8 h-3'
-                : 'bg-white/60 hover:bg-white/80 w-3 h-3'
+                : 'bg-white/50 hover:bg-white/80 w-3 h-3'
             }`}
             aria-label={`Go to slide ${index + 1}`}
           />

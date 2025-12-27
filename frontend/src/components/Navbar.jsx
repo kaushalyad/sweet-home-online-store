@@ -201,31 +201,52 @@ const Navbar = () => {
           ref={bannerRef}
           className="fixed top-0 left-0 right-0 z-[60] bg-gradient-to-r from-orange-300 via-yellow-300 to-orange-400 overflow-hidden shadow-md"
         >
-          <div className="flex items-center justify-between py-1.5">
-            <div className="animate-marquee inline-flex items-center gap-4 text-black text-base font-medium">
-              <FaTruck className="text-black flex-shrink-0 w-5 h-5" />
-              <span className="font-bold">Delivering PAN India</span>
-              <span>& Free Shipping across India on Orders above</span>
-              <span className="font-bold">₹500</span>
-              <span className="hidden sm:inline">|</span>
-              <span className="hidden sm:inline">Estimated Standard Delivery Timeline of 3-5 Working Days, Though Delivery Time May Vary Depending On Pin Code</span>
-              <span className="hidden sm:inline">|</span>
-              <span className="hidden sm:inline text-red-600 font-bold">CAUTION - Beware of Fraud!!</span>
-              <span className="hidden sm:inline text-sm">We do not accept/encourage online payments with respect to super stockist/distributorship/franchisee/employment.</span>
+          <div className="flex items-center justify-between py-1">
+            <div className="flex overflow-hidden flex-1">
+              <div className="animate-marquee inline-flex items-center gap-4 text-black text-base font-medium">
+                <FaTruck className="text-black flex-shrink-0 w-5 h-5" />
+                <span className="font-bold">Delivering PAN India</span>
+                <span>& Free Shipping across India on Orders above</span>
+                <span className="font-bold">₹500</span>
+                <span className="hidden sm:inline">|</span>
+                <span className="hidden sm:inline">Estimated Standard Delivery Timeline of 3-5 Working Days, Though Delivery Time May Vary Depending On Pin Code</span>
+                <span className="hidden sm:inline">|</span>
+                <span className="hidden sm:inline text-red-600 font-bold">CAUTION - Beware of Fraud!!</span>
+                <span className="hidden sm:inline text-sm">We do not accept/encourage online payments with respect to super stockist/distributorship/franchisee/employment.</span>
+                <span className="mx-8">•</span>
+              </div>
+              <div className="animate-marquee inline-flex items-center gap-4 text-black text-base font-medium">
+                <FaTruck className="text-black flex-shrink-0 w-5 h-5" />
+                <span className="font-bold">Delivering PAN India</span>
+                <span>& Free Shipping across India on Orders above</span>
+                <span className="font-bold">₹500</span>
+                <span className="hidden sm:inline">|</span>
+                <span className="hidden sm:inline">Estimated Standard Delivery Timeline of 3-5 Working Days, Though Delivery Time May Vary Depending On Pin Code</span>
+                <span className="hidden sm:inline">|</span>
+                <span className="hidden sm:inline text-red-600 font-bold">CAUTION - Beware of Fraud!!</span>
+                <span className="hidden sm:inline text-sm">We do not accept/encourage online payments with respect to super stockist/distributorship/franchisee/employment.</span>
+                <span className="mx-8">•</span>
+              </div>
             </div>
-            <div className="flex items-center gap-4 text-base font-medium pr-4 hidden md:flex">
+            <div className="flex items-center gap-1.5 pl-2 pr-2 sm:pr-3 flex-shrink-0 hidden md:flex">
               <Link 
                 to="/track-order" 
-                className="text-black hover:text-gray-800 transition-colors whitespace-nowrap"
+                className="flex items-center gap-1 bg-white/90 hover:bg-white text-gray-900 px-2 py-1 rounded-md transition-all duration-200 hover:scale-105 font-semibold shadow-md hover:shadow-lg text-[10px] whitespace-nowrap"
               >
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+                </svg>
                 Track Order
               </Link>
-              <span className="text-black">|</span>
               <Link 
                 to="/e-coupons" 
-                className="text-black hover:text-gray-800 transition-colors whitespace-nowrap"
+                className="relative flex items-center gap-1 bg-white/90 hover:bg-white text-gray-900 px-2 py-1 rounded-md transition-all duration-200 hover:scale-105 font-semibold shadow-md hover:shadow-lg text-[10px] whitespace-nowrap"
               >
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3 text-green-600" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M20 4H4c-1.11 0-1.99.89-1.99 2L2 18c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V6c0-1.11-.89-2-2-2zm0 14H4v-6h16v6zm0-10H4V6h16v2z"/>
+                </svg>
                 E-Coupons
+                <span className="absolute -top-1 -right-1 bg-gradient-to-r from-red-500 to-orange-500 text-white text-[8px] px-1 py-0.5 rounded-full font-black shadow-sm">NEW</span>
               </Link>
             </div>
           </div>
@@ -252,7 +273,7 @@ const Navbar = () => {
             {/* Left Search Bar */}
             <div className="flex-1 max-w-md ml-4 mr-auto hidden md:block">
               <div className="relative group">
-                <div className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-hover:text-orange-500 transition-colors pointer-events-none">
+                <div className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-hover:text-orange-500 transition-colors pointer-events-none z-10">
                   <FaSearch className="w-4 h-4" />
                 </div>
                 <input 
@@ -260,7 +281,7 @@ const Navbar = () => {
                   placeholder="Search for sweets, snacks, ghee..."
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
-                  className="w-full pl-11 pr-5 py-2.5 bg-gray-50 border border-gray-200 rounded-full focus:outline-none focus:bg-white focus:border-orange-500 focus:ring-2 focus:ring-orange-100 text-sm transition-all shadow-sm hover:shadow-md hover:border-orange-300 placeholder:text-gray-400"
+                  className="w-full pl-11 pr-5 py-2.5 bg-gray-50 border-2 border-gray-200 rounded-full focus:outline-none focus:bg-white focus:border-orange-500 focus:ring-2 focus:ring-orange-100 text-sm transition-all shadow-sm hover:shadow-md hover:border-orange-300 placeholder:text-gray-400 !rounded-full"
                   onKeyDown={(e) => {
                     if (e.key === 'Enter' && search.trim()) {
                       navigate(`/collection?search=${encodeURIComponent(search.trim())}`);

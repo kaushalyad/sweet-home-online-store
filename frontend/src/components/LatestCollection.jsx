@@ -28,17 +28,19 @@ const LatestCollection = () => {
 
   return (
     <div className="my-10">
-      <div className="text-center py-8">
+      <div className="text-center py-12">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.5 }}
         >
-          <Title text1={"Latest"} text2={"Sweets And Namkeens"} />
-          <div className="w-20 h-1 bg-pink-500 mx-auto mt-4 mb-6"></div>
-          <p className="text-gray-600 max-w-2xl mx-auto mb-8 px-4">
-            Discover our newest arrivals - freshly made sweets and savory snacks that will delight your taste buds
+          <h2 className="font-poppins text-4xl sm:text-5xl font-extrabold text-gray-900 mb-4">
+            Latest <span className="gradient-text">Arrivals</span>
+          </h2>
+          <div className="w-24 h-1 bg-gradient-to-r from-pink-500 to-orange-500 mx-auto mb-6 rounded-full"></div>
+          <p className="font-inter text-gray-600 text-lg max-w-2xl mx-auto mb-8 px-4">
+            Discover our newest creations - freshly made sweets and savory snacks
           </p>
         </motion.div>
       </div>
@@ -76,10 +78,10 @@ const LatestCollection = () => {
           >
             <Link 
               to="/collection" 
-              className="inline-flex items-center px-6 py-3 border border-gray-300 rounded-full hover:bg-gray-50 transition-colors duration-300 text-gray-800 font-medium"
+              className="btn-interactive group inline-flex items-center px-8 py-4 bg-gradient-to-r from-pink-500 to-orange-500 text-white rounded-full hover:shadow-strong transition-all duration-300 font-semibold text-lg hover:scale-105 relative z-10"
             >
-              View All Products
-              <FaArrowRight className="ml-2" />
+              <span className="relative z-10">View All Products</span>
+              <FaArrowRight className="ml-2 relative z-10 transform group-hover:translate-x-1 transition-transform" />
             </Link>
           </motion.div>
         </div>

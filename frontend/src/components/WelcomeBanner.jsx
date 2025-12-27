@@ -21,10 +21,10 @@ const WelcomeBanner = () => {
       if (daysSinceDismissed < 7) return;
     }
 
-    // Show banner after 3 seconds (let user browse first)
+    // Show banner immediately
     const timer = setTimeout(() => {
       setIsVisible(true);
-    }, 3000);
+    }, 0);
 
     return () => clearTimeout(timer);
   }, [token]);

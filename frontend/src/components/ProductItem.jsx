@@ -94,9 +94,9 @@ const ProductItem = ({ id, image, name, price, index = 0, featured = false, best
         }}
       >
         {/* Product image with hover effect */}
-        <div className="overflow-hidden rounded-lg sm:rounded-xl md:rounded-2xl shadow-md relative bg-gray-50 border border-gray-100 transform transition-all duration-500 group-hover:shadow-2xl group-hover:border-orange-200 aspect-square sm:aspect-[4/5]">
+        <div className="overflow-hidden rounded-2xl shadow-soft relative bg-white transform transition-all duration-500 group-hover:shadow-medium group-hover:-translate-y-1 aspect-square sm:aspect-[4/5]">
           <img
-            className="w-full h-full object-cover transition-all duration-700 group-hover:scale-110"
+            className="w-full h-full object-cover transition-all duration-700 group-hover:scale-105"
             src={image[currentImage]}
             alt={`${name} - Indian Sweet`}
             loading="lazy"
@@ -134,11 +134,11 @@ const ProductItem = ({ id, image, name, price, index = 0, featured = false, best
           <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent md:opacity-0 md:group-hover:opacity-100 transition-all duration-300 flex items-end justify-center p-3 sm:p-4">
             <div className="flex gap-2 sm:gap-2.5 mb-2 sm:mb-3 md:mb-4 transform md:translate-y-4 md:group-hover:translate-y-0 transition-all duration-300 delay-75">
               <motion.button
-                whileHover={{ scale: 1.1 }}
-                whileTap={{ scale: 0.9 }}
+                whileHover={{ scale: 1.15 }}
+                whileTap={{ scale: 0.85 }}
                 onClick={handleQuickAddToCart}
-                className={`bg-white text-pink-500 hover:text-white hover:bg-pink-500 p-2.5 sm:p-3 rounded-full shadow-lg transition-colors duration-300 ${
-                  isAdded ? 'bg-pink-500 text-white hover:bg-pink-600' : ''
+                className={`bg-white text-pink-500 hover:text-white hover:bg-gradient-to-r hover:from-pink-500 hover:to-orange-500 p-2.5 sm:p-3 rounded-full shadow-lg transition-all duration-300 ${
+                  isAdded ? 'bg-gradient-to-r from-pink-500 to-orange-500 text-white' : ''
                 }`}
                 aria-label="Add to cart"
               >
@@ -146,13 +146,13 @@ const ProductItem = ({ id, image, name, price, index = 0, featured = false, best
               </motion.button>
               
               <motion.button
-                whileHover={{ scale: 1.1 }}
-                whileTap={{ scale: 0.9 }}
+                whileHover={{ scale: 1.15 }}
+                whileTap={{ scale: 0.85 }}
                 onClick={handleWishlistToggle}
-                className={`p-2.5 sm:p-3 rounded-full shadow-lg transition-colors duration-300 ${
+                className={`p-2.5 sm:p-3 rounded-full shadow-lg transition-all duration-300 ${
                   inWishlist 
-                    ? 'bg-pink-500 text-white hover:bg-pink-600' 
-                    : 'bg-white text-gray-400 hover:text-white hover:bg-pink-500'
+                    ? 'bg-gradient-to-r from-pink-500 to-orange-500 text-white hover:from-pink-600 hover:to-orange-600' 
+                    : 'bg-white text-gray-400 hover:text-white hover:bg-gradient-to-r hover:from-pink-500 hover:to-orange-500'
                 }`}
                 aria-label={inWishlist ? "Remove from wishlist" : "Add to wishlist"}
               >
@@ -180,21 +180,20 @@ const ProductItem = ({ id, image, name, price, index = 0, featured = false, best
         </div>
         
         {/* Product info with improved design */}
-        <div className="mt-3 sm:mt-3.5 px-0.5 sm:px-1">
-          <h3 className="font-medium text-gray-800 group-hover:text-pink-500 transition-colors duration-300 line-clamp-2 min-h-[2.5rem] sm:min-h-[2.75rem] text-sm sm:text-base md:text-base leading-snug">
+        <div className="mt-3 sm:mt-4 px-1">
+          <h3 className="font-inter font-medium text-gray-900 group-hover:text-orange-600 transition-colors duration-300 line-clamp-2 min-h-[2.5rem] sm:min-h-[2.75rem] text-sm sm:text-base leading-snug cursor-pointer">
             {name}
           </h3>
-          <div className="flex justify-between items-center mt-2.5 sm:mt-3">
+          <div className="flex justify-between items-center mt-3">
             <div className="flex flex-col">
-              <p className="font-bold text-gray-900 flex items-center">
-                <span className="text-sm sm:text-base text-pink-500 mr-1">{currency}</span>
-                <span className="text-base sm:text-lg md:text-xl">{price}</span>
+              <p className="font-poppins font-bold text-gray-900 flex items-center">
+                <span className="text-sm sm:text-base text-orange-600 mr-1 font-semibold">{currency}</span>
+                <span className="text-lg sm:text-xl md:text-2xl">{price}</span>
               </p>
-              {/* Optional: Add original price for comparison if on sale */}
               {featured && <p className="text-xs sm:text-sm text-gray-500 line-through mt-0.5">₹{Math.round(price * 1.2)}</p>}
             </div>
-            <div className="text-xs sm:text-sm bg-pink-50 text-pink-600 px-2 sm:px-3 py-1 sm:py-1.5 rounded-full font-medium border border-pink-100 whitespace-nowrap">
-              Free ship
+            <div className="text-xs sm:text-sm bg-gradient-to-r from-pink-500 to-orange-500 text-white px-3 sm:px-4 py-1.5 sm:py-2 rounded-full font-semibold shadow-soft whitespace-nowrap">
+              Free Ship
             </div>
           </div>
           

@@ -130,7 +130,7 @@ const SearchBar = () => {
                 {/* Search input area */}
                 <div className="p-4 border-b border-gray-200">
                     <div className="relative">
-                        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none z-10">
                             <FaSearch className="text-gray-400" />
                         </div>
                         <input 
@@ -139,7 +139,7 @@ const SearchBar = () => {
                             onKeyDown={handleSearch}
                             onFocus={() => setFocused(true)}
                             onBlur={() => setTimeout(() => setFocused(false), 200)}
-                            className="w-full pl-10 pr-14 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-pink-500 transition-all duration-200" 
+                            className="w-full pl-10 pr-14 py-3 border-2 border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-pink-500 transition-all duration-200 bg-white" 
                             type="text" 
                             placeholder="Search for sweets, desserts, and treats..."
                             autoFocus

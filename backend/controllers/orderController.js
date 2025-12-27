@@ -729,7 +729,7 @@ const cancelOrder = async (req, res) => {
 
     const order = await Order.findOne({
       _id: orderId,
-      user: userId
+      userId: userId
     });
 
     if (!order) {

@@ -289,23 +289,41 @@ const Collection = () => {
   const filteredCount = filterProducts.length;
 
   return (
-    <div className="bg-gray-50">
+    <div className="bg-gradient-to-b from-gray-50 to-white min-h-screen">
       {/* Collection Page Header */}
-      <div className="bg-gradient-to-r from-pink-50 to-pink-100 py-10 mb-8 relative overflow-hidden">
-        <div className="absolute inset-0 opacity-10" style={{ 
-          backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23f472b6' fill-opacity='0.4'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
+      <div className="bg-gradient-to-br from-pink-500 via-orange-500 to-rose-500 py-16 mb-8 relative overflow-hidden">
+        <div className="absolute inset-0 opacity-20" style={{ 
+          backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.4'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
         }}></div>
-        <div className="container mx-auto sm:px-4">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center relative z-10">
-            <h1 className="text-4xl font-bold text-gray-800 mb-2">Our Sweet Collection</h1>
-            <p className="text-gray-600 max-w-xl mx-auto">Discover a world of authentic Indian sweets and delicacies made with traditional recipes and finest ingredients</p>
+            <motion.h1 
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="font-poppins text-4xl sm:text-5xl lg:text-6xl font-extrabold text-white mb-4 tracking-tight"
+            >
+              Our Sweet <span className="text-yellow-200">Collection</span>
+            </motion.h1>
+            <motion.p 
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.1 }}
+              className="font-inter text-white/90 text-lg sm:text-xl max-w-2xl mx-auto mb-8"
+            >
+              Discover a world of authentic Indian sweets and delicacies made with traditional recipes and finest ingredients
+            </motion.p>
             
             {/* Collection stats */}
-            <div className="mt-6 inline-flex items-center px-4 py-2 bg-white rounded-full shadow-sm">
-              <span className="text-gray-600 mr-2">Showing</span>
-              <span className="font-semibold text-pink-600">{filteredCount}</span>
-              <span className="text-gray-600 ml-2">delicious treats</span>
-            </div>
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ delay: 0.2 }}
+              className="inline-flex items-center px-6 py-3 bg-white/95 backdrop-blur-sm rounded-full shadow-strong"
+            >
+              <span className="font-inter text-gray-700 text-sm sm:text-base">Showing</span>
+              <span className="font-poppins font-bold text-orange-600 mx-2 text-lg sm:text-xl">{filteredCount}</span>
+              <span className="font-inter text-gray-700 text-sm sm:text-base">delicious treats</span>
+            </motion.div>
           </div>
         </div>
       </div>
@@ -391,13 +409,18 @@ const Collection = () => {
           </div>
           
           {/* Filter Options */}
-          <div className="w-full lg:min-w-40 lg:max-w-60">
+          <div className="w-full lg:min-w-60 lg:max-w-72">
             <button
               onClick={() => setShowFilter(!showFilter)}
-              className="flex items-center gap-2 px-4 py-2 mb-4 rounded-md bg-gray-100 hover:bg-gray-200 transition-colors duration-200 lg:hidden w-full justify-center"
+              className="flex items-center gap-2 px-6 py-3 mb-4 rounded-xl bg-gradient-to-r from-pink-500 to-orange-500 text-white hover:shadow-medium transition-all duration-200 lg:hidden w-full justify-center font-semibold"
             >
-              <FaFilter className="text-gray-700" />
-              <span className="font-medium">FILTERS</span>
+              <FaFilter />
+              <span>FILTERS</span>
+              {(category.length > 0 || subCategory.length > 0) && (
+                <span className="ml-2 px-2 py-0.5 bg-white/30 rounded-full text-xs">
+                  {category.length + subCategory.length}
+                </span>
+              )}
               <FaChevronDown className={`ml-1 transition-transform duration-200 ${showFilter ? 'rotate-180' : ''}`} />
             </button>
             
@@ -604,32 +627,35 @@ const Collection = () => {
 
           {/* Right Side */}
           <div className="flex-1">
-            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-3 md:gap-4 mb-4 md:mb-6">
+            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 md:gap-6 mb-6 md:mb-8 pb-4 border-b-2 border-gray-200">
               <div>
-                <Title text1={"All"} text2={"Collections"} />
-                <p className="text-xs md:text-sm text-gray-500 mt-1">{filteredCount} products found</p>
+                <h2 className="font-poppins text-2xl sm:text-3xl font-bold text-gray-900 mb-1">All Collections</h2>
+                <p className="font-inter text-sm md:text-base text-gray-600 flex items-center gap-2">
+                  <span className="inline-block w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
+                  {filteredCount} products available
+                </p>
               </div>
               
-              <div className="flex items-center gap-2 md:gap-3 w-full md:w-auto justify-between md:justify-end">
+              <div className="flex items-center gap-3 md:gap-4 w-full md:w-auto justify-between md:justify-end">
                 {/* Grid/List View Toggle */}
-                <div className="border border-gray-200 rounded-md overflow-hidden flex">
+                <div className="border-2 border-gray-200 rounded-xl overflow-hidden flex shadow-sm">
                   <button 
-                    className="p-1.5 md:p-2 bg-pink-50 text-pink-600 border-r border-gray-200"
+                    className="p-2 md:p-2.5 bg-gradient-to-r from-pink-500 to-orange-500 text-white transition-all"
                     aria-label="Grid view"
                   >
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 md:h-5 md:w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6z" />
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6z" />
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2z" />
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 md:h-5 md:w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6z" />
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6z" />
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2z" />
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
                     </svg>
                   </button>
                   <button 
-                    className="p-1.5 md:p-2 text-gray-500 hover:bg-gray-50"
+                    className="p-2 md:p-2.5 text-gray-500 hover:bg-gray-50 border-l-2 border-gray-200 transition-all"
                     aria-label="List view"
                   >
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 md:h-5 md:w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 md:h-5 md:w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16" />
                     </svg>
                   </button>
                 </div>
@@ -638,15 +664,15 @@ const Collection = () => {
                 <div className="relative sort-dropdown">
                   <button 
                     onClick={() => setShowSortDropdown(!showSortDropdown)}
-                    className="flex items-center gap-1.5 md:gap-2 px-2 md:px-4 py-1.5 md:py-2 border border-gray-300 rounded-md bg-white hover:bg-gray-50 transition-colors duration-200 text-xs md:text-sm shadow-sm hover:shadow"
+                    className="flex items-center gap-2 md:gap-3 px-4 md:px-5 py-2 md:py-2.5 border-2 border-gray-200 rounded-xl bg-white hover:border-orange-300 hover:shadow-soft transition-all duration-200 text-sm md:text-base font-medium"
                   >
-                    <span className="text-gray-600 hidden md:inline">{selectedSortOption.icon}</span>
-                    <span className="truncate">{selectedSortOption.label}</span>
-                    <FaChevronDown className={`text-xs transition-transform duration-200 ${showSortDropdown ? 'rotate-180' : ''}`} />
+                    <span className="text-gray-600 hidden md:inline text-lg">{selectedSortOption.icon}</span>
+                    <span className="truncate font-semibold text-gray-800">{selectedSortOption.label}</span>
+                    <FaChevronDown className={`text-xs text-gray-500 transition-transform duration-200 ${showSortDropdown ? 'rotate-180' : ''}`} />
                   </button>
                   
                   {showSortDropdown && (
-                    <div className="absolute right-0 mt-1 w-56 bg-white border border-gray-200 rounded-md shadow-lg z-10">
+                    <div className="absolute right-0 mt-2 w-64 bg-white border-2 border-gray-200 rounded-xl shadow-strong z-10 overflow-hidden">
                       <div className="py-1">
                         {sortOptions.map(option => (
                           <button
@@ -685,21 +711,24 @@ const Collection = () => {
                     />
                   ))
                 ) : (
-                  <div className="col-span-full py-16 text-center">
-                    <div className="text-5xl mb-4">😢</div>
-                    <h3 className="text-xl font-medium text-gray-800 mb-2">No products found</h3>
-                    <p className="text-gray-600">Try adjusting your filters or search terms</p>
-                    <button 
-                      onClick={() => {
-                        setCategory([]);
-                        setSubCategory([]);
-                        setPriceRange([0, 1000]);
-                        setRatingFilter(0);
-                      }}
-                      className="mt-4 px-6 py-2 bg-gradient-to-r from-pink-500 to-rose-500 text-white rounded-md hover:shadow-md transition-all duration-300 transform hover:scale-105"
-                    >
-                      Clear all filters
-                    </button>
+                  <div className="col-span-full py-20 text-center">
+                    <div className="max-w-md mx-auto">
+                      <div className="text-6xl sm:text-7xl mb-6 animate-bounce">🍰</div>
+                      <h3 className="font-poppins text-2xl sm:text-3xl font-bold text-gray-900 mb-3">No products found</h3>
+                      <p className="font-inter text-gray-600 mb-8 text-base sm:text-lg">Try adjusting your filters or search terms to find what you're looking for</p>
+                      <button 
+                        onClick={() => {
+                          setCategory([]);
+                          setSubCategory([]);
+                          setPriceRange([0, 1000]);
+                          setRatingFilter(0);
+                        }}
+                        className="btn-interactive inline-flex items-center gap-2 px-8 py-4 bg-gradient-to-r from-pink-500 to-orange-500 text-white rounded-full hover:shadow-strong transition-all duration-300 font-semibold relative z-10"
+                      >
+                        <FaTimes className="relative z-10" />
+                        <span className="relative z-10">Clear all filters</span>
+                      </button>
+                    </div>
                   </div>
                 )}
               </div>
@@ -710,14 +739,27 @@ const Collection = () => {
       
       {/* Recommended Products Section - Only show when there are products */}
       {filterProducts.length > 0 && (
-        <div className="mt-16 py-16 bg-gradient-to-r from-pink-50 to-rose-50">
-          <div className="container mx-auto sm:px-4">
-            <div className="text-center mb-10">
-              <h2 className="text-3xl font-bold text-gray-800 mb-2">Recommended For You</h2>
-              <div className="w-24 h-1 bg-gradient-to-r from-pink-400 to-pink-600 mx-auto rounded-full"></div>
-              <p className="text-gray-600 max-w-2xl mx-auto mt-4">
+        <div className="mt-20 py-20 bg-gradient-to-br from-orange-50 via-pink-50 to-rose-50">
+          <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="text-center mb-12">
+              <motion.h2 
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                className="font-poppins text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 mb-4"
+              >
+                Recommended <span className="gradient-text">For You</span>
+              </motion.h2>
+              <div className="w-24 h-1 bg-gradient-to-r from-pink-500 to-orange-500 mx-auto rounded-full mb-6"></div>
+              <motion.p 
+                initial={{ opacity: 0 }}
+                whileInView={{ opacity: 1 }}
+                viewport={{ once: true }}
+                transition={{ delay: 0.2 }}
+                className="font-inter text-gray-600 text-base sm:text-lg max-w-2xl mx-auto"
+              >
                 Based on your browsing history and preferences
-              </p>
+              </motion.p>
             </div>
             
             <motion.div 
@@ -725,7 +767,7 @@ const Collection = () => {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.6 }}
-              className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4 gap-y-8"
+              className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-5 md:gap-6"
             >
               {/* Show first 4 products as recommendations - this could be enhanced with actual recommendation logic */}
               {products.slice(0, 4).map((item, index) => (
@@ -746,13 +788,13 @@ const Collection = () => {
               ))}
             </motion.div>
             
-            <div className="text-center mt-10">
+            <div className="text-center mt-12">
               <Link 
                 to="/collection"
-                className="inline-flex items-center px-6 py-3 bg-white border border-pink-200 rounded-full text-pink-600 hover:bg-pink-50 transition-colors duration-300 shadow-sm"
+                className="btn-interactive inline-flex items-center gap-3 px-8 py-4 bg-white border-2 border-orange-200 rounded-full text-orange-600 hover:bg-orange-50 hover:border-orange-300 transition-all duration-300 shadow-soft hover:shadow-medium font-semibold text-base relative z-10"
               >
-                <span className="font-medium">View All Recommendations</span>
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 ml-2" viewBox="0 0 20 20" fill="currentColor">
+                <span className="relative z-10">View All Recommendations</span>
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 relative z-10" viewBox="0 0 20 20" fill="currentColor">
                   <path fillRule="evenodd" d="M10.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L12.586 11H5a1 1 0 110-2h7.586l-2.293-2.293a1 1 0 010-1.414z" clipRule="evenodd" />
                 </svg>
               </Link>
