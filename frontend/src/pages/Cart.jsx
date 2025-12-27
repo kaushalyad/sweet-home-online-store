@@ -163,31 +163,48 @@ const Cart = () => {
 
   if (isCartEmpty) {
     return (
-      <div className="container mx-auto sm:px-4 py-8">
-        <Title title="Your Sweet Cart" />
-        <div className="text-center py-12 bg-white rounded-lg shadow-sm">
-          <div className="max-w-md mx-auto">
-            <div className="w-24 h-24 bg-pink-50 rounded-full flex items-center justify-center mx-auto mb-6">
-              <FaShoppingCart className="text-4xl text-pink-500" />
-            </div>
-            <h2 className="text-2xl font-bold text-gray-800 mb-3">Your Cart is Waiting for Sweet Treats!</h2>
-            <p className="text-gray-600 mb-8">
-              Discover our delightful collection of handcrafted sweets and treats. From traditional favorites to modern delights, we have something special for every sweet tooth!
-            </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <button
-                onClick={() => navigate('/collection')}
-                className="px-8 py-3 bg-gradient-to-r from-pink-500 to-rose-500 text-white rounded-md font-medium hover:from-pink-600 hover:to-rose-600 transition-all duration-300 flex items-center justify-center gap-2"
-              >
-                <FaShoppingCart className="text-lg" />
-                Explore Sweet Collection
-              </button>
-              <button
-                onClick={() => navigate('/')}
-                className="px-8 py-3 border border-gray-300 text-gray-700 rounded-md font-medium hover:bg-gray-50 transition-all duration-300"
-              >
-                Back to Home
-              </button>
+      <div className="w-full min-h-screen bg-gray-50 py-4 sm:py-8">
+        <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
+          <div className="mb-4 sm:mb-6">
+            <Title title="Your Sweet Cart" />
+          </div>
+          
+          <div className="bg-gradient-to-br from-pink-50 via-orange-50 to-rose-50 rounded-xl sm:rounded-2xl shadow-medium p-6 sm:p-10 md:p-16">
+            <div className="max-w-2xl mx-auto text-center">
+              {/* Animated Icon */}
+              <div className="relative w-20 h-20 sm:w-28 sm:h-28 md:w-32 md:h-32 mx-auto mb-6 sm:mb-8">
+                <div className="absolute inset-0 bg-gradient-to-br from-pink-400 to-orange-400 rounded-full opacity-20 animate-pulse"></div>
+                <div className="relative w-full h-full bg-gradient-to-br from-pink-500 to-orange-500 rounded-full flex items-center justify-center shadow-strong">
+                  <FaShoppingCart className="text-3xl sm:text-4xl md:text-5xl text-white" />
+                </div>
+              </div>
+
+              {/* Heading with Poppins */}
+              <h2 className="font-poppins text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold bg-gradient-to-r from-pink-600 to-orange-600 bg-clip-text text-transparent mb-3 sm:mb-4 leading-tight">
+                Your Cart is Waiting for Sweet Treats!
+              </h2>
+              
+              {/* Description */}
+              <p className="font-inter text-sm sm:text-base md:text-lg text-gray-700 mb-6 sm:mb-8 md:mb-10 leading-relaxed px-2 sm:px-4">
+                Discover our delightful collection of handcrafted sweets and treats. From traditional favorites to modern delights, we have something special for every sweet tooth!
+              </p>
+
+              {/* Action Buttons */}
+              <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 justify-center items-stretch sm:items-center max-w-md sm:max-w-none mx-auto">
+                <button
+                  onClick={() => navigate('/collection')}
+                  className="btn-interactive w-full sm:w-auto px-5 sm:px-6 md:px-8 py-2.5 sm:py-3 md:py-3.5 bg-gradient-to-r from-pink-500 to-orange-500 text-white rounded-lg font-poppins font-medium sm:font-semibold hover:shadow-strong transition-all duration-300 flex items-center justify-center gap-2 text-sm sm:text-base group"
+                >
+                  <FaShoppingCart className="text-sm sm:text-base group-hover:scale-110 transition-transform" />
+                  <span className="whitespace-nowrap">Explore Sweet Collection</span>
+                </button>
+                <button
+                  onClick={() => navigate('/')}
+                  className="w-full sm:w-auto px-5 sm:px-6 md:px-8 py-2.5 sm:py-3 md:py-3.5 border-2 border-gray-300 text-gray-700 rounded-lg font-poppins font-medium sm:font-semibold hover:border-orange-400 hover:bg-orange-50 hover:text-orange-600 transition-all duration-300 text-sm sm:text-base"
+                >
+                  Back to Home
+                </button>
+              </div>
             </div>
           </div>
         </div>

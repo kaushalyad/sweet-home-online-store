@@ -6,30 +6,30 @@ import { FaExchangeAlt, FaUndoAlt, FaHeadset } from 'react-icons/fa'
 const OurPolicy = () => {
   const policyItems = [
     {
-      icon: <FaExchangeAlt className="text-pink-500 text-2xl" />,
+      icon: <FaExchangeAlt className="text-pink-500 text-3xl" />,
       image: assets.exchange_icon,
       title: "Easy Exchange Policy",
       description: "We offer hassle free exchange policy",
-      color: "bg-pink-50"
+      gradient: "from-pink-50 to-white"
     },
     {
-      icon: <FaUndoAlt className="text-blue-500 text-2xl" />,
+      icon: <FaUndoAlt className="text-orange-500 text-3xl" />,
       image: assets.quality_icon,
       title: "7 Days Return Policy",
       description: "We provide 7 days free return policy",
-      color: "bg-blue-50"
+      gradient: "from-orange-50 to-white"
     },
     {
-      icon: <FaHeadset className="text-green-500 text-2xl" />,
+      icon: <FaHeadset className="text-purple-500 text-3xl" />,
       image: assets.support_img,
       title: "Best Customer Support",
       description: "We provide 24/7 customer support",
-      color: "bg-green-50"
+      gradient: "from-purple-50 to-white"
     }
   ];
 
   return (
-    <div className='grid grid-cols-1 md:grid-cols-3 gap-8'>
+    <div className='grid grid-cols-1 md:grid-cols-3 gap-6'>
       {policyItems.map((item, index) => (
         <motion.div
           key={index}
@@ -37,13 +37,14 @@ const OurPolicy = () => {
           whileInView={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: index * 0.1 }}
           viewport={{ once: true }}
-          className={`${item.color} p-8 rounded-xl shadow-sm hover:shadow-md transition-all duration-300 flex flex-col items-center text-center`}
+          whileHover={{ y: -5 }}
+          className={`bg-gradient-to-br ${item.gradient} p-8 rounded-2xl shadow-soft hover:shadow-medium transition-all duration-300 flex flex-col items-center text-center border border-gray-100`}
         >
-          <div className="w-16 h-16 rounded-full bg-white shadow-sm flex items-center justify-center mb-5">
+          <div className="w-20 h-20 rounded-2xl bg-white shadow-soft flex items-center justify-center mb-6 transform transition-transform duration-300 hover:scale-110 hover:rotate-6">
             {item.icon}
           </div>
-          <h3 className="text-lg font-bold text-gray-800 mb-2">{item.title}</h3>
-          <p className="text-gray-600">{item.description}</p>
+          <h3 className="font-poppins text-xl font-bold text-gray-900 mb-2">{item.title}</h3>
+          <p className="font-inter text-gray-600 leading-relaxed">{item.description}</p>
         </motion.div>
       ))}
     </div>

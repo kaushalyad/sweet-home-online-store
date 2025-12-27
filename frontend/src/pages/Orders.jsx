@@ -6,7 +6,7 @@ import axios from 'axios';
 import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { toast } from 'react-hot-toast';
-import { FaBox, FaTruck, FaCheck, FaSearch, FaShippingFast, FaMapMarkerAlt, FaClock, FaChevronDown, FaChevronUp, FaReceipt, FaPhone, FaExclamationCircle, FaTimes, FaBan } from 'react-icons/fa';
+import { FaBox, FaTruck, FaCheck, FaSearch, FaShippingFast, FaMapMarkerAlt, FaClock, FaChevronDown, FaChevronUp, FaReceipt, FaPhone, FaExclamationCircle, FaTimes, FaBan, FaChevronLeft } from 'react-icons/fa';
 
 // Base64 encoded placeholder image (1x1 transparent pixel)
 const PLACEHOLDER_IMAGE = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=';
@@ -181,8 +181,10 @@ const Orders = () => {
   };
 
   const canCancelOrder = (status) => {
-    const cancellableStatuses = ['processing', 'pending', 'order placed'];
-    return cancellableStatuses.includes(status.toLowerCase());
+    // Normalize status for comparison
+    const normalizedStatus = status.toLowerCase().trim();
+    const cancellableStatuses = ['processing', 'pending', 'order placed', 'preparing', 'packing', 'quality check'];
+    return cancellableStatuses.includes(normalizedStatus);
   };
 
   const handleCancelOrder = (orderId) => {
@@ -390,28 +392,30 @@ const Orders = () => {
                           </div>
                         </div>
                         
-                        {/* Action Buttons */}
-                        <div className="flex gap-2">
+                        {/* Action Buttons - Responsive */}
+                        <div className="flex flex-wrap gap-2">
                           <Link
                             to={`/track-order/${order._id}`}
-                            className="flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-orange-500 to-pink-500 text-white rounded-xl hover:from-orange-600 hover:to-pink-600 transition-all shadow-lg hover:shadow-xl font-semibold text-sm"
+                            className="flex items-center justify-center gap-1.5 px-3 sm:px-4 py-2 sm:py-2.5 bg-gradient-to-r from-orange-500 to-pink-500 text-white rounded-lg sm:rounded-xl hover:from-orange-600 hover:to-pink-600 transition-all shadow-lg hover:shadow-xl font-semibold text-xs sm:text-sm whitespace-nowrap"
                           >
-                            <FaMapMarkerAlt /> Track
+                            <FaMapMarkerAlt className="text-xs sm:text-sm" /> 
+                            <span>Track</span>
                           </Link>
                           {canCancelOrder(order.status) && (
                             <button
                               onClick={() => handleCancelOrder(order._id)}
-                              className="flex items-center gap-2 px-4 py-2.5 bg-red-100 text-red-700 rounded-xl hover:bg-red-200 transition-colors font-semibold text-sm"
+                              className="flex items-center justify-center gap-1.5 px-3 sm:px-4 py-2 sm:py-2.5 bg-red-100 text-red-700 rounded-lg sm:rounded-xl hover:bg-red-200 transition-colors font-semibold text-xs sm:text-sm whitespace-nowrap border-2 border-red-200 hover:border-red-300"
                             >
-                              <FaBan /> Cancel
+                              <FaBan className="text-xs sm:text-sm" /> 
+                              <span>Cancel</span>
                             </button>
                           )}
                           <button
                             onClick={() => toggleOrderExpansion(order._id)}
-                            className="flex items-center gap-2 px-4 py-2.5 bg-gray-100 text-gray-700 rounded-xl hover:bg-gray-200 transition-colors font-semibold text-sm"
+                            className="flex items-center justify-center gap-1.5 px-3 sm:px-4 py-2 sm:py-2.5 bg-gray-100 text-gray-700 rounded-lg sm:rounded-xl hover:bg-gray-200 transition-colors font-semibold text-xs sm:text-sm whitespace-nowrap"
                           >
-                            Details
-                            {isExpanded ? <FaChevronUp /> : <FaChevronDown />}
+                            <span>Details</span>
+                            {isExpanded ? <FaChevronUp className="text-xs sm:text-sm" /> : <FaChevronDown className="text-xs sm:text-sm" />}
                           </button>
                         </div>
                       </div>
@@ -562,45 +566,107 @@ const Orders = () => {
           </div>
         )}
 
-        {/* Cancel Confirmation Dialog */}
+        {/* Cancel Confirmation Dialog - Mobile Optimized */}
         <AnimatePresence>
           {showCancelDialog && (
             <motion.div
-              className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4"
+              className="fixed inset-0 bg-black/70 flex items-center justify-center z-[100] p-3 sm:p-4"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               onClick={() => setShowCancelDialog(false)}
             >
               <motion.div
-                className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-8"
-                initial={{ scale: 0.9, opacity: 0 }}
-                animate={{ scale: 1, opacity: 1 }}
-                exit={{ scale: 0.9, opacity: 0 }}
+                className="bg-white rounded-2xl shadow-2xl max-w-sm sm:max-w-md w-full mx-2 sm:mx-4"
+                initial={{ scale: 0.9, opacity: 0, y: 20 }}
+                animate={{ scale: 1, opacity: 1, y: 0 }}
+                exit={{ scale: 0.9, opacity: 0, y: 20 }}
+                transition={{ type: "spring", duration: 0.4 }}
                 onClick={(e) => e.stopPropagation()}
               >
-                <div className="text-center">
-                  <div className="w-20 h-20 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <FaBan className="w-10 h-10 text-red-600" />
-                  </div>
-                  <h3 className="text-2xl font-bold text-gray-800 mb-2">Cancel Order?</h3>
-                  <p className="text-gray-600 mb-6">
-                    Are you sure you want to cancel this order? This action cannot be undone.
-                  </p>
-                  <div className="flex gap-3">
-                    <button
+                {/* Icon Section */}
+                <div className="px-4 sm:px-6 pt-6 sm:pt-8 pb-3 sm:pb-4 text-center">
+                  <motion.div 
+                    className="w-16 h-16 sm:w-20 sm:h-20 bg-gradient-to-br from-red-100 to-red-200 rounded-full flex items-center justify-center mx-auto mb-3 sm:mb-4 shadow-lg border-4 border-red-50"
+                    initial={{ scale: 0, rotate: -180 }}
+                    animate={{ scale: 1, rotate: 0 }}
+                    transition={{ delay: 0.1, type: "spring", stiffness: 200 }}
+                  >
+                    <FaBan className="w-8 h-8 sm:w-10 sm:h-10 text-red-600" />
+                  </motion.div>
+                  
+                  <motion.h3 
+                    className="text-xl sm:text-2xl font-bold text-gray-900 mb-2 sm:mb-3"
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.2 }}
+                  >
+                    Cancel This Order?
+                  </motion.h3>
+                  
+                  <motion.div
+                    className="inline-block bg-gray-100 px-3 py-1 sm:px-4 sm:py-1.5 rounded-full"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ delay: 0.3 }}
+                  >
+                    <p className="text-xs sm:text-sm font-mono text-gray-600">
+                      #{cancellingOrder?.slice(-8).toUpperCase()}
+                    </p>
+                  </motion.div>
+                </div>
+
+                {/* Message Section */}
+                <div className="px-4 sm:px-6 pb-4 sm:pb-6">
+                  <motion.div 
+                    className="bg-gradient-to-br from-orange-50 to-red-50 rounded-lg sm:rounded-xl p-3 sm:p-4 mb-4 sm:mb-5 border border-red-100"
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.4 }}
+                  >
+                    <p className="text-xs sm:text-sm text-gray-700 text-center leading-relaxed">
+                      Once cancelled, this action <span className="font-bold text-red-700">cannot be reversed</span>. 
+                      A refund will be processed per our policy.
+                    </p>
+                  </motion.div>
+
+                  {/* Action Buttons */}
+                  <motion.div 
+                    className="flex flex-col-reverse sm:flex-row gap-2 sm:gap-2.5"
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.5 }}
+                  >
+                    <motion.button
                       onClick={() => setShowCancelDialog(false)}
-                      className="flex-1 px-6 py-3 bg-gray-100 text-gray-700 rounded-xl hover:bg-gray-200 transition-colors font-semibold"
+                      className="flex-1 px-4 py-2.5 sm:px-5 sm:py-3 bg-white text-gray-700 rounded-lg sm:rounded-xl hover:bg-gray-50 transition-all font-semibold text-xs sm:text-sm border-2 border-gray-200 hover:border-gray-300 flex items-center justify-center gap-1.5 sm:gap-2 shadow-sm"
+                      whileHover={{ scale: 1.02, y: -1 }}
+                      whileTap={{ scale: 0.98 }}
                     >
-                      Keep Order
-                    </button>
-                    <button
+                      <FaChevronLeft className="text-[10px] sm:text-xs" />
+                      Keep My Order
+                    </motion.button>
+                    <motion.button
                       onClick={confirmCancelOrder}
-                      className="flex-1 px-6 py-3 bg-gradient-to-r from-red-500 to-red-600 text-white rounded-xl hover:from-red-600 hover:to-red-700 transition-all shadow-lg hover:shadow-xl font-semibold"
+                      className="flex-1 px-4 py-2.5 sm:px-5 sm:py-3 bg-gradient-to-r from-red-500 to-red-600 text-white rounded-lg sm:rounded-xl hover:from-red-600 hover:to-red-700 transition-all shadow-lg hover:shadow-xl font-bold text-xs sm:text-sm flex items-center justify-center gap-1.5 sm:gap-2"
+                      whileHover={{ scale: 1.02, y: -1 }}
+                      whileTap={{ scale: 0.98 }}
                     >
-                      Yes, Cancel
-                    </button>
-                  </div>
+                      <FaBan className="text-[10px] sm:text-xs" />
+                      Yes, Cancel Order
+                    </motion.button>
+                  </motion.div>
+
+                  {/* Help Text */}
+                  <motion.p 
+                    className="text-[10px] sm:text-xs text-gray-500 text-center mt-3 sm:mt-4 flex items-center justify-center gap-1 sm:gap-1.5"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ delay: 0.6 }}
+                  >
+                    <FaPhone className="text-orange-500 text-[10px] sm:text-xs" />
+                    Questions? Call 9931018857
+                  </motion.p>
                 </div>
               </motion.div>
             </motion.div>

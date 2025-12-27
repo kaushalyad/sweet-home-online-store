@@ -111,42 +111,37 @@ const Product = () => {
   };
 
   return productData ? (
-    <div className="container mx-auto px-4 py-8 relative">
-      {/* Add subtle background pattern */}
-      <div className="absolute inset-0 bg-pink-50 opacity-40 z-[-1]" style={{ 
-        backgroundImage: `url("data:image/svg+xml,%3Csvg width='20' height='20' viewBox='0 0 20 20' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23f9a8d4' fill-opacity='0.1' fill-rule='evenodd'%3E%3Ccircle cx='3' cy='3' r='3'/%3E%3Ccircle cx='13' cy='13' r='3'/%3E%3C/g%3E%3C/svg%3E")`,
-        backgroundSize: '20px 20px' 
-      }}></div>
+    <div className="w-full min-h-screen bg-gradient-to-br from-pink-50/30 via-orange-50/20 to-rose-50/30">
+      <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-6 py-4 sm:py-6 lg:py-8">
+        {/* Breadcrumb Navigation */}
+        <div className="mb-4 sm:mb-6">
+          <nav className="flex items-center text-xs sm:text-sm bg-white/80 backdrop-blur-sm px-3 sm:px-4 py-2.5 sm:py-3 rounded-xl shadow-soft overflow-x-auto">
+            <button 
+              onClick={() => navigate(-1)} 
+              className="flex items-center text-gray-600 hover:text-orange-500 transition-colors font-medium whitespace-nowrap"
+            >
+              <FaArrowLeft className="mr-1.5 sm:mr-2 text-xs sm:text-sm" />
+              <span className="hidden sm:inline">Back</span>
+            </button>
+            <span className="mx-1.5 sm:mx-2 text-gray-300">/</span>
+            <Link to="/" className="text-gray-600 hover:text-orange-500 transition-colors font-medium whitespace-nowrap">Home</Link>
+            <span className="mx-1.5 sm:mx-2 text-gray-300">/</span>
+            <Link to="/collection" className="text-gray-600 hover:text-orange-500 transition-colors font-medium whitespace-nowrap">Collection</Link>
+            <span className="mx-1.5 sm:mx-2 text-gray-300">/</span>
+            <Link 
+              to={`/collection?category=${productData.category}`}
+              className="text-gray-600 hover:text-orange-500 transition-colors font-medium capitalize whitespace-nowrap"
+            >
+              {productData.category}
+            </Link>
+            <span className="mx-1.5 sm:mx-2 text-gray-300 hidden md:inline">/</span>
+            <span className="text-gray-800 font-semibold truncate hidden md:inline max-w-[200px]">{productData.name}</span>
+          </nav>
+        </div>
 
-      {/* Breadcrumb Navigation */}
-      <div className="mb-6">
-        <nav className="flex items-center text-sm bg-white p-3 rounded-lg shadow-sm">
-          <button 
-            onClick={() => navigate(-1)} 
-            className="flex items-center text-gray-500 hover:text-pink-500 transition-colors"
-          >
-            <FaArrowLeft className="mr-2" />
-            <span>Back</span>
-          </button>
-          <span className="mx-2 text-gray-400">/</span>
-          <Link to="/" className="text-gray-500 hover:text-pink-500 transition-colors">Home</Link>
-          <span className="mx-2 text-gray-400">/</span>
-          <Link to="/collection" className="text-gray-500 hover:text-pink-500 transition-colors">Collection</Link>
-          <span className="mx-2 text-gray-400">/</span>
-          <Link 
-            to={`/collection?category=${productData.category}`}
-            className="text-gray-500 hover:text-pink-500 transition-colors capitalize"
-          >
-            {productData.category}
-          </Link>
-          <span className="mx-2 text-gray-400">/</span>
-          <span className="text-gray-700 font-medium truncate">{productData.name}</span>
-        </nav>
-      </div>
-
-      {/* Main Product Section */}
-      <div className="bg-white rounded-2xl shadow-md border border-gray-100 overflow-hidden hover:shadow-lg transition-shadow duration-300 backdrop-blur-sm bg-white/90">
-        <div className="flex flex-col lg:flex-row">
+        {/* Main Product Section */}
+        <div className="bg-white/90 backdrop-blur-sm rounded-xl sm:rounded-2xl shadow-medium border border-gray-100/50 overflow-hidden hover:shadow-strong transition-shadow duration-300">
+          <div className="flex flex-col lg:flex-row">
           {/* Product Images Section */}
           <div className="w-full lg:w-1/2 p-2 sm:p-4 lg:p-8">
             <div className="flex flex-col sm:flex-row gap-2 sm:gap-4 lg:gap-6">
@@ -194,7 +189,7 @@ const Product = () => {
                       transition: { duration: 0.3 }
                     }}
                     src={image} 
-                    className="absolute inset-0 w-full h-full object-contain p-2 sm:p-4 lg:p-6 transition-transform duration-500 group-hover:scale-110"
+                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                     alt={productData.name}
                     loading="eager"
                   />
@@ -315,7 +310,7 @@ const Product = () => {
               </div>
               
               {/* Product Title */}
-              <h1 className="text-xl sm:text-2xl lg:text-3xl font-semibold text-gray-800 mb-3 leading-tight">
+              <h1 className="font-poppins text-xl sm:text-2xl lg:text-3xl xl:text-4xl font-bold bg-gradient-to-r from-pink-600 via-orange-600 to-rose-600 bg-clip-text text-transparent mb-3 leading-tight">
                 {productData.name}
               </h1>
               
@@ -333,41 +328,41 @@ const Product = () => {
               </div>
               
               {/* Price */}
-              <div className="mb-6 bg-gray-50 p-4 rounded-lg">
-                <div className="flex flex-wrap items-center gap-3">
-                  <span className="text-2xl sm:text-3xl font-bold text-gray-900 bg-gradient-to-r from-pink-500 to-rose-500 bg-clip-text text-transparent">
+              <div className="mb-6 bg-gradient-to-br from-pink-50 via-orange-50 to-rose-50 p-4 sm:p-5 rounded-xl border border-pink-100/50">
+                <div className="flex flex-wrap items-center gap-2 sm:gap-3">
+                  <span className="font-poppins text-2xl sm:text-3xl lg:text-4xl font-bold bg-gradient-to-r from-pink-600 to-orange-600 bg-clip-text text-transparent">
                     {currency}{productData.price}
                   </span>
                   {productData.discountPrice && (
-                    <span className="text-xl text-gray-400 line-through">
+                    <span className="text-lg sm:text-xl text-gray-400 line-through font-inter">
                       {currency}{productData.discountPrice}
                     </span>
                   )}
                   {productData.discountPrice && (
-                    <span className="bg-green-100 text-green-700 text-sm px-2 py-1 rounded-full font-medium">
+                    <span className="bg-gradient-to-r from-green-500 to-emerald-500 text-white text-xs sm:text-sm px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-full font-semibold shadow-sm">
                       Save {Math.round(((productData.discountPrice - productData.price) / productData.discountPrice) * 100)}%
                     </span>
                   )}
                 </div>
-                <p className="text-sm text-green-600 mt-2 flex items-center">
-                  <FaCheck className="mr-1" /> In Stock
+                <p className="text-sm sm:text-base text-green-600 mt-3 flex items-center font-medium">
+                  <FaCheck className="mr-1.5" /> In Stock - Ready to Ship
                 </p>
               </div>
               
               {/* Description */}
               <div className="mb-6">
-                <p className="text-gray-600 leading-relaxed text-sm sm:text-base">
+                <p className="font-inter text-gray-700 leading-relaxed text-sm sm:text-base">
                   {productData.description}
                 </p>
               </div>
               
               {/* Quantity Selector */}
               <div className="mb-6">
-                <p className="font-medium text-gray-700 mb-2">Quantity</p>
+                <p className="font-poppins font-semibold text-gray-800 mb-3 text-sm sm:text-base">Quantity</p>
                 <div className="flex items-center">
                   <button 
                     onClick={decreaseQuantity}
-                    className="w-10 h-10 rounded-l-md border border-gray-300 flex items-center justify-center hover:bg-gray-50 focus:outline-none transition-colors"
+                    className="w-11 h-11 sm:w-12 sm:h-12 rounded-l-xl border-2 border-gray-300 flex items-center justify-center hover:bg-gradient-to-r hover:from-pink-500 hover:to-orange-500 hover:text-white hover:border-transparent focus:outline-none transition-all duration-200 font-bold text-lg"
                   >
                     -
                   </button>
@@ -375,11 +370,11 @@ const Product = () => {
                     type="number" 
                     value={quantity}
                     onChange={(e) => setQuantity(Math.max(1, parseInt(e.target.value) || 1))}
-                    className="w-16 h-10 border-t border-b border-gray-300 text-center"
+                    className="w-16 sm:w-20 h-11 sm:h-12 border-t-2 border-b-2 border-gray-300 text-center font-poppins font-bold text-base sm:text-lg focus:outline-none focus:border-orange-400"
                   />
                   <button 
                     onClick={increaseQuantity}
-                    className="w-10 h-10 rounded-r-md border border-gray-300 flex items-center justify-center hover:bg-gray-50 focus:outline-none transition-colors"
+                    className="w-11 h-11 sm:w-12 sm:h-12 rounded-r-xl border-2 border-gray-300 flex items-center justify-center hover:bg-gradient-to-r hover:from-pink-500 hover:to-orange-500 hover:text-white hover:border-transparent focus:outline-none transition-all duration-200 font-bold text-lg"
                   >
                     +
                   </button>
@@ -387,44 +382,52 @@ const Product = () => {
               </div>
               
               {/* Action Buttons */}
-              <div className="flex flex-col sm:flex-row gap-3 mb-8">
+              <div className="flex flex-col sm:flex-row gap-3 mb-6 sm:mb-8">
                 <motion.button
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
                   onClick={handleAddToCart}
-                  className="flex-1 bg-gradient-to-r from-pink-500 to-rose-500 text-white px-6 py-3.5 rounded-md font-medium flex items-center justify-center gap-2 transition-all shadow-sm hover:shadow"
+                  className="btn-interactive flex-1 bg-gradient-to-r from-pink-500 to-orange-500 text-white px-6 sm:px-8 py-3.5 sm:py-4 rounded-xl font-poppins font-semibold flex items-center justify-center gap-2.5 transition-all shadow-medium hover:shadow-strong text-sm sm:text-base"
                 >
-                  <FaShoppingCart /> Add to Cart
+                  <FaShoppingCart className="text-lg" /> Add to Cart
                 </motion.button>
                 
                 <motion.button
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
                   onClick={handleBuyNow}
-                  className="flex-1 bg-gray-800 hover:bg-gray-900 text-white px-6 py-3.5 rounded-md font-medium transition-colors shadow-sm"
+                  className="flex-1 bg-gradient-to-r from-gray-800 to-gray-900 hover:from-gray-900 hover:to-black text-white px-6 sm:px-8 py-3.5 sm:py-4 rounded-xl font-poppins font-semibold transition-all shadow-medium hover:shadow-strong text-sm sm:text-base"
                 >
                   Buy Now
                 </motion.button>
               </div>
               
               {/* Product Features */}
-              <div className="border-t border-gray-100 pt-6">
-                <h3 className="font-medium text-gray-800 mb-3">Product Highlights</h3>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  <div className="flex items-center gap-2 text-sm text-gray-600">
-                    <FaCheck className="text-green-500" />
+              <div className="border-t border-gray-200 pt-6">
+                <h3 className="font-poppins font-semibold text-gray-800 mb-4 text-base sm:text-lg">Product Highlights</h3>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+                  <div className="flex items-center gap-2.5 text-sm text-gray-700 font-inter">
+                    <div className="w-8 h-8 rounded-full bg-gradient-to-br from-green-400 to-emerald-500 flex items-center justify-center flex-shrink-0">
+                      <FaCheck className="text-white text-xs" />
+                    </div>
                     <span>100% Authentic</span>
                   </div>
-                  <div className="flex items-center gap-2 text-sm text-gray-600">
-                    <FaShippingFast className="text-green-500" />
+                  <div className="flex items-center gap-2.5 text-sm text-gray-700 font-inter">
+                    <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-400 to-indigo-500 flex items-center justify-center flex-shrink-0">
+                      <FaShippingFast className="text-white text-xs" />
+                    </div>
                     <span>Free shipping over ₹500</span>
                   </div>
-                  <div className="flex items-center gap-2 text-sm text-gray-600">
-                    <FaRegClock className="text-green-500" />
+                  <div className="flex items-center gap-2.5 text-sm text-gray-700 font-inter">
+                    <div className="w-8 h-8 rounded-full bg-gradient-to-br from-orange-400 to-rose-500 flex items-center justify-center flex-shrink-0">
+                      <FaRegClock className="text-white text-xs" />
+                    </div>
                     <span>Easy returns within 7 days</span>
                   </div>
-                  <div className="flex items-center gap-2 text-sm text-gray-600">
-                    <FaCheck className="text-green-500" />
+                  <div className="flex items-center gap-2.5 text-sm text-gray-700 font-inter">
+                    <div className="w-8 h-8 rounded-full bg-gradient-to-br from-purple-400 to-pink-500 flex items-center justify-center flex-shrink-0">
+                      <FaCheck className="text-white text-xs" />
+                    </div>
                     <span>Secure payment</span>
                   </div>
                 </div>
@@ -432,31 +435,31 @@ const Product = () => {
               
               {/* Product Specifications */}
               {(productData.ingredients || productData.weight || productData.shelfLife || productData.storage) && (
-                <div className="mt-6 border-t border-gray-100 pt-4">
-                  <h3 className="font-medium text-gray-800 mb-3">Product Specifications</h3>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-y-2 gap-x-4">
+                <div className="mt-6 border-t border-gray-200 pt-6">
+                  <h3 className="font-poppins font-semibold text-gray-800 mb-4 text-base sm:text-lg">Product Specifications</h3>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-y-3 sm:gap-y-4 gap-x-4 sm:gap-x-6">
                     {productData.ingredients && (
                       <div className="flex flex-col">
-                        <span className="text-xs text-gray-500">Ingredients</span>
-                        <span className="text-sm">{productData.ingredients}</span>
+                        <span className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">Ingredients</span>
+                        <span className="text-sm font-inter text-gray-700">{productData.ingredients}</span>
                       </div>
                     )}
                     {productData.weight && (
                       <div className="flex flex-col">
-                        <span className="text-xs text-gray-500">Weight</span>
-                        <span className="text-sm">{productData.weight}</span>
+                        <span className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">Weight</span>
+                        <span className="text-sm font-inter text-gray-700">{productData.weight}</span>
                       </div>
                     )}
                     {productData.shelfLife && (
                       <div className="flex flex-col">
-                        <span className="text-xs text-gray-500">Shelf Life</span>
-                        <span className="text-sm">{productData.shelfLife}</span>
+                        <span className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">Shelf Life</span>
+                        <span className="text-sm font-inter text-gray-700">{productData.shelfLife}</span>
                       </div>
                     )}
                     {productData.storage && (
                       <div className="flex flex-col">
-                        <span className="text-xs text-gray-500">Storage Instructions</span>
-                        <span className="text-sm">{productData.storage}</span>
+                        <span className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">Storage Instructions</span>
+                        <span className="text-sm font-inter text-gray-700">{productData.storage}</span>
                       </div>
                     )}
                   </div>
@@ -468,13 +471,13 @@ const Product = () => {
       </div>
 
       {/* Tabs Section */}
-      <div className="mt-12">
-        <div className="flex border-b border-gray-200 bg-white rounded-t-lg overflow-hidden">
+      <div className="mt-8 sm:mt-12">
+        <div className="flex gap-1 sm:gap-2 border-b-2 border-gray-200 bg-white/80 backdrop-blur-sm rounded-t-xl overflow-x-auto">
           <button
             onClick={() => setActiveTab("description")}
-            className={`px-6 py-4 text-sm font-medium transition-all ${
+            className={`px-4 sm:px-6 py-3 sm:py-4 text-xs sm:text-sm font-poppins font-semibold transition-all whitespace-nowrap ${
               activeTab === "description"
-                ? "text-pink-600 border-b-2 border-pink-500 bg-pink-50/50"
+                ? "text-white bg-gradient-to-r from-pink-500 to-orange-500 rounded-t-xl shadow-sm"
                 : "text-gray-600 hover:text-gray-900 hover:bg-gray-50"
             }`}
           >
@@ -482,9 +485,9 @@ const Product = () => {
           </button>
           <button
             onClick={() => setActiveTab("nutrition")}
-            className={`px-6 py-4 text-sm font-medium transition-all ${
+            className={`px-4 sm:px-6 py-3 sm:py-4 text-xs sm:text-sm font-poppins font-semibold transition-all whitespace-nowrap ${
               activeTab === "nutrition"
-                ? "text-pink-600 border-b-2 border-pink-500 bg-pink-50/50"
+                ? "text-white bg-gradient-to-r from-pink-500 to-orange-500 rounded-t-xl shadow-sm"
                 : "text-gray-600 hover:text-gray-900 hover:bg-gray-50"
             }`}
           >
@@ -492,9 +495,9 @@ const Product = () => {
           </button>
           <button
             onClick={() => setActiveTab("reviews")}
-            className={`px-6 py-4 text-sm font-medium transition-all ${
+            className={`px-4 sm:px-6 py-3 sm:py-4 text-xs sm:text-sm font-poppins font-semibold transition-all whitespace-nowrap ${
               activeTab === "reviews"
-                ? "text-pink-600 border-b-2 border-pink-500 bg-pink-50/50"
+                ? "text-white bg-gradient-to-r from-pink-500 to-orange-500 rounded-t-xl shadow-sm"
                 : "text-gray-600 hover:text-gray-900 hover:bg-gray-50"
             }`}
           >
@@ -502,7 +505,7 @@ const Product = () => {
           </button>
         </div>
         
-        <div className="bg-white border border-gray-200 border-t-0 rounded-b-lg shadow-sm p-6">
+        <div className="bg-white/90 backdrop-blur-sm border-2 border-gray-200 border-t-0 rounded-b-xl shadow-medium p-4 sm:p-6 lg:p-8">
           <AnimatePresence mode="wait">
             {activeTab === "description" && (
               <motion.div 
@@ -615,7 +618,7 @@ const Product = () => {
                   </div>
                 </div>
                 
-                <button className="bg-pink-500 hover:bg-pink-600 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors">
+                <button className="bg-gradient-to-r from-pink-500 to-orange-500 hover:from-pink-600 hover:to-orange-600 text-white px-5 sm:px-6 py-2.5 sm:py-3 rounded-xl text-sm font-poppins font-semibold transition-all shadow-medium hover:shadow-strong">
                   Write a Review
                 </button>
                 
@@ -680,10 +683,10 @@ const Product = () => {
       </div>
 
       {/* Related Products Section */}
-      <div className="mt-16">
-        <div className="text-center mb-10">
-          <h2 className="text-2xl font-semibold text-gray-800 mb-2">You May Also Like</h2>
-          <div className="w-24 h-1 bg-gradient-to-r from-pink-400 to-pink-600 mx-auto rounded-full"></div>
+      <div className="mt-12 sm:mt-16">
+        <div className="text-center mb-8 sm:mb-10">
+          <h2 className="font-poppins text-2xl sm:text-3xl font-bold bg-gradient-to-r from-pink-600 to-orange-600 bg-clip-text text-transparent mb-3">You May Also Like</h2>
+          <div className="w-20 sm:w-24 h-1 bg-gradient-to-r from-pink-500 to-orange-500 mx-auto rounded-full"></div>
         </div>
         <RelatedProducts
           category={productData.category}
@@ -795,6 +798,7 @@ const Product = () => {
         )}
       </AnimatePresence>
     </div>
+  </div>
   ) : (
     <div className="min-h-[60vh] flex items-center justify-center">
       <div className="flex flex-col items-center bg-white p-8 rounded-xl shadow-md">

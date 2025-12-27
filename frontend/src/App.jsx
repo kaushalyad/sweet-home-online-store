@@ -105,7 +105,7 @@ const App = () => {
 
   return (
     <ShopContextProvider>
-      <div className='relative min-h-screen w-full'>
+      <div className='relative min-h-screen w-full overflow-x-hidden'>
         <ToastContainer 
           position="top-right"
           autoClose={2000}
@@ -126,7 +126,7 @@ const App = () => {
         <div 
           className='transition-all duration-300 min-h-[calc(100vh-140px)] w-full'
           style={{ 
-            paddingTop: showPromoBanner ? '148px' : '108px'
+            paddingTop: showPromoBanner ? 'clamp(100px, 15vh, 148px)' : 'clamp(70px, 12vh, 108px)'
           }}
         > 
           <div className="flex justify-center mb-6 px-4 sm:px-[5vw] md:px-[7vw] lg:px-[9vw]">

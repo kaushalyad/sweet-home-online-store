@@ -2,7 +2,12 @@
 <html lang="en" class="scroll-smooth">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/sweet_home_logo.ico" />
+    
+    <!-- Favicon - Optimized for Google Search -->
+    <link rel="icon" href="/sweet_home_logo.ico" type="image/x-icon" sizes="16x16 32x32 48x48" />
+    <link rel="shortcut icon" href="/sweet_home_logo.ico" type="image/x-icon" />
+    <link rel="apple-touch-icon" href="/sweet_home_logo.ico" />
+    
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     
     <!-- Primary Meta Tags -->
@@ -30,11 +35,9 @@
     <meta name="msapplication-TileColor" content="#F97316" />
     <meta name="msapplication-config" content="/browserconfig.xml" />
     
-    <!-- Security Headers -->
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self' https://sweet-home-online-store.onrender.com https://checkout.razorpay.com https://www.google-analytics.com https://www.googletagmanager.com; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://checkout.razorpay.com https://www.google-analytics.com https://www.googletagmanager.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: https: blob:; font-src 'self' https://fonts.gstatic.com; connect-src 'self' https://sweet-home-online-store.onrender.com https://checkout.razorpay.com https://www.google-analytics.com; frame-src https://checkout.razorpay.com;" />
+    <!-- Security Headers - Permissive for compatibility -->
     <meta http-equiv="X-Content-Type-Options" content="nosniff" />
-    <meta http-equiv="X-Frame-Options" content="SAMEORIGIN" />
-    <meta http-equiv="Referrer-Policy" content="strict-origin-when-cross-origin" />
+    <meta http-equiv="Referrer-Policy" content="no-referrer-when-downgrade" />
     
     <!-- PWA Manifest -->
     <link rel="manifest" href="/manifest.json" />
@@ -73,14 +76,20 @@
       "name": "Sweet Home Online Store",
       "alternateName": "Sweet Home Ladania Store",
       "image": "https://sweethome-store.com/sweet_home_logo.jpg",
-      "logo": "https://sweethome-store.com/sweet_home_logo.jpg",
+      "logo": {
+        "@type": "ImageObject",
+        "url": "https://sweethome-store.com/sweet_home_logo.jpg",
+        "width": 512,
+        "height": 512,
+        "caption": "Sweet Home Online Store Logo"
+      },
       "description": "Premium Indian sweets, mithai, namkeen and dry fruits store offering fresh homemade products online with same day delivery",
       "address": {
         "@type": "PostalAddress",
         "addressCountry": "IN",
         "addressRegion": "India"
       },
-      "telephone": "+918797196867",
+      "telephone": "+919931018857",
       "priceRange": "₹₹",
       "openingHours": "Mo-Su 09:00-21:00",
       "paymentAccepted": ["Cash", "Credit Card", "Debit Card", "UPI", "Net Banking", "Razorpay"],
@@ -216,11 +225,19 @@
       "name": "Sweet Home Online Store",
       "alternateName": "Sweet Home Ladania",
       "url": "https://sweethome-store.com",
-      "logo": "https://sweethome-store.com/sweet_home_logo.jpg",
+      "logo": {
+        "@type": "ImageObject",
+        "url": "https://sweethome-store.com/sweet_home_logo.jpg",
+        "width": 512,
+        "height": 512,
+        "caption": "Sweet Home Online Store Logo"
+      },
+      "image": "https://sweethome-store.com/sweet_home_logo.jpg",
       "description": "Leading Indian sweets and mithai store offering authentic traditional sweets, namkeen, and premium dry fruits with nationwide delivery",
+      "email": "contact@sweethome-store.com",
       "contactPoint": {
         "@type": "ContactPoint",
-        "telephone": "+91-8797196867",
+        "telephone": "+919931018857",
         "contactType": "Customer Service",
         "areaServed": "IN",
         "availableLanguage": ["English", "Hindi"]
