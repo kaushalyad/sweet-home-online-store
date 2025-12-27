@@ -163,6 +163,8 @@ const Orders = () => {
       case 'shipped':
       case 'out for delivery':
         return <FaTruck className="w-4 h-4" />;
+      case 'cancelled':
+        return <FaBan className="w-4 h-4" />;
       default:
         return <FaBox className="w-4 h-4" />;
     }
@@ -208,7 +210,14 @@ const Orders = () => {
       );
 
       if (response.data.success) {
-        toast.success('Order cancelled successfully!');
+        if (response.data.refundInitiated) {
+          toast.success(
+            `Order cancelled successfully! Refund of ${currency}${response.data.refundAmount} has been initiated.`,
+            { duration: 5000 }
+          );
+        } else {
+          toast.success('Order cancelled successfully!');
+        }
         // Refresh order data
         await loadOrderData();
       } else {
@@ -349,18 +358,32 @@ const Orders = () => {
               {filteredOrders.map((order, index) => {
                 const isExpanded = expandedOrders.has(order._id);
                 
+                const isCancelled = order.status.toLowerCase() === 'cancelled';
+                
                 return (
                   <motion.div 
                     key={order._id} 
-                    className="bg-white rounded-2xl shadow-lg overflow-hidden hover:shadow-2xl transition-shadow duration-300"
+                    className={`bg-white rounded-2xl shadow-lg overflow-hidden hover:shadow-2xl transition-shadow duration-300 ${
+                      isCancelled ? 'opacity-75 ring-2 ring-red-200' : ''
+                    }`}
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: -20 }}
                     transition={{ delay: index * 0.05 }}
                     layout
                   >
+                    {/* Cancelled Banner */}
+                    {isCancelled && (
+                      <div className="bg-gradient-to-r from-red-500 to-red-600 text-white px-6 py-3 flex items-center justify-center gap-2 font-bold text-sm">
+                        <FaBan className="animate-pulse" />
+                        THIS ORDER HAS BEEN CANCELLED
+                      </div>
+                    )}
+                    
                     {/* Order Header */}
-                    <div className="p-6 border-b border-gray-100">
+                    <div className={`p-6 border-b ${
+                      isCancelled ? 'bg-red-50/30 border-red-100' : 'border-gray-100'
+                    }`}>
                       <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-4">
                         <div className="flex-1">
                           <div className="flex items-center gap-3 mb-2">
@@ -396,12 +419,17 @@ const Orders = () => {
                         <div className="flex flex-wrap gap-2">
                           <Link
                             to={`/track-order/${order._id}`}
-                            className="flex items-center justify-center gap-1.5 px-3 sm:px-4 py-2 sm:py-2.5 bg-gradient-to-r from-orange-500 to-pink-500 text-white rounded-lg sm:rounded-xl hover:from-orange-600 hover:to-pink-600 transition-all shadow-lg hover:shadow-xl font-semibold text-xs sm:text-sm whitespace-nowrap"
+                            className={`flex items-center justify-center gap-1.5 px-3 sm:px-4 py-2 sm:py-2.5 rounded-lg sm:rounded-xl transition-all font-semibold text-xs sm:text-sm whitespace-nowrap ${
+                              isCancelled 
+                                ? 'bg-gray-300 text-gray-600 cursor-not-allowed shadow-sm' 
+                                : 'bg-gradient-to-r from-orange-500 to-pink-500 text-white hover:from-orange-600 hover:to-pink-600 shadow-lg hover:shadow-xl'
+                            }`}
+                            onClick={(e) => isCancelled && e.preventDefault()}
                           >
                             <FaMapMarkerAlt className="text-xs sm:text-sm" /> 
                             <span>Track</span>
                           </Link>
-                          {canCancelOrder(order.status) && (
+                          {canCancelOrder(order.status) && !isCancelled && (
                             <button
                               onClick={() => handleCancelOrder(order._id)}
                               className="flex items-center justify-center gap-1.5 px-3 sm:px-4 py-2 sm:py-2.5 bg-red-100 text-red-700 rounded-lg sm:rounded-xl hover:bg-red-200 transition-colors font-semibold text-xs sm:text-sm whitespace-nowrap border-2 border-red-200 hover:border-red-300"
@@ -480,12 +508,16 @@ const Orders = () => {
                                 {order.items.map((item, idx) => (
                                   <motion.div 
                                     key={idx}
-                                    className="flex items-center gap-4 p-4 bg-white rounded-xl shadow-sm hover:shadow-md transition-shadow"
+                                    className={`flex items-center gap-4 p-4 bg-white rounded-xl shadow-sm hover:shadow-md transition-shadow ${
+                                      isCancelled ? 'opacity-60' : ''
+                                    }`}
                                     initial={{ opacity: 0, x: -20 }}
                                     animate={{ opacity: 1, x: 0 }}
                                     transition={{ delay: idx * 0.05 }}
                                   >
-                                    <div className="w-20 h-20 bg-gray-100 rounded-xl overflow-hidden flex-shrink-0">
+                                    <div className={`w-20 h-20 bg-gray-100 rounded-xl overflow-hidden flex-shrink-0 ${
+                                      isCancelled ? 'grayscale' : ''
+                                    }`}>
                                       <img 
                                         src={item.image} 
                                         alt={item.name || 'Product'}
@@ -497,8 +529,12 @@ const Orders = () => {
                                       />
                                     </div>
                                     <div className="flex-1">
-                                      <h5 className="font-bold text-gray-800">{item.name || 'Product'}</h5>
-                                      <div className="flex flex-wrap gap-3 text-sm text-gray-600 mt-1">
+                                      <h5 className={`font-bold text-gray-800 ${
+                                        isCancelled ? 'line-through' : ''
+                                      }`}>{item.name || 'Product'}</h5>
+                                      <div className={`flex flex-wrap gap-3 text-sm text-gray-600 mt-1 ${
+                                        isCancelled ? 'line-through' : ''
+                                      }`}>
                                         <span>Size: <span className="font-semibold">{item.size || 'Regular'}</span></span>
                                         <span>Qty: <span className="font-semibold">{item.quantity}</span></span>
                                         <span className="font-bold text-orange-600">{currency}{item.price}</span>
@@ -555,6 +591,107 @@ const Orders = () => {
                                 </div>
                               </div>
                             </div>
+
+                            {/* Refund Status for Cancelled Orders */}
+                            {isCancelled && order.refund && order.refund.status !== 'none' && (
+                              <motion.div 
+                                className="p-4 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl border-2 border-blue-200 shadow-sm"
+                                initial={{ opacity: 0, y: 10 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{ delay: 0.3 }}
+                              >
+                                <h4 className="font-bold text-blue-900 mb-3 flex items-center gap-2">
+                                  <FaReceipt className="text-blue-500" />
+                                  Refund Information
+                                </h4>
+                                <div className="space-y-3">
+                                  <div className="flex items-center justify-between">
+                                    <span className="text-sm text-gray-700">Refund Status</span>
+                                    <span className={`px-3 py-1 rounded-full text-xs font-bold ${
+                                      order.refund.status === 'completed' 
+                                        ? 'bg-green-100 text-green-700 border border-green-300' 
+                                        : order.refund.status === 'pending' 
+                                          ? 'bg-yellow-100 text-yellow-700 border border-yellow-300 animate-pulse'
+                                          : order.refund.status === 'processing'
+                                            ? 'bg-blue-100 text-blue-700 border border-blue-300'
+                                            : 'bg-red-100 text-red-700 border border-red-300'
+                                    }`}>
+                                      {order.refund.status === 'completed' && '✓ '}
+                                      {order.refund.status.charAt(0).toUpperCase() + order.refund.status.slice(1)}
+                                    </span>
+                                  </div>
+                                  
+                                  <div className="flex items-center justify-between">
+                                    <span className="text-sm text-gray-700">Refund Amount</span>
+                                    <span className="text-base font-bold text-blue-700">
+                                      {currency}{order.refund.amount}
+                                    </span>
+                                  </div>
+
+                                  {order.refund.initiatedDate && (
+                                    <div className="flex items-center justify-between">
+                                      <span className="text-sm text-gray-700">Initiated On</span>
+                                      <span className="text-sm font-semibold text-gray-800">
+                                        {new Date(order.refund.initiatedDate).toLocaleDateString('en-US', { 
+                                          month: 'short', 
+                                          day: 'numeric', 
+                                          year: 'numeric' 
+                                        })}
+                                      </span>
+                                    </div>
+                                  )}
+
+                                  {order.refund.completedDate && (
+                                    <div className="flex items-center justify-between">
+                                      <span className="text-sm text-gray-700">Completed On</span>
+                                      <span className="text-sm font-semibold text-green-700">
+                                        {new Date(order.refund.completedDate).toLocaleDateString('en-US', { 
+                                          month: 'short', 
+                                          day: 'numeric', 
+                                          year: 'numeric' 
+                                        })}
+                                      </span>
+                                    </div>
+                                  )}
+
+                                  {order.refund.refundMethod && (
+                                    <div className="flex items-center justify-between">
+                                      <span className="text-sm text-gray-700">Refund Method</span>
+                                      <span className="text-sm font-semibold text-gray-800 capitalize">
+                                        {order.refund.refundMethod}
+                                      </span>
+                                    </div>
+                                  )}
+
+                                  {order.refund.transactionId && (
+                                    <div className="pt-2 border-t border-blue-200">
+                                      <span className="text-xs text-gray-600">Transaction ID</span>
+                                      <p className="text-xs font-mono text-gray-800 mt-1 bg-white px-2 py-1 rounded">
+                                        {order.refund.transactionId}
+                                      </p>
+                                    </div>
+                                  )}
+
+                                  {order.refund.status === 'pending' && (
+                                    <div className="pt-3 border-t border-blue-200">
+                                      <p className="text-xs text-blue-700 flex items-start gap-2">
+                                        <FaClock className="mt-0.5 flex-shrink-0" />
+                                        <span>Your refund is being processed. It typically takes 5-7 business days to reflect in your account.</span>
+                                      </p>
+                                    </div>
+                                  )}
+
+                                  {order.refund.status === 'completed' && (
+                                    <div className="pt-3 border-t border-blue-200">
+                                      <p className="text-xs text-green-700 flex items-start gap-2">
+                                        <FaCheck className="mt-0.5 flex-shrink-0" />
+                                        <span>Your refund has been successfully processed and credited to your original payment method.</span>
+                                      </p>
+                                    </div>
+                                  )}
+                                </div>
+                              </motion.div>
+                            )}
                           </div>
                         </motion.div>
                       )}

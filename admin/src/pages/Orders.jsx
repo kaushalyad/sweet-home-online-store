@@ -96,6 +96,32 @@ const Orders = () => {
     }
   }
 
+  const handleRefundStatusUpdate = async (orderId, refundStatus) => {
+    if (!token) {
+      toast.error('Please login again')
+      return
+    }
+
+    try {
+      const response = await axios.put(
+        backendUrl + '/api/order/refund/' + orderId,
+        { refundStatus },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        }
+      )
+      
+      if (response.data.success) {
+        await fetchAllOrders()
+        toast.success(`Refund status updated to ${refundStatus}`)
+      }
+    } catch (error) {
+      toast.error(error.response?.data?.message || 'Error updating refund status')
+    }
+  }
+
   useEffect(() => {
     fetchAllOrders()
     fetchRecentNotifications()
@@ -232,18 +258,35 @@ const Orders = () => {
           No orders found matching your filter criteria
         </div>
       ) : (
-        filteredOrders.map((order, index) => (
+        filteredOrders.map((order, index) => {
+          const isCancelled = order.status === 'Cancelled' || order.status === 'cancelled';
+          
+          return (
           <div 
             className={`grid grid-cols-1 sm:grid-cols-[0.5fr_2fr_1fr] lg:grid-cols-[0.5fr_2fr_1fr_1fr_1fr] gap-3 items-start border-2 ${
-              hasPerishableItems(order.items) ? 'border-pink-200 bg-pink-50' : 'border-gray-200'
-            } p-5 md:p-8 my-3 md:my-4 text-xs sm:text-sm text-gray-700`} 
+              isCancelled 
+                ? 'border-red-300 bg-red-50/50 opacity-75' 
+                : hasPerishableItems(order.items) 
+                  ? 'border-pink-200 bg-pink-50' 
+                  : 'border-gray-200'
+            } p-5 md:p-8 my-3 md:my-4 text-xs sm:text-sm text-gray-700 ${
+              isCancelled ? 'relative' : ''
+            }`} 
             key={index}
           >
+            {isCancelled && (
+              <div className="absolute top-3 right-3 bg-red-600 text-white px-3 py-1 rounded-full text-xs font-bold flex items-center gap-1.5 shadow-md">
+                <FaBan className="w-3 h-3" />
+                CANCELLED
+              </div>
+            )}
             <div className="flex items-center justify-center">
-              <FaBox className="w-4 h-4 text-gray-600" />
+              <FaBox className={`w-4 h-4 ${
+                isCancelled ? 'text-red-400' : 'text-gray-600'
+              }`} />
             </div>
-            <div>
-              <div>
+            <div className={isCancelled ? 'opacity-70' : ''}>
+              <div className={isCancelled ? 'line-through' : ''}>
                 {order.items.map((item, index) => {
                   if (index === order.items.length - 1) {
                     return <p className='py-0.5' key={index}> {item.name} x {item.quantity} <span> {item.size} </span> </p>
@@ -311,9 +354,10 @@ const Orders = () => {
               <select 
                 onChange={(event)=>statusHandler(event,order._id)} 
                 value={order.status} 
+                disabled={isCancelled}
                 className={`p-2 font-semibold w-full rounded ${
                   order.status === 'Delivered' ? 'bg-green-100' : 
-                  order.status === 'Cancelled' ? 'bg-red-100' :
+                  order.status === 'Cancelled' ? 'bg-red-200 text-red-800 cursor-not-allowed line-through' :
                   order.status === 'Out for delivery' ? 'bg-blue-100' :
                   'bg-amber-50'
                 }`}
@@ -334,9 +378,39 @@ const Orders = () => {
                   Contains perishable items - prioritize delivery
                 </div>
               )}
+
+              {/* Refund Status Management for Cancelled Orders */}
+              {isCancelled && order.refund && order.refund.status !== 'none' && (
+                <div className="mt-3 p-3 bg-blue-50 border border-blue-200 rounded">
+                  <p className="text-xs font-semibold text-blue-900 mb-2">Refund Status</p>
+                  <select
+                    value={order.refund.status}
+                    onChange={(e) => handleRefundStatusUpdate(order._id, e.target.value)}
+                    className={`w-full p-2 text-xs font-semibold rounded border ${
+                      order.refund.status === 'completed' 
+                        ? 'bg-green-100 border-green-300 text-green-800' 
+                        : order.refund.status === 'pending'
+                          ? 'bg-yellow-100 border-yellow-300 text-yellow-800'
+                          : order.refund.status === 'processing'
+                            ? 'bg-blue-100 border-blue-300 text-blue-800'
+                            : 'bg-red-100 border-red-300 text-red-800'
+                    }`}
+                  >
+                    <option value="pending">Pending</option>
+                    <option value="processing">Processing</option>
+                    <option value="completed">Completed</option>
+                    <option value="failed">Failed</option>
+                  </select>
+                  {order.refund.amount && (
+                    <p className="text-xs text-gray-600 mt-2">
+                      Amount: <span className="font-bold text-blue-700">₹{order.refund.amount}</span>
+                    </p>
+                  )}
+                </div>
+              )}
             </div>
           </div>
-        ))
+        )})
       )}
     </div>
   )
