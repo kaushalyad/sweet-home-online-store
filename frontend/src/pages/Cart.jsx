@@ -163,49 +163,122 @@ const Cart = () => {
 
   if (isCartEmpty) {
     return (
-      <div className="w-full min-h-screen bg-gray-50 py-4 sm:py-8">
-        <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
-          <div className="mb-4 sm:mb-6">
-            <Title title="Your Sweet Cart" />
+      <div className="w-full min-h-screen bg-gradient-to-br from-orange-50 via-white to-pink-50 py-6 sm:py-10">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6">
+          {/* Compact Header */}
+          <div className="text-center mb-6">
+            <h1 className="font-poppins text-2xl sm:text-3xl font-bold bg-gradient-to-r from-pink-600 via-orange-500 to-rose-600 bg-clip-text text-transparent">
+              Your Sweet Cart
+            </h1>
           </div>
           
-          <div className="bg-gradient-to-br from-pink-50 via-orange-50 to-rose-50 rounded-xl sm:rounded-2xl shadow-medium p-6 sm:p-10 md:p-16">
-            <div className="max-w-2xl mx-auto text-center">
-              {/* Animated Icon */}
-              <div className="relative w-20 h-20 sm:w-28 sm:h-28 md:w-32 md:h-32 mx-auto mb-6 sm:mb-8">
-                <div className="absolute inset-0 bg-gradient-to-br from-pink-400 to-orange-400 rounded-full opacity-20 animate-pulse"></div>
-                <div className="relative w-full h-full bg-gradient-to-br from-pink-500 to-orange-500 rounded-full flex items-center justify-center shadow-strong">
-                  <FaShoppingCart className="text-3xl sm:text-4xl md:text-5xl text-white" />
+          {/* Main Empty Cart Card - Compact & Attractive */}
+          <div className="bg-white rounded-3xl shadow-xl overflow-hidden">
+            {/* Decorative Header */}
+            <div className="h-2 bg-gradient-to-r from-pink-500 via-orange-400 to-rose-500"></div>
+            
+            <div className="p-6 sm:p-10 text-center">
+              {/* Animated Icon - Smaller */}
+              <div className="relative inline-block mb-5">
+                <div className="absolute inset-0 bg-gradient-to-br from-pink-400 to-orange-400 rounded-full blur-xl opacity-30 animate-pulse"></div>
+                <div className="relative w-24 h-24 sm:w-28 sm:h-28 bg-gradient-to-br from-pink-100 to-orange-100 rounded-full flex items-center justify-center shadow-lg">
+                  <FaShoppingCart className="text-4xl sm:text-5xl text-transparent bg-gradient-to-br from-pink-500 to-orange-500 bg-clip-text" style={{ WebkitTextFillColor: 'transparent', WebkitBackgroundClip: 'text' }} />
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <FaShoppingCart className="text-4xl sm:text-5xl text-pink-500 opacity-50" />
+                  </div>
                 </div>
               </div>
 
-              {/* Heading with Poppins */}
-              <h2 className="font-poppins text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold bg-gradient-to-r from-pink-600 to-orange-600 bg-clip-text text-transparent mb-3 sm:mb-4 leading-tight">
-                Your Cart is Waiting for Sweet Treats!
+              {/* Heading - Compact */}
+              <h2 className="font-poppins text-xl sm:text-2xl font-bold text-gray-800 mb-2">
+                Your Cart is Empty
               </h2>
               
-              {/* Description */}
-              <p className="font-inter text-sm sm:text-base md:text-lg text-gray-700 mb-6 sm:mb-8 md:mb-10 leading-relaxed px-2 sm:px-4">
-                Discover our delightful collection of handcrafted sweets and treats. From traditional favorites to modern delights, we have something special for every sweet tooth!
+              {/* Description - Shorter */}
+              <p className="text-sm sm:text-base text-gray-600 mb-6 max-w-md mx-auto">
+                Fill it with delicious handcrafted sweets from our collection!
               </p>
 
-              {/* Action Buttons */}
-              <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 justify-center items-stretch sm:items-center max-w-md sm:max-w-none mx-auto">
+              {/* Features Grid - Compact */}
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4 mb-8 max-w-2xl mx-auto">
+                <div className="bg-gradient-to-br from-pink-50 to-orange-50 rounded-xl p-3 sm:p-4 transform hover:scale-105 transition-transform">
+                  <div className="text-2xl mb-2">🍬</div>
+                  <h3 className="font-semibold text-gray-800 text-sm mb-1">Fresh & Pure</h3>
+                  <p className="text-xs text-gray-600">Handcrafted daily</p>
+                </div>
+                <div className="bg-gradient-to-br from-orange-50 to-rose-50 rounded-xl p-3 sm:p-4 transform hover:scale-105 transition-transform">
+                  <div className="text-2xl mb-2">🚚</div>
+                  <h3 className="font-semibold text-gray-800 text-sm mb-1">Free Delivery</h3>
+                  <p className="text-xs text-gray-600">On orders above ₹500</p>
+                </div>
+                <div className="bg-gradient-to-br from-rose-50 to-pink-50 rounded-xl p-3 sm:p-4 transform hover:scale-105 transition-transform">
+                  <div className="text-2xl mb-2">🎁</div>
+                  <h3 className="font-semibold text-gray-800 text-sm mb-1">Gift Options</h3>
+                  <p className="text-xs text-gray-600">Perfect packaging</p>
+                </div>
+              </div>
+
+              {/* Action Buttons - Compact */}
+              <div className="flex flex-col sm:flex-row gap-3 justify-center max-w-md mx-auto">
                 <button
                   onClick={() => navigate('/collection')}
-                  className="btn-interactive w-full sm:w-auto px-5 sm:px-6 md:px-8 py-2.5 sm:py-3 md:py-3.5 bg-gradient-to-r from-pink-500 to-orange-500 text-white rounded-lg font-poppins font-medium sm:font-semibold hover:shadow-strong transition-all duration-300 flex items-center justify-center gap-2 text-sm sm:text-base group"
+                  className="group px-6 py-3 bg-gradient-to-r from-pink-500 to-orange-500 text-white rounded-xl font-semibold hover:shadow-lg hover:scale-105 transition-all duration-300 flex items-center justify-center gap-2 text-sm"
                 >
-                  <FaShoppingCart className="text-sm sm:text-base group-hover:scale-110 transition-transform" />
-                  <span className="whitespace-nowrap">Explore Sweet Collection</span>
+                  <FaShoppingCart className="group-hover:rotate-12 transition-transform" />
+                  <span>Browse Sweets</span>
                 </button>
                 <button
                   onClick={() => navigate('/')}
-                  className="w-full sm:w-auto px-5 sm:px-6 md:px-8 py-2.5 sm:py-3 md:py-3.5 border-2 border-gray-300 text-gray-700 rounded-lg font-poppins font-medium sm:font-semibold hover:border-orange-400 hover:bg-orange-50 hover:text-orange-600 transition-all duration-300 text-sm sm:text-base"
+                  className="px-6 py-3 border-2 border-gray-300 text-gray-700 rounded-xl font-semibold hover:border-orange-400 hover:bg-orange-50 transition-all duration-300 text-sm"
                 >
-                  Back to Home
+                  Go Home
                 </button>
               </div>
             </div>
+
+            {/* Popular Products Suggestion - Compact */}
+            <div className="bg-gradient-to-r from-pink-50 to-orange-50 px-6 py-4 border-t border-gray-100">
+              <p className="text-center text-sm text-gray-700">
+                <span className="font-semibold">💡 Tip:</span> Check out our{' '}
+                <button 
+                  onClick={() => navigate('/collection')}
+                  className="text-orange-600 font-semibold hover:underline"
+                >
+                  bestsellers
+                </button>
+                {' '}and{' '}
+                <button 
+                  onClick={() => navigate('/collection')}
+                  className="text-pink-600 font-semibold hover:underline"
+                >
+                  new arrivals
+                </button>
+              </p>
+            </div>
+          </div>
+
+          {/* Quick Links - Compact Cards */}
+          <div className="grid grid-cols-2 gap-3 mt-6">
+            <button
+              onClick={() => navigate('/orders')}
+              className="bg-white rounded-2xl p-4 shadow-md hover:shadow-lg transition-all group"
+            >
+              <div className="text-3xl mb-2">📦</div>
+              <h3 className="font-semibold text-gray-800 text-sm group-hover:text-orange-600 transition-colors">
+                My Orders
+              </h3>
+              <p className="text-xs text-gray-500 mt-1">Track your purchases</p>
+            </button>
+            <button
+              onClick={() => navigate('/wishlist')}
+              className="bg-white rounded-2xl p-4 shadow-md hover:shadow-lg transition-all group"
+            >
+              <div className="text-3xl mb-2">❤️</div>
+              <h3 className="font-semibold text-gray-800 text-sm group-hover:text-pink-600 transition-colors">
+                Wishlist
+              </h3>
+              <p className="text-xs text-gray-500 mt-1">Save your favorites</p>
+            </button>
           </div>
         </div>
       </div>

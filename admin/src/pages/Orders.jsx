@@ -6,7 +6,7 @@ import { io } from 'socket.io-client'
 import { backendUrl, currency } from '../config'
 import { toast } from 'react-toastify'
 import { assets } from '../assets/assets'
-import { FaSnowflake, FaGift, FaHandHoldingHeart, FaDoorClosed, FaBox } from 'react-icons/fa'
+import { FaSnowflake, FaGift, FaHandHoldingHeart, FaDoorClosed, FaBox, FaBan } from 'react-icons/fa'
 import { AuthContext } from '../context/AuthContext'
 
 const Orders = () => {

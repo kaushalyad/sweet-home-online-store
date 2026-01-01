@@ -38,6 +38,50 @@
     <!-- Security Headers - Permissive for compatibility -->
     <meta http-equiv="X-Content-Type-Options" content="nosniff" />
     <meta http-equiv="Referrer-Policy" content="no-referrer-when-downgrade" />
+      <!-- Product Structured Data for Google Rich Snippets -->
+      <script type="application/ld+json">
+      {
+        "@context": "https://schema.org/",
+        "@type": "Product",
+        "name": "Traditional Indian Sweets Gift Box",
+        "image": [
+          "https://sweethome-store.com/sweets/kaju-katli.jpg",
+          "https://sweethome-store.com/sweets/gulab-jamun.jpg"
+        ],
+        "description": "A premium gift box of authentic Indian sweets including Kaju Katli, Gulab Jamun, and more. Perfect for festivals and celebrations.",
+        "sku": "SH-GB-2026",
+        "brand": {
+          "@type": "Brand",
+          "name": "Sweet Home Online Store"
+        },
+        "offers": {
+          "@type": "Offer",
+          "url": "https://sweethome-store.com/products/gift-box",
+          "priceCurrency": "INR",
+          "price": "799.00",
+          "availability": "https://schema.org/InStock"
+        },
+        "aggregateRating": {
+          "@type": "AggregateRating",
+          "ratingValue": "4.8",
+          "reviewCount": "250"
+        },
+        "review": [
+          {
+            "@type": "Review",
+            "reviewRating": {
+              "@type": "Rating",
+              "ratingValue": "5"
+            },
+            "author": {
+              "@type": "Person",
+              "name": "Priya Sharma"
+            },
+            "reviewBody": "Absolutely delicious sweets! Perfect for gifting."
+          }
+        ]
+      }
+      </script>
     
     <!-- PWA Manifest -->
     <link rel="manifest" href="/manifest.json" />
@@ -323,6 +367,14 @@
     
     <!-- Load Razorpay script synchronously to ensure it's available when needed -->
     <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+      <!-- Google Analytics -->
+      <script async src="https://www.googletagmanager.com/gtag/js?id=G-XXXXXXX"></script>
+      <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-XXXXXXX');
+      </script>
   </head>
   <body>
     <div id="root"></div>
