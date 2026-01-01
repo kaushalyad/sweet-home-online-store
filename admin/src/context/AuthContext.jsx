@@ -74,6 +74,7 @@ export const AuthProvider = ({ children }) => {
     verifyAdminToken,
     logout
   };
+  // 
 
   return (
     <AuthContext.Provider value={value}>
