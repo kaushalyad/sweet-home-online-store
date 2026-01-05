@@ -94,13 +94,12 @@ const NewsletterBox = () => {
           >
             <div className="flex flex-col sm:flex-row gap-3">
               <input 
-                className="w-full px-5 py-4 rounded-full shadow-sm border border-gray-200 outline-none focus:ring-2 focus:ring-pink-300 focus:border-transparent transition-all bg-white text-gray-800 font-medium placeholder-gray-400 appearance-none min-h-[48px]" 
+                className="w-full newsletter-email-input placeholder-gray-400 appearance-none" 
                 type="email" 
                 placeholder="Enter your email address" 
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                style={{ boxShadow: '0 2px 8px rgba(255, 105, 135, 0.08)', borderRadius: '9999px', border: '1.5px solid #f3f3f3' }}
               />
               <button 
                 type="submit" 

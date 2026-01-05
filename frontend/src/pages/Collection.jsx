@@ -715,7 +715,23 @@ const Collection = () => {
                     <div className="max-w-md mx-auto">
                       <div className="text-6xl sm:text-7xl mb-6 animate-bounce">🍰</div>
                       <h3 className="font-poppins text-2xl sm:text-3xl font-bold text-gray-900 mb-3">No products found</h3>
-                      <p className="font-inter text-gray-600 mb-8 text-base sm:text-lg">Try adjusting your filters or search terms to find what you're looking for</p>
+                      <p className="font-inter text-gray-600 mb-8 text-base sm:text-lg">
+                        {location.search.includes('occasion=festival') ? (
+                          <>
+                            We couldn't find any festival products right now.<br />
+                            <span className="font-semibold">Browse our other categories below!</span>
+                          </>
+                        ) : (
+                          <>Try adjusting your filters or search terms to find what you're looking for</>
+                        )}
+                      </p>
+                      <div className="flex flex-wrap justify-center gap-3 mb-6">
+                        <Link to="/collection?category=sweets" className="px-4 py-2 bg-pink-100 text-pink-700 rounded-full font-medium hover:bg-pink-200 transition">Sweets</Link>
+                        <Link to="/collection?category=namkeen" className="px-4 py-2 bg-orange-100 text-orange-700 rounded-full font-medium hover:bg-orange-200 transition">Namkeen</Link>
+                        <Link to="/collection?category=beverages" className="px-4 py-2 bg-yellow-100 text-yellow-700 rounded-full font-medium hover:bg-yellow-200 transition">Beverages</Link>
+                        <Link to="/collection?category=cookies" className="px-4 py-2 bg-blue-100 text-blue-700 rounded-full font-medium hover:bg-blue-200 transition">Cookies</Link>
+                        <Link to="/collection?category=gift-boxes" className="px-4 py-2 bg-green-100 text-green-700 rounded-full font-medium hover:bg-green-200 transition">Gift Boxes</Link>
+                      </div>
                       <button 
                         onClick={() => {
                           setCategory([]);

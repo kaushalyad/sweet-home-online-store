@@ -54,12 +54,10 @@ const ImageCarousel = () => {
           >
             <img
               src={image}
-              alt={`Sweet Home Indian Sweets - Slide ${index + 1}`}
+              alt={`Sweet Home Online Store - Indian Sweets, Mithai, and Namkeen Slide ${index + 1}`}
               className="w-full h-full object-cover"
               loading={index === 0 ? "eager" : "lazy"}
               fetchpriority={index === 0 ? "high" : "low"}
-              width="1920"
-              height="600"
             />
           </div>
         ))}

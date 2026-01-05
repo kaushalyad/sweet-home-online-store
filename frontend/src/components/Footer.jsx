@@ -62,7 +62,7 @@ const Footer = () => {
               <input
                 type="email"
                 placeholder="Enter your email address"
-                className="font-inter flex-1 px-6 py-4 rounded-full focus:outline-none focus:ring-2 focus:ring-white/50 shadow-strong text-gray-900 transition-all duration-300"
+                className="font-inter flex-1 newsletter-email-input placeholder-gray-400 text-gray-900"
                 value={newsletterEmail}
                 onChange={(e) => setNewsletterEmail(e.target.value)}
                 required
@@ -281,22 +281,12 @@ const Footer = () => {
               <FaInstagram />
             </a>
             <a
-              href="#"
-              className="w-10 h-10 rounded-full bg-gray-200 text-gray-700 flex items-center justify-center hover:bg-orange-500 hover:text-white transition-colors"
-            >
-              <FaTwitter />
-            </a>
-            <a
-              href="#"
+              href="https://www.youtube.com/@SweetHomeLadania" // Replace with your actual YouTube channel URL
+              target="_blank"
+              rel="noopener noreferrer"
               className="w-10 h-10 rounded-full bg-gray-200 text-gray-700 flex items-center justify-center hover:bg-orange-500 hover:text-white transition-colors"
             >
               <FaYoutube />
-            </a>
-            <a
-              href="#"
-              className="w-10 h-10 rounded-full bg-gray-200 text-gray-700 flex items-center justify-center hover:bg-orange-500 hover:text-white transition-colors"
-            >
-              <FaPinterestP />
             </a>
           </div>
         </div>

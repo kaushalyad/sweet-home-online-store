@@ -1,3 +1,23 @@
+/* Newsletter email input fix: always rounded and not flat */
+.newsletter-email-input {
+  border-radius: 9999px !important;
+  min-height: 48px !important;
+  background: #fff !important;
+  border: 1.5px solid #f3f3f3 !important;
+  box-shadow: 0 2px 8px rgba(255, 105, 135, 0.08) !important;
+  font-weight: 500;
+  color: #222;
+  padding-left: 1.25rem;
+  padding-right: 1.25rem;
+  padding-top: 1rem;
+  padding-bottom: 1rem;
+  transition: box-shadow 0.2s, border-color 0.2s;
+}
+
+.newsletter-email-input:focus {
+  border-color: #ff6b6b !important;
+  box-shadow: 0 0 0 2px #ff6b6b33 !important;
+}
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700&family=Outfit:wght@100..900&family=Prata&display=swap');
 
 @tailwind base;

@@ -98,7 +98,7 @@ const ProductItem = ({ id, image, name, price, index = 0, featured = false, best
           <img
             className="w-full h-full object-cover transition-all duration-700 group-hover:scale-105"
             src={image[currentImage]}
-            alt={`${name} - Indian Sweet`}
+            alt={`${name} - Authentic Indian Sweet, Mithai, or Namkeen`}
             loading="lazy"
             width="400"
             height="400"

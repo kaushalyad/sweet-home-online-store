@@ -362,43 +362,7 @@ const Contact = () => {
           </div>
         </div>
         
-        {/* FAQ Section */}
-        <div className="mt-16">
-          <div className="text-center mb-10">
-            <h2 className="text-3xl font-bold text-gray-800 mb-2">Frequently Asked Questions</h2>
-            <p className="text-gray-600">
-              Common questions about our sweets, delivery, and storage
-            </p>
-          </div>
-          
-          <div className="bg-white rounded-lg shadow-sm border border-gray-100 p-8">
-            <div className="space-y-4">
-              {faqs.map((faq, index) => (
-                <div key={index} className="border-b border-gray-100 pb-4 last:border-0 last:pb-0">
-                  <button 
-                    className="w-full flex justify-between items-center py-3 text-left"
-                    onClick={() => toggleAccordion(index)}
-                  >
-                    <div className="flex items-center">
-                      <FaQuestionCircle className="text-pink-500 mr-3 flex-shrink-0" />
-                      <span className="font-medium text-gray-800">{faq.question}</span>
-                    </div>
-                    {activeAccordion === index ? 
-                      <FaMinus className="text-pink-500 flex-shrink-0" /> : 
-                      <FaPlus className="text-pink-500 flex-shrink-0" />
-                    }
-                  </button>
-                  
-                  {activeAccordion === index && (
-                    <div className="pl-8 pr-4 pt-2 pb-3 text-gray-600">
-                      {faq.answer}
-                    </div>
-                  )}
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
+                  {/* ...existing code... */}
         
         {/* Google Maps Section */}
         <div className="mt-16">

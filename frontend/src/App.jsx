@@ -1,6 +1,7 @@
 import { useContext, useState, useEffect, lazy, Suspense } from 'react'
 import { Routes, Route, Navigate, useParams, Link } from 'react-router-dom'
 import Navbar from './components/Navbar'
+import FAQ from './components/FAQ'
 import Footer from './components/Footer'
 import SearchBar from './components/SearchBar'
 import CookieConsent from './components/CookieConsent'
@@ -13,6 +14,7 @@ import 'react-toastify/dist/ReactToastify.css'
 import { ShopContext, ShopContextProvider } from './context/ShopContext'
 import PropTypes from 'prop-types'
 import { initGA } from "./utils/analytics"
+import { Helmet, HelmetProvider } from 'react-helmet-async'
 
 // Lazy load all page components for code splitting
 const Home = lazy(() => import('./pages/Home'))
@@ -36,6 +38,12 @@ const SharedContent = lazy(() => import('./pages/SharedContent'))
 const CookiePolicy = lazy(() => import('./pages/CookiePolicy'))
 const CookieSettings = lazy(() => import('./pages/CookieSettings'))
 const Verify = lazy(() => import('./pages/Verify'))
+
+// SEO landing pages for popular sweets/namkeen
+const KajuKatli = lazy(() => import('./pages/KajuKatli'));
+const Rasgulla = lazy(() => import('./pages/Rasgulla'));
+const NamkeenMixture = lazy(() => import('./pages/NamkeenMixture'));
+const Blog = lazy(() => import('./pages/Blog'));
 
 export const backendUrl = import.meta.env.VITE_BACKEND_URL
 
@@ -104,71 +112,84 @@ const App = () => {
   initGA();
 
   return (
-    <ShopContextProvider>
-      <div className='relative min-h-screen w-full overflow-x-hidden'>
-        <ToastContainer 
-          position="top-right"
-          autoClose={2000}
-          hideProgressBar={false}
-          newestOnTop={true}
-          closeOnClick
-          rtl={false}
-          pauseOnFocusLoss={false}
-          draggable
-          pauseOnHover
-          limit={2}
-          theme="light"
-        />
-        <CookieConsent />
-        <CookieDebug />
-        <WelcomeBanner />
-        <Navbar />
-        <div 
-          className='transition-all duration-300 min-h-[calc(100vh-140px)] w-full'
-          style={{ 
-            paddingTop: showPromoBanner ? 'clamp(100px, 15vh, 148px)' : 'clamp(70px, 12vh, 108px)'
-          }}
-        > 
-          <div className="flex justify-center mb-6 px-4 sm:px-[5vw] md:px-[7vw] lg:px-[9vw]">
-            <SearchBar />
-          </div>
-          <div className='min-h-full w-full'>
-            <Suspense fallback={<Loader />}>
-            <Routes>
-              <Route path='/' element={<Home />} />
-              <Route path='/collection' element={<Collection />} />
-              <Route path='/collection/:productId' element={<Product />} />
-              <Route path='/about' element={<About />} />
-              <Route path='/contact' element={<Contact />} />
-              <Route path='/product/:productId' element={<Product />} />
-              <Route path='/cart' element={<Cart />} />
-              <Route path='/login' element={<Login />} />
-              <Route path='/register' element={<Register />} />
-              <Route path='/forgot-password' element={<ForgotPassword />} />
-              <Route path='/reset-password' element={<ResetPassword />} />
-              <Route path='/place-order' element={<ProtectedRoute element={<PlaceOrder />} />} />
-              <Route path='/orders' element={<ProtectedRoute element={<Orders />} />} />
-              <Route path='/track-order/:orderId' element={<ProtectedRoute element={<TrackOrder />} />} />
-              <Route path='/profile' element={<ProtectedRoute element={<Profile />} />} />
-              <Route path='/addresses' element={<ProtectedRoute element={<Addresses />} />} />
-              <Route path='/wishlist' element={<ProtectedRoute element={<Profile />} />} />
-              <Route path='/settings' element={<ProtectedRoute element={<Profile />} />} />
-              <Route path='/verify' element={<Verify />} />
-              <Route path='/products' element={<ProductListing />} />
-              <Route path='/products/:productId' element={<ProductRedirect />} />
-              <Route path='/order-success' element={<ProtectedRoute element={<OrderSuccess />} />} />
-              <Route path='/shared/:contentId' element={<SharedContent />} />
-              <Route path='/cookie-policy' element={<CookiePolicy />} />
-              <Route path='/cookie-settings' element={<CookieSettings />} />
-              <Route path='*' element={<NotFound />} />
-            </Routes>
-            </Suspense>
-            <Footer />
+    <HelmetProvider>
+      <ShopContextProvider>
+        <Helmet>
+          <title>Sweet Home Online Store | Buy Fresh Indian Sweets, Mithai, Namkeen & Dry Fruits</title>
+          <meta name="description" content="Order authentic Indian sweets, traditional mithai, namkeen, and premium dry fruits online. Fresh homemade sweets delivered to your doorstep. Best quality sweets shop for festivals, celebrations & gifts." />
+          <meta name="keywords" content="indian sweets online, buy mithai online, traditional sweets, namkeen online, dry fruits, sweets shop, homemade sweets, festival sweets, diwali sweets, wedding sweets, milk sweets, kaju katli, gulab jamun, rasgulla, ladoo, barfi, jalebi, pedha, sandesh, rasmalai, soan papdi, besan ladoo, motichoor ladoo, coconut ladoo, mysore pak, halwa, kheer, kala jamun, chamcham, pista burfi, cashew sweets, almond sweets, gift box sweets, bulk sweets order, fresh sweets delivery, same day delivery sweets, best sweet shop near me, sweet home ladania" />
+          <link rel="canonical" href="https://sweethome-store.com/" />
+        </Helmet>
+        <div className='relative min-h-screen w-full overflow-x-hidden'>
+          <ToastContainer 
+            position="top-right"
+            autoClose={2000}
+            hideProgressBar={false}
+            newestOnTop={true}
+            closeOnClick
+            rtl={false}
+            pauseOnFocusLoss={false}
+            draggable
+            pauseOnHover
+            limit={2}
+            theme="light"
+          />
+          <CookieConsent />
+          <CookieDebug />
+          <WelcomeBanner />
+          <Navbar />
+          <div 
+            className='transition-all duration-300 min-h-[calc(100vh-140px)] w-full'
+            style={{ 
+              paddingTop: showPromoBanner ? 'clamp(100px, 15vh, 148px)' : 'clamp(70px, 12vh, 108px)'
+            }}
+          > 
+            <div className="flex justify-center mb-6 px-4 sm:px-[5vw] md:px-[7vw] lg:px-[9vw]">
+              <SearchBar />
+            </div>
+            <div className='min-h-full w-full'>
+              <Suspense fallback={<Loader />}>
+              <Routes>
+                              <Route path='/blog' element={<Blog />} />
+                <Route path='/' element={<Home />} />
+                <Route path='/collection' element={<Collection />} />
+                <Route path='/collection/:productId' element={<Product />} />
+                <Route path='/about' element={<About />} />
+                <Route path='/contact' element={<Contact />} />
+                <Route path='/product/:productId' element={<Product />} />
+                <Route path='/cart' element={<Cart />} />
+                <Route path='/login' element={<Login />} />
+                <Route path='/register' element={<Register />} />
+                <Route path='/forgot-password' element={<ForgotPassword />} />
+                <Route path='/reset-password' element={<ResetPassword />} />
+                <Route path='/place-order' element={<ProtectedRoute element={<PlaceOrder />} />} />
+                <Route path='/orders' element={<ProtectedRoute element={<Orders />} />} />
+                <Route path='/track-order/:orderId' element={<ProtectedRoute element={<TrackOrder />} />} />
+                <Route path='/profile' element={<ProtectedRoute element={<Profile />} />} />
+                <Route path='/addresses' element={<ProtectedRoute element={<Addresses />} />} />
+                <Route path='/wishlist' element={<ProtectedRoute element={<Profile />} />} />
+                <Route path='/settings' element={<ProtectedRoute element={<Profile />} />} />
+                <Route path='/verify' element={<Verify />} />
+                <Route path='/products' element={<ProductListing />} />
+                <Route path='/products/:productId' element={<ProductRedirect />} />
+                <Route path='/order-success' element={<ProtectedRoute element={<OrderSuccess />} />} />
+                <Route path='/shared/:contentId' element={<SharedContent />} />
+                <Route path='/cookie-policy' element={<CookiePolicy />} />
+                <Route path='/cookie-settings' element={<CookieSettings />} />
+                <Route path='/kaju-katli' element={<KajuKatli />} />
+                <Route path='/rasgulla' element={<Rasgulla />} />
+                <Route path='/namkeen-mixture' element={<NamkeenMixture />} />
+                <Route path='*' element={<NotFound />} />
+              </Routes>
+              </Suspense>
+              <FAQ />
+              <Footer />
+            </div>
           </div>
         </div>
-      </div>
-      <WhatsAppButton />
-    </ShopContextProvider>
+        <WhatsAppButton />
+      </ShopContextProvider>
+    </HelmetProvider>
   )
 }
 

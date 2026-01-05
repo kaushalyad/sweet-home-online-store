@@ -193,7 +193,7 @@ const Slider = () => {
                 >
                   <img
                     src={slides[currentSlide].image}
-                    alt={slides[currentSlide].title}
+                    alt={`${slides[currentSlide].title} - Indian Sweet, Mithai, or Namkeen`}
                     className="w-full h-full object-cover rounded-3xl shadow-2xl"
                   />
                   <div className="absolute -bottom-8 -right-8 bg-white/10 p-6 rounded-2xl border border-white/20">

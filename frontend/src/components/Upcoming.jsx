@@ -61,7 +61,7 @@ const Upcoming = () => {
           {upcomingSeed.map((p) => (
             <div key={p._id} className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
               <div className="relative h-40 sm:h-56 md:h-64 overflow-hidden">
-                <img src={p.image[0]} alt={p.name} className="w-full h-full object-cover" />
+                <img src={p.image[0]} alt={`${p.name} - Indian Sweet or Namkeen`} className="w-full h-full object-cover" />
               </div>
               <div className="p-4">
                 <h3 className="font-semibold text-base sm:text-lg text-gray-800">{p.name}</h3>

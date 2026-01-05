@@ -187,13 +187,12 @@ const Home = () => {
               <p>
                 Our origins can be traced back to a small namkeen shop in Bikaner founded by Ganga Bishan Agarwal (Haldiram Ji). This modest shop quickly gained popularity and scaled up to meet a booming demand for its unique-tasting bhujia. Building on this legacy, his grandson, our pioneer Mr. Shiv Kishan Agrawal steered the business towards the heights it has tasted today.
               </p>
-              <div className="text-center pt-6">
-                <Link
-                  to="/about"
-                  className="inline-flex items-center px-8 py-4 bg-gradient-to-r from-orange-500 to-orange-600 text-white rounded-full hover:shadow-lg transition-all duration-300 font-semibold"
-                >
-                  Explore <FaArrowRight className="ml-3" />
-                </Link>
+              <div className="text-center pt-6 flex flex-wrap gap-4 justify-center">
+                <Link to="/about" className="inline-flex items-center px-8 py-4 bg-gradient-to-r from-orange-500 to-orange-600 text-white rounded-full hover:shadow-lg transition-all duration-300 font-semibold">Explore <FaArrowRight className="ml-3" /></Link>
+                <Link to="/kaju-katli" className="inline-flex items-center px-8 py-4 bg-gradient-to-r from-pink-500 to-orange-500 text-white rounded-full hover:shadow-lg transition-all duration-300 font-semibold">Kaju Katli</Link>
+                <Link to="/rasgulla" className="inline-flex items-center px-8 py-4 bg-gradient-to-r from-pink-500 to-orange-500 text-white rounded-full hover:shadow-lg transition-all duration-300 font-semibold">Rasgulla</Link>
+                <Link to="/namkeen-mixture" className="inline-flex items-center px-8 py-4 bg-gradient-to-r from-pink-500 to-orange-500 text-white rounded-full hover:shadow-lg transition-all duration-300 font-semibold">Namkeen Mixture</Link>
+                <Link to="/blog" className="inline-flex items-center px-8 py-4 bg-gradient-to-r from-orange-400 to-pink-500 text-white rounded-full hover:shadow-lg transition-all duration-300 font-semibold">Blog & Recipes</Link>
               </div>
             </div>
           </div>

@@ -191,7 +191,7 @@ const SearchBar = () => {
                                                     {product.image && (
                                                         <img 
                                                             src={Array.isArray(product.image) ? product.image[0] : product.image} 
-                                                            alt={product.name} 
+                                                            alt={`${product.name} - Indian Sweet, Mithai, or Namkeen`} 
                                                             className="w-10 h-10 object-cover rounded-md mr-3" 
                                                             onError={(e) => {
                                                                 e.target.onerror = null;

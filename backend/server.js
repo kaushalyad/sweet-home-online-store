@@ -1,4 +1,6 @@
 import express from "express";
+import path from "path";
+import { fileURLToPath } from 'url';
 import cors from "cors";
 import "dotenv/config";
 import morgan from "morgan";
@@ -25,6 +27,10 @@ import { Server } from 'socket.io';
 // App Config
 const app = express();
 const port = process.env.PORT || 4000;
+
+// For __dirname in ES modules
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 // Create HTTP server
 const server = createServer(app);
@@ -103,6 +109,22 @@ const startServer = async () => {
     app.use(express.json({ limit: '50mb' }));
     app.use(express.urlencoded({ limit: '50mb', extended: true }));
 
+
+    // 301 Redirects for canonical URLs
+    app.use((req, res, next) => {
+      // Force non-www
+      if (req.headers.host && req.headers.host.startsWith('www.')) {
+        return res.redirect(301, `https://${req.headers.host.replace(/^www\./, '')}${req.originalUrl}`);
+      }
+      // Force trailing slash on root only (homepage)
+      if (req.path === '' || req.path === '/') {
+        if (!req.originalUrl.endsWith('/')) {
+          return res.redirect(301, `${req.originalUrl}/`);
+        }
+      }
+      next();
+    });
+
     // Middlewares
     app.use(cookieParser());
     app.use(morgan("dev"));
@@ -116,6 +138,7 @@ const startServer = async () => {
       next();
     });
 
+
     // API endpoints
     app.use("/api/user", userRouter);
     app.use("/api/product", productRouter);
@@ -125,18 +148,31 @@ const startServer = async () => {
     app.use("/api/analytics", analyticsRouter);
     app.use("/api/admin", adminRouter);
     app.use("/api/shared", sharedContentRouter);
-      app.use("/api/upload", uploadRouter);
-      app.use("/api/messages", messageRouter);
-      app.use("/api/newsletter", newsletterRouter);
+    app.use("/api/upload", uploadRouter);
+    app.use("/api/messages", messageRouter);
+    app.use("/api/newsletter", newsletterRouter);
 
-    // Root endpoint
-    app.get("/", (req, res) => {
+    // Serve frontend static files
+    const frontendDistPath = path.join(__dirname, '../frontend/dist');
+    app.use(express.static(frontendDistPath));
+
+    // SPA fallback: serve index.html for all non-API, non-static routes
+    app.get(/^\/(?!api\/|uploads\/|logs\/|config\/|controllers\/|middleware\/|models\/|routes\/|services\/|utils\/|scripts\/|backend\/|admin\/|public\/|favicon\.ico|robots\.txt|sitemap\.xml|manifest\.json|browserconfig\.xml|vite\.svg|_headers|\.well-known\/).*/, (req, res) => {
+      res.sendFile(path.join(frontendDistPath, 'index.html'));
+    });
+
+    // Root endpoint (API health)
+    app.get("/api", (req, res) => {
       res.send("API Working");
     });
 
-    // 404 handler
+    // 404 handler (for API only)
     app.use((req, res) => {
-      res.status(404).send("Route not found");
+      if (req.path.startsWith('/api/')) {
+        res.status(404).send("API route not found");
+      } else {
+        res.sendFile(path.join(frontendDistPath, 'index.html'));
+      }
     });
 
     // Error handler

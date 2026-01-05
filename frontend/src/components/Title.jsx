@@ -7,13 +7,13 @@ const Title = ({
 }) => {
   return (
     <div
-      className={`flex items-center ${className}`}
+      className={`w-full flex flex-col items-center justify-center my-6 ${className}`}
       aria-label={`${text1} ${text2}`}
     >
-      <div className="text-gray-800 flex items-center small_mobile:text-xl mobile:text-2xl  font-medium tracking-wide">
-        <span>{text1}</span>
-        <span className="ml-1">{text2}</span>
-      </div>
+      <h1 className="text-3xl sm:text-4xl md:text-5xl font-extrabold text-center text-gradient bg-gradient-to-r from-pink-500 via-orange-500 to-yellow-400 bg-clip-text text-transparent drop-shadow-lg tracking-tight mb-2">
+        {text1} <span className="whitespace-nowrap">{text2}</span>
+      </h1>
+      <div className="w-16 h-1 bg-gradient-to-r from-pink-500 to-orange-400 rounded-full mb-2"></div>
     </div>
   );
 };
