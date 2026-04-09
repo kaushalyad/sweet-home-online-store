@@ -67,6 +67,59 @@ const UserBehavior = () => {
     statistics: [],
     totalUsers: 0
   });
+
+  const renderSegmentsChart = (statistics) => {
+    if (!statistics) return null;
+    const segments = [
+      { key: 'loyalCustomers', label: 'Loyal Customers' },
+      { key: 'frequentBuyers', label: 'Frequent Buyers' },
+      { key: 'browsers', label: 'Browsers' },
+      { key: 'cartAbandoners', label: 'Cart Abandoners' },
+    ];
+
+    const totalUsers = Number(userSegments?.totalUsers || 0) || 0;
+    const getCount = (k) => Number(statistics?.[k] || 0) || 0;
+    const max = Math.max(1, ...segments.map((s) => getCount(s.key)));
+
+    return (
+      <Box sx={{ mt: 2 }}>
+        {segments.map((s) => {
+          const count = getCount(s.key);
+          const pct = totalUsers ? Math.round((count / totalUsers) * 100) : 0;
+          const width = Math.round((count / max) * 100);
+          return (
+            <Box key={s.key} sx={{ mb: 2 }}>
+              <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 0.5 }}>
+                <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                  {s.label}
+                </Typography>
+                <Typography variant="body2" color="text.secondary">
+                  {count.toLocaleString()} ({pct}%)
+                </Typography>
+              </Box>
+              <Box
+                sx={{
+                  height: 10,
+                  borderRadius: 999,
+                  backgroundColor: 'rgba(148, 163, 184, 0.25)',
+                  overflow: 'hidden',
+                }}
+              >
+                <Box
+                  sx={{
+                    height: '100%',
+                    width: `${width}%`,
+                    borderRadius: 999,
+                    background: 'linear-gradient(90deg, #ec4899, #f97316)',
+                  }}
+                />
+              </Box>
+            </Box>
+          );
+        })}
+      </Box>
+    );
+  };
   const [liveTraffic, setLiveTraffic] = useState([]);
   const [socket, setSocket] = useState(null);
   const [isRealTimeEnabled, setIsRealTimeEnabled] = useState(false);

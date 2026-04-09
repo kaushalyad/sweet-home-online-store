@@ -202,7 +202,7 @@ const Cart = () => {
               {/* Features Grid - Compact */}
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4 mb-8 max-w-2xl mx-auto">
                 <div className="bg-gradient-to-br from-pink-50 to-orange-50 rounded-xl p-3 sm:p-4 transform hover:scale-105 transition-transform">
-                  <div className="text-2xl mb-2">🍬</div>
+                  <div className="w-8 h-8 mb-2 rounded-lg bg-gradient-to-br from-pink-500 to-orange-500 shadow-soft mx-auto"></div>
                   <h3 className="font-semibold text-gray-800 text-sm mb-1">Fresh & Pure</h3>
                   <p className="text-xs text-gray-600">Handcrafted daily</p>
                 </div>

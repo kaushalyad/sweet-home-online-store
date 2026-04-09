@@ -55,7 +55,7 @@ const LatestCollection = () => {
             initial="hidden"
             whileInView="visible"
             viewport={{ once: true }}
-            className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3 sm:gap-4 gap-y-5 sm:gap-y-6"
+            className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-4 xl:grid-cols-5 gap-5 sm:gap-6 lg:gap-7 gap-y-8 sm:gap-y-10"
           >
             {latestProducts.map((item, index) => (
               <ProductItem
@@ -64,6 +64,9 @@ const LatestCollection = () => {
                 image={item.image}
                 name={item.name}
                 price={item.price}
+                discountPrice={item.discountPrice}
+                rating={item.rating}
+                totalReviews={item.totalReviews}
                 index={index}
               />
             ))}

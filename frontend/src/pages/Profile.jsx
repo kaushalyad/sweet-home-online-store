@@ -569,20 +569,25 @@ const Profile = () => {
             initial="hidden"
             animate="visible"
             variants={fadeIn}
-            className="bg-white p-6 rounded-lg shadow-sm"
+            className="bg-white p-4 sm:p-6 rounded-2xl shadow-sm border border-gray-100"
           >
-            <div className="flex justify-between items-center mb-6">
-              <h3 className="text-xl font-bold text-gray-800">My Wishlist</h3>
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6">
+              <div>
+                <h3 className="text-xl sm:text-2xl font-extrabold text-gray-900">My Wishlist</h3>
+                <p className="text-sm text-gray-500 mt-1">
+                  {wishlistItems?.length ? `${wishlistItems.length} saved item${wishlistItems.length > 1 ? 's' : ''}` : 'Save items you love for later'}
+                </p>
+              </div>
               <Link 
                 to="/collection" 
-                className="text-pink-500 hover:text-pink-700 flex items-center transition-colors duration-300"
+                className="text-pink-600 hover:text-pink-700 flex items-center transition-colors duration-300 font-semibold"
               >
                 Browse More <FaArrowRight className="ml-2" />
               </Link>
             </div>
             
             {wishlistItems && wishlistItems.length > 0 ? (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-6">
                 {wishlistItems.map((productId) => {
                   const product = products.find(p => p._id === productId);
                   if (!product) return null;
@@ -593,51 +598,68 @@ const Profile = () => {
                       initial={{ opacity: 0, y: 10 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ duration: 0.4 }}
-                      className="group border border-gray-200 rounded-lg overflow-hidden hover:shadow-lg transition-all duration-300"
+                      className="group border border-gray-200/70 rounded-2xl overflow-hidden hover:shadow-lg transition-all duration-300 bg-white"
                     >
-                      <div className="relative aspect-square">
+                      <div className="relative aspect-[4/3] bg-gray-50">
                         <Link to={`/collection/${product._id}`}>
                           <img 
                             src={product.image[0]} 
                             alt={product.name} 
-                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                            className="w-full h-full object-cover group-hover:scale-[1.03] transition-transform duration-300"
                           />
                         </Link>
                         <button
-                          onClick={() => removeFromWishlist(product._id)}
-                          className="absolute top-3 right-3 bg-white p-2.5 rounded-full shadow-md hover:shadow-lg transition-all duration-300 hover:bg-pink-50"
+                          onClick={() => {
+                            if (window.confirm('Remove this item from your wishlist?')) {
+                              removeFromWishlist(product._id);
+                            }
+                          }}
+                          className="absolute top-3 right-3 bg-white/95 backdrop-blur p-2.5 rounded-full shadow-md hover:shadow-lg transition-all duration-300 hover:bg-pink-50 border border-gray-200/60"
                           aria-label="Remove from wishlist"
                         >
                           <FaHeart className="text-pink-500" />
                         </button>
                       </div>
                       
-                      <div className="p-4">
+                      <div className="p-4 sm:p-5">
                         <Link 
                           to={`/collection/${product._id}`}
-                          className="hover:text-pink-500 transition-colors duration-300"
+                          className="hover:text-pink-600 transition-colors duration-300"
                         >
-                          <h4 className="font-medium text-gray-800 line-clamp-1">{product.name}</h4>
+                          <h4 className="font-semibold text-gray-900 line-clamp-2 min-h-[2.75rem] leading-snug">
+                            {product.name}
+                          </h4>
                         </Link>
-                        <p className="font-bold text-gray-900 mt-2">
-                          <span className="text-xs text-gray-500 mr-1">{currency}</span>
-                          <span>{product.price}</span>
-                        </p>
+                        <div className="flex items-center justify-between mt-3">
+                          <p className="font-extrabold text-gray-900">
+                            <span className="text-xs text-gray-500 mr-1">{currency}</span>
+                            <span className="text-lg">{product.price}</span>
+                          </p>
+                          <div className="flex items-center gap-1 text-sm text-gray-600">
+                            <FaHeart className="text-gray-300" />
+                            <span className="font-semibold text-gray-800">{Number(product.rating || 0).toFixed(1)}</span>
+                            <span className="text-gray-500">({Number(product.totalReviews || 0)})</span>
+                          </div>
+                        </div>
                         
-                        <div className="mt-4 flex flex-col gap-2">
+                        <div className="mt-4 flex flex-col gap-2.5">
                           <button
                             onClick={() => {
                               addToCart(product._id, 1);
                               toast.success("Added to cart!");
                             }}
-                            className="w-full bg-gradient-to-r from-pink-500 to-rose-500 text-white px-4 py-2.5 rounded-md font-medium flex items-center justify-center gap-2 hover:from-pink-600 hover:to-rose-600 transition-all duration-300"
+                            className="w-full bg-gradient-to-r from-pink-500 to-orange-500 text-white px-4 py-3 rounded-xl font-semibold flex items-center justify-center gap-2 hover:from-pink-600 hover:to-orange-600 transition-all duration-300 shadow-sm hover:shadow-md"
                           >
                             <FaShoppingCart className="text-sm" />
                             Add to Cart
                           </button>
                           <button
-                            onClick={() => removeFromWishlist(product._id)}
-                            className="w-full text-gray-500 text-sm hover:text-gray-700 transition-colors duration-300 py-2"
+                            onClick={() => {
+                              if (window.confirm('Remove this item from your wishlist?')) {
+                                removeFromWishlist(product._id);
+                              }
+                            }}
+                            className="w-full text-gray-600 text-sm hover:text-gray-900 transition-colors duration-300 py-2 rounded-xl hover:bg-gray-50 border border-gray-200"
                           >
                             Remove from Wishlist
                           </button>
@@ -648,17 +670,19 @@ const Profile = () => {
                 })}
               </div>
             ) : (
-              <div className="text-center py-12 bg-gray-50 rounded-lg">
-                <FaHeart className="mx-auto text-gray-300 text-4xl mb-4" />
-                <h3 className="text-xl font-bold text-gray-800 mb-2">Your Wishlist is Empty</h3>
-                <p className="text-gray-600 mb-6 max-w-md mx-auto">
+              <div className="text-center py-14 bg-gradient-to-br from-gray-50 to-white rounded-2xl border border-gray-100">
+                <div className="mx-auto w-14 h-14 rounded-2xl bg-gradient-to-br from-pink-500 to-orange-500 shadow-md mb-5 flex items-center justify-center">
+                  <FaHeart className="text-white text-xl" />
+                </div>
+                <h3 className="text-xl sm:text-2xl font-extrabold text-gray-900 mb-2">Your Wishlist is Empty</h3>
+                <p className="text-gray-600 mb-7 max-w-md mx-auto text-sm sm:text-base">
                   Save your favorite products to your wishlist and they'll be here waiting for you.
                 </p>
                 <Link 
                   to="/collection" 
-                  className="inline-block px-6 py-2.5 bg-gradient-to-r from-pink-500 to-rose-500 text-white rounded-md hover:from-pink-600 hover:to-rose-600 transition-all duration-300"
+                  className="inline-flex items-center gap-2 px-7 py-3 bg-gradient-to-r from-pink-500 to-orange-500 text-white rounded-full hover:from-pink-600 hover:to-orange-600 transition-all duration-300 font-semibold shadow-sm hover:shadow-md"
                 >
-                  Browse Collection
+                  Browse Collection <FaArrowRight />
                 </Link>
               </div>
             )}

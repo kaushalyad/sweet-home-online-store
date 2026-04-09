@@ -30,9 +30,20 @@ const NewArrivals = () => {
         <Buffer />
       ) : (
         <div className="px-4">
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-6 gap-y-10">
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-4 gap-6 md:gap-7 gap-y-10 md:gap-y-12">
             {newProducts.map((item, idx) => (
-              <ProductItem key={item._id || idx} id={item._id} name={item.name} image={item.image} price={item.price} index={idx} newArrival={true} />
+              <ProductItem
+                key={item._id || idx}
+                id={item._id}
+                name={item.name}
+                image={item.image}
+                price={item.price}
+                discountPrice={item.discountPrice}
+                rating={item.rating}
+                totalReviews={item.totalReviews}
+                index={idx}
+                newArrival={true}
+              />
             ))}
           </div>
 

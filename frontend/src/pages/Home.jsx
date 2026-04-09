@@ -179,13 +179,13 @@ const Home = () => {
             </h2>
             <div className="space-y-6 text-gray-700 text-base sm:text-lg leading-relaxed">
               <p>
-                Over the course of eight decades, a lot has changed about us. We have relocated, undergone expansion, developed new product lines & added segments, opened retail chains & stores across India and embraced new markets overseas.
+                Sweet Home began in 2015, started by Tribhuvan Yadav with a small samosa stall. Day by day, people in the area fell in love with the taste and freshness.
               </p>
               <p>
-                One thing hasn't changed - we're still a tight-knit family business, committed to serving the most authentic taste of India through our products.
+                With the same passion, we expanded into namkeen and sweets — made with purity, great ingredients, and consistent quality. Today, Sweet Home is one of the most loved sweets businesses in our area.
               </p>
               <p>
-                Our origins can be traced back to a small namkeen shop in Bikaner founded by Ganga Bishan Agarwal (Haldiram Ji). This modest shop quickly gained popularity and scaled up to meet a booming demand for its unique-tasting bhujia. Building on this legacy, his grandson, our pioneer Mr. Shiv Kishan Agrawal steered the business towards the heights it has tasted today.
+                Our next goal is simple: to reach all of India with the same delicious taste, affordable pricing, and trusted purity — so everyone can enjoy authentic sweets from Sweet Home.
               </p>
               <div className="text-center pt-6">
                 <Link

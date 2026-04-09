@@ -37,9 +37,19 @@ const OnSale = () => {
         <Buffer />
       ) : (
         <div className="px-4">
-          <motion.div variants={containerVariants} initial="hidden" whileInView="visible" viewport={{ once: true }} className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-6 gap-y-10">
+          <motion.div variants={containerVariants} initial="hidden" whileInView="visible" viewport={{ once: true }} className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-4 gap-6 md:gap-7 gap-y-10 md:gap-y-12">
             {saleProducts.map((item, idx) => (
-              <ProductItem key={item._id || idx} id={item._id} name={item.name} image={item.image} price={item.discountPrice || item.price} index={idx} />
+              <ProductItem
+                key={item._id || idx}
+                id={item._id}
+                name={item.name}
+                image={item.image}
+                price={item.price}
+                discountPrice={item.discountPrice}
+                rating={item.rating}
+                totalReviews={item.totalReviews}
+                index={idx}
+              />
             ))}
           </motion.div>
 

@@ -1,5 +1,5 @@
 import { Box, Drawer, List, ListItem, ListItemIcon, ListItemText, AppBar, Toolbar, Typography, IconButton } from '@mui/material';
-import { Menu as MenuIcon, Dashboard as DashboardIcon, Inventory as InventoryIcon, ShoppingCart as ShoppingCartIcon, People as PeopleIcon, Analytics as AnalyticsIcon, Timeline as TimelineIcon, Logout as LogoutIcon } from '@mui/icons-material';
+import { Menu as MenuIcon, Dashboard as DashboardIcon, Inventory as InventoryIcon, ShoppingCart as ShoppingCartIcon, People as PeopleIcon, Analytics as AnalyticsIcon, Timeline as TimelineIcon, ConfirmationNumber as ConfirmationNumberIcon, Logout as LogoutIcon } from '@mui/icons-material';
 import { useState, useContext } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
@@ -9,6 +9,7 @@ const menuItems = [
   { text: 'Products', icon: <InventoryIcon sx={{ fontSize: 24 }} />, path: '/products' },
   { text: 'Orders', icon: <ShoppingCartIcon sx={{ fontSize: 24 }} />, path: '/orders' },
   { text: 'Users', icon: <PeopleIcon sx={{ fontSize: 24 }} />, path: '/users' },
+  { text: 'Coupons', icon: <ConfirmationNumberIcon sx={{ fontSize: 24 }} />, path: '/coupons' },
   { text: 'Analytics', icon: <AnalyticsIcon sx={{ fontSize: 24 }} />, path: '/analytics' },
   { text: 'User Behavior', icon: <TimelineIcon sx={{ fontSize: 24 }} />, path: '/user-behavior' }
 ];

@@ -62,7 +62,7 @@ const Footer = () => {
               <input
                 type="email"
                 placeholder="Enter your email address"
-                className="font-inter flex-1 px-6 py-4 rounded-full focus:outline-none focus:ring-2 focus:ring-white/50 shadow-strong text-gray-900 transition-all duration-300"
+                className="newsletter-input font-inter flex-1 px-6 py-4 rounded-full bg-white border border-white/40 shadow-strong text-gray-900 placeholder:text-gray-500 appearance-none transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-white/60 focus:border-transparent focus:shadow-2xl"
                 value={newsletterEmail}
                 onChange={(e) => setNewsletterEmail(e.target.value)}
                 required
@@ -284,19 +284,7 @@ const Footer = () => {
               href="#"
               className="w-10 h-10 rounded-full bg-gray-200 text-gray-700 flex items-center justify-center hover:bg-orange-500 hover:text-white transition-colors"
             >
-              <FaTwitter />
-            </a>
-            <a
-              href="#"
-              className="w-10 h-10 rounded-full bg-gray-200 text-gray-700 flex items-center justify-center hover:bg-orange-500 hover:text-white transition-colors"
-            >
               <FaYoutube />
-            </a>
-            <a
-              href="#"
-              className="w-10 h-10 rounded-full bg-gray-200 text-gray-700 flex items-center justify-center hover:bg-orange-500 hover:text-white transition-colors"
-            >
-              <FaPinterestP />
             </a>
           </div>
         </div>

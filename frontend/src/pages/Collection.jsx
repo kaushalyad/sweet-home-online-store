@@ -1,9 +1,9 @@
-import { useContext, useEffect, useState } from "react";
+import { useContext, useEffect, useMemo, useState } from "react";
 import { ShopContext } from "../context/ShopContext";
 import Title from "../components/Title";
 import ProductItem from "../components/ProductItem";
 import ProductSkeleton from "../components/ProductSkeleton";
-import { FaSort, FaSortAmountDown, FaSortAmountUp, FaChevronDown, FaFilter, FaCheck, FaTimes } from "react-icons/fa";
+import { FaSort, FaSortAmountDown, FaSortAmountUp, FaChevronDown, FaFilter, FaCheck, FaTimes, FaStar } from "react-icons/fa";
 import { motion, AnimatePresence } from "framer-motion";
 import PropTypes from "prop-types";
 import { Link, useLocation } from "react-router-dom";
@@ -19,13 +19,30 @@ const Collection = () => {
   const [priceRange, setPriceRange] = useState([0, 1000]);
   const [ratingFilter, setRatingFilter] = useState(0);
   const location = useLocation();
+
+  const normalizeKey = (v) => String(v || "").toLowerCase().replace(/[\s-_]/g, "");
+
+  const availableCategories = useMemo(() => {
+    const set = new Set();
+    (products || []).forEach((p) => {
+      if (p?.category) set.add(String(p.category));
+    });
+    return Array.from(set).sort((a, b) => a.localeCompare(b));
+  }, [products]);
   
-  // Handle URL search parameter
+  // Handle URL search/category parameters
   useEffect(() => {
     const params = new URLSearchParams(location.search);
     const searchParam = params.get('search');
     if (searchParam) {
       setSearch(decodeURIComponent(searchParam));
+    }
+
+    // Optional: allow deep links like /collection?category=refreshments
+    const categoryParam = params.get('category');
+    if (categoryParam) {
+      const normalized = decodeURIComponent(categoryParam);
+      setCategory([normalized]);
     }
   }, [location.search, setSearch]);
 
@@ -33,7 +50,9 @@ const Collection = () => {
   const sortOptions = [
     { value: "relavent", label: "Relevance", icon: <FaSort /> },
     { value: "low-high", label: "Price: Low to High", icon: <FaSortAmountUp /> },
-    { value: "high-low", label: "Price: High to Low", icon: <FaSortAmountDown /> }
+    { value: "high-low", label: "Price: High to Low", icon: <FaSortAmountDown /> },
+    { value: "rating", label: "Top Rated", icon: <FaStar /> },
+    { value: "newest", label: "Newest", icon: <FaSortAmountDown /> }
   ];
 
   // Animation variants
@@ -211,9 +230,8 @@ const Collection = () => {
 
     // Filter by category
     if (category.length > 0) {
-      productsCopy = productsCopy.filter((item) =>
-        category.includes(item.category)
-      );
+      const selected = new Set(category.map(normalizeKey));
+      productsCopy = productsCopy.filter((item) => selected.has(normalizeKey(item.category)));
     }
 
     // Filter by subCategory
@@ -233,8 +251,7 @@ const Collection = () => {
     // Filter by rating
     if (ratingFilter > 0) {
       productsCopy = productsCopy.filter((item) => 
-        // Assuming items have a rating property or calculate based on reviews
-        (item.rating || 4) >= ratingFilter
+        (Number(item.rating) || 0) >= ratingFilter
       );
     }
 
@@ -251,6 +268,22 @@ const Collection = () => {
 
       case "high-low":
         setFilterProducts(fpCopy.sort((a, b) => b.price - a.price));
+        break;
+
+      case "rating":
+        setFilterProducts(
+          fpCopy.sort((a, b) => (Number(b.rating) || 0) - (Number(a.rating) || 0))
+        );
+        break;
+
+      case "newest":
+        setFilterProducts(
+          fpCopy.sort((a, b) => {
+            const ad = a?.createdAt ? new Date(a.createdAt).getTime() : 0;
+            const bd = b?.createdAt ? new Date(b.createdAt).getTime() : 0;
+            return bd - ad;
+          })
+        );
         break;
 
       default:
@@ -329,87 +362,10 @@ const Collection = () => {
       </div>
 
       <div className="container mx-auto px-4">
-        <div className="flex flex-col lg:flex-row gap-4 lg:gap-10 pt-4 lg:pt-6 border-t border-gray-200">
-          {/* Sticky Quick Filter Bar - For easy access to popular filters */}
-          <div className={`sticky top-24 left-0 right-0 z-20 bg-white border border-gray-200 rounded-lg shadow-sm p-2 mb-6 hidden md:block transition-all duration-300 ${
-            (category.length > 0 || subCategory.length > 0 || priceRange[0] > 0 || priceRange[1] < 1000 || ratingFilter > 0) 
-              ? 'w-[16%]' 
-              : 'w-[18%]'
-          }`}>
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <span className="text-sm font-medium text-gray-700">Quick Filters:</span>
-                <div className="flex flex-wrap gap-1">
-                  <button 
-                    onClick={() => setCategory(prev => prev.includes("Sweets") ? prev.filter(c => c !== "Sweets") : [...prev, "Sweets"])}
-                    className={`px-2 py-1 text-xs rounded-full transition-colors duration-200 ${
-                      category.includes("Sweets") 
-                        ? 'bg-pink-500 text-white' 
-                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                    }`}
-                  >
-                    Sweets
-                  </button>
-                  <button 
-                    onClick={() => setCategory(prev => prev.includes("Namkeens") ? prev.filter(c => c !== "Namkeens") : [...prev, "Namkeens"])}
-                    className={`px-2 py-1 text-xs rounded-full transition-colors duration-200 ${
-                      category.includes("Namkeens") 
-                        ? 'bg-pink-500 text-white' 
-                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                    }`}
-                  >
-                    Namkeens
-                  </button>
-                  <button
-                    onClick={() => setPriceRange([0, 200])}
-                    className={`px-2 py-1 text-xs rounded-full transition-colors duration-200 ${
-                      priceRange[1] === 200
-                        ? 'bg-pink-500 text-white'
-                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                    }`}
-                  >
-                    Under ₹200
-                  </button>
-                  <button
-                    onClick={() => setRatingFilter(prev => prev === 4 ? 0 : 4)}
-                    className={`px-2 py-1 text-xs rounded-full transition-colors duration-200 ${
-                      ratingFilter === 4
-                        ? 'bg-pink-500 text-white'
-                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                    }`}
-                  >
-                    4★ & Up
-                  </button>
-                </div>
-              </div>
-              
-              <div className="flex items-center">
-                {(category.length > 0 || subCategory.length > 0 || priceRange[0] > 0 || priceRange[1] < 1000 || ratingFilter > 0) && (
-                  <button
-                    onClick={() => {
-                      setCategory([]);
-                      setSubCategory([]);
-                      setPriceRange([0, 1000]);
-                      setRatingFilter(0);
-                    }}
-                    className="text-xs text-gray-500 hover:text-pink-600 transition-colors mr-4"
-                  >
-                    Clear All
-                  </button>
-                )}
-                <button
-                  onClick={() => setShowFilter(!showFilter)}
-                  className="flex items-center gap-1.5 text-sm text-gray-700 hover:text-pink-600 transition-colors"
-                >
-                  <FaFilter className="text-xs" />
-                  <span>All Filters</span>
-                </button>
-              </div>
-            </div>
-          </div>
+        <div className="flex flex-col lg:flex-row gap-4 lg:gap-8 pt-4 lg:pt-6 border-t border-gray-200">
           
           {/* Filter Options */}
-          <div className="w-full lg:min-w-60 lg:max-w-72">
+          <div className="w-full lg:min-w-60 lg:max-w-72 lg:sticky lg:top-28 self-start">
             <button
               onClick={() => setShowFilter(!showFilter)}
               className="flex items-center gap-2 px-6 py-3 mb-4 rounded-xl bg-gradient-to-r from-pink-500 to-orange-500 text-white hover:shadow-medium transition-all duration-200 lg:hidden w-full justify-center font-semibold"
@@ -442,38 +398,29 @@ const Collection = () => {
                   className="sm:block"
                 >
                   {/* Category Filter */}
-                  <div className="bg-white rounded-lg shadow-sm border border-gray-200 mb-5 overflow-hidden transition-all duration-300 hover:shadow-md">
-                    <div className="px-3 py-2 bg-gray-50 border-b border-gray-200">
-                      <h4 className="font-medium text-gray-800">Categories</h4>
+                  <div className="bg-white rounded-2xl shadow-sm border border-gray-200 mb-5 overflow-hidden transition-all duration-300 hover:shadow-md">
+                    <div className="px-4 py-3 bg-gray-50 border-b border-gray-200 flex items-center justify-between">
+                      <h4 className="font-semibold text-gray-900">Categories</h4>
                     </div>
-                    <div className="p-3">
-                      <Checkbox 
-                        value="Sweets" 
-                        checked={category.includes("Sweets")} 
-                        onChange={toggleCategory} 
-                        label="Sweets" 
-                      />
-                      <Checkbox 
-                        value="Namkeens" 
-                        checked={category.includes("Namkeens")} 
-                        onChange={toggleCategory} 
-                        label="Namkeens" 
-                      />
-                      <Checkbox 
-                        value="CookiesAndBiscuits" 
-                        checked={category.includes("CookiesAndBiscuits")} 
-                        onChange={toggleCategory} 
-                        label="Cookies and Biscuits" 
-                      />
+                    <div className="p-4">
+                      {(availableCategories.length ? availableCategories : ["Sweets", "Namkeens", "CookiesAndBiscuits"]).map((cat) => (
+                        <Checkbox
+                          key={cat}
+                          value={cat}
+                          checked={category.map(normalizeKey).includes(normalizeKey(cat))}
+                          onChange={toggleCategory}
+                          label={cat === "CookiesAndBiscuits" ? "Cookies and Biscuits" : cat}
+                        />
+                      ))}
                     </div>
                   </div>
                   
                   {/* Type Filter */}
-                  <div className="bg-white rounded-lg shadow-sm border border-gray-200 mb-5 overflow-hidden transition-all duration-300 hover:shadow-md">
-                    <div className="px-3 py-2 bg-gray-50 border-b border-gray-200">
-                      <h4 className="font-medium text-gray-800">Type</h4>
+                  <div className="bg-white rounded-2xl shadow-sm border border-gray-200 mb-5 overflow-hidden transition-all duration-300 hover:shadow-md">
+                    <div className="px-4 py-3 bg-gray-50 border-b border-gray-200">
+                      <h4 className="font-semibold text-gray-900">Type</h4>
                     </div>
-                    <div className="p-3">
+                    <div className="p-4">
                       <Checkbox 
                         value="Sugar" 
                         checked={subCategory.includes("Sugar")} 
@@ -496,11 +443,11 @@ const Collection = () => {
                   </div>
                   
                   {/* Price Range Filter */}
-                  <div className="bg-white rounded-lg shadow-sm border border-gray-200 mb-5 overflow-hidden transition-all duration-300 hover:shadow-md">
-                    <div className="px-3 py-2 bg-gray-50 border-b border-gray-200">
-                      <h4 className="font-medium text-gray-800">Price Range</h4>
+                  <div className="bg-white rounded-2xl shadow-sm border border-gray-200 mb-5 overflow-hidden transition-all duration-300 hover:shadow-md">
+                    <div className="px-4 py-3 bg-gray-50 border-b border-gray-200">
+                      <h4 className="font-semibold text-gray-900">Price Range</h4>
                     </div>
-                    <div className="p-3">
+                    <div className="p-4">
                       <PriceRangeSlider 
                         range={priceRange} 
                         setRange={setPriceRange} 
@@ -511,11 +458,11 @@ const Collection = () => {
                   </div>
 
                   {/* Rating Filter */}
-                  <div className="bg-white rounded-lg shadow-sm border border-gray-200 mb-5 overflow-hidden transition-all duration-300 hover:shadow-md">
-                    <div className="px-3 py-2 bg-gray-50 border-b border-gray-200">
-                      <h4 className="font-medium text-gray-800">Customer Rating</h4>
+                  <div className="bg-white rounded-2xl shadow-sm border border-gray-200 mb-5 overflow-hidden transition-all duration-300 hover:shadow-md">
+                    <div className="px-4 py-3 bg-gray-50 border-b border-gray-200">
+                      <h4 className="font-semibold text-gray-900">Customer Rating</h4>
                     </div>
-                    <div className="p-3">
+                    <div className="p-4">
                       <p className="text-sm text-gray-600 mb-2">Minimum rating:</p>
                       <StarRating rating={ratingFilter} setRating={setRatingFilter} />
                       
@@ -553,11 +500,11 @@ const Collection = () => {
                   
                   {/* Active Filters Summary */}
                   {(category.length > 0 || subCategory.length > 0 || priceRange[0] > 0 || priceRange[1] < 1000 || ratingFilter > 0) && (
-                    <div className="bg-white rounded-lg shadow-sm border border-gray-200 mb-5 overflow-hidden">
-                      <div className="px-5 py-3.5 bg-gray-50 border-b border-gray-200">
-                        <h4 className="font-medium text-gray-800">Active Filters</h4>
+                    <div className="bg-white rounded-2xl shadow-sm border border-gray-200 mb-5 overflow-hidden">
+                      <div className="px-4 py-3 bg-gray-50 border-b border-gray-200">
+                        <h4 className="font-semibold text-gray-900">Active Filters</h4>
                       </div>
-                      <div className="p-3">
+                      <div className="p-4">
                         <div className="flex flex-wrap gap-2">
                           {category.map(cat => (
                             <span key={cat} className="inline-flex items-center gap-1 px-3 py-1 bg-pink-50 text-pink-600 rounded-full text-xs">
@@ -612,7 +559,7 @@ const Collection = () => {
                               setPriceRange([0, 1000]);
                               setRatingFilter(0);
                             }}
-                            className="mt-3 text-sm text-gray-500 hover:text-pink-600 transition-colors duration-200"
+                            className="mt-3 text-sm font-semibold text-gray-600 hover:text-pink-600 transition-colors duration-200"
                           >
                             Clear all filters
                           </button>
@@ -695,11 +642,69 @@ const Collection = () => {
               </div>
             </div>
 
+            {/* Quick filter chips (compact, no wasted sidebar space) */}
+            <div className="flex flex-wrap items-center gap-2 mb-5">
+              <span className="text-sm font-semibold text-gray-700 mr-1">Quick filters</span>
+              <button
+                onClick={() => setCategory(prev => prev.includes("Sweets") ? prev.filter(c => c !== "Sweets") : [...prev, "Sweets"])}
+                className={`px-3 py-1.5 text-sm rounded-full border transition-colors ${
+                  category.includes("Sweets")
+                    ? 'bg-gray-900 text-white border-gray-900'
+                    : 'bg-white text-gray-700 border-gray-200 hover:border-gray-300 hover:bg-gray-50'
+                }`}
+              >
+                Sweets
+              </button>
+              <button
+                onClick={() => setCategory(prev => prev.includes("Namkeens") ? prev.filter(c => c !== "Namkeens") : [...prev, "Namkeens"])}
+                className={`px-3 py-1.5 text-sm rounded-full border transition-colors ${
+                  category.includes("Namkeens")
+                    ? 'bg-gray-900 text-white border-gray-900'
+                    : 'bg-white text-gray-700 border-gray-200 hover:border-gray-300 hover:bg-gray-50'
+                }`}
+              >
+                Namkeens
+              </button>
+              <button
+                onClick={() => setPriceRange([0, 200])}
+                className={`px-3 py-1.5 text-sm rounded-full border transition-colors ${
+                  priceRange[1] === 200
+                    ? 'bg-gray-900 text-white border-gray-900'
+                    : 'bg-white text-gray-700 border-gray-200 hover:border-gray-300 hover:bg-gray-50'
+                }`}
+              >
+                Under ₹200
+              </button>
+              <button
+                onClick={() => setRatingFilter(prev => prev === 4 ? 0 : 4)}
+                className={`px-3 py-1.5 text-sm rounded-full border transition-colors ${
+                  ratingFilter === 4
+                    ? 'bg-gray-900 text-white border-gray-900'
+                    : 'bg-white text-gray-700 border-gray-200 hover:border-gray-300 hover:bg-gray-50'
+                }`}
+              >
+                4★ & Up
+              </button>
+              {(category.length > 0 || subCategory.length > 0 || priceRange[0] > 0 || priceRange[1] < 1000 || ratingFilter > 0) && (
+                <button
+                  onClick={() => {
+                    setCategory([]);
+                    setSubCategory([]);
+                    setPriceRange([0, 1000]);
+                    setRatingFilter(0);
+                  }}
+                  className="ml-auto text-sm font-semibold text-gray-600 hover:text-pink-600 transition-colors"
+                >
+                  Clear all
+                </button>
+              )}
+            </div>
+
             {/* Map Products */}
             {buffer ? (
               <ProductSkeleton count={6} />
             ) : (
-              <div className="grid grid-cols-2 md:grid-cols-3 gap-4 md:gap-8 gap-y-6 md:gap-y-12 mt-3">
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6 gap-y-7 md:gap-y-10 mt-3">
                 {filterProducts.length > 0 ? (
                   filterProducts.map((item, index) => (
                     <ProductItem
@@ -707,27 +712,54 @@ const Collection = () => {
                       name={item.name}
                       id={item._id}
                       price={item.price}
+                      discountPrice={item.discountPrice}
                       image={item.image}
+                      rating={item.rating}
+                      totalReviews={item.totalReviews}
                     />
                   ))
                 ) : (
-                  <div className="col-span-full py-20 text-center">
-                    <div className="max-w-md mx-auto">
-                      <div className="text-6xl sm:text-7xl mb-6 animate-bounce">🍰</div>
-                      <h3 className="font-poppins text-2xl sm:text-3xl font-bold text-gray-900 mb-3">No products found</h3>
-                      <p className="font-inter text-gray-600 mb-8 text-base sm:text-lg">Try adjusting your filters or search terms to find what you're looking for</p>
-                      <button 
-                        onClick={() => {
-                          setCategory([]);
-                          setSubCategory([]);
-                          setPriceRange([0, 1000]);
-                          setRatingFilter(0);
-                        }}
-                        className="btn-interactive inline-flex items-center gap-2 px-8 py-4 bg-gradient-to-r from-pink-500 to-orange-500 text-white rounded-full hover:shadow-strong transition-all duration-300 font-semibold relative z-10"
-                      >
-                        <FaTimes className="relative z-10" />
-                        <span className="relative z-10">Clear all filters</span>
-                      </button>
+                  <div className="col-span-full py-14 sm:py-20">
+                    <div className="max-w-xl mx-auto text-center">
+                      <div className="mb-6 flex justify-center">
+                        <div className="w-16 h-16 rounded-2xl bg-white border border-gray-200 shadow-soft flex items-center justify-center">
+                          <span className="text-3xl" aria-hidden="true">😔</span>
+                        </div>
+                      </div>
+
+                      <h3 className="font-poppins text-2xl sm:text-3xl font-extrabold text-gray-900 mb-2 tracking-tight">
+                        No products found
+                      </h3>
+                      <p className="font-inter text-gray-600 text-base sm:text-lg mb-8">
+                        Try clearing filters or searching something else.
+                      </p>
+
+                      <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
+                        <button
+                          onClick={() => {
+                            setCategory([]);
+                            setSubCategory([]);
+                            setPriceRange([0, 1000]);
+                            setRatingFilter(0);
+                          }}
+                          className="btn-interactive inline-flex items-center justify-center gap-2 w-full sm:w-auto px-7 py-3.5 bg-gray-900 text-white rounded-full hover:bg-black hover:shadow-strong transition-all duration-200 font-semibold"
+                        >
+                          <FaTimes />
+                          Clear filters
+                        </button>
+                        <Link
+                          to="/collection"
+                          onClick={() => {
+                            setCategory([]);
+                            setSubCategory([]);
+                            setPriceRange([0, 1000]);
+                            setRatingFilter(0);
+                          }}
+                          className="inline-flex items-center justify-center w-full sm:w-auto px-7 py-3.5 rounded-full border-2 border-gray-200 bg-white text-gray-900 font-semibold hover:border-gray-300 hover:bg-gray-50 hover:shadow-soft transition-all duration-200"
+                        >
+                          Browse all
+                        </Link>
+                      </div>
                     </div>
                   </div>
                 )}
@@ -782,6 +814,8 @@ const Collection = () => {
                     id={item._id}
                     price={item.price}
                     image={item.image}
+                    rating={item.rating}
+                    totalReviews={item.totalReviews}
                     featured={index === 0}
                   />
                 </motion.div>

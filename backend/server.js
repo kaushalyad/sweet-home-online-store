@@ -19,6 +19,8 @@ import sharedContentRouter from './routes/sharedContentRoute.js';
 import uploadRouter from './routes/uploadRoute.js';
 import messageRouter from './routes/messageRoute.js';
 import newsletterRouter from './routes/newsletterRoute.js';
+import reviewRouter from './routes/reviewRoute.js';
+import couponRouter from './routes/couponRoute.js';
 import { createServer } from 'http';
 import { Server } from 'socket.io';
 
@@ -128,6 +130,8 @@ const startServer = async () => {
       app.use("/api/upload", uploadRouter);
       app.use("/api/messages", messageRouter);
       app.use("/api/newsletter", newsletterRouter);
+      app.use("/api/reviews", reviewRouter);
+      app.use("/api/coupons", couponRouter);
 
     // Root endpoint
     app.get("/", (req, res) => {
@@ -185,7 +189,8 @@ const startServer = async () => {
     });
 
   } catch (error) {
-    logger.error('Failed to start server:', error);
+    console.error('Failed to start server:', error);
+    logger.error(`Failed to start server: ${error?.stack || error?.message || error}`);
     process.exit(1);
   }
 };

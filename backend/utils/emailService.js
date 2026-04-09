@@ -53,10 +53,40 @@ export const sendOrderConfirmationEmail = async (orderData) => {
       orderDate
     } = orderData;
 
+    const resolvePublicUrl = (src) => {
+      if (!src) return null;
+      const s = String(src).trim();
+      if (!s) return null;
+      if (/^https?:\/\//i.test(s)) return s;
+
+      const base =
+        process.env.PUBLIC_BASE_URL ||
+        process.env.BACKEND_URL ||
+        process.env.FRONTEND_URL ||
+        "";
+
+      if (!base) return s;
+      try {
+        return new URL(s, base).toString();
+      } catch {
+        return s;
+      }
+    };
+
+    const placeholderUrl =
+      resolvePublicUrl("/placeholder.jpg") ||
+      "https://via.placeholder.com/50?text=Item";
+
     const itemsHtml = items.map(item => `
       <tr>
         <td style="padding: 10px; border-bottom: 1px solid #eee;">
-          <img src="${item.image?.[0] || '/placeholder.jpg'}" alt="${item.name}" style="width: 50px; height: 50px; object-fit: cover; margin-right: 10px;">
+          <img
+            src="${resolvePublicUrl(Array.isArray(item.image) ? item.image?.[0] : item.image) || placeholderUrl}"
+            alt="${String(item.name || "Item").replace(/"/g, "&quot;")}"
+            width="50"
+            height="50"
+            style="width: 50px; height: 50px; object-fit: cover; margin-right: 10px; border-radius: 8px; border: 1px solid #eee; display: inline-block; vertical-align: middle;"
+          >
           ${item.name}
         </td>
         <td style="padding: 10px; border-bottom: 1px solid #eee;">${item.quantity}</td>

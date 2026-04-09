@@ -6,7 +6,7 @@ import "react-loading-skeleton/dist/skeleton.css";
 const ProductSkeleton = ({ count = 10 }) => {
   return (
     <SkeletonTheme baseColor="#f3f4f6" highlightColor="#ffffff">
-      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 md:gap-6 gap-y-6 md:gap-y-10">
+      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-4 xl:grid-cols-5 gap-5 md:gap-7 gap-y-8 md:gap-y-12">
         {[...Array(count)].map((_, index) => (
           <motion.div
             key={index}
@@ -17,7 +17,7 @@ const ProductSkeleton = ({ count = 10 }) => {
           >
             {/* Image Skeleton - matching ProductItem dimensions */}
             <div className="overflow-hidden rounded-lg md:rounded-2xl mb-2 md:mb-3">
-              <Skeleton height="100%" className="h-36 sm:h-44 md:h-56 lg:h-64" />
+              <Skeleton height="100%" className="h-44 sm:h-52 md:h-64 lg:h-72" />
             </div>
 
             {/* Product Name Skeleton */}

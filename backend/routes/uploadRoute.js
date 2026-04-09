@@ -1,11 +1,14 @@
 import express from 'express'
-import { getCloudinarySignature } from '../controllers/uploadController.js'
+import { getCloudinarySignature, getReviewUploadSignature } from '../controllers/uploadController.js'
 import { protect, admin } from '../middleware/authMiddleware.js'
 
 const router = express.Router()
 
 // Protected: only authenticated admins can request signatures
 router.get('/cloudinary/signature', protect, admin, getCloudinarySignature)
+
+// Protected: authenticated users can request review upload signatures
+router.get('/cloudinary/review-signature', protect, getReviewUploadSignature)
 
 // Test endpoint to verify Cloudinary config
 router.get('/cloudinary/test', protect, admin, (req, res) => {

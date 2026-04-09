@@ -9,6 +9,7 @@ import Users from './pages/Users';
 import Analytics from './pages/Analytics';
 import UserBehavior from './pages/UserBehavior';
 import Messages from './pages/Messages';
+import Coupons from './pages/Coupons';
 import PrivateRoute from './components/auth/PrivateRoute';
 import { AuthProvider } from './context/AuthContext';
 import Layout from './components/Layout';
@@ -29,6 +30,7 @@ function App() {
                     <Route path="/products/*" element={<ProductRoutes />} />
                     <Route path="/orders" element={<Orders />} />
                     <Route path="/users" element={<Users />} />
+                    <Route path="/coupons" element={<Coupons />} />
                     <Route path="/analytics" element={<Analytics />} />
                     <Route path="/user-behavior" element={<UserBehavior />} />
                     <Route path="/messages" element={<Messages />} />

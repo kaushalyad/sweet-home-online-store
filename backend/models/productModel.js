@@ -1,5 +1,25 @@
 import mongoose from 'mongoose'
 
+const reviewMediaSchema = new mongoose.Schema(
+  {
+    url: { type: String, required: true },
+    type: { type: String, enum: ['image', 'video'], required: true },
+    publicId: { type: String }
+  },
+  { _id: false }
+);
+
+const reviewSchema = new mongoose.Schema(
+  {
+    userId: { type: mongoose.Schema.Types.ObjectId, ref: 'user', required: true },
+    rating: { type: Number, required: true, min: 1, max: 5 },
+    comment: { type: String, default: '' },
+    media: { type: [reviewMediaSchema], default: [] },
+    verifiedPurchase: { type: Boolean, default: false }
+  },
+  { timestamps: true }
+);
+
 const productSchema = new mongoose.Schema({
     name: { type: String, required: true },
     description: { type: String, required: true },
@@ -20,6 +40,7 @@ const productSchema = new mongoose.Schema({
     tags: { type: Array, default: [] },
     rating: { type: Number, default: 0 },
     totalReviews: { type: Number, default: 0 },
+    reviews: { type: [reviewSchema], default: [] },
     totalSold: { type: Number, default: 0 },
     date: { type: Date, default: Date.now }
 }, { minimize: false });
@@ -30,6 +51,18 @@ productSchema.methods.getDiscountedPrice = function() {
         return this.discountPrice;
     }
     return this.price;
+};
+
+productSchema.methods.recalculateRating = function () {
+  if (!Array.isArray(this.reviews) || this.reviews.length === 0) {
+    this.rating = 0;
+    this.totalReviews = 0;
+    return;
+  }
+
+  const sum = this.reviews.reduce((acc, r) => acc + (Number(r.rating) || 0), 0);
+  this.totalReviews = this.reviews.length;
+  this.rating = Number((sum / this.totalReviews).toFixed(2));
 };
 
 // Check if model already exists to prevent model overwrite error

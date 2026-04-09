@@ -1,7 +1,5 @@
-import { useContext, useState, useEffect } from "react";
+import { useContext, useState, useEffect, useCallback, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import Title from "../components/Title";
-import { assets } from "../assets/assets";
 import { ShopContext } from "../context/ShopContext";
 import axios from "axios";
 import { toast } from "react-toastify";
@@ -17,6 +15,7 @@ const PlaceOrder = () => {
   const [discount, setDiscount] = useState(0);
   const [appliedCoupon, setAppliedCoupon] = useState(null);
   const [isApplyingCoupon, setIsApplyingCoupon] = useState(false);
+  const [availableCoupons, setAvailableCoupons] = useState([]);
   const [deliveryInstructions, setDeliveryInstructions] = useState("");
   const [specialRequirements, setSpecialRequirements] = useState({
     coldPacking: false,
@@ -47,6 +46,15 @@ const PlaceOrder = () => {
     products,
   } = useContext(ShopContext);
 
+  const hasItems = useMemo(() => {
+    return (
+      cartItems &&
+      typeof cartItems === "object" &&
+      Object.keys(cartItems).length > 0 &&
+      Object.values(cartItems).some((q) => Number(q) > 0)
+    );
+  }, [cartItems]);
+
   useEffect(() => {
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
@@ -63,61 +71,41 @@ const PlaceOrder = () => {
     }
   }, []);
 
-  // Debug logging for cart items and context
-  console.log("Full ShopContext:", {
-    cartItems,
-    products,
-    getCartAmount: getCartAmount(),
-    delivery_fee
-  });
-
-  // Check if cartItems is in the expected format
-  if (cartItems && typeof cartItems === 'object') {
-    console.log("Cart items structure:", {
-      keys: Object.keys(cartItems),
-      values: Object.values(cartItems),
-      type: typeof cartItems,
-      isArray: Array.isArray(cartItems),
-      stringified: JSON.stringify(cartItems)
-    });
-  } else {
-    console.error("Invalid cart items format:", cartItems);
-  }
-
-  // Check authentication and cart after hooks
-  if (!token) {
-    toast.error("Please login to place an order");
-    navigate("/login");
-    return null;
-  }
-
-  // Updated cart validation for new structure
-  const hasItems = cartItems && 
-    typeof cartItems === 'object' && 
-    Object.keys(cartItems).length > 0 && 
-    Object.values(cartItems).some(quantity => quantity > 0);
-
-  // Only redirect if not showing success animation
-  if (!hasItems && !showSuccess) {
-    console.log("Cart validation failed:", {
-      cartItems,
-      hasItems,
-      cartKeys: Object.keys(cartItems),
-      cartValues: Object.values(cartItems),
-      cartItemsType: typeof cartItems,
-      cartItemsStringified: JSON.stringify(cartItems)
-    });
-    toast.error("Your cart is empty");
-    navigate("/cart");
-    return null;
-  }
+  // Redirects must happen in effects (avoid conditional hook order changes)
+  useEffect(() => {
+    if (!token) {
+      toast.error("Please login to place an order");
+      navigate("/login");
+      return;
+    }
+    if (!hasItems && !showSuccess) {
+      toast.error("Your cart is empty");
+      navigate("/cart");
+    }
+  }, [token, hasItems, showSuccess, navigate]);
   
-  // Available coupons (in a real app, this would come from the backend)
-  const availableCoupons = [
-    { code: "SWEETFREE", discount: 100, minAmount: 500, description: "₹100 off on orders above ₹500" },
-    { code: "WELCOME10", discount: 0.1, isPercentage: true, maxDiscount: 200, description: "10% off (up to ₹200)" },
-    { code: "FREESHIP", discount: 50, description: "Free shipping (₹50 off shipping)" }
-  ];
+  const formatCouponDescription = (c) => {
+    if (!c) return "";
+    if (c.type === "flat") return `₹${c.value} off${c.minOrderAmount ? ` on orders above ₹${c.minOrderAmount}` : ""}`;
+    if (c.type === "percent") return `${c.value}% off${c.maxDiscount != null ? ` (up to ₹${c.maxDiscount})` : ""}${c.minOrderAmount ? ` on orders above ₹${c.minOrderAmount}` : ""}`;
+    if (c.type === "shipping") return `Shipping discount up to ₹${c.value}${c.minOrderAmount ? ` on orders above ₹${c.minOrderAmount}` : ""}`;
+    return c.code;
+  };
+
+  const fetchAvailableCoupons = useCallback(async () => {
+    try {
+      const res = await axios.get(`${backendUrl}/api/coupons/active`);
+      if (res.data?.success) {
+        setAvailableCoupons(res.data.coupons || []);
+      }
+    } catch {
+      // ignore: coupon list is optional UI
+    }
+  }, [backendUrl]);
+
+  useEffect(() => {
+    fetchAvailableCoupons();
+  }, [fetchAvailableCoupons]);
 
   // Calculate additional costs
   const calculateAdditionalCosts = () => {
@@ -174,51 +162,35 @@ const PlaceOrder = () => {
   };
 
   // Apply coupon code
-  const applyCoupon = (e) => {
-    // Prevent form submission
+  const applyCoupon = async (e) => {
     e && e.preventDefault();
-    
+
     if (!couponCode) {
       toast.info("Please enter a coupon code");
       return;
     }
 
     setIsApplyingCoupon(true);
-    
-    // Simulate API call with setTimeout
-    setTimeout(() => {
-      const coupon = availableCoupons.find(c => c.code === couponCode);
-      
-      if (!coupon) {
-        toast.error("Invalid coupon code");
-        setIsApplyingCoupon(false);
-        return;
-      }
-      
+    try {
       const subtotal = getCartAmount();
-      
-      // Check minimum order amount if applicable
-      if (coupon.minAmount && subtotal < coupon.minAmount) {
-        toast.error(`This coupon requires a minimum order of ₹${coupon.minAmount}`);
-        setIsApplyingCoupon(false);
-        return;
-      }
-      
-      // Calculate discount
-      let discountAmount;
-      if (coupon.isPercentage) {
-        discountAmount = subtotal * coupon.discount;
-        if (coupon.maxDiscount && discountAmount > coupon.maxDiscount) {
-          discountAmount = coupon.maxDiscount;
-        }
+      const res = await axios.post(`${backendUrl}/api/coupons/apply`, {
+        code: couponCode,
+        subtotal,
+        deliveryFee: delivery_fee
+      });
+
+      if (res.data?.success) {
+        setDiscount(Number(res.data.discountAmount || 0));
+        setAppliedCoupon(res.data.coupon || { code: couponCode });
+        toast.success("Coupon applied");
       } else {
-        discountAmount = coupon.discount;
+        toast.error(res.data?.message || "Invalid coupon code");
       }
-      
-      setDiscount(discountAmount);
-      setAppliedCoupon(coupon);
+    } catch (err) {
+      toast.error(err.response?.data?.message || "Failed to apply coupon");
+    } finally {
       setIsApplyingCoupon(false);
-    }, 800); // Simulate network delay
+    }
   };
 
   // Remove applied coupon
@@ -768,6 +740,7 @@ const PlaceOrder = () => {
         additionalCosts: additionalCosts || 0,
         discount: discount || 0,
         appliedCoupon: appliedCoupon ? appliedCoupon.code : null,
+        deliveryFee: delivery_fee,
         paymentMethod: method.toLowerCase(),
         status: "Order Placed",
         paymentStatus: "pending",
@@ -859,13 +832,15 @@ const PlaceOrder = () => {
   };
 
   return (
-    <div className="bg-gray-50 py-8">
+    // When redirecting away, don't render the page (prevents flicker)
+    (!token || (!hasItems && !showSuccess)) ? null : (
+    <div className="bg-gray-50 pt-10 sm:pt-12 pb-10">
       <AnimatePresence>
         {showSuccess && <SuccessAnimation />}
       </AnimatePresence>
-      <div className="container mx-auto sm:px-4">
+      <div className="container mx-auto px-4 sm:px-4">
         {/* Order Progress */}
-        <div className="max-w-3xl mx-auto mb-8">
+        <div className="max-w-3xl mx-auto mb-10 sm:mb-12">
           <div className="flex items-center justify-between">
             <div className="flex flex-col items-center">
               <div className="w-10 h-10 bg-pink-500 text-white rounded-full flex items-center justify-center font-medium">1</div>
@@ -884,7 +859,7 @@ const PlaceOrder = () => {
           </div>
         </div>
         
-        <div className="text-center mb-8">
+        <div className="text-center mb-10 sm:mb-12">
           <h1 className="text-2xl sm:text-3xl font-bold text-gray-800">Checkout</h1>
           <p className="text-sm sm:text-base text-gray-600 mt-2">Complete your order with just a few more steps</p>
         </div>
@@ -894,7 +869,7 @@ const PlaceOrder = () => {
           className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-8"
         >
           {/* Left Column - Shipping Information */}
-          <div className="lg:col-span-2 space-y-4 sm:space-y-6">
+          <div className="lg:col-span-2 space-y-6 sm:space-y-8">
             {/* Shipping Information */}
             <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
               <div className="bg-gradient-to-r from-pink-500 to-rose-500 py-3 sm:py-4 px-4 sm:px-6">
@@ -906,7 +881,7 @@ const PlaceOrder = () => {
                 </h2>
               </div>
               
-              <div className="p-4 sm:p-6">
+              <div className="p-4 sm:p-6 lg:p-8">
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
                     <label htmlFor="firstName" className="block text-sm font-medium text-gray-700 mb-1">First Name</label>
@@ -994,7 +969,7 @@ const PlaceOrder = () => {
                   )}
                 </div>
                 
-                <div className="grid grid-cols-2 gap-4 mb-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4 mt-4">
                   <div>
                     <label htmlFor="city" className="block text-sm font-medium text-gray-700 mb-1">City</label>
                     <input
@@ -1025,7 +1000,7 @@ const PlaceOrder = () => {
                   </div>
                 </div>
                 
-                <div className="grid grid-cols-2 gap-4 mb-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-2">
                   <div>
                     <label htmlFor="zipcode" className="block text-sm font-medium text-gray-700 mb-1">Zipcode</label>
                     <input
@@ -1348,8 +1323,8 @@ const PlaceOrder = () => {
                         Available coupons:
                       </p>
                       <div className="space-y-2 mt-1.5">
-                        {availableCoupons.map((coupon, index) => (
-                          <div key={index} className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2 group">
+                        {availableCoupons.map((coupon) => (
+                          <div key={coupon._id || coupon.code} className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2 group">
                             <button
                               type="button"
                               onClick={() => setCouponCode(coupon.code)}
@@ -1357,7 +1332,7 @@ const PlaceOrder = () => {
                             >
                               {coupon.code}
                             </button>
-                            <span className="text-gray-600 text-xs sm:text-sm">{coupon.description}</span>
+                            <span className="text-gray-600 text-xs sm:text-sm">{formatCouponDescription(coupon)}</span>
                           </div>
                         ))}
                       </div>
@@ -1440,6 +1415,7 @@ const PlaceOrder = () => {
         </form>
       </div>
     </div>
+    )
   );
 };
 

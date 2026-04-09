@@ -1,4 +1,4 @@
-import { useContext, useEffect, useState } from "react";
+import { useContext, useEffect, useMemo, useState } from "react";
 import { Link, useParams, useNavigate } from "react-router-dom";
 import { ShopContext } from "../context/ShopContext";
 import RelatedProducts from "../components/RelatedProducts";
@@ -6,6 +6,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { FaHeart, FaShoppingCart, FaShippingFast, FaRegClock, FaCheck, FaArrowLeft, FaStar, FaShare, FaFacebook, FaTwitter, FaPinterest, FaWhatsapp } from "react-icons/fa";
 import { toast } from "react-toastify";
 import { trackPageView, trackProductView, trackAddToCart, trackBuyNow } from "../utils/analytics";
+import axios from "axios";
 
 const Product = () => {
   const { productId } = useParams();
@@ -16,7 +17,10 @@ const Product = () => {
     addToCart, 
     addToWishlist, 
     removeFromWishlist, 
-    isInWishlist 
+    isInWishlist,
+    backendUrl,
+    token,
+    isAuthenticated
   } = useContext(ShopContext);
   const [productData, setProductData] = useState(false);
   const [image, setImage] = useState("");
@@ -25,6 +29,13 @@ const Product = () => {
   const [activeTab, setActiveTab] = useState("description");
   const [showShareOptions, setShowShareOptions] = useState(false);
   const [showImageModal, setShowImageModal] = useState(false);
+  const [reviewsLoading, setReviewsLoading] = useState(false);
+  const [reviewsData, setReviewsData] = useState([]);
+  const [reviewsStats, setReviewsStats] = useState({ rating: 0, totalReviews: 0 });
+  const [showReviewModal, setShowReviewModal] = useState(false);
+  const [reviewRating, setReviewRating] = useState(5);
+  const [reviewComment, setReviewComment] = useState("");
+  const [reviewFiles, setReviewFiles] = useState([]);
 
   const fetchProductData = async () => {
     products.map((item) => {
@@ -41,6 +52,112 @@ const Product = () => {
     window.scrollTo(0, 0);
     fetchProductData();
   }, [productId, products]);
+
+  const fetchReviews = async () => {
+    try {
+      setReviewsLoading(true);
+      const res = await axios.get(`${backendUrl}/api/reviews/product/${productId}?page=1&limit=10`);
+      if (res.data?.success) {
+        setReviewsData(res.data.reviews || []);
+        setReviewsStats({
+          rating: Number(res.data.rating || 0),
+          totalReviews: Number(res.data.totalReviews || 0),
+        });
+      }
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setReviewsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (productId) fetchReviews();
+  }, [productId]);
+
+  const ratingBreakdown = useMemo(() => {
+    const counts = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 };
+    for (const r of reviewsData) {
+      const v = Number(r?.rating);
+      if (v >= 1 && v <= 5) counts[v] += 1;
+    }
+    const total = reviewsStats.totalReviews || reviewsData.length || 0;
+    const percent = (n) => (total ? Math.round((n / total) * 100) : 0);
+    return {
+      total,
+      counts,
+      percents: {
+        5: percent(counts[5]),
+        4: percent(counts[4]),
+        3: percent(counts[3]),
+        2: percent(counts[2]),
+        1: percent(counts[1]),
+      },
+    };
+  }, [reviewsData, reviewsStats.totalReviews]);
+
+  const uploadReviewMedia = async (file) => {
+    const isVideo = file.type?.startsWith("video/");
+    const resourceType = isVideo ? "video" : "image";
+
+    const sigRes = await axios.get(
+      `${backendUrl}/api/upload/cloudinary/review-signature?productId=${productId}&resourceType=${resourceType}`,
+      { headers: { Authorization: `Bearer ${token}` } }
+    );
+    if (!sigRes.data?.success) throw new Error(sigRes.data?.message || "Failed to get upload signature");
+
+    const { signature, timestamp, api_key, cloud_name, folder } = sigRes.data.data;
+    const uploadUrl = `https://api.cloudinary.com/v1_1/${cloud_name}/${resourceType}/upload`;
+
+    const form = new FormData();
+    form.append("file", file);
+    form.append("api_key", api_key);
+    form.append("timestamp", timestamp);
+    form.append("signature", signature);
+    form.append("folder", folder);
+
+    const upRes = await axios.post(uploadUrl, form, {
+      headers: { "Content-Type": "multipart/form-data" },
+    });
+
+    return {
+      url: upRes.data.secure_url,
+      type: resourceType,
+      publicId: upRes.data.public_id,
+    };
+  };
+
+  const handleSubmitReview = async () => {
+    if (!isAuthenticated || !token) {
+      toast.error("Please login to write a review");
+      return;
+    }
+    try {
+      const files = Array.from(reviewFiles || []);
+      const media = [];
+      for (const f of files) {
+        media.push(await uploadReviewMedia(f));
+      }
+
+      const res = await axios.post(
+        `${backendUrl}/api/reviews/product/${productId}`,
+        { rating: reviewRating, comment: reviewComment, media },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+
+      if (res.data?.success) {
+        toast.success("Review saved");
+        setShowReviewModal(false);
+        setReviewComment("");
+        setReviewFiles([]);
+        await fetchReviews();
+      } else {
+        toast.error(res.data?.message || "Failed to save review");
+      }
+    } catch (e) {
+      toast.error(e?.response?.data?.message || e.message || "Failed to save review");
+    }
+  };
 
   // Update wishlist state when isInWishlist changes
   useEffect(() => {
@@ -143,26 +260,26 @@ const Product = () => {
         <div className="bg-white/90 backdrop-blur-sm rounded-xl sm:rounded-2xl shadow-medium border border-gray-100/50 overflow-hidden hover:shadow-strong transition-shadow duration-300">
           <div className="flex flex-col lg:flex-row">
           {/* Product Images Section */}
-          <div className="w-full lg:w-1/2 p-2 sm:p-4 lg:p-8">
-            <div className="flex flex-col sm:flex-row gap-2 sm:gap-4 lg:gap-6">
+          <div className="w-full lg:w-[45%] p-2 sm:p-4 lg:p-6">
+            <div className="flex flex-col sm:flex-row gap-2 sm:gap-4 lg:gap-5">
               {/* Thumbnails - Horizontal on mobile, Vertical on larger screens */}
-              <div className="flex sm:flex-col gap-2 sm:gap-4 overflow-x-auto sm:overflow-y-auto sm:overflow-x-hidden pb-2 sm:pb-0 sm:pr-2 max-h-[500px] scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100 w-full sm:w-20">
+              <div className="flex sm:flex-col gap-2 sm:gap-3 overflow-x-auto sm:overflow-y-auto sm:overflow-x-hidden pb-2 sm:pb-0 sm:pr-2 max-h-[420px] scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100 w-full sm:w-16">
                 {productData.image.map((img, index) => (
                   <motion.div
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
                     key={index}
                     onClick={() => setImage(img)}
-                    className={`relative cursor-pointer rounded-lg overflow-hidden min-w-16 sm:min-w-20 h-16 sm:h-20 flex-shrink-0 shadow-sm ${
+                    className={`relative cursor-pointer rounded-xl overflow-hidden min-w-16 sm:min-w-16 h-16 sm:h-16 flex-shrink-0 shadow-sm ${
                       image === img 
                         ? 'ring-2 ring-pink-500 ring-offset-2 shadow-md' 
                         : 'border border-gray-200 hover:border-pink-300 hover:shadow'
                     }`}
                   >
-                    <div className="w-full h-full">
+                    <div className="w-full h-full bg-white">
                       <img
                         src={img}
-                        className="w-full h-full object-cover"
+                        className="w-full h-full object-contain p-1.5 bg-gray-50"
                         alt={`${productData.name} view ${index + 1}`}
                         loading="lazy"
                       />
@@ -175,33 +292,35 @@ const Product = () => {
               <motion.div 
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
-                className="relative flex-1 rounded-xl overflow-hidden bg-gradient-to-br from-white to-gray-50 shadow-sm border border-gray-200"
+                className="relative flex-1 rounded-2xl overflow-hidden bg-white shadow-sm border-2 border-gray-300/70 ring-1 ring-black/5"
               >
                 <div 
-                  className="group relative aspect-square overflow-hidden cursor-zoom-in"
+                  className="group relative aspect-square overflow-hidden cursor-zoom-in p-2 sm:p-3"
                   onClick={() => setShowImageModal(true)}
                 >
-                  <motion.img 
-                    key={image}
-                    initial={{ opacity: 0 }}
-                    animate={{ 
-                      opacity: 1,
-                      transition: { duration: 0.3 }
-                    }}
-                    src={image} 
-                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                    alt={productData.name}
-                    loading="eager"
-                  />
+                  <div className="w-full h-full rounded-2xl overflow-hidden bg-white border border-gray-100">
+                    <motion.img 
+                      key={image}
+                      initial={{ opacity: 0 }}
+                      animate={{ 
+                        opacity: 1,
+                        transition: { duration: 0.3 }
+                      }}
+                      src={image} 
+                      className="w-full h-full object-contain bg-gray-50 transition-transform duration-500 group-hover:scale-[1.02]"
+                      alt={productData.name}
+                      loading="eager"
+                    />
+                  </div>
                   
                   {/* Beautiful overlay with gradient */}
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/5 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/5 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-2xl"></div>
                   
                   {/* Zoom hint overlay */}
-                  <div className="absolute bottom-0 inset-x-0 bg-gradient-to-t from-black/10 to-transparent h-16 sm:h-20 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"></div>
+                  <div className="absolute bottom-0 inset-x-0 bg-gradient-to-t from-black/10 to-transparent h-16 sm:h-20 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none rounded-2xl"></div>
                   
                   {/* Zoom text hint */}
-                  <div className="absolute bottom-2 sm:bottom-4 left-1/2 transform -translate-x-1/2 bg-white/80 px-2 sm:px-3 py-1 sm:py-1.5 rounded-full text-xs font-medium text-gray-700 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none shadow-sm flex items-center">
+                  <div className="absolute bottom-2 sm:bottom-3 left-1/2 transform -translate-x-1/2 bg-white/85 px-2 sm:px-3 py-1 sm:py-1.5 rounded-full text-xs font-medium text-gray-700 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none shadow-sm flex items-center">
                     <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3 sm:h-3.5 sm:w-3.5 mr-1 text-gray-600" viewBox="0 0 20 20" fill="currentColor">
                       <path d="M5 8a1 1 0 011-1h1V6a1 1 0 012 0v1h1a1 1 0 110 2H9v1a1 1 0 11-2 0V9H6a1 1 0 01-1-1z" />
                       <path fillRule="evenodd" d="M2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8zm6-4a4 4 0 100 8 4 4 0 000-8z" clipRule="evenodd" />
@@ -293,7 +412,7 @@ const Product = () => {
           </div>
 
           {/* Product Info Section */}
-          <div className="w-full lg:w-1/2 p-4 lg:p-8 border-t lg:border-t-0 lg:border-l border-gray-100">
+          <div className="w-full lg:w-[55%] p-4 lg:p-8 border-t lg:border-t-0 lg:border-l border-gray-100 lg:sticky lg:top-28 self-start">
             <motion.div
               initial="hidden"
               animate="visible"
@@ -310,43 +429,63 @@ const Product = () => {
               </div>
               
               {/* Product Title */}
-              <h1 className="font-poppins text-xl sm:text-2xl lg:text-3xl xl:text-4xl font-bold bg-gradient-to-r from-pink-600 via-orange-600 to-rose-600 bg-clip-text text-transparent mb-3 leading-tight">
+              <h1 className="font-poppins text-2xl sm:text-3xl lg:text-4xl font-extrabold text-gray-900 mb-2 leading-tight tracking-tight">
                 {productData.name}
               </h1>
+              <div className="w-16 h-1 bg-gradient-to-r from-pink-500 to-orange-500 rounded-full mb-4" />
               
               {/* Ratings */}
-              <div className="flex items-center mb-5">
-                <div className="flex">
+              <div className="flex flex-wrap items-center gap-3 mb-6">
+                <div className="inline-flex items-center gap-2 bg-amber-50 border border-amber-100 text-amber-800 px-3 py-1.5 rounded-full">
+                  <FaStar className="text-amber-500" />
+                  <span className="font-semibold">
+                    {Number(reviewsStats.rating || productData.rating || 0).toFixed(1)}
+                  </span>
+                  <span className="text-amber-700/80">/ 5</span>
+                </div>
+
+                <div className="flex items-center">
                   {[...Array(5)].map((_, i) => (
-                    <FaStar 
-                      key={i} 
-                      className={`${i < 4 ? 'text-yellow-400' : 'text-gray-300'} mr-1`} 
+                    <FaStar
+                      key={i}
+                      className={`${i < Math.round(reviewsStats.rating || productData.rating || 0) ? 'text-yellow-400' : 'text-gray-300'} mr-1 text-base sm:text-lg`}
                     />
                   ))}
                 </div>
-                <span className="text-sm text-gray-500 ml-2">(122 reviews)</span>
+
+                <button
+                  type="button"
+                  onClick={() => setActiveTab("reviews")}
+                  className="text-sm font-semibold text-gray-700 hover:text-orange-600 underline underline-offset-4"
+                >
+                  {reviewsStats.totalReviews || productData.totalReviews || 0} reviews
+                </button>
               </div>
               
               {/* Price */}
-              <div className="mb-6 bg-gradient-to-br from-pink-50 via-orange-50 to-rose-50 p-4 sm:p-5 rounded-xl border border-pink-100/50">
-                <div className="flex flex-wrap items-center gap-2 sm:gap-3">
-                  <span className="font-poppins text-2xl sm:text-3xl lg:text-4xl font-bold bg-gradient-to-r from-pink-600 to-orange-600 bg-clip-text text-transparent">
-                    {currency}{productData.price}
-                  </span>
-                  {productData.discountPrice && (
-                    <span className="text-lg sm:text-xl text-gray-400 line-through font-inter">
-                      {currency}{productData.discountPrice}
-                    </span>
-                  )}
-                  {productData.discountPrice && (
-                    <span className="bg-gradient-to-r from-green-500 to-emerald-500 text-white text-xs sm:text-sm px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-full font-semibold shadow-sm">
-                      Save {Math.round(((productData.discountPrice - productData.price) / productData.discountPrice) * 100)}%
-                    </span>
-                  )}
+              <div className="mb-6 p-5 rounded-2xl border border-gray-200 bg-white shadow-sm">
+                <div className="flex items-end justify-between gap-4">
+                  <div>
+                    <div className="flex items-baseline gap-2 flex-wrap">
+                      <span className="font-poppins text-3xl sm:text-4xl font-extrabold text-gray-900">
+                        {currency}{productData.price}
+                      </span>
+                      {productData.discountPrice && (
+                        <span className="text-base sm:text-lg text-gray-400 line-through font-inter">
+                          {currency}{productData.discountPrice}
+                        </span>
+                      )}
+                      {productData.discountPrice && (
+                        <span className="bg-emerald-50 text-emerald-700 text-xs sm:text-sm px-3 py-1.5 rounded-full font-semibold border border-emerald-100">
+                          Save {Math.round(((productData.discountPrice - productData.price) / productData.discountPrice) * 100)}%
+                        </span>
+                      )}
+                    </div>
+                    <p className="text-sm sm:text-base text-green-600 mt-2 flex items-center font-semibold">
+                      <FaCheck className="mr-1.5" /> In Stock <span className="text-green-600/70 font-medium ml-2">• Ready to Ship</span>
+                    </p>
+                  </div>
                 </div>
-                <p className="text-sm sm:text-base text-green-600 mt-3 flex items-center font-medium">
-                  <FaCheck className="mr-1.5" /> In Stock - Ready to Ship
-                </p>
               </div>
               
               {/* Description */}
@@ -387,7 +526,7 @@ const Product = () => {
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
                   onClick={handleAddToCart}
-                  className="btn-interactive flex-1 bg-gradient-to-r from-pink-500 to-orange-500 text-white px-6 sm:px-8 py-3.5 sm:py-4 rounded-xl font-poppins font-semibold flex items-center justify-center gap-2.5 transition-all shadow-medium hover:shadow-strong text-sm sm:text-base"
+                  className="btn-interactive flex-1 bg-gradient-to-r from-pink-500 to-orange-500 text-white px-6 sm:px-8 py-4 rounded-xl font-poppins font-semibold flex items-center justify-center gap-2.5 transition-all shadow-medium hover:shadow-strong text-base"
                 >
                   <FaShoppingCart className="text-lg" /> Add to Cart
                 </motion.button>
@@ -396,7 +535,7 @@ const Product = () => {
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
                   onClick={handleBuyNow}
-                  className="flex-1 bg-gradient-to-r from-gray-800 to-gray-900 hover:from-gray-900 hover:to-black text-white px-6 sm:px-8 py-3.5 sm:py-4 rounded-xl font-poppins font-semibold transition-all shadow-medium hover:shadow-strong text-sm sm:text-base"
+                  className="flex-1 bg-gray-900 hover:bg-black text-white px-6 sm:px-8 py-4 rounded-xl font-poppins font-semibold transition-all shadow-medium hover:shadow-strong text-base"
                 >
                   Buy Now
                 </motion.button>
@@ -501,7 +640,7 @@ const Product = () => {
                 : "text-gray-600 hover:text-gray-900 hover:bg-gray-50"
             }`}
           >
-            Reviews (122)
+            Reviews ({reviewsStats.totalReviews || productData.totalReviews || 0})
           </button>
         </div>
         
@@ -565,116 +704,202 @@ const Product = () => {
                 transition={{ duration: 0.2 }}
                 className="text-gray-600"
               >
+                {/* Write Review Modal */}
+                <AnimatePresence>
+                  {showReviewModal && (
+                    <motion.div
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      exit={{ opacity: 0 }}
+                      className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4"
+                      onClick={() => setShowReviewModal(false)}
+                    >
+                      <motion.div
+                        initial={{ scale: 0.95, opacity: 0 }}
+                        animate={{ scale: 1, opacity: 1 }}
+                        exit={{ scale: 0.95, opacity: 0 }}
+                        className="w-full max-w-2xl bg-white rounded-2xl shadow-strong p-5 sm:p-6"
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        <div className="flex items-center justify-between mb-4">
+                          <h3 className="font-poppins font-bold text-gray-900 text-lg">Write a Review</h3>
+                          <button
+                            onClick={() => setShowReviewModal(false)}
+                            className="text-gray-500 hover:text-gray-800"
+                          >
+                            ✕
+                          </button>
+                        </div>
+
+                        <div className="space-y-4">
+                          <div>
+                            <label className="block text-sm font-semibold text-gray-700 mb-2">Rating</label>
+                            <div className="flex items-center gap-2">
+                              {[1, 2, 3, 4, 5].map((v) => (
+                                <button
+                                  key={v}
+                                  onClick={() => setReviewRating(v)}
+                                  className="p-1"
+                                  aria-label={`Set rating ${v}`}
+                                >
+                                  <FaStar className={v <= reviewRating ? "text-yellow-400" : "text-gray-300"} />
+                                </button>
+                              ))}
+                            </div>
+                          </div>
+
+                          <div>
+                            <label className="block text-sm font-semibold text-gray-700 mb-2">Comment</label>
+                            <textarea
+                              value={reviewComment}
+                              onChange={(e) => setReviewComment(e.target.value)}
+                              rows={4}
+                              className="w-full border border-gray-200 rounded-xl p-3 focus:outline-none focus:ring-2 focus:ring-pink-300"
+                              placeholder="Share your experience..."
+                            />
+                          </div>
+
+                          <div>
+                            <label className="block text-sm font-semibold text-gray-700 mb-2">Photos / Video (optional)</label>
+                            <input
+                              type="file"
+                              multiple
+                              accept="image/*,video/*"
+                              onChange={(e) => setReviewFiles(e.target.files)}
+                              className="w-full"
+                            />
+                            <p className="text-xs text-gray-500 mt-1">You can upload images and videos.</p>
+                          </div>
+
+                          <div className="flex gap-3 justify-end">
+                            <button
+                              onClick={() => setShowReviewModal(false)}
+                              className="px-4 py-2 rounded-xl border border-gray-200 text-gray-700 hover:bg-gray-50"
+                            >
+                              Cancel
+                            </button>
+                            <button
+                              onClick={handleSubmitReview}
+                              className="px-5 py-2 rounded-xl bg-gradient-to-r from-pink-500 to-orange-500 text-white font-semibold shadow-medium hover:shadow-strong"
+                            >
+                              Submit
+                            </button>
+                          </div>
+                        </div>
+                      </motion.div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+
                 <div className="flex items-center mb-4">
                   <div className="mr-4">
-                    <h3 className="text-2xl font-bold text-gray-800">4.2</h3>
+                    <h3 className="text-2xl font-bold text-gray-800">{(reviewsStats.rating || 0).toFixed ? (reviewsStats.rating || 0).toFixed(1) : reviewsStats.rating}</h3>
                     <div className="flex">
                       {[...Array(5)].map((_, i) => (
                         <FaStar 
                           key={i} 
-                          className={`${i < 4 ? 'text-yellow-400' : 'text-gray-300'} mr-1`} 
+                          className={`${i < Math.round(reviewsStats.rating || 0) ? 'text-yellow-400' : 'text-gray-300'} mr-1`} 
                         />
                       ))}
                     </div>
-                    <p className="text-sm text-gray-500 mt-1">Based on 122 reviews</p>
+                    <p className="text-sm text-gray-500 mt-1">Based on {ratingBreakdown.total} reviews</p>
                   </div>
                   
                   <div className="flex-1">
                     <div className="flex items-center mb-1">
                       <span className="text-sm w-8">5★</span>
                       <div className="flex-1 h-2 bg-gray-200 rounded-full mx-2">
-                        <div className="h-2 bg-yellow-400 rounded-full" style={{ width: '70%' }}></div>
+                        <div className="h-2 bg-yellow-400 rounded-full" style={{ width: `${ratingBreakdown.percents[5]}%` }}></div>
                       </div>
-                      <span className="text-sm text-gray-500">70%</span>
+                      <span className="text-sm text-gray-500">{ratingBreakdown.percents[5]}%</span>
                     </div>
                     <div className="flex items-center mb-1">
                       <span className="text-sm w-8">4★</span>
                       <div className="flex-1 h-2 bg-gray-200 rounded-full mx-2">
-                        <div className="h-2 bg-yellow-400 rounded-full" style={{ width: '20%' }}></div>
+                        <div className="h-2 bg-yellow-400 rounded-full" style={{ width: `${ratingBreakdown.percents[4]}%` }}></div>
                       </div>
-                      <span className="text-sm text-gray-500">20%</span>
+                      <span className="text-sm text-gray-500">{ratingBreakdown.percents[4]}%</span>
                     </div>
                     <div className="flex items-center mb-1">
                       <span className="text-sm w-8">3★</span>
                       <div className="flex-1 h-2 bg-gray-200 rounded-full mx-2">
-                        <div className="h-2 bg-yellow-400 rounded-full" style={{ width: '5%' }}></div>
+                        <div className="h-2 bg-yellow-400 rounded-full" style={{ width: `${ratingBreakdown.percents[3]}%` }}></div>
                       </div>
-                      <span className="text-sm text-gray-500">5%</span>
+                      <span className="text-sm text-gray-500">{ratingBreakdown.percents[3]}%</span>
                     </div>
                     <div className="flex items-center mb-1">
                       <span className="text-sm w-8">2★</span>
                       <div className="flex-1 h-2 bg-gray-200 rounded-full mx-2">
-                        <div className="h-2 bg-yellow-400 rounded-full" style={{ width: '3%' }}></div>
+                        <div className="h-2 bg-yellow-400 rounded-full" style={{ width: `${ratingBreakdown.percents[2]}%` }}></div>
                       </div>
-                      <span className="text-sm text-gray-500">3%</span>
+                      <span className="text-sm text-gray-500">{ratingBreakdown.percents[2]}%</span>
                     </div>
                     <div className="flex items-center">
                       <span className="text-sm w-8">1★</span>
                       <div className="flex-1 h-2 bg-gray-200 rounded-full mx-2">
-                        <div className="h-2 bg-yellow-400 rounded-full" style={{ width: '2%' }}></div>
+                        <div className="h-2 bg-yellow-400 rounded-full" style={{ width: `${ratingBreakdown.percents[1]}%` }}></div>
                       </div>
-                      <span className="text-sm text-gray-500">2%</span>
+                      <span className="text-sm text-gray-500">{ratingBreakdown.percents[1]}%</span>
                     </div>
                   </div>
                 </div>
                 
-                <button className="bg-gradient-to-r from-pink-500 to-orange-500 hover:from-pink-600 hover:to-orange-600 text-white px-5 sm:px-6 py-2.5 sm:py-3 rounded-xl text-sm font-poppins font-semibold transition-all shadow-medium hover:shadow-strong">
+                <button
+                  onClick={() => setShowReviewModal(true)}
+                  className="bg-gradient-to-r from-pink-500 to-orange-500 hover:from-pink-600 hover:to-orange-600 text-white px-5 sm:px-6 py-2.5 sm:py-3 rounded-xl text-sm font-poppins font-semibold transition-all shadow-medium hover:shadow-strong"
+                >
                   Write a Review
                 </button>
                 
-                {/* Sample Reviews */}
+                {/* Real Reviews */}
                 <div className="mt-8 space-y-6">
-                  <div className="border-b border-gray-100 pb-6">
-                    <div className="flex justify-between">
-                      <div>
-                        <div className="flex items-center mb-1">
-                          <span className="font-medium text-gray-800 mr-3">Delicious and Fresh</span>
-                          <div className="flex">
-                            {[...Array(5)].map((_, i) => (
-                              <FaStar key={i} className={`${i < 5 ? 'text-yellow-400' : 'text-gray-300'} text-xs`} />
-                            ))}
+                  {reviewsLoading ? (
+                    <div className="text-sm text-gray-500">Loading reviews…</div>
+                  ) : reviewsData.length === 0 ? (
+                    <div className="text-sm text-gray-500">No reviews yet. Be the first to review.</div>
+                  ) : (
+                    reviewsData.map((r) => (
+                      <div key={r._id || `${r.userId?._id || r.userId}-${r.createdAt}`} className="border-b border-gray-100 pb-6">
+                        <div className="flex justify-between gap-4">
+                          <div>
+                            <div className="flex items-center mb-1">
+                              <span className="font-medium text-gray-800 mr-3">
+                                {r.userId?.name || "Customer"}
+                              </span>
+                              <div className="flex">
+                                {[...Array(5)].map((_, i) => (
+                                  <FaStar key={i} className={`${i < Number(r.rating || 0) ? 'text-yellow-400' : 'text-gray-300'} text-xs`} />
+                                ))}
+                              </div>
+                              {r.verifiedPurchase && (
+                                <span className="ml-3 text-[10px] px-2 py-0.5 rounded-full bg-green-50 text-green-700 border border-green-100">
+                                  Verified purchase
+                                </span>
+                              )}
+                            </div>
+                            <p className="text-xs text-gray-500 mb-2">
+                              {r.createdAt ? new Date(r.createdAt).toLocaleDateString() : ""}
+                            </p>
                           </div>
                         </div>
-                        <p className="text-xs text-gray-500 mb-2">by Amit Kumar • March 22, 2023</p>
-                      </div>
-                      <div className="flex items-center text-sm text-gray-500">
-                        <span className="mr-2">Helpful?</span>
-                        <button className="px-2 py-1 border border-gray-200 rounded-md hover:bg-gray-50 transition-colors">
-                          Yes (12)
-                        </button>
-                      </div>
-                    </div>
-                    <p className="text-gray-600 mt-2">
-                      The sweets were absolutely delicious! They arrived fresh and the packaging was excellent. 
-                      The taste was authentic and reminded me of homemade treats. Will definitely order again!
-                    </p>
-                  </div>
-                  
-                  <div className="border-b border-gray-100 pb-6">
-                    <div className="flex justify-between">
-                      <div>
-                        <div className="flex items-center mb-1">
-                          <span className="font-medium text-gray-800 mr-3">Perfect Gift Box</span>
-                          <div className="flex">
-                            {[...Array(5)].map((_, i) => (
-                              <FaStar key={i} className={`${i < 4 ? 'text-yellow-400' : 'text-gray-300'} text-xs`} />
+                        {r.comment && <p className="text-gray-600 mt-2">{r.comment}</p>}
+
+                        {Array.isArray(r.media) && r.media.length > 0 && (
+                          <div className="mt-3 grid grid-cols-2 sm:grid-cols-3 gap-3">
+                            {r.media.map((m) => (
+                              <div key={m.publicId || m.url} className="rounded-xl overflow-hidden border border-gray-100 bg-gray-50">
+                                {m.type === "video" ? (
+                                  <video src={m.url} controls className="w-full h-40 object-cover" />
+                                ) : (
+                                  <img src={m.url} alt="Review media" className="w-full h-40 object-cover" loading="lazy" />
+                                )}
+                              </div>
                             ))}
                           </div>
-                        </div>
-                        <p className="text-xs text-gray-500 mb-2">by Priya Singh • February 14, 2023</p>
+                        )}
                       </div>
-                      <div className="flex items-center text-sm text-gray-500">
-                        <span className="mr-2">Helpful?</span>
-                        <button className="px-2 py-1 border border-gray-200 rounded-md hover:bg-gray-50 transition-colors">
-                          Yes (8)
-                        </button>
-                      </div>
-                    </div>
-                    <p className="text-gray-600 mt-2">
-                      I purchased this as a gift for my parents and they loved it! The presentation was beautiful 
-                      and the sweets were fresh. The variety in the box was excellent too. Great value for money.
-                    </p>
-                  </div>
+                    ))
+                  )}
                 </div>
               </motion.div>
             )}

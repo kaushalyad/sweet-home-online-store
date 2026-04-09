@@ -135,7 +135,7 @@ h1, h2, h3, h4, h5, h6 {
 *:focus-visible {
     outline: 3px solid #ff6b6b;
     outline-offset: 2px;
-    border-radius: 4px;
+    border-radius: inherit;
 }
 
 /* Smooth focus for inputs */
@@ -143,6 +143,37 @@ input:focus, textarea:focus, select:focus {
     outline: none;
     ring: 2px solid #ff6b6b;
     border-color: #ff6b6b;
+}
+
+/* Prevent browser autofill from "flattening" inputs */
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
+textarea:-webkit-autofill,
+textarea:-webkit-autofill:hover,
+textarea:-webkit-autofill:focus,
+select:-webkit-autofill,
+select:-webkit-autofill:hover,
+select:-webkit-autofill:focus {
+    -webkit-text-fill-color: #111827;
+    transition: background-color 9999s ease-out 0s;
+    box-shadow: 0 0 0px 1000px #ffffff inset, 0 2px 18px rgba(0, 0, 0, 0.08);
+}
+
+/* Keep footer newsletter input pill shape even during Chrome autofill UI */
+.newsletter-input {
+    border-radius: 9999px !important;
+    background-color: #ffffff !important;
+    background-clip: padding-box;
+}
+.newsletter-input:-webkit-autofill,
+.newsletter-input:-webkit-autofill:hover,
+.newsletter-input:-webkit-autofill:focus,
+.newsletter-input:-webkit-autofill:active {
+    border-radius: 9999px !important;
+    -webkit-text-fill-color: #111827 !important;
+    transition: background-color 9999s ease-out 0s;
+    box-shadow: 0 0 0px 1000px #ffffff inset, 0 2px 18px rgba(0, 0, 0, 0.10) !important;
 }
   
   /* Custom animation for the banner icon */
@@ -186,7 +217,7 @@ input:focus, textarea:focus, select:focus {
   }
 
   .animate-marquee {
-    animation: marquee 20s linear infinite;
+    animation: marquee 35s linear infinite;
     white-space: nowrap;
   }
 

@@ -6,18 +6,35 @@ import logger from '../config/logger.js';
 import crypto from 'crypto';
 import axios from 'axios';
 import { sendOrderConfirmationEmail, sendAdminOrderNotification, sendOrderStatusUpdateEmail } from '../utils/emailService.js';
+import { validateAndComputeCoupon } from '../services/couponService.js';
 
 // global variables
 const currency = 'inr'
 const deliveryCharge = 10
 
-// gateway initialize
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY)
+// Payment gateway clients are initialized lazily so the server can boot
+// even when optional payment env vars aren't set in local dev.
+let stripeClient = null;
+const getStripeClient = () => {
+  if (stripeClient) return stripeClient;
+  if (!process.env.STRIPE_SECRET_KEY) throw new Error('STRIPE_SECRET_KEY is not set');
+  stripeClient = new Stripe(process.env.STRIPE_SECRET_KEY);
+  return stripeClient;
+};
 
-const razorpayInstance = new razorpay({
-    key_id : process.env.RAZORPAY_KEY_ID,
-    key_secret : process.env.RAZORPAY_KEY_SECRET,
-})
+let razorpayClient = null;
+const getRazorpayClient = () => {
+  if (razorpayClient) return razorpayClient;
+  const { RAZORPAY_KEY_ID, RAZORPAY_KEY_SECRET } = process.env;
+  if (!RAZORPAY_KEY_ID || !RAZORPAY_KEY_SECRET) {
+    throw new Error('RAZORPAY_KEY_ID and RAZORPAY_KEY_SECRET must be set');
+  }
+  razorpayClient = new razorpay({
+    key_id: RAZORPAY_KEY_ID,
+    key_secret: RAZORPAY_KEY_SECRET,
+  });
+  return razorpayClient;
+};
 
 // Helper function to geocode address
 const geocodeAddress = async (address) => {
@@ -41,7 +58,7 @@ const geocodeAddress = async (address) => {
 // Placing orders using COD Method
 const placeOrder = async (req, res) => {
     try {
-        const { items, amount, totalAmount, address, paymentMethod, status, date, additionalCosts, discount, appliedCoupon } = req.body;
+        const { items, amount, totalAmount, address, paymentMethod, status, date, additionalCosts, discount, appliedCoupon, deliveryFee } = req.body;
         const userId = req.user.id;
 
         // Validate required fields
@@ -83,6 +100,19 @@ const placeOrder = async (req, res) => {
             });
         }
 
+        // Recompute discount server-side (do not trust client)
+        let computedDiscount = 0;
+        let couponMeta = { code: null, id: null };
+        if (appliedCoupon) {
+          const sub = orderItems.reduce((acc, it) => acc + Number(it.price || 0) * Number(it.quantity || 0), 0);
+          const fee = deliveryFee !== undefined ? Number(deliveryFee) : 0;
+          const r = await validateAndComputeCoupon({ code: appliedCoupon, subtotal: sub, deliveryFee: fee });
+          if (r.ok) {
+            computedDiscount = r.discountAmount;
+            couponMeta = { code: r.coupon.code, id: r.coupon.id };
+          }
+        }
+
         // Create order with new schema
         const order = await Order.create({
             userId,
@@ -108,8 +138,9 @@ const placeOrder = async (req, res) => {
             status: status || 'Order Placed',
             paymentStatus: 'pending',
             additionalCosts: additionalCosts || 0,
-            discount: discount || 0,
-            appliedCoupon: appliedCoupon || null,
+            discount: computedDiscount,
+            appliedCoupon: couponMeta.code,
+            couponId: couponMeta.id,
             date: date || Date.now()
         });
 
@@ -221,7 +252,7 @@ const placeOrderStripe = async (req,res) => {
             quantity: 1
         })
 
-        const session = await stripe.checkout.sessions.create({
+        const session = await getStripeClient().checkout.sessions.create({
             success_url: `${origin}/verify?success=true&orderId=${newOrder._id}`,
             cancel_url:  `${origin}/verify?success=false&orderId=${newOrder._id}`,
             line_items,
@@ -301,7 +332,7 @@ const verifyStripe = async (req,res) => {
 // Placing orders using Razorpay Method
 const placeOrderRazorpay = async (req, res) => {
   try {
-    const { userId, items, amount, address, additionalCosts, discount, appliedCoupon } = req.body;
+    const { userId, items, amount, address, additionalCosts, discount, appliedCoupon, deliveryFee } = req.body;
     console.log("Creating Razorpay order for amount:", amount);
 
     if (!amount || amount <= 0) {
@@ -342,9 +373,22 @@ const placeOrderRazorpay = async (req, res) => {
       payment: false,
       date: Date.now(),
       additionalCosts: additionalCosts || 0,
-      discount: discount || 0,
-      appliedCoupon: appliedCoupon || null
+      discount: 0,
+      appliedCoupon: null,
+      couponId: null
     };
+
+    // Recompute discount server-side (do not trust client)
+    if (appliedCoupon) {
+      const sub = orderItems.reduce((acc, it) => acc + Number(it.price || 0) * Number(it.quantity || 0), 0);
+      const fee = deliveryFee !== undefined ? Number(deliveryFee) : 0;
+      const r = await validateAndComputeCoupon({ code: appliedCoupon, subtotal: sub, deliveryFee: fee });
+      if (r.ok) {
+        orderData.discount = r.discountAmount;
+        orderData.appliedCoupon = r.coupon.code;
+        orderData.couponId = r.coupon.id;
+      }
+    }
 
     // Create order in database
     const newOrder = new Order(orderData);
@@ -366,7 +410,7 @@ const placeOrderRazorpay = async (req, res) => {
 
     try {
       const order = await new Promise((resolve, reject) => {
-        razorpayInstance.orders.create(options, (error, result) => {
+        getRazorpayClient().orders.create(options, (error, result) => {
           if (error) {
             console.error("Razorpay order creation failed:", error);
             reject(error);
@@ -451,7 +495,7 @@ const verifyRazorpay = async (req, res) => {
       }
 
       // Fetch the order details from Razorpay
-      const orderInfo = await razorpayInstance.orders.fetch(razorpay_order_id);
+      const orderInfo = await getRazorpayClient().orders.fetch(razorpay_order_id);
       logger.info("Order info from Razorpay:", {
         id: orderInfo.id,
         amount: orderInfo.amount,

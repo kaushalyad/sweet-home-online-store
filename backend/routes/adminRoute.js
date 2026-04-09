@@ -2,6 +2,12 @@ import express from 'express';
 import jwt from 'jsonwebtoken';
 import logger from '../config/logger.js';
 import { protect, admin } from '../middleware/authMiddleware.js';
+import {
+  adminCreateCoupon,
+  adminDeleteCoupon,
+  adminListCoupons,
+  adminUpdateCoupon
+} from '../controllers/adminCouponController.js';
 
 const router = express.Router();
 
@@ -85,5 +91,11 @@ router.get('/verify-token', protect, admin, (req, res) => {
     }
   });
 });
+
+// Coupons (admin protected)
+router.get('/coupons', protect, admin, adminListCoupons);
+router.post('/coupons', protect, admin, adminCreateCoupon);
+router.put('/coupons/:id', protect, admin, adminUpdateCoupon);
+router.delete('/coupons/:id', protect, admin, adminDeleteCoupon);
 
 export default router; 

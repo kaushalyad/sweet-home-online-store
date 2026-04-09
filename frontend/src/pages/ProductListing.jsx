@@ -508,6 +508,9 @@ const ProductListing = () => {
                     image={product.image}
                     name={product.name}
                     price={product.price}
+                    discountPrice={product.discountPrice}
+                    rating={product.rating}
+                    totalReviews={product.totalReviews}
                     featured={product.featured}
                     bestseller={product.bestseller}
                     index={products.indexOf(product)}
