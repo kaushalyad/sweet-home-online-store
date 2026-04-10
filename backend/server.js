@@ -28,22 +28,34 @@ import { Server } from 'socket.io';
 const app = express();
 const port = process.env.PORT || 4000;
 
+/** Merge defaults with ALLOWED_ORIGINS (comma-separated) for Render / staging URLs */
+function getAllowedOrigins() {
+  const defaults = [
+    "http://localhost:4173",
+    "http://localhost:3000",
+    "http://localhost:5173",
+    "http://localhost:5174",
+    "http://localhost:5175",
+    "https://www.sweethome-store.com",
+    "https://sweethome-store.com",
+    "https://api.sweethome-store.com",
+  ];
+  const extra = (process.env.ALLOWED_ORIGINS || "")
+    .split(",")
+    .map((s) => s.trim())
+    .filter(Boolean);
+  return [...new Set([...defaults, ...extra])];
+}
+
+const allowedOrigins = getAllowedOrigins();
+
 // Create HTTP server
 const server = createServer(app);
 
 // Initialize Socket.IO
 const io = new Server(server, {
   cors: {
-    origin: [
-      "http://localhost:4173", // Admin panel
-      "http://localhost:3000", // Frontend
-      "http://localhost:5173", // Vite dev server
-      "http://localhost:5174", // Vite dev server
-      "http://localhost:5175", // Additional Vite dev server
-      "https://www.sweethome-store.com",
-      "https://sweethome-store.com",
-      "https://api.sweethome-store.com",
-    ],
+    origin: allowedOrigins,
     credentials: true,
     methods: ["GET", "POST"]
   }
@@ -64,18 +76,6 @@ const startServer = async () => {
       logger.error('Cloudinary connection failed:', cloudinaryError);
       // Don't exit process for Cloudinary failure
     }
-
-    // CORS configuration
-    const allowedOrigins = [
-      "http://localhost:4173", // Admin panel
-      "http://localhost:3000", // Frontend
-      "http://localhost:5173", // Vite dev server
-      "http://localhost:5174", // Vite dev server
-      "http://localhost:5175", // Additional Vite dev server
-      "https://www.sweethome-store.com",
-      "https://sweethome-store.com",
-      "https://api.sweethome-store.com",
-    ];
 
     const corsOptions = {
       origin: function (origin, callback) {
