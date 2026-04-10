@@ -4,9 +4,7 @@ import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import logger from "@/utils/logger";
 import PropTypes from 'prop-types';
-
-// Backend URL configuration
-const backendUrl = import.meta.env.VITE_BACKEND_URL || "http://localhost:4000";
+import { backendUrl } from "@/config";
 
 // Create axios instance with default config
 const axiosInstance = axios.create({

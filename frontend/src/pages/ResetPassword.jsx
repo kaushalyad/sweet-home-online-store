@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import axios from 'axios';
+import { backendUrl } from '../config';
 
 const ResetPassword = () => {
   const navigate = useNavigate();
@@ -43,7 +44,7 @@ const ResetPassword = () => {
         return;
       }
 
-      const response = await axios.post(`${import.meta.env.VITE_BACKEND_URL}/api/user/reset-password`, {
+      const response = await axios.post(`${backendUrl}/api/user/reset-password`, {
         token: resetToken,
         newPassword: password
       }, { withCredentials: true });

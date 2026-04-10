@@ -39,6 +39,7 @@ function getAllowedOrigins() {
     "https://www.sweethome-store.com",
     "https://sweethome-store.com",
     "https://api.sweethome-store.com",
+    "https://sweet-home-online-store.onrender.com",
   ];
   const extra = (process.env.ALLOWED_ORIGINS || "")
     .split(",")

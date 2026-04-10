@@ -3,12 +3,12 @@ import { motion } from 'framer-motion'
 import { FaPaperPlane, FaCheckCircle } from 'react-icons/fa'
 import axios from 'axios'
 import { toast } from 'react-toastify'
+import { backendUrl } from '../config'
 
 const NewsletterBox = () => {
     const [email, setEmail] = useState('');
     const [isSubmitted, setIsSubmitted] = useState(false);
     const [loading, setLoading] = useState(false);
-    const backendUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:4000';
 
     const onSubmitHandler = async (event) => {
         event.preventDefault();

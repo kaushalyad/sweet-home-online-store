@@ -18,11 +18,11 @@ import {
   FaCcPaypal,
   FaGooglePay,
 } from "react-icons/fa";
+import { backendUrl } from "../config";
 
 const Footer = () => {
   const [newsletterEmail, setNewsletterEmail] = useState('');
   const [newsletterLoading, setNewsletterLoading] = useState(false);
-  const backendUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:4000';
 
   const handleNewsletterSubmit = async (e) => {
     e.preventDefault();

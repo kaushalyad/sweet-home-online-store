@@ -37,7 +37,7 @@ const CookiePolicy = lazy(() => import('./pages/CookiePolicy'))
 const CookieSettings = lazy(() => import('./pages/CookieSettings'))
 const Verify = lazy(() => import('./pages/Verify'))
 
-export const backendUrl = import.meta.env.VITE_BACKEND_URL
+export { backendUrl } from './config'
 
 // Protected route component that redirects to login if not authenticated
 const ProtectedRoute = ({ element }) => {

@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import axios from 'axios';
+import { backendUrl } from '../config';
 
 const ForgotPassword = () => {
   const navigate = useNavigate();
@@ -18,7 +19,7 @@ const ForgotPassword = () => {
 
     try {
       setLoading(true);
-      const response = await axios.post(`${import.meta.env.VITE_BACKEND_URL}/api/user/forgot-password`, {
+      const response = await axios.post(`${backendUrl}/api/user/forgot-password`, {
         email
       });
 
