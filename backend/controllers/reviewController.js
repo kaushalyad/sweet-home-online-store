@@ -1,179 +1,127 @@
-import mongoose from 'mongoose';
-import productModel from '../models/productModel.js';
-import Order from '../models/order.js';
-import logger from '../config/logger.js';
+import mongoose from "mongoose";
+import productModel from "../models/productModel.js";
+import Order from "../models/order.js";
+import logger from "../config/logger.js";
 
-function normalizeObjectId(id) {
+const toObjectId = (id) => {
   try {
-    return new mongoose.Types.ObjectId(String(id));
+    return new mongoose.Types.ObjectId(id);
   } catch {
     return null;
   }
-}
+};
 
-async function hasDeliveredPurchase({ userId, productId }) {
-  const userObjectId = normalizeObjectId(userId);
-  const productObjectId = normalizeObjectId(productId);
-  if (!userObjectId || !productObjectId) return false;
-
-  const match = await Order.findOne({
-    userId: userObjectId,
-    // Status is not consistent across codepaths (e.g. "Delivered" vs "delivered").
-    // Use case-insensitive match to avoid blocking legitimate reviews.
-    status: { $regex: /^delivered$/i },
-    $or: [
-      { 'items.product': productObjectId },
-      { 'items.product': String(productObjectId) },
-      { 'items.product._id': productObjectId },
-      { 'items.product._id': String(productObjectId) }
-    ]
-  }).select({ _id: 1 });
-
-  return !!match;
-}
-
-export async function listProductReviews(req, res) {
+export const listProductReviews = async (req, res) => {
   try {
     const { productId } = req.params;
-    const page = Math.max(1, Number(req.query.page || 1));
-    const limit = Math.min(50, Math.max(1, Number(req.query.limit || 10)));
-    const skip = (page - 1) * limit;
+    const page = Math.max(1, parseInt(req.query.page, 10) || 1);
+    const limit = Math.min(50, Math.max(1, parseInt(req.query.limit, 10) || 10));
+    const pid = toObjectId(productId);
+    if (!pid) {
+      return res.status(400).json({ success: false, message: "Invalid product id" });
+    }
 
     const product = await productModel
-      .findById(productId)
-      .select({ reviews: 1, rating: 1, totalReviews: 1 })
-      .populate({ path: 'reviews.userId', select: 'name' })
+      .findById(pid)
+      .select("reviews rating totalReviews")
       .lean();
 
     if (!product) {
-      return res.status(404).json({ success: false, message: 'Product not found' });
+      return res.status(404).json({ success: false, message: "Product not found" });
     }
 
-    const allReviews = Array.isArray(product.reviews) ? product.reviews : [];
-    const sorted = [...allReviews].sort((a, b) => {
-      const ad = new Date(a?.createdAt || 0).getTime();
-      const bd = new Date(b?.createdAt || 0).getTime();
-      return bd - ad;
-    });
+    const reviews = Array.isArray(product.reviews) ? [...product.reviews] : [];
+    reviews.sort(
+      (a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0)
+    );
+    const start = (page - 1) * limit;
+    const slice = reviews.slice(start, start + limit);
 
-    const pageItems = sorted.slice(skip, skip + limit);
-
-    return res.json({
+    res.json({
       success: true,
-      rating: product.rating || 0,
-      totalReviews: product.totalReviews || allReviews.length,
-      reviews: pageItems,
-      pagination: {
-        total: allReviews.length,
-        page,
-        limit,
-        totalPages: Math.ceil(allReviews.length / limit)
-      }
+      reviews: slice,
+      rating: Number(product.rating || 0),
+      totalReviews: Number(product.totalReviews || reviews.length),
     });
-  } catch (error) {
-    logger.error(`listProductReviews error: ${error?.message || error}`);
-    return res.status(500).json({ success: false, message: 'Failed to fetch reviews' });
+  } catch (e) {
+    logger.error("listProductReviews:", e);
+    res.status(500).json({ success: false, message: e.message });
   }
-}
+};
 
-export async function upsertMyReview(req, res) {
+export const addProductReview = async (req, res) => {
   try {
     const { productId } = req.params;
-    const { rating, comment = '', media = [] } = req.body || {};
-
     const userId = req.user?.id;
-    if (!userId) return res.status(401).json({ success: false, message: 'Not authorized' });
+    const { rating, comment = "", media = [] } = req.body;
 
-    const ratingNum = Number(rating);
-    if (!ratingNum || Number.isNaN(ratingNum) || ratingNum < 1 || ratingNum > 5) {
-      return res.status(400).json({ success: false, message: 'Rating must be between 1 and 5' });
+    const pid = toObjectId(productId);
+    const uid = toObjectId(userId);
+    if (!pid || !uid) {
+      return res.status(400).json({ success: false, message: "Invalid request" });
     }
 
-    const verifiedPurchase = await hasDeliveredPurchase({ userId, productId });
-    if (!verifiedPurchase) {
-      return res.status(403).json({
+    const r = Number(rating);
+    if (!Number.isFinite(r) || r < 1 || r > 5) {
+      return res.status(400).json({ success: false, message: "Rating must be 1–5" });
+    }
+
+    const product = await productModel.findById(pid);
+    if (!product) {
+      return res.status(404).json({ success: false, message: "Product not found" });
+    }
+
+    const existingIdx = product.reviews.findIndex(
+      (rev) => rev.userId && String(rev.userId) === String(uid)
+    );
+    if (existingIdx !== -1) {
+      return res.status(400).json({
         success: false,
-        message: 'You can only review products after delivery (verified purchase required).'
+        message: "You have already reviewed this product",
       });
     }
 
-    const product = await productModel.findById(productId);
-    if (!product) return res.status(404).json({ success: false, message: 'Product not found' });
-
-    const userObjectId = normalizeObjectId(userId);
-    if (!userObjectId) return res.status(400).json({ success: false, message: 'Invalid user' });
-
-    const safeMedia = Array.isArray(media)
-      ? media
-          .filter((m) => m && typeof m.url === 'string' && (m.type === 'image' || m.type === 'video'))
-          .map((m) => ({
-            url: m.url,
-            type: m.type,
-            publicId: typeof m.publicId === 'string' ? m.publicId : undefined
-          }))
-      : [];
-
-    const idx = (product.reviews || []).findIndex((r) => String(r.userId) === String(userObjectId));
-    if (idx >= 0) {
-      product.reviews[idx].rating = ratingNum;
-      product.reviews[idx].comment = String(comment || '');
-      product.reviews[idx].media = safeMedia;
-      product.reviews[idx].verifiedPurchase = true;
-    } else {
-      product.reviews.push({
-        userId: userObjectId,
-        rating: ratingNum,
-        comment: String(comment || ''),
-        media: safeMedia,
-        verifiedPurchase: true
-      });
+    let verifiedPurchase = false;
+    try {
+      const userOrders = await Order.find({ userId: uid })
+        .select("items paymentStatus payment")
+        .lean();
+      const pidStr = String(pid);
+      for (const o of userOrders) {
+        const paid =
+          o.paymentStatus === "completed" || o.payment === true;
+        if (!paid) continue;
+        for (const it of o.items || []) {
+          const p = it.product;
+          const id =
+            p && typeof p === "object" && p._id != null
+              ? String(p._id)
+              : String(p);
+          if (id === pidStr) {
+            verifiedPurchase = true;
+            break;
+          }
+        }
+        if (verifiedPurchase) break;
+      }
+    } catch {
+      verifiedPurchase = false;
     }
+
+    product.reviews.push({
+      userId: uid,
+      rating: r,
+      comment: String(comment || "").slice(0, 5000),
+      media: Array.isArray(media) ? media.slice(0, 6) : [],
+      verifiedPurchase,
+    });
 
     product.recalculateRating();
     await product.save();
 
-    return res.json({
-      success: true,
-      message: 'Review saved',
-      rating: product.rating,
-      totalReviews: product.totalReviews
-    });
-  } catch (error) {
-    logger.error(`upsertMyReview error: ${error?.message || error}`);
-    return res.status(500).json({ success: false, message: 'Failed to save review' });
+    res.status(201).json({ success: true, message: "Review saved" });
+  } catch (e) {
+    logger.error("addProductReview:", e);
+    res.status(500).json({ success: false, message: e.message });
   }
-}
-
-export async function deleteMyReview(req, res) {
-  try {
-    const { productId } = req.params;
-    const userId = req.user?.id;
-    if (!userId) return res.status(401).json({ success: false, message: 'Not authorized' });
-
-    const product = await productModel.findById(productId);
-    if (!product) return res.status(404).json({ success: false, message: 'Product not found' });
-
-    const userObjectId = normalizeObjectId(userId);
-    if (!userObjectId) return res.status(400).json({ success: false, message: 'Invalid user' });
-
-    const before = product.reviews.length;
-    product.reviews = (product.reviews || []).filter((r) => String(r.userId) !== String(userObjectId));
-    if (product.reviews.length === before) {
-      return res.status(404).json({ success: false, message: 'Review not found' });
-    }
-
-    product.recalculateRating();
-    await product.save();
-
-    return res.json({
-      success: true,
-      message: 'Review deleted',
-      rating: product.rating,
-      totalReviews: product.totalReviews
-    });
-  } catch (error) {
-    logger.error(`deleteMyReview error: ${error?.message || error}`);
-    return res.status(500).json({ success: false, message: 'Failed to delete review' });
-  }
-}
-
+};

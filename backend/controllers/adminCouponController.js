@@ -1,82 +1,54 @@
-import couponModel from '../models/couponModel.js';
-import logger from '../config/logger.js';
+import couponModel from "../models/couponModel.js";
 
-export async function adminListCoupons(req, res) {
+export const adminListCoupons = async (req, res) => {
   try {
-    const coupons = await couponModel.find({}).sort({ createdAt: -1 }).lean();
+    const coupons = await couponModel.find().sort({ createdAt: -1 });
     res.json({ success: true, coupons });
   } catch (e) {
-    logger.error(`adminListCoupons error: ${e?.message || e}`);
-    res.status(500).json({ success: false, message: 'Failed to fetch coupons' });
+    res.status(500).json({ success: false, message: e.message });
   }
-}
+};
 
-export async function adminCreateCoupon(req, res) {
+export const adminCreateCoupon = async (req, res) => {
   try {
-    const {
-      code,
-      type,
-      value,
-      minOrderAmount = 0,
-      maxDiscount = null,
-      expiresAt = null,
-      active = true
-    } = req.body || {};
-
-    const cleanCode = String(code || '').trim().toUpperCase();
-    if (!cleanCode) return res.status(400).json({ success: false, message: 'code is required' });
-    if (!['flat', 'percent', 'shipping'].includes(type)) {
-      return res.status(400).json({ success: false, message: 'Invalid type' });
+    const payload = { ...req.body };
+    if (payload.code) {
+      payload.code = String(payload.code).trim().toUpperCase();
     }
+    const coupon = await couponModel.create(payload);
+    res.status(201).json({ success: true, coupon });
+  } catch (e) {
+    res.status(400).json({ success: false, message: e.message });
+  }
+};
 
-    const val = Number(value);
-    if (Number.isNaN(val) || val < 0) {
-      return res.status(400).json({ success: false, message: 'Invalid value' });
+export const adminUpdateCoupon = async (req, res) => {
+  try {
+    const updates = { ...req.body };
+    if (updates.code != null) {
+      updates.code = String(updates.code).trim().toUpperCase();
     }
-
-    const doc = await couponModel.create({
-      code: cleanCode,
-      type,
-      value: val,
-      minOrderAmount: Number(minOrderAmount) || 0,
-      maxDiscount: maxDiscount === null || maxDiscount === undefined || maxDiscount === '' ? null : Number(maxDiscount),
-      expiresAt: expiresAt ? new Date(expiresAt) : null,
-      active: Boolean(active)
+    const coupon = await couponModel.findByIdAndUpdate(req.params.id, updates, {
+      new: true,
+      runValidators: true,
     });
-
-    res.status(201).json({ success: true, coupon: doc });
+    if (!coupon) {
+      return res.status(404).json({ success: false, message: "Coupon not found" });
+    }
+    res.json({ success: true, coupon });
   } catch (e) {
-    const msg = e?.code === 11000 ? 'Coupon code already exists' : (e?.message || 'Failed to create coupon');
-    logger.error(`adminCreateCoupon error: ${e?.message || e}`);
-    res.status(500).json({ success: false, message: msg });
+    res.status(400).json({ success: false, message: e.message });
   }
-}
+};
 
-export async function adminUpdateCoupon(req, res) {
+export const adminDeleteCoupon = async (req, res) => {
   try {
-    const { id } = req.params;
-    const patch = { ...req.body };
-    if (patch.code) patch.code = String(patch.code).trim().toUpperCase();
-    if (patch.expiresAt === '') patch.expiresAt = null;
-
-    const updated = await couponModel.findByIdAndUpdate(id, patch, { new: true });
-    if (!updated) return res.status(404).json({ success: false, message: 'Coupon not found' });
-    res.json({ success: true, coupon: updated });
+    const coupon = await couponModel.findByIdAndDelete(req.params.id);
+    if (!coupon) {
+      return res.status(404).json({ success: false, message: "Coupon not found" });
+    }
+    res.json({ success: true });
   } catch (e) {
-    logger.error(`adminUpdateCoupon error: ${e?.message || e}`);
-    res.status(500).json({ success: false, message: 'Failed to update coupon' });
+    res.status(500).json({ success: false, message: e.message });
   }
-}
-
-export async function adminDeleteCoupon(req, res) {
-  try {
-    const { id } = req.params;
-    const deleted = await couponModel.findByIdAndDelete(id);
-    if (!deleted) return res.status(404).json({ success: false, message: 'Coupon not found' });
-    res.json({ success: true, message: 'Coupon deleted' });
-  } catch (e) {
-    logger.error(`adminDeleteCoupon error: ${e?.message || e}`);
-    res.status(500).json({ success: false, message: 'Failed to delete coupon' });
-  }
-}
-
+};

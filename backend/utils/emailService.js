@@ -1,5 +1,57 @@
 import nodemailer from 'nodemailer';
+import fs from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'url';
 import logger from './logger.js';
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const LOCAL_OWNER_LOGO = path.join(__dirname, '../public/email-assets/company-logo.png');
+const OWNER_LOGO_CID = 'sweet-home-store-logo';
+
+/** Header for owner alerts: STORE_LOGO_URL, or local company-logo.png (CID), or text */
+function buildOwnerBranding() {
+  const storeLogoUrl = process.env.STORE_LOGO_URL?.trim();
+  const attachments = [];
+
+  let logoInner = '';
+  if (storeLogoUrl) {
+    const safe = storeLogoUrl.replace(/"/g, '');
+    logoInner = `<img src="${safe}" alt="Sweet Home" width="140" style="max-width:140px;height:auto;display:block;margin:0 auto 8px;border:0;" />`;
+  } else if (fs.existsSync(LOCAL_OWNER_LOGO)) {
+    attachments.push({
+      filename: 'company-logo.png',
+      path: LOCAL_OWNER_LOGO,
+      cid: OWNER_LOGO_CID,
+    });
+    logoInner = `<img src="cid:${OWNER_LOGO_CID}" alt="Sweet Home" width="140" style="max-width:140px;height:auto;display:block;margin:0 auto 8px;border:0;" />`;
+  } else {
+    logoInner = `
+      <div style="font-family: Georgia, 'Times New Roman', serif; font-size: 24px; font-weight: bold; color: #ffffff;">Sweet Home</div>
+      <div style="font-size: 13px; color: rgba(255,255,255,0.92); margin-top: 6px;">Online Store</div>`;
+  }
+
+  const headerHtml = `
+    <div style="background: linear-gradient(180deg, #8B1538 0%, #C41E3A 100%); color: #ffffff; padding: 22px 16px; text-align: center;">
+      ${logoInner}
+    </div>`;
+
+  return { headerHtml, attachments };
+}
+
+function ownerEmailShell(innerBody) {
+  const { headerHtml, attachments } = buildOwnerBranding();
+  const html = `
+    <div style="font-family: Arial, Helvetica, sans-serif; max-width: 600px; margin: 0 auto; border: 1px solid #e8e8e8; border-radius: 10px; overflow: hidden; background: #ffffff;">
+      ${headerHtml}
+      <div style="padding: 22px 20px; color: #333333;">
+        ${innerBody}
+      </div>
+      <div style="background: #f8f9fa; padding: 14px; text-align: center; font-size: 12px; color: #6c757d;">
+        Owner notification from Sweet Home Store
+      </div>
+    </div>`;
+  return { html, attachments };
+}
 
 // Create transporter
 const transporter = nodemailer.createTransport({
@@ -200,43 +252,36 @@ export const sendAdminOrderNotification = async (orderData) => {
 
     const itemsText = items.map(item => `- ${item.name} (x${item.quantity}) - ₹${item.price * item.quantity}`).join('\n');
 
+    const innerBody = `
+      <h2 style="margin: 0 0 16px; color: #8B1538;">New order</h2>
+      <div style="background-color: #f8f9fa; padding: 15px; margin: 0 0 16px; border-radius: 8px; border-left: 4px solid #C41E3A;">
+        <p style="margin: 6px 0;"><strong>Order ID:</strong> ${orderId.toString().slice(-8).toUpperCase()}</p>
+        <p style="margin: 6px 0;"><strong>Customer:</strong> ${String(customerName).replace(/</g, '')} (${String(customerEmail).replace(/</g, '')})</p>
+        <p style="margin: 6px 0;"><strong>Total:</strong> ₹${Number(totalAmount).toFixed(2)}</p>
+        <p style="margin: 6px 0;"><strong>Payment:</strong> ${String(paymentMethod).replace(/</g, '')}</p>
+        <p style="margin: 6px 0;"><strong>Date:</strong> ${new Date(orderDate).toLocaleString('en-IN')}</p>
+      </div>
+      <h3 style="margin: 16px 0 8px;">Items</h3>
+      <div style="background-color: #f8f9fa; padding: 15px; border-radius: 8px;">
+        <pre style="font-family: Arial, sans-serif; white-space: pre-line; margin: 0;">${itemsText.replace(/</g, '')}</pre>
+      </div>
+      <div style="text-align: center; margin: 24px 0 8px;">
+        <a href="${(process.env.ADMIN_PANEL_URL || 'http://localhost:4173').replace(/"/g, '')}/orders"
+           style="background-color: #C41E3A; color: white; padding: 12px 24px; text-decoration: none; border-radius: 8px; display: inline-block;">
+          Open orders in admin
+        </a>
+      </div>
+      <p style="margin: 16px 0 0; color: #555;">Please process this order when you can.</p>
+    `;
+
+    const { html, attachments } = ownerEmailShell(innerBody);
+
     const mailOptions = {
       from: `"Sweet Home Store" <${process.env.EMAIL_USER}>`,
       to: process.env.ADMIN_EMAIL || process.env.EMAIL_USER,
-      subject: `🚨 New Order Received - ₹${totalAmount}`,
-      html: `
-        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-          <div style="background-color: #28a745; color: white; padding: 20px; text-align: center;">
-            <h1>🛒 New Order Alert!</h1>
-          </div>
-
-          <div style="padding: 20px;">
-            <h2>New Order Details</h2>
-
-            <div style="background-color: #f8f9fa; padding: 15px; margin: 20px 0; border-radius: 5px;">
-              <p><strong>Order ID:</strong> ${orderId.toString().slice(-8).toUpperCase()}</p>
-              <p><strong>Customer:</strong> ${customerName} (${customerEmail})</p>
-              <p><strong>Total Amount:</strong> ₹${totalAmount.toFixed(2)}</p>
-              <p><strong>Payment Method:</strong> ${paymentMethod}</p>
-              <p><strong>Order Date:</strong> ${new Date(orderDate).toLocaleString('en-IN')}</p>
-            </div>
-
-            <h3>Items Ordered:</h3>
-            <div style="background-color: #f8f9fa; padding: 15px; margin: 20px 0; border-radius: 5px;">
-              <pre style="font-family: Arial, sans-serif; white-space: pre-line;">${itemsText}</pre>
-            </div>
-
-            <div style="text-align: center; margin: 30px 0;">
-              <a href="${process.env.ADMIN_PANEL_URL || 'http://localhost:4173'}/orders"
-                 style="background-color: #FF6B35; color: white; padding: 12px 24px; text-decoration: none; border-radius: 5px; display: inline-block;">
-                View Order Details
-              </a>
-            </div>
-
-            <p>Please process this order promptly to ensure timely delivery.</p>
-          </div>
-        </div>
-      `
+      subject: `New order — ₹${Number(totalAmount).toFixed(2)} — ${orderId.toString().slice(-8).toUpperCase()}`,
+      html,
+      attachments,
     };
 
     const info = await transporter.sendMail(mailOptions);
@@ -245,6 +290,46 @@ export const sendAdminOrderNotification = async (orderData) => {
 
   } catch (error) {
     logger.error('Error sending admin notification email:', error);
+    return { success: false, error: error.message };
+  }
+};
+
+export const sendAdminNewCustomerNotification = async ({ name, email, phone }) => {
+  try {
+    if (!process.env.EMAIL_USER) {
+      return { success: false, error: 'EMAIL_USER not configured' };
+    }
+    const ownerTo = process.env.ADMIN_EMAIL || process.env.EMAIL_USER;
+    const safe = (s) => String(s ?? '').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    const subjectName = String(name ?? '')
+      .replace(/[\r\n]/g, ' ')
+      .slice(0, 80);
+
+    const innerBody = `
+      <h2 style="margin: 0 0 16px; color: #8B1538;">New account</h2>
+      <p style="margin: 0 0 12px;">Someone just registered on your store.</p>
+      <div style="background-color: #f8f9fa; padding: 15px; border-radius: 8px; border-left: 4px solid #C41E3A;">
+        <p style="margin: 6px 0;"><strong>Name:</strong> ${safe(name)}</p>
+        <p style="margin: 6px 0;"><strong>Email:</strong> ${safe(email)}</p>
+        <p style="margin: 6px 0;"><strong>Phone:</strong> ${safe(phone)}</p>
+      </div>
+    `;
+
+    const { html, attachments } = ownerEmailShell(innerBody);
+
+    const mailOptions = {
+      from: `"Sweet Home Store" <${process.env.EMAIL_USER}>`,
+      to: ownerTo,
+      subject: `New customer — ${subjectName}`,
+      html,
+      attachments,
+    };
+
+    const info = await transporter.sendMail(mailOptions);
+    logger.info(`Owner new-signup email sent: ${info.messageId}`);
+    return { success: true, messageId: info.messageId };
+  } catch (error) {
+    logger.error('Error sending owner new-signup email:', error);
     return { success: false, error: error.message };
   }
 };

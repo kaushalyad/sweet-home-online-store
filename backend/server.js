@@ -23,6 +23,10 @@ import reviewRouter from './routes/reviewRoute.js';
 import couponRouter from './routes/couponRoute.js';
 import { createServer } from 'http';
 import { Server } from 'socket.io';
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 // App Config
 const app = express();
@@ -118,6 +122,11 @@ const startServer = async () => {
       res.setHeader('X-XSS-Protection', '1; mode=block');
       next();
     });
+
+    app.use(
+      '/email-assets',
+      express.static(path.join(__dirname, 'public/email-assets'))
+    );
 
     // API endpoints
     app.use("/api/user", userRouter);

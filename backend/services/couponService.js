@@ -1,73 +1,92 @@
-import couponModel from '../models/couponModel.js';
+import couponModel from "../models/couponModel.js";
 
-export async function getActiveCoupons() {
-  const now = new Date();
-  return couponModel
-    .find({
-      active: true,
-      $or: [{ expiresAt: null }, { expiresAt: { $gt: now } }]
-    })
-    .sort({ createdAt: -1 })
-    .lean();
+/**
+ * @param {object} coupon — mongoose doc or plain object
+ * @param {number} subtotal — cart subtotal (items only)
+ * @param {number} deliveryFee
+ * @returns {number} discount in INR (not rounded)
+ */
+export function computeCouponDiscount(coupon, subtotal, deliveryFee) {
+  const sub = Number(subtotal) || 0;
+  const fee = Number(deliveryFee) || 0;
+  const type = coupon.type;
+  const value = Number(coupon.value) || 0;
+
+  if (type === "flat") {
+    return Math.min(value, sub);
+  }
+  if (type === "percent") {
+    const raw = (sub * value) / 100;
+    const cap =
+      coupon.maxDiscount != null && coupon.maxDiscount !== ""
+        ? Number(coupon.maxDiscount)
+        : Infinity;
+    return Math.min(raw, cap, sub);
+  }
+  if (type === "shipping") {
+    return Math.min(value, fee);
+  }
+  return 0;
 }
 
-export async function validateAndComputeCoupon({ code, subtotal, deliveryFee }) {
-  const cleanCode = String(code || '').trim().toUpperCase();
-  if (!cleanCode) {
-    return { ok: false, status: 400, message: 'Coupon code is required' };
+/**
+ * Server-side validation for checkout (COD / Razorpay).
+ * @returns {{ ok: false } | { ok: true, discountAmount: number, coupon: { id, code, type, value } }}
+ */
+export async function validateAndComputeCoupon({
+  code,
+  subtotal,
+  deliveryFee = 0,
+}) {
+  if (!code || String(code).trim() === "") {
+    return { ok: false };
   }
 
-  const now = new Date();
+  const normalized = String(code).trim().toUpperCase();
   const coupon = await couponModel.findOne({
-    code: cleanCode,
+    code: normalized,
     active: true,
-    $or: [{ expiresAt: null }, { expiresAt: { $gt: now } }]
   });
 
   if (!coupon) {
-    return { ok: false, status: 404, message: 'Invalid or expired coupon code' };
+    return { ok: false };
   }
 
-  const sub = Number(subtotal || 0);
-  if (Number.isNaN(sub) || sub < 0) {
-    return { ok: false, status: 400, message: 'Invalid subtotal' };
+  const now = new Date();
+  if (coupon.validFrom && now < coupon.validFrom) {
+    return { ok: false };
+  }
+  if (coupon.validUntil && now > coupon.validUntil) {
+    return { ok: false };
+  }
+  if (
+    coupon.usageLimit != null &&
+    Number(coupon.usedCount) >= Number(coupon.usageLimit)
+  ) {
+    return { ok: false };
   }
 
-  if (coupon.minOrderAmount && sub < coupon.minOrderAmount) {
-    return {
-      ok: false,
-      status: 400,
-      message: `Minimum order amount for this coupon is ₹${coupon.minOrderAmount}`
-    };
+  const min = Number(coupon.minOrderAmount) || 0;
+  const sub = Number(subtotal) || 0;
+  if (sub < min) {
+    return { ok: false };
   }
 
-  let discountAmount = 0;
-  if (coupon.type === 'flat') {
-    discountAmount = Number(coupon.value || 0);
-  } else if (coupon.type === 'percent') {
-    discountAmount = (sub * Number(coupon.value || 0)) / 100;
-    if (coupon.maxDiscount != null) {
-      discountAmount = Math.min(discountAmount, Number(coupon.maxDiscount));
-    }
-  } else if (coupon.type === 'shipping') {
-    const fee = Number(deliveryFee || 0);
-    discountAmount = Math.min(fee, Number(coupon.value || 0));
+  const rawDiscount = computeCouponDiscount(coupon, subtotal, deliveryFee);
+  if (rawDiscount <= 0) {
+    return { ok: false };
   }
 
-  discountAmount = Math.max(0, Math.floor(discountAmount));
+  const discountAmount = Math.round(rawDiscount * 100) / 100;
 
   return {
     ok: true,
+    discountAmount,
     coupon: {
       id: coupon._id,
       code: coupon.code,
       type: coupon.type,
       value: coupon.value,
-      minOrderAmount: coupon.minOrderAmount || 0,
-      maxDiscount: coupon.maxDiscount ?? null,
-      expiresAt: coupon.expiresAt ?? null
     },
-    discountAmount
   };
 }
-

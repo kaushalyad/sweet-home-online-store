@@ -4,6 +4,7 @@ import jwt from "jsonwebtoken";
 import crypto from "crypto";
 import userModel from "../models/userModel.js";
 import logger from "../config/logger.js";
+import { sendAdminNewCustomerNotification } from "../utils/emailService.js";
 
 const createToken = (id) => {
   try {
@@ -86,6 +87,14 @@ const registerUser = async (req, res) => {
 
     // Generate token
     const token = createToken(user._id);
+
+    sendAdminNewCustomerNotification({
+      name: user.name,
+      email: user.email,
+      phone: user.phone,
+    }).catch((err) =>
+      logger.error("Failed to send owner new-signup email:", err)
+    );
 
     res.status(201).json({
       success: true,

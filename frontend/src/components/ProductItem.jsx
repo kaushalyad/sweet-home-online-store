@@ -203,7 +203,7 @@ const ProductItem = ({ id, image, name, price, discountPrice = null, rating = 0,
         
         {/* Product info with improved design */}
         <div className="mt-5.5 px-3">
-          <h3 className="font-inter font-semibold text-gray-900 group-hover:text-gray-900 transition-colors duration-300 line-clamp-2 min-h-[3.25rem] sm:min-h-[3.5rem] text-[16px] sm:text-[18px] leading-snug cursor-pointer tracking-tight">
+          <h3 className="font-inter font-semibold text-gray-900 group-hover:text-gray-900 transition-colors duration-300 line-clamp-2 min-h-[3.25rem] sm:min-h-[3.5rem] text-[17px] sm:text-[18px] leading-snug cursor-pointer tracking-tight">
             {name}
           </h3>
 
@@ -211,7 +211,7 @@ const ProductItem = ({ id, image, name, price, discountPrice = null, rating = 0,
             <div className="flex flex-col">
               <p className="font-poppins font-extrabold text-gray-900 flex items-baseline gap-1.5">
               <span className="text-[13px] sm:text-sm text-gray-700 font-semibold">{currency}</span>
-              <span className="text-[22px] sm:text-[26px] leading-none">{salePrice}</span>
+              <span className="text-[24px] sm:text-[26px] leading-none">{salePrice}</span>
               {hasDiscount && (
                 <span className="text-[12px] sm:text-sm text-gray-500 line-through font-semibold ml-2">
                   {currency}{originalPrice}

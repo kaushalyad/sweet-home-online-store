@@ -704,7 +704,7 @@ const Collection = () => {
             {buffer ? (
               <ProductSkeleton count={6} />
             ) : (
-              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6 gap-y-7 md:gap-y-10 mt-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6 gap-y-7 md:gap-y-10 mt-3">
                 {filterProducts.length > 0 ? (
                   filterProducts.map((item, index) => (
                     <ProductItem
@@ -799,7 +799,7 @@ const Collection = () => {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.6 }}
-              className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-5 md:gap-6"
+              className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-5 md:gap-6"
             >
               {/* Show first 4 products as recommendations - this could be enhanced with actual recommendation logic */}
               {products.slice(0, 4).map((item, index) => (
