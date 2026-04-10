@@ -2,7 +2,7 @@ import ImageCarousel from "../components/ImageCarousel";
 import LatestCollection from "../components/LatestCollection";
 import OurPolicy from "../components/OurPolicy";
 import { motion } from "framer-motion";
-import { FaArrowRight } from "react-icons/fa";
+import { FaArrowRight, FaGift, FaShippingFast, FaStar } from "react-icons/fa";
 import { Link } from "react-router-dom";
 import { assets } from "../assets/assets";
 
@@ -63,12 +63,12 @@ const Home = () => {
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {[
-              { name: "Sweets", path: "/collection?category=sweets", image: assets.traditional_sweets },
-              { name: "Namkeen", path: "/collection?category=namkeen", image: assets.milk_sweets },
-              { name: "Beverages", path: "/collection?category=beverages", image: assets.dry_fruits },
-              { name: "Cookies", path: "/collection?category=cookies", image: assets.hero_img },
-              { name: "Ready To Eat", path: "/collection?category=ready-to-eat", image: assets.traditional_sweets },
-              { name: "Festive Packs/Gift Boxes", path: "/collection?category=gift-boxes", image: assets.milk_sweets },
+              { name: "Sweets", path: "/collection?category=sweets", image: assets.category_sweets },
+              { name: "Namkeen", path: "/collection?category=namkeen", image: assets.category_namkeen },
+              { name: "Beverages", path: "/collection?category=beverages", image: assets.category_beverages },
+              { name: "Cookies", path: "/collection?category=cookies", image: assets.category_cookies },
+              { name: "Ready To Eat", path: "/collection?category=ready-to-eat", image: assets.category_ready_to_eat },
+              { name: "Festive Packs/Gift Boxes", path: "/collection?category=gift-boxes", image: assets.category_gift_boxes },
             ].map((category, index) => (
               <Link
                 key={index}
@@ -122,26 +122,74 @@ const Home = () => {
         transition={{ duration: 0.6 }}
         className="container mx-auto sm:px-4 py-12 sm:py-16"
       >
-        <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-orange-400 to-pink-500 py-20 px-8 md:py-24 md:px-12">
-          <div className="max-w-lg relative z-10">
-            <h2 className="text-4xl md:text-5xl font-bold text-white mb-6">
-              Festival Special Collection
-            </h2>
-            <p className="text-white text-xl mb-8 opacity-90">
-              Celebrate with our specially curated sweet boxes. Perfect for
-              gifting and sharing joy with your loved ones.
-            </p>
-            <Link
-              to="/collection?category=festive"
-              className="inline-block px-10 py-4 bg-white text-pink-500 rounded-full font-medium hover:bg-gray-100 transition-colors duration-300 text-lg"
-            >
-              Explore Festival Specials
-            </Link>
+        <div className="relative overflow-hidden rounded-3xl border border-orange-100 bg-gradient-to-r from-orange-500 via-rose-500 to-pink-500 px-6 py-10 sm:px-8 sm:py-12 lg:px-12 lg:py-14 shadow-strong">
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_20%,rgba(255,255,255,0.22),transparent_35%),radial-gradient(circle_at_80%_80%,rgba(255,255,255,0.15),transparent_40%)]"></div>
+
+          <div className="relative z-10 grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-10 items-center">
+            <div className="max-w-2xl">
+              <div className="inline-flex items-center gap-2 mb-4 px-4 py-1.5 rounded-full bg-white/20 border border-white/30 text-white text-sm font-semibold backdrop-blur-sm">
+                <FaGift className="text-xs" />
+                Limited Time Festive Offers
+              </div>
+
+              <h2 className="font-poppins text-3xl sm:text-4xl lg:text-5xl font-extrabold text-white leading-tight mb-4">
+                Festival Special
+                <span className="block text-yellow-100">Sweet Boxes</span>
+              </h2>
+
+              <p className="text-white/90 text-base sm:text-lg lg:text-xl mb-7 max-w-xl leading-relaxed">
+                Make celebrations memorable with handcrafted gift packs made fresh every day. Ideal for family, friends, and corporate gifting.
+              </p>
+
+              <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
+                <Link
+                  to="/collection?category=festive"
+                  className="inline-flex items-center justify-center px-7 py-3.5 bg-white text-pink-600 rounded-full font-semibold hover:bg-pink-50 transition-colors duration-300"
+                >
+                  Explore Festival Specials
+                  <FaArrowRight className="ml-2" />
+                </Link>
+                <Link
+                  to="/collection"
+                  className="inline-flex items-center justify-center px-7 py-3.5 border border-white/60 text-white rounded-full font-semibold hover:bg-white/15 transition-colors duration-300"
+                >
+                  Browse All Products
+                </Link>
+              </div>
+            </div>
+
+            <div className="relative">
+              <div className="rounded-3xl border border-white/30 bg-white/15 backdrop-blur-md p-4 sm:p-5 shadow-medium">
+                <div className="rounded-2xl overflow-hidden border border-white/30 bg-white/20">
+                  <img
+                    src={assets.category_gift_boxes}
+                    alt="Festive sweet gift boxes"
+                    className="w-full h-52 sm:h-64 object-cover"
+                    loading="lazy"
+                  />
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 mt-3">
+                  <div className="rounded-xl bg-white/85 text-gray-900 px-3 py-2 text-xs sm:text-sm font-semibold flex items-center justify-center gap-2">
+                    <FaStar className="text-amber-500" />
+                    Premium Quality
+                  </div>
+                  <div className="rounded-xl bg-white/85 text-gray-900 px-3 py-2 text-xs sm:text-sm font-semibold flex items-center justify-center gap-2">
+                    <FaGift className="text-pink-500" />
+                    Gift Ready Packs
+                  </div>
+                  <div className="rounded-xl bg-white/85 text-gray-900 px-3 py-2 text-xs sm:text-sm font-semibold flex items-center justify-center gap-2">
+                    <FaShippingFast className="text-emerald-500" />
+                    Fast Delivery
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
 
           {/* Decorative circles */}
           <div className="absolute top-0 right-0 w-96 h-96 bg-white rounded-full opacity-10 transform translate-x-1/3 -translate-y-1/3"></div>
-          <div className="absolute bottom-0 right-0 w-48 h-48 bg-white rounded-full opacity-10 transform translate-x-1/4 translate-y-1/4"></div>
+          <div className="absolute bottom-0 right-0 w-56 h-56 bg-white rounded-full opacity-10 transform translate-x-1/4 translate-y-1/4"></div>
+          <div className="absolute -bottom-8 left-16 w-28 h-28 bg-yellow-200 rounded-full opacity-20 blur-xl"></div>
         </div>
       </motion.div>
 

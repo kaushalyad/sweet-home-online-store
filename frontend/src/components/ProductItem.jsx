@@ -95,7 +95,7 @@ const ProductItem = ({ id, image, name, price, discountPrice = null, rating = 0,
     >
       <Link
         onClick={() => scrollTo(0, 0)}
-        className="block group relative"
+        className="block group relative rounded-[30px] border border-orange-100/70 bg-gradient-to-b from-white via-orange-50/20 to-orange-50/45 p-2.5 shadow-sm transition-all duration-300 hover:shadow-lg"
         to={`/collection/${id}`}
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => {
@@ -104,18 +104,18 @@ const ProductItem = ({ id, image, name, price, discountPrice = null, rating = 0,
         }}
       >
         {/* Product image with hover effect */}
-        {/* Iconic border wrapper */}
-        <div className="relative rounded-[30px] p-[1px] bg-gradient-to-br from-pink-200 via-orange-100 to-gray-200 shadow-sm group-hover:shadow-xl transition-shadow duration-300">
+        <div className="relative rounded-[24px] p-[1px] bg-gradient-to-br from-pink-200/80 via-orange-100/80 to-gray-200/70 transition-shadow duration-300">
           <div className="overflow-hidden rounded-[29px] bg-white border border-white/60 relative aspect-square sm:aspect-[4/5]">
             {/* subtle corner highlight */}
             <div className="absolute -top-24 -right-24 w-56 h-56 rounded-full bg-gradient-to-br from-pink-200/40 to-orange-200/30 blur-2xl pointer-events-none" />
             <div className="absolute inset-0 pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-300" style={{ boxShadow: "inset 0 0 0 1px rgba(236,72,153,0.10)" }} />
 
-            {/* inner padding around image */}
-            <div className="p-3.5 sm:p-4 h-full w-full">
-              <div className="rounded-2xl overflow-hidden bg-gray-50 border border-gray-100 h-full w-full">
+            {/* Keep product visuals consistent across mixed source image ratios */}
+            <div className="p-2.5 sm:p-3 h-full w-full">
+              <div className="rounded-2xl overflow-hidden border border-gray-100 h-full w-full bg-gradient-to-br from-amber-50 via-white to-orange-50 relative">
+                <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_20%,rgba(255,255,255,0.9),transparent_40%),radial-gradient(circle_at_80%_80%,rgba(254,215,170,0.25),transparent_45%)] pointer-events-none" />
                 <img
-                  className="w-full h-full object-contain transition-transform duration-500 group-hover:scale-[1.03]"
+                  className="relative z-[1] w-full h-full object-cover object-center transition-transform duration-500 group-hover:scale-[1.03]"
                   src={image[currentImage]}
                   alt={`${name} - Indian Sweet`}
                   loading="lazy"
@@ -202,12 +202,12 @@ const ProductItem = ({ id, image, name, price, discountPrice = null, rating = 0,
         </div>
         
         {/* Product info with improved design */}
-        <div className="mt-5.5 px-3">
+        <div className="mt-3 px-2.5 pb-1.5">
           <h3 className="font-inter font-semibold text-gray-900 group-hover:text-gray-900 transition-colors duration-300 line-clamp-2 min-h-[3.25rem] sm:min-h-[3.5rem] text-[17px] sm:text-[18px] leading-snug cursor-pointer tracking-tight">
             {name}
           </h3>
 
-          <div className="flex items-center justify-between mt-3.5">
+          <div className="flex items-center justify-between mt-2.5 rounded-xl border border-orange-100/90 bg-white/90 px-3 py-2.5">
             <div className="flex flex-col">
               <p className="font-poppins font-extrabold text-gray-900 flex items-baseline gap-1.5">
               <span className="text-[13px] sm:text-sm text-gray-700 font-semibold">{currency}</span>

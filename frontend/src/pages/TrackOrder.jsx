@@ -2,9 +2,8 @@ import React, { useContext, useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { ShopContext } from '../context/ShopContext';
 import axios from 'axios';
-import Title from '../components/Title';
 import { motion } from 'framer-motion';
-import { FaBox, FaCheck, FaShippingFast, FaTruck, FaMapMarkerAlt, FaSearchLocation, FaSnowflake, FaExclamationTriangle, FaInfoCircle, FaPrint, FaArrowLeft, FaPhone, FaEnvelope } from 'react-icons/fa';
+import { FaBox, FaCheck, FaShippingFast, FaTruck, FaMapMarkerAlt, FaSearchLocation, FaSnowflake, FaArrowLeft, FaPhone, FaEnvelope } from 'react-icons/fa';
 import { toast } from 'react-toastify';
 
 const TrackOrder = () => {
@@ -225,7 +224,7 @@ const TrackOrder = () => {
     return (
       <div className="min-h-[60vh] flex items-center justify-center bg-gradient-to-b from-orange-50/30 to-transparent">
         <motion.div 
-          className="text-center"
+          className="text-center bg-white border border-orange-100 shadow-lg rounded-3xl px-10 py-12"
           initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
         >
@@ -239,32 +238,43 @@ const TrackOrder = () => {
   if (error || !orderData) {
     return (
       <motion.div 
-        className="min-h-[60vh] flex flex-col items-center justify-center"
+        className="min-h-[60vh] flex flex-col items-center justify-center px-4"
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
       >
-        <div className="text-6xl text-orange-200 mb-6">
-          <FaSearchLocation />
+        <div className="bg-white border border-orange-100 shadow-lg rounded-3xl px-8 sm:px-12 py-10 sm:py-12 text-center">
+          <div className="text-6xl text-orange-200 mb-6">
+            <FaSearchLocation />
+          </div>
+          <h2 className="text-2xl font-bold text-gray-800 mb-2">Order Not Found</h2>
+          <p className="text-gray-500 mb-8 text-center max-w-md">We couldn't find the order you're looking for. Please check the order ID and try again.</p>
+          <button 
+            onClick={() => navigate('/orders')}
+            className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-orange-500 to-pink-500 text-white rounded-xl hover:from-orange-600 hover:to-pink-600 transition-all shadow-lg hover:shadow-xl mx-auto"
+          >
+            <FaArrowLeft /> Back to Orders
+          </button>
         </div>
-        <h2 className="text-2xl font-bold text-gray-800 mb-2">Order Not Found</h2>
-        <p className="text-gray-500 mb-8 text-center max-w-md">We couldn't find the order you're looking for. Please check the order ID and try again.</p>
-        <button 
-          onClick={() => navigate('/orders')}
-          className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-orange-500 to-pink-500 text-white rounded-xl hover:from-orange-600 hover:to-pink-600 transition-all shadow-lg hover:shadow-xl"
-        >
-          <FaArrowLeft /> Back to Orders
-        </button>
       </motion.div>
     );
   }
 
   const timelineSteps = getTimelineSteps(orderData.status);
+  const currentStepIndex = Math.max(
+    0,
+    timelineSteps.findIndex((s) => s.title === orderData.status)
+  );
+  const progressPercent = Math.max(
+    12,
+    Math.round(((currentStepIndex + 1) / timelineSteps.length) * 100)
+  );
 
   return (
-    <div className="border-t pt-8 sm:pt-12 pb-20 bg-gradient-to-b from-white to-orange-50/20">
+    <div className="border-t pt-6 sm:pt-10 pb-20 bg-gradient-to-b from-white to-orange-50/20">
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-7xl">
       {/* Header with Back Button */}
       <motion.div 
-        className="mb-8"
+        className="mb-7 sm:mb-8"
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
       >
@@ -282,7 +292,7 @@ const TrackOrder = () => {
 
       {/* Order Status Card - Hero Section */}
       <motion.div 
-        className="bg-gradient-to-br from-orange-500 via-pink-500 to-purple-500 rounded-2xl shadow-2xl p-8 mb-8 text-white relative overflow-hidden"
+        className="bg-gradient-to-br from-orange-500 via-pink-500 to-purple-500 rounded-3xl shadow-2xl p-6 sm:p-8 mb-8 text-white relative overflow-hidden border border-white/20"
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}
         transition={{ delay: 0.1 }}
@@ -303,7 +313,7 @@ const TrackOrder = () => {
                 <span className="mr-2">●</span>
                 {orderData.status}
               </div>
-              <h2 className="text-2xl md:text-3xl font-bold mb-2">Your Sweet Treats Are On The Way! 🍬</h2>
+              <h2 className="text-2xl md:text-3xl font-bold mb-2">Your Sweet Treats Are On The Way!</h2>
               <p className="text-white/80">
                 Placed on {new Date(orderData.date).toLocaleString('en-US', { 
                   year: 'numeric', 
@@ -311,6 +321,20 @@ const TrackOrder = () => {
                   day: 'numeric'
                 })}
               </p>
+              <div className="mt-5">
+                <div className="flex items-center justify-between text-xs sm:text-sm text-white/85 mb-1.5">
+                  <span>Delivery Progress</span>
+                  <span>{progressPercent}%</span>
+                </div>
+                <div className="h-2.5 bg-white/25 rounded-full overflow-hidden">
+                  <motion.div
+                    className="h-full bg-white rounded-full"
+                    initial={{ width: 0 }}
+                    animate={{ width: `${progressPercent}%` }}
+                    transition={{ duration: 0.9, ease: "easeOut" }}
+                  />
+                </div>
+              </div>
             </div>
             <div className="text-right">
               <div className="text-4xl md:text-5xl font-bold">{currency}{orderData.amount}</div>
@@ -330,7 +354,7 @@ const TrackOrder = () => {
           transition={{ delay: 0.2 }}
         >
           {/* Order Tracking Timeline */}
-          <div className="bg-white rounded-2xl shadow-lg p-6 sm:p-8">
+          <div className="bg-white rounded-3xl border border-orange-100 shadow-lg p-5 sm:p-8">
             <h2 className="text-xl font-bold text-gray-800 mb-8 flex items-center gap-2">
               <div className="w-8 h-8 bg-orange-100 rounded-lg flex items-center justify-center">
                 <FaTruck className="text-orange-500" />
@@ -338,7 +362,7 @@ const TrackOrder = () => {
               Delivery Progress
             </h2>
             
-            <div className="space-y-6">
+            <div className="space-y-5">
               {timelineSteps.map((step, index) => (
                 <motion.div 
                   key={step.id} 
@@ -349,7 +373,7 @@ const TrackOrder = () => {
                 >
                   {/* Connector line */}
                   {index < timelineSteps.length - 1 && (
-                    <div className={`absolute top-12 left-6 w-1 h-full -translate-x-1/2 transition-all duration-500 rounded-full ${
+                    <div className={`absolute top-12 left-6 w-[3px] h-full -translate-x-1/2 transition-all duration-500 rounded-full ${
                       step.completed ? 'bg-gradient-to-b from-orange-500 to-pink-500' : 'bg-gray-200'
                     }`}></div>
                   )}
@@ -389,7 +413,7 @@ const TrackOrder = () => {
           </div>
 
           {/* Order Items */}
-          <div className="bg-white rounded-2xl shadow-lg p-6 sm:p-8">
+          <div className="bg-white rounded-3xl border border-pink-100 shadow-lg p-5 sm:p-8">
             <h2 className="text-xl font-bold text-gray-800 mb-6 flex items-center gap-2">
               <div className="w-8 h-8 bg-pink-100 rounded-lg flex items-center justify-center">
                 <FaBox className="text-pink-500" />
@@ -411,7 +435,7 @@ const TrackOrder = () => {
                 return (
                   <motion.div 
                     key={index} 
-                    className="flex items-start gap-4 p-4 rounded-xl bg-gradient-to-r from-gray-50 to-orange-50/30 hover:shadow-md transition-shadow"
+                    className="flex items-start gap-4 p-4 rounded-2xl border border-gray-100 bg-gradient-to-r from-gray-50 to-orange-50/30 hover:shadow-md transition-shadow"
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.4 + index * 0.05 }}
@@ -454,7 +478,7 @@ const TrackOrder = () => {
           transition={{ delay: 0.3 }}
         >
           {/* Shipping Address */}
-          <div className="bg-white rounded-2xl shadow-lg p-6">
+          <div className="bg-white rounded-3xl border border-gray-100 shadow-lg p-6">
             <h3 className="font-bold text-gray-800 mb-4 flex items-center gap-2">
               <FaMapMarkerAlt className="text-orange-500" />
               Shipping Address
@@ -472,7 +496,7 @@ const TrackOrder = () => {
           </div>
 
           {/* Payment Information */}
-          <div className="bg-white rounded-2xl shadow-lg p-6">
+          <div className="bg-white rounded-3xl border border-gray-100 shadow-lg p-6">
             <h3 className="font-bold text-gray-800 mb-4">Payment Details</h3>
             <div className="space-y-3 text-sm">
               <div className="flex justify-between">
@@ -497,7 +521,7 @@ const TrackOrder = () => {
           </div>
 
           {/* Special Instructions */}
-          <div className="bg-gradient-to-br from-blue-50 to-purple-50 rounded-2xl shadow-lg p-6">
+          <div className="bg-gradient-to-br from-blue-50 to-purple-50 rounded-3xl border border-blue-100 shadow-lg p-6">
             <h3 className="font-bold text-gray-800 mb-4 flex items-center gap-2">
               <FaSnowflake className="text-blue-500" />
               Storage Instructions
@@ -511,7 +535,7 @@ const TrackOrder = () => {
           </div>
 
           {/* Contact Support */}
-          <div className="bg-gradient-to-br from-orange-50 to-pink-50 rounded-2xl shadow-lg p-6">
+          <div className="bg-gradient-to-br from-orange-50 to-pink-50 rounded-3xl border border-orange-100 shadow-lg p-6">
             <h3 className="font-bold text-gray-800 mb-4">Need Help?</h3>
             <div className="space-y-3 text-sm">
               <a href="tel:+919931018857" className="flex items-center gap-2 text-orange-600 hover:text-orange-700 font-medium">
@@ -523,6 +547,7 @@ const TrackOrder = () => {
             </div>
           </div>
         </motion.div>
+      </div>
       </div>
     </div>
   );

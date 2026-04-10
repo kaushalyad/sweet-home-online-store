@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext } from "react";
+﻿import React, { useState, useEffect, useContext } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import axios from "axios";
 import { backendUrl } from "../App";
@@ -6,6 +6,7 @@ import { ShopContext } from "../context/ShopContext";
 import ProductItem from "../components/ProductItem";
 import Title from "../components/Title";
 import Buffer from "../components/Buffer";
+import NoProductsFound from "../components/NoProductsFound";
 import { 
   FaSort, 
   FaSortAmountDown, 
@@ -461,19 +462,15 @@ const ProductListing = () => {
           {loading ? (
             <Buffer />
           ) : products.length === 0 ? (
-            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-10 text-center">
-              <h3 className="text-xl font-medium text-gray-800 mb-3">No products found</h3>
-              <p className="text-gray-600 mb-5">Try adjusting your filters or search terms.</p>
-              <button
-                onClick={() => {
-                  navigate('/products');
-                  window.location.reload();
-                }}
-                className="inline-flex items-center px-4 py-2 bg-pink-500 text-white rounded-md hover:bg-pink-600 transition-colors"
-              >
-                Reset All Filters
-              </button>
-            </div>
+            <NoProductsFound
+              title="No products found"
+              subtitle="Try adjusting your filters or search terms."
+              primaryActionLabel="Reset all filters"
+              onPrimaryAction={() => {
+                navigate("/products");
+                window.location.reload();
+              }}
+            />
           ) : (
             <>
               {/* Results Summary */}
@@ -500,7 +497,7 @@ const ProductListing = () => {
               </div>
               
               {/* Products Grid */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4 md:gap-5 lg:gap-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-3 sm:gap-4 md:gap-5 lg:gap-6">
                 {products.map((product) => (
                   <ProductItem 
                     key={product._id} 

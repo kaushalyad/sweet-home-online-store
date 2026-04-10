@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState } from "react";
+﻿import React, { useContext, useEffect, useState } from "react";
 import { ShopContext } from "../context/ShopContext";
 import Title from "./Title";
 import ProductItem from "./ProductItem";
@@ -53,7 +53,7 @@ const BestSeller = () => {
             initial="hidden"
             whileInView="visible"
             viewport={{ once: true }}
-            className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5 sm:gap-6 md:gap-7 gap-y-8 sm:gap-y-10 md:gap-y-12"
+            className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 gap-5 sm:gap-6 md:gap-7 gap-y-8 sm:gap-y-10 md:gap-y-12"
           >
             {bestSeller.map((item, index) => (
               <ProductItem
@@ -94,3 +94,4 @@ const BestSeller = () => {
 };
 
 export default BestSeller;
+

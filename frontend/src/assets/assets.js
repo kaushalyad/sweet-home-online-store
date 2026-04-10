@@ -16,14 +16,23 @@ import slider1 from "./sweets-1.jpg";
 import slider2 from "./sweets-2.jpg";
 import slider3 from "./sweets-3.jpg";
 import slider4 from "./sweets-4.jpg";
-import hero1 from "./hero-1.png";
-import hero2 from "./hero-2.png";
-import hero3 from "./hero-3.png";
-import hero4 from "./hero-4.png";
+import hero1 from "./hero-1.jpeg";
+import hero2 from "./hero-2.jpeg";
+import hero3 from "./hero-3.jpeg";
+import hero4 from "./hero-4.jpeg";
+import hero5 from "./hero-5.jpeg";
 import milk_sweets from "./milk-sweets.jpg";
 import namkeens from "./namkeens.jpg";
 import dry_fruits from "./dry_fruits.jpg";
 import traditional_sweets from "./traditional.jpg";
+// Home “Explore collection” tiles — filenames match your uploads (screenshot order)
+import category_sweets from "./sweets.jpeg";
+import category_namkeen from "./namkeens.jpeg";
+import category_beverages from "./behaverages.jpeg";
+import category_cookies from "./cookies.jpeg";
+import category_ready_to_eat from "./ready-to-eat.jpeg";
+import category_gift_boxes from "./festive-packs.jpeg";
+
 export const assets = {
   logo,
   slider1,
@@ -34,10 +43,17 @@ export const assets = {
   hero2,
   hero3,
   hero4,
+  hero5,
   milk_sweets,
   namkeens,
   dry_fruits,
   traditional_sweets,
+  category_sweets,
+  category_namkeen,
+  category_beverages,
+  category_cookies,
+  category_ready_to_eat,
+  category_gift_boxes,
   hero_img:slider4,
   cart_icon,
   dropdown_icon,

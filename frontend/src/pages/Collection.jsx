@@ -1,8 +1,9 @@
-import { useContext, useEffect, useMemo, useState } from "react";
+﻿import { useContext, useEffect, useMemo, useState } from "react";
 import { ShopContext } from "../context/ShopContext";
 import Title from "../components/Title";
 import ProductItem from "../components/ProductItem";
 import ProductSkeleton from "../components/ProductSkeleton";
+import NoProductsFound from "../components/NoProductsFound";
 import { FaSort, FaSortAmountDown, FaSortAmountUp, FaChevronDown, FaFilter, FaCheck, FaTimes, FaStar } from "react-icons/fa";
 import { motion, AnimatePresence } from "framer-motion";
 import PropTypes from "prop-types";
@@ -704,7 +705,7 @@ const Collection = () => {
             {buffer ? (
               <ProductSkeleton count={6} />
             ) : (
-              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6 gap-y-7 md:gap-y-10 mt-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-2 xl:grid-cols-3 gap-4 md:gap-6 gap-y-7 md:gap-y-10 mt-3">
                 {filterProducts.length > 0 ? (
                   filterProducts.map((item, index) => (
                     <ProductItem
@@ -720,33 +721,27 @@ const Collection = () => {
                   ))
                 ) : (
                   <div className="col-span-full py-14 sm:py-20">
-                    <div className="max-w-xl mx-auto text-center">
-                      <div className="mb-6 flex justify-center">
-                        <div className="w-16 h-16 rounded-2xl bg-white border border-gray-200 shadow-soft flex items-center justify-center">
-                          <span className="text-3xl" aria-hidden="true">😔</span>
-                        </div>
-                      </div>
+                    <div className="max-w-2xl mx-auto">
+                      <NoProductsFound
+                        title="No products found"
+                        subtitle="Try clearing filters or searching something else."
+                        primaryActionLabel="Clear filters"
+                        onPrimaryAction={() => {
+                          setCategory([]);
+                          setSubCategory([]);
+                          setPriceRange([0, 1000]);
+                          setRatingFilter(0);
+                        }}
+                        secondaryActionLabel="Browse all"
+                        onSecondaryAction={() => {
+                          setCategory([]);
+                          setSubCategory([]);
+                          setPriceRange([0, 1000]);
+                          setRatingFilter(0);
+                        }}
+                      />
 
-                      <h3 className="font-poppins text-2xl sm:text-3xl font-extrabold text-gray-900 mb-2 tracking-tight">
-                        No products found
-                      </h3>
-                      <p className="font-inter text-gray-600 text-base sm:text-lg mb-8">
-                        Try clearing filters or searching something else.
-                      </p>
-
-                      <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
-                        <button
-                          onClick={() => {
-                            setCategory([]);
-                            setSubCategory([]);
-                            setPriceRange([0, 1000]);
-                            setRatingFilter(0);
-                          }}
-                          className="btn-interactive inline-flex items-center justify-center gap-2 w-full sm:w-auto px-7 py-3.5 bg-gray-900 text-white rounded-full hover:bg-black hover:shadow-strong transition-all duration-200 font-semibold"
-                        >
-                          <FaTimes />
-                          Clear filters
-                        </button>
+                      <div className="mt-4 text-center">
                         <Link
                           to="/collection"
                           onClick={() => {
@@ -755,9 +750,9 @@ const Collection = () => {
                             setPriceRange([0, 1000]);
                             setRatingFilter(0);
                           }}
-                          className="inline-flex items-center justify-center w-full sm:w-auto px-7 py-3.5 rounded-full border-2 border-gray-200 bg-white text-gray-900 font-semibold hover:border-gray-300 hover:bg-gray-50 hover:shadow-soft transition-all duration-200"
+                          className="inline-flex items-center justify-center px-5 py-2.5 text-sm font-semibold text-gray-600 hover:text-pink-600 transition-colors"
                         >
-                          Browse all
+                          Go to all collections
                         </Link>
                       </div>
                     </div>
@@ -799,7 +794,7 @@ const Collection = () => {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.6 }}
-              className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-5 md:gap-6"
+              className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 gap-4 sm:gap-5 md:gap-6"
             >
               {/* Show first 4 products as recommendations - this could be enhanced with actual recommendation logic */}
               {products.slice(0, 4).map((item, index) => (
@@ -841,3 +836,4 @@ const Collection = () => {
 };
 
 export default Collection;
+

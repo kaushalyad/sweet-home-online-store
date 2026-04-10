@@ -1,4 +1,4 @@
-import React from "react";
+﻿import React from "react";
 import { motion } from "framer-motion";
 import Skeleton, { SkeletonTheme } from "react-loading-skeleton";
 import "react-loading-skeleton/dist/skeleton.css";
@@ -6,7 +6,7 @@ import "react-loading-skeleton/dist/skeleton.css";
 const ProductSkeleton = ({ count = 10 }) => {
   return (
     <SkeletonTheme baseColor="#f3f4f6" highlightColor="#ffffff">
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-5 md:gap-7 gap-y-8 md:gap-y-12">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-2 xl:grid-cols-3 gap-5 md:gap-7 gap-y-8 md:gap-y-12">
         {[...Array(count)].map((_, index) => (
           <motion.div
             key={index}
@@ -48,3 +48,4 @@ const ProductSkeleton = ({ count = 10 }) => {
 };
 
 export default ProductSkeleton;
+

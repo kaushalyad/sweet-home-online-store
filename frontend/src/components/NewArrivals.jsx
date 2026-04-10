@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState } from "react";
+﻿import React, { useContext, useEffect, useState } from "react";
 import { ShopContext } from "../context/ShopContext";
 import Title from "./Title";
 import ProductItem from "./ProductItem";
@@ -22,7 +22,7 @@ const NewArrivals = () => {
         <motion.div initial={{ opacity: 0, y: 16 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.5 }}>
           <Title text1={"New"} text2={"Arrivals"} />
           <div className="w-20 h-1 bg-pink-500 mx-auto mt-4 mb-6" />
-          <p className="text-gray-600 max-w-2xl mx-auto mb-8 px-4">Fresh additions to our collection — try them while they're new.</p>
+          <p className="text-gray-600 max-w-2xl mx-auto mb-8 px-4">Fresh additions to our collection â€” try them while they're new.</p>
         </motion.div>
       </div>
 
@@ -30,7 +30,7 @@ const NewArrivals = () => {
         <Buffer />
       ) : (
         <div className="px-4">
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 md:gap-7 gap-y-10 md:gap-y-12">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 gap-6 md:gap-7 gap-y-10 md:gap-y-12">
             {newProducts.map((item, idx) => (
               <ProductItem
                 key={item._id || idx}
@@ -60,3 +60,4 @@ const NewArrivals = () => {
 };
 
 export default NewArrivals;
+

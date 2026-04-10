@@ -7,10 +7,11 @@ const ImageCarousel = () => {
   const [isAutoPlaying, setIsAutoPlaying] = useState(true);
 
   const images = [
-    assets.hero4,
     assets.hero1,
     assets.hero2,
     assets.hero3,
+    assets.hero4,
+    assets.hero5,
   ];
 
   // Auto-play carousel
@@ -40,7 +41,7 @@ const ImageCarousel = () => {
 
   return (
     <div 
-      className="relative w-full min-w-full h-[180px] sm:h-[280px] md:h-[400px] lg:h-[500px] xl:h-[550px] overflow-hidden bg-gradient-to-b from-orange-50 to-white"
+      className="relative w-full min-w-full h-[240px] sm:h-[340px] md:h-[460px] lg:h-[580px] xl:h-[640px] overflow-hidden bg-gradient-to-b from-orange-50 to-white"
     >
       {/* Images */}
       <div 
