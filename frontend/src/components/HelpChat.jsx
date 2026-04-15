@@ -1,209 +1,204 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { FaComments, FaTimes, FaPaperPlane, FaUser, FaRobot, FaSmile } from 'react-icons/fa';
+import { FaComments, FaTimes, FaPaperPlane, FaUser, FaRobot } from 'react-icons/fa';
 
 const HelpChat = () => {
-    const [isOpen, setIsOpen] = useState(false);
-    const [messages, setMessages] = useState([
-        {
-            id: 1,
-            text: 'Hi there! Welcome to Sweet Home Online Store! How can I help you today?',
-            sender: 'bot',
-            timestamp: new Date()
-        }
+  const [isOpen, setIsOpen] = useState(false);
+  const [messages, setMessages] = useState([
+    {
+      id: 1,
+      text: 'Hi there! Welcome to Sweet Home Online Store. How can I help you today?',
+      sender: 'bot',
+      timestamp: new Date()
+    }
+  ]);
+  const [newMessage, setNewMessage] = useState('');
+  const [isTyping, setIsTyping] = useState(false);
+  const [notificationCount, setNotificationCount] = useState(0);
+  const messagesEndRef = useRef(null);
+  const inputRef = useRef(null);
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const seen = localStorage.getItem('helpChatNotificationSeen');
+      if (!seen) {
+        setNotificationCount(1);
+      }
+    }
+  }, []);
+
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [messages, isTyping]);
+
+  useEffect(() => {
+    if (isOpen && inputRef.current) {
+      inputRef.current.focus();
+    }
+  }, [isOpen]);
+
+  const sendMessage = (text) => {
+    const nextId = messages.length + 1;
+    setMessages((prev) => [
+      ...prev,
+      { id: nextId, text, sender: 'user', timestamp: new Date() }
     ]);
-    const [newMessage, setNewMessage] = useState('');
-    const [isTyping, setIsTyping] = useState(false);
-    const messagesEndRef = useRef(null);
-    const inputRef = useRef(null);
+    setNewMessage('');
+    setIsTyping(true);
 
-    useEffect(() => {
-        messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-    }, [messages, isTyping]);
-
-    useEffect(() => {
-        if (isOpen && inputRef.current) {
-            inputRef.current.focus();
+    setTimeout(() => {
+      setIsTyping(false);
+      setMessages((prev) => [
+        ...prev,
+        {
+          id: prev.length + 1,
+          text: 'Thanks for your message! Our assistant will get back to you soon.',
+          sender: 'bot',
+          timestamp: new Date()
         }
-    }, [isOpen]);
+      ]);
+    }, 900);
+  };
 
-    const addMessage = (message) => {
-        setMessages((prev) => [...prev, message]);
-    };
+  const handleSubmit = () => {
+    const trimmed = newMessage.trim();
+    if (!trimmed) return;
+    sendMessage(trimmed);
+  };
 
-    const handleSendMessage = () => {
-        const trimmed = newMessage.trim();
-        if (!trimmed) return;
+  const handleQuickReply = (reply) => {
+    setNewMessage(reply);
+    setTimeout(() => sendMessage(reply), 120);
+  };
 
-        addMessage({
-            id: messages.length + 1,
-            text: trimmed,
-            sender: 'user',
-            timestamp: new Date()
-        });
+  const quickReplies = ['Track my order', 'Return policy', 'Payment issues', 'Product information'];
 
-        setNewMessage('');
-        setIsTyping(true);
+  return (
+    <>
+      {!isOpen && (
+        <div className="fixed bottom-4 right-4 z-50 sm:bottom-6 sm:right-6">
+          <button
+            onClick={() => {
+              setIsOpen(true);
+              setNotificationCount(0);
+              if (typeof window !== 'undefined') {
+                localStorage.setItem('helpChatNotificationSeen', 'true');
+              }
+            }}
+            className="relative flex h-12 w-12 items-center justify-center rounded-full bg-gradient-to-br from-sky-500 to-violet-600 text-white shadow-lg transition-transform duration-200 hover:-translate-y-0.5"
+            aria-label="Open chat"
+          >
+            <FaComments className="text-xl" />
+            {notificationCount > 0 && (
+              <span className="absolute -top-1 -right-1 flex h-5 min-w-[1.25rem] items-center justify-center rounded-full bg-red-500 px-1 text-[10px] font-semibold text-white">
+                {notificationCount}
+              </span>
+            )}
+          </button>
+        </div>
+      )}
 
-        setTimeout(() => {
-            setIsTyping(false);
-            addMessage({
-                id: messages.length + 2,
-                text: 'Thanks for your message! Our AI assistant will respond shortly.',
-                sender: 'bot',
-                timestamp: new Date()
-            });
-        }, 1400);
-    };
+      {isOpen && (
+        <div className="fixed inset-x-3 bottom-3 z-50 mx-auto flex max-h-[70vh] max-w-[calc(100vw-1rem)] flex-col rounded-[26px] border border-slate-200 bg-white shadow-[0_14px_40px_rgba(15,23,42,0.14)] sm:right-6 sm:left-auto sm:bottom-6 sm:w-[20rem] sm:max-h-[70vh] sm:max-w-none">
+          <div className="flex items-center justify-between gap-2 rounded-t-[26px] bg-gradient-to-r from-sky-500 via-blue-500 to-violet-600 px-3 py-2 text-white shadow-sm">
+            <div className="flex items-center gap-3">
+              <div className="flex h-11 w-11 items-center justify-center rounded-full bg-white/20">
+                <FaRobot className="text-lg" />
+              </div>
+              <div>
+                <h3 className="text-sm font-semibold">Support Assistant</h3>
+                <p className="text-[11px] opacity-90">Available 24/7</p>
+              </div>
+            </div>
+            <button
+              onClick={() => setIsOpen(false)}
+              className="rounded-full border border-white/25 px-2 py-2 text-white transition hover:bg-white/10"
+              aria-label="Close chat"
+            >
+              <FaTimes className="text-sm" />
+            </button>
+          </div>
 
-    const handleKeyPress = (e) => {
-        if (e.key === 'Enter' && !e.shiftKey) {
-            e.preventDefault();
-            handleSendMessage();
-        }
-    };
-
-    const quickReplies = [
-        'Track my order',
-        'Return policy',
-        'Payment issues',
-        'Product information'
-    ];
-
-    const handleQuickReply = (reply) => {
-        setNewMessage(reply);
-        setTimeout(handleSendMessage, 120);
-    };
-
-    return (
-        <>
-            <div className="fixed bottom-4 right-4 z-50 sm:bottom-6 sm:right-6">
-                <button
-                    onClick={() => setIsOpen((open) => !open)}
-                    className="relative flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-br from-sky-500 to-violet-600 text-white shadow-lg"
-                    aria-label={isOpen ? 'Close chat' : 'Open chat'}
+          <div className="flex-1 min-h-0 overflow-y-auto p-2 space-y-1">
+            {messages.map((message) => (
+              <div key={message.id} className={message.sender === 'bot' ? 'flex justify-start' : 'flex justify-end'}>
+                <div className={message.sender === 'bot'
+                  ? 'min-w-[55%] max-w-[82%] rounded-[22px] bg-slate-100 px-3 py-3 text-[14px] leading-snug text-slate-700 shadow-sm sm:max-w-[75%]'
+                  : 'min-w-[55%] max-w-[82%] rounded-[22px] bg-sky-500 px-3 py-3 text-[14px] leading-snug text-white shadow-sm sm:max-w-[75%]'}
                 >
-                    {isOpen ? <FaTimes className="text-xl" /> : <FaComments className="text-xl" />}
-                    {!isOpen && messages.length > 1 && (
-                        <span className="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-rose-500 text-[10px] font-bold text-white">
-                            {messages.filter((message) => message.sender === 'bot').length}
-                        </span>
-                    )}
+                  <div className="flex items-center gap-1 mb-1 text-[10px] opacity-80">
+                    {message.sender === 'bot' ? <FaRobot className="text-[10px] text-sky-500" /> : <FaUser className="text-[10px] text-white" />}
+                    <span className="font-medium text-[10px]">{message.sender === 'bot' ? 'Support' : 'You'}</span>
+                  </div>
+                  <p className="leading-relaxed break-words text-[14px]">{message.text}</p>
+                  <p className="mt-1 text-right text-[10px] opacity-60">
+                    {message.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                  </p>
+                </div>
+              </div>
+            ))}
+
+            {isTyping && (
+              <div className="flex justify-start">
+                <div className="rounded-[20px] bg-slate-100 p-2.5 shadow-sm">
+                  <div className="mb-2 flex items-center gap-2 text-[11px] text-slate-500">
+                    <FaRobot className="text-xs text-sky-500" />
+                    <span>Support is typing...</span>
+                  </div>
+                  <div className="flex items-center gap-1">
+                    <span className="h-2 w-2 rounded-full bg-slate-400 animate-bounce" />
+                    <span className="h-2 w-2 rounded-full bg-slate-400 animate-bounce" style={{ animationDelay: '0.1s' }} />
+                    <span className="h-2 w-2 rounded-full bg-slate-400 animate-bounce" style={{ animationDelay: '0.2s' }} />
+                  </div>
+                </div>
+              </div>
+            )}
+
+            <div ref={messagesEndRef} />
+          </div>
+
+          <div className="border-t border-slate-200 px-3 py-2">
+            <div className="mb-2 flex flex-wrap justify-center gap-1">
+              {quickReplies.map((reply) => (
+                <button
+                  key={reply}
+                  onClick={() => handleQuickReply(reply)}
+                  className="rounded-full bg-slate-100 px-2 py-1 text-[9px] font-medium text-slate-700 shadow-sm transition hover:bg-slate-200"
+                >
+                  {reply}
                 </button>
+              ))}
             </div>
 
-            {isOpen && (
-                <div className="fixed bottom-20 left-4 right-4 z-40 flex w-full max-w-[24rem] flex-col overflow-hidden rounded-[28px] border border-slate-200 bg-white shadow-xl sm:bottom-24 sm:right-6 sm:left-auto sm:w-[24rem] sm:h-[30rem] sm:max-w-none md:right-8 lg:right-10">
-                    <div className="flex items-center justify-between gap-3 bg-gradient-to-r from-sky-500 to-violet-600 p-4 text-white">
-                        <div className="flex items-center gap-3">
-                            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-white/20">
-                                <FaRobot className="text-base" />
-                            </div>
-                            <div>
-                                <h3 className="text-sm font-semibold">Support Assistant</h3>
-                                <p className="text-[11px] opacity-90">Available 24/7</p>
-                            </div>
-                        </div>
-                        <button
-                            onClick={() => setIsOpen(false)}
-                            className="rounded-full border border-white/20 px-2 py-2 text-sm transition hover:bg-white/10"
-                            aria-label="Close chat"
-                        >
-                            <FaTimes className="text-sm" />
-                        </button>
-                    </div>
-
-                    <div className="flex-1 overflow-y-auto p-4 space-y-3">
-                        {messages.map((message) => (
-                            <div
-                                key={message.id}
-                                className={message.sender === 'bot' ? 'flex justify-start' : 'flex justify-end'}
-                            >
-                                <div
-                                    className={
-                                        message.sender === 'bot'
-                                            ? 'w-full max-w-[80%] rounded-3xl bg-slate-100 p-3 text-slate-700 shadow-sm sm:max-w-[78%]'
-                                            : 'w-full max-w-[80%] ml-auto rounded-3xl bg-sky-500 p-3 text-white shadow-sm sm:max-w-[78%]'
-                                    }
-                                >
-                                    <div className="flex items-center gap-2 mb-1 text-[11px] opacity-80">
-                                        {message.sender === 'bot' ? (
-                                            <FaRobot className="text-xs text-sky-500" />
-                                        ) : (
-                                            <FaUser className="text-xs text-white" />
-                                        )}
-                                        <span>{message.sender === 'bot' ? 'Support' : 'You'}</span>
-                                    </div>
-                                    <p className="leading-relaxed">{message.text}</p>
-                                    <p className="mt-2 text-right text-[10px] opacity-60">
-                                        {message.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                                    </p>
-                                </div>
-                            </div>
-                        ))}
-
-                        {isTyping && (
-                            <div className="flex justify-start">
-                                <div className="rounded-[24px] bg-slate-100 p-3 shadow-sm">
-                                    <div className="mb-2 flex items-center gap-2 text-[11px] text-slate-500">
-                                        <FaRobot className="text-xs text-sky-500" />
-                                        <span>Support is typing...</span>
-                                    </div>
-                                    <div className="flex items-center gap-1">
-                                        <span className="h-2 w-2 rounded-full bg-slate-400 animate-bounce" />
-                                        <span className="h-2 w-2 rounded-full bg-slate-400 animate-bounce" style={{ animationDelay: '0.1s' }} />
-                                        <span className="h-2 w-2 rounded-full bg-slate-400 animate-bounce" style={{ animationDelay: '0.2s' }} />
-                                    </div>
-                                </div>
-                            </div>
-                        )}
-
-                        <div ref={messagesEndRef} />
-                    </div>
-
-                    <div className="border-t border-slate-200 px-4 py-3">
-                        <div className="mb-3 flex flex-wrap gap-2">
-                            {quickReplies.map((reply) => (
-                                <button
-                                    key={reply}
-                                    onClick={() => handleQuickReply(reply)}
-                                    className="rounded-full bg-slate-100 px-4 py-2 text-xs font-medium text-slate-700 shadow-sm transition hover:bg-slate-200"
-                                >
-                                    {reply}
-                                </button>
-                            ))}
-                        </div>
-                        <div className="flex items-center gap-2 rounded-full bg-slate-100 px-3 py-2 shadow-sm transition duration-200 focus-within:border-sky-300 focus-within:ring-2 focus-within:ring-sky-100">
-                            <button className="flex h-11 w-11 items-center justify-center rounded-full bg-white text-slate-600 shadow-sm transition hover:bg-slate-100" type="button" aria-label="Add emoji">
-                                <FaSmile className="text-lg" />
-                            </button>
-                            <input
-                                ref={inputRef}
-                                type="text"
-                                value={newMessage}
-                                onChange={(e) => setNewMessage(e.target.value)}
-                                onKeyPress={handleKeyPress}
-                                placeholder="Type your question..."
-                                className="min-w-0 flex-1 bg-transparent text-sm text-slate-700 outline-none placeholder:text-slate-400"
-                            />
-                            <button
-                                onClick={handleSendMessage}
-                                disabled={!newMessage.trim()}
-                                className={
-                                    newMessage.trim()
-                                        ? 'flex h-11 w-11 items-center justify-center rounded-full bg-gradient-to-br from-sky-500 to-indigo-600 text-white shadow-lg transition hover:from-sky-600 hover:to-indigo-700'
-                                        : 'flex h-11 w-11 items-center justify-center rounded-full bg-slate-300 text-slate-500 transition'
-                                }
-                                type="button"
-                                aria-label="Send message"
-                            >
-                                <FaPaperPlane className="text-base" />
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            )}
-        </>
-    );
+            <div className="flex items-center gap-1 rounded-full bg-white p-1">
+              <input
+                ref={inputRef}
+                type="text"
+                value={newMessage}
+                onChange={(e) => setNewMessage(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    handleSubmit();
+                  }
+                }}
+                placeholder="Type your question..."
+                className="min-w-0 flex-1 rounded-full border border-slate-200 bg-white px-2 py-2 text-xs text-slate-700 outline-none placeholder:text-slate-400"
+              />
+              <button
+                onClick={handleSubmit}
+                disabled={!newMessage.trim()}
+                className="flex h-9 w-9 items-center justify-center rounded-full bg-sky-500 text-white shadow-sm transition hover:bg-sky-600 disabled:cursor-not-allowed disabled:bg-slate-300"
+                type="button"
+                aria-label="Send message"
+              >
+                <FaPaperPlane className="text-xs" />
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </>
+  );
 };
 
 export default HelpChat;
