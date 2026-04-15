@@ -16,11 +16,12 @@ import slider1 from "./sweets-1.jpg";
 import slider2 from "./sweets-2.jpg";
 import slider3 from "./sweets-3.jpg";
 import slider4 from "./sweets-4.jpg";
-import hero1 from "./hero-1.jpeg";
-import hero2 from "./hero-2.jpeg";
-import hero3 from "./hero-3.jpeg";
-import hero4 from "./hero-4.jpeg";
-import hero5 from "./hero-5.jpeg";
+import hero1 from "./hero-1.png";
+import hero2 from "./hero-2.png";
+import hero3 from "./hero-3.png";
+import hero4 from "./hero-4.png";
+import hero5 from "./hero-5.png";
+import hero6 from "./hero-6.png";
 import milk_sweets from "./milk-sweets.jpg";
 import namkeens from "./namkeens.jpg";
 import dry_fruits from "./dry_fruits.jpg";
@@ -32,6 +33,7 @@ import category_beverages from "./behaverages.jpeg";
 import category_cookies from "./cookies.jpeg";
 import category_ready_to_eat from "./ready-to-eat.jpeg";
 import category_gift_boxes from "./festive-packs.jpeg";
+import festive from "./festive.png";
 
 export const assets = {
   logo,
@@ -44,6 +46,7 @@ export const assets = {
   hero3,
   hero4,
   hero5,
+  hero6,
   milk_sweets,
   namkeens,
   dry_fruits,
@@ -54,6 +57,7 @@ export const assets = {
   category_cookies,
   category_ready_to_eat,
   category_gift_boxes,
+  festive,
   hero_img:slider4,
   cart_icon,
   dropdown_icon,

@@ -2,7 +2,7 @@ import { useContext, useState, useEffect, useRef } from "react";
 import { assets } from "../assets/assets";
 import { Link, NavLink, useLocation, useNavigate } from "react-router-dom";
 import { ShopContext } from "../context/ShopContext";
-import { FaGift, FaBirthdayCake, FaHeart, FaSearch, FaShoppingCart, FaUserAlt, FaTruck, FaExclamationTriangle } from "react-icons/fa";
+import { FaGift, FaBirthdayCake, FaHeart, FaSearch, FaShoppingCart, FaUserAlt, FaTruck } from "react-icons/fa";
 import AccountMenuSkeleton from "./AccountMenuSkeleton";
 
 // Define as a named function declaration instead of a function expression
@@ -14,9 +14,11 @@ const Navbar = () => {
   const [activeDropdown, setActiveDropdown] = useState(null);
   const [showSearchBar, setShowSearchBar] = useState(false);
   const [scrollPosition, setScrollPosition] = useState(0);
+  const [showLoginCTA, setShowLoginCTA] = useState(false);
   const bannerRef = useRef(null);
   const categoryRef = useRef(null);
   const navScrollRef = useRef(null);
+  const loginCTARef = useRef(null);
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -133,6 +135,35 @@ const Navbar = () => {
       window.removeEventListener('showPromoBanner', handleShowBanner);
     };
   }, []);
+
+  // Login CTA - Show after delay and hide after display duration
+  useEffect(() => {
+    // Only show CTA if user is not logged in
+    if (token) {
+      setShowLoginCTA(false);
+      return;
+    }
+
+    // Show CTA after 5 seconds of page load
+    const showTimer = setTimeout(() => {
+      setShowLoginCTA(true);
+      
+      // Trigger vibration
+      if (navigator.vibrate) {
+        navigator.vibrate([20, 10, 20]);
+      }
+    }, 5000);
+
+    // Hide CTA after 8 seconds of being shown
+    const hideTimer = setTimeout(() => {
+      setShowLoginCTA(false);
+    }, 13000);
+
+    return () => {
+      clearTimeout(showTimer);
+      clearTimeout(hideTimer);
+    };
+  }, [token]);
 
   // Close dropdown menus when clicking outside
   useEffect(() => {
@@ -376,12 +407,39 @@ const Navbar = () => {
                     )}
                   </>
                 ) : (
-                  <button
-                    onClick={() => navigate("/login")}
-                    className="px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition-colors text-sm font-medium"
-                  >
-                    Login
-                  </button>
+                  <div className="relative">
+                    <button
+                      onClick={() => navigate("/login")}
+                      className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-slate-200 bg-white text-gray-800 text-sm font-semibold transition-all shadow-sm hover:border-slate-300 hover:bg-slate-50"
+                    >
+                      <FaUserAlt className="w-4 h-4" />
+                      Login
+                    </button>
+
+                    {/* Login CTA */}
+                    {showLoginCTA && (
+                      <div 
+                        ref={loginCTARef}
+                        className="absolute top-[calc(100%+8px)] left-1/2 -translate-x-1/2 z-50"
+                      >
+                        <button
+                          onClick={() => {
+                            navigate("/login");
+                            setShowLoginCTA(false);
+                          }}
+                          className="relative px-4 py-2 bg-gradient-to-r from-red-600 to-red-700 text-white text-xs font-bold rounded-lg shadow-lg hover:shadow-xl transition-all whitespace-nowrap hover:scale-110 animate-cta-bounce-vibrate"
+                        >
+                          <span className="flex items-center gap-2">
+                            <span className="text-sm">✨</span>
+                            Sign in now!
+                            <span className="text-sm">✨</span>
+                          </span>
+                          {/* Arrow pointing up to login button */}
+                          <div className="absolute -top-2 left-1/2 -translate-x-1/2 w-0 h-0 border-l-4 border-r-4 border-b-4 border-l-transparent border-r-transparent border-b-red-700"></div>
+                        </button>
+                      </div>
+                    )}
+                  </div>
                 )}
               </div>
 

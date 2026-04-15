@@ -1,6 +1,11 @@
 import express from "express";
 import cors from "cors";
-import "dotenv/config";
+import dotenv from "dotenv";
+import path from "path";
+import { fileURLToPath } from "url";
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+dotenv.config({ path: path.join(__dirname, '..', '.env') });
 import morgan from "morgan";
 import logger from "./config/logger.js";
 import connectDB from "./config/mongodb.js";
@@ -23,10 +28,6 @@ import reviewRouter from './routes/reviewRoute.js';
 import couponRouter from './routes/couponRoute.js';
 import { createServer } from 'http';
 import { Server } from 'socket.io';
-import path from 'path';
-import { fileURLToPath } from 'url';
-
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 // App Config
 const app = express();
@@ -196,6 +197,7 @@ const startServer = async () => {
     server.listen(port, '0.0.0.0', () => {
       logger.info(`Server started on PORT : ${port}`);
       logger.info(`Environment: ${process.env.NODE_ENV || 'development'}`);
+      logger.info(`Msg91 API configured: ${process.env.MSG91_API_KEY ? 'Yes' : 'No'}`);
     });
 
   } catch (error) {

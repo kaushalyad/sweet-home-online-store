@@ -2,9 +2,12 @@ import express from 'express';
 import { 
   loginUser, 
   registerUser, 
+  checkIdentifierExists,
   adminLogin, 
   verifyToken, 
   refreshToken,
+  sendOtp,
+  verifyOtp,
   getUserProfile, 
   updateUserProfile, 
   listUsers,
@@ -22,8 +25,11 @@ const router = express.Router();
 // Public routes
 router.post('/register', registerUser);
 router.post('/login', loginUser);
+router.post('/check-identifier', checkIdentifierExists);
 router.post('/admin/login', adminLogin);
 router.post('/refresh', refreshToken);
+router.post('/send-otp', sendOtp);
+router.post('/verify-otp', verifyOtp);
 router.post('/forgot-password', forgotPassword);
 router.post('/reset-password', resetPassword);
 

@@ -49,39 +49,36 @@ const Footer = () => {
 
   return (
     <footer className="w-full bg-gray-50 text-gray-700 border-t border-gray-200" role="contentinfo">
-      <div className="w-full bg-gradient-to-br from-pink-600 via-orange-600 to-orange-500 py-14 sm:py-16 relative overflow-hidden">
-        <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGRlZnM+PHBhdHRlcm4gaWQ9ImdyaWQiIHdpZHRoPSI2MCIgaGVpZ2h0PSI2MCIgcGF0dGVyblVuaXRzPSJ1c2VyU3BhY2VPblVzZSI+PHBhdGggZD0iTSAxMCAwIEwgMCAwIDAgMTAiIGZpbGw9Im5vbmUiIHN0cm9rZT0id2hpdGUiIHN0cm9rZS1vcGFjaXR5PSIwLjA1IiBzdHJva2Utd2lkdGg9IjEiLz48L3BhdHRlcm4+PC9kZWZzPjxyZWN0IHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiIGZpbGw9InVybCgjZ3JpZCkiLz48L3N2Zz4=')] opacity-50"></div>
-        <div className="container mx-auto px-4 relative z-10">
-          <div className="max-w-4xl mx-auto text-center">
-            <h3 className="font-poppins text-3xl sm:text-4xl font-extrabold text-white mb-3">
-              Stay Sweet & Updated!
+      <div className="w-full bg-gradient-to-br from-orange-500 via-orange-500 to-orange-600 py-12 sm:py-14">
+        <div className="container mx-auto px-4">
+          <div className="max-w-3xl mx-auto rounded-[32px] bg-white/95 border border-white/60 shadow-[0_35px_80px_rgba(15,23,42,0.12)] py-10 px-6 sm:px-8 text-center">
+            <h3 className="font-poppins text-3xl sm:text-4xl font-extrabold text-slate-900 mb-3">
+              Stay Sweet & Updated
             </h3>
-            <p className="font-inter text-white/90 text-base sm:text-lg mb-7">
-              Get exclusive offers, new arrivals, and sweet surprises in your inbox
+            <p className="text-slate-600 text-base sm:text-lg mb-7 max-w-2xl mx-auto">
+              Get exclusive offers, festive deals, and sweet surprises straight to your inbox.
             </p>
 
             <form onSubmit={handleNewsletterSubmit} className="max-w-2xl mx-auto">
-              <div className="p-2 sm:p-2.5 rounded-2xl bg-white/15 border border-white/25 backdrop-blur-sm shadow-strong">
-                <div className="flex flex-col sm:flex-row gap-2.5">
-                  <input
-                    type="email"
-                    placeholder="Enter your email address"
-                    className="newsletter-input font-inter flex-1 px-5 py-3.5 rounded-xl bg-white border border-white/40 text-gray-900 placeholder:text-gray-500 appearance-none transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-white/60 focus:border-transparent"
-                    value={newsletterEmail}
-                    onChange={(e) => setNewsletterEmail(e.target.value)}
-                    required
-                  />
-                  <button
-                    type="submit"
-                    disabled={newsletterLoading}
-                    className="btn-interactive font-semibold px-7 py-3.5 bg-gray-900 text-white rounded-xl hover:bg-black transition-all shadow-md disabled:opacity-50 disabled:cursor-not-allowed relative z-10"
-                  >
-                    <span className="relative z-10">{newsletterLoading ? "Subscribing..." : "Subscribe"}</span>
-                  </button>
-                </div>
+              <div className="flex flex-col sm:flex-row items-center gap-3 bg-slate-100 rounded-[28px] p-1 shadow-sm">
+                <input
+                  type="email"
+                  placeholder="Enter your email address"
+                  className="font-inter flex-1 min-w-0 rounded-[24px] border border-slate-200 bg-white px-5 py-4 text-slate-900 placeholder:text-slate-500 outline-none transition-all duration-300 focus:border-orange-400 focus:ring-2 focus:ring-orange-200"
+                  value={newsletterEmail}
+                  onChange={(e) => setNewsletterEmail(e.target.value)}
+                  required
+                />
+                <button
+                  type="submit"
+                  disabled={newsletterLoading}
+                  className="inline-flex items-center justify-center rounded-[24px] bg-orange-600 px-8 py-4 text-sm font-semibold text-white transition-colors duration-300 hover:bg-orange-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {newsletterLoading ? "Subscribing..." : "Subscribe"}
+                </button>
               </div>
             </form>
-            <p className="text-white/75 text-xs mt-4">No spam, just sweet updates. Unsubscribe anytime.</p>
+            <p className="text-slate-500 text-sm mt-4">No spam, just sweet updates. Unsubscribe anytime.</p>
           </div>
         </div>
       </div>

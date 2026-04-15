@@ -26,11 +26,13 @@ const protect = async (req, res, next) => {
       // Add user info from token to request object
       req.user = {
         id: decoded.id,
-        email: decoded.email,
-        role: decoded.role
+        email: decoded.email || undefined,
+        role: decoded.role || undefined
       };
 
-      logger.info(`User authenticated: ${decoded.email} (${decoded.role})`);
+      const emailLog = decoded.email ? decoded.email : 'unknown';
+      const roleLog = decoded.role ? decoded.role : 'unknown';
+      logger.info(`User authenticated: ${emailLog} (${roleLog})`);
       next();
     } catch (error) {
       logger.error(`Token verification error: ${error.message}`);

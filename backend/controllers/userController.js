@@ -4,14 +4,20 @@ import jwt from "jsonwebtoken";
 import crypto from "crypto";
 import userModel from "../models/userModel.js";
 import logger from "../config/logger.js";
-import { sendAdminNewCustomerNotification } from "../utils/emailService.js";
+import { sendAdminNewCustomerNotification, sendEmail } from "../utils/emailService.js";
+import axios from "axios";
 
-const createToken = (id) => {
+const createToken = (payload) => {
   try {
     if (!process.env.JWT_SECRET) {
       throw new Error("JWT_SECRET is not defined in environment variables");
     }
-    return jwt.sign({ id }, process.env.JWT_SECRET, {
+
+    const tokenPayload = typeof payload === 'string' || typeof payload === 'number'
+      ? { id: payload }
+      : { ...payload };
+
+    return jwt.sign(tokenPayload, process.env.JWT_SECRET, {
       expiresIn: '30d' // Token expires in 30 days
     });
   } catch (error) {
@@ -20,37 +26,300 @@ const createToken = (id) => {
   }
 };
 
+const generateOtpCode = () => {
+  return Math.floor(100000 + Math.random() * 900000).toString();
+};
+
+const normalizePhoneDigits = (raw) => {
+  let phone = String(raw || "").trim();
+  
+  // Remove +91 prefix if present
+  if (phone.startsWith('+91')) {
+    phone = phone.slice(3);
+  }
+  
+  // Remove all non-digits
+  let digits = phone.replace(/\D/g, "");
+  
+  // Handle leading 0 for 11-digit numbers (after removing +91)
+  if (digits.length === 11 && digits.startsWith("0")) {
+    digits = digits.slice(1);
+  }
+  // Handle 91 prefix for 12-digit numbers
+  if (digits.length === 12 && digits.startsWith("91")) {
+    digits = digits.slice(2);
+  }
+  
+  return digits.length === 10 ? digits : null;
+};
+
+const normalizeIdentifier = (identifier) => {
+  const raw = String(identifier || "").trim();
+  const email = validator.isEmail(raw) ? raw.toLowerCase() : null;
+  const phone = normalizePhoneDigits(raw);
+  return { raw, email, phone };
+};
+
+const buildIdentifierQuery = (email, phone) => {
+  const conditions = [];
+  if (email) conditions.push({ email });
+  if (phone) conditions.push({ phone });
+  return conditions.length ? { $or: conditions } : null;
+};
+
+const sendSmsViaMsg91 = async (phoneNumber, otpMessage) => {
+  try {
+    // Normalize phone number to remove country codes
+    let formattedPhone = String(phoneNumber).trim();
+    
+    // Remove +91 prefix if present
+    if (formattedPhone.startsWith('+91')) {
+      formattedPhone = formattedPhone.slice(3);
+    }
+    // Remove 91 prefix for 12-digit numbers
+    if (formattedPhone.length === 12 && formattedPhone.startsWith('91')) {
+      formattedPhone = formattedPhone.slice(2);
+    }
+    // Remove any remaining non-digits
+    formattedPhone = formattedPhone.replace(/\D/g, '');
+    
+    // Ensure it's 10 digits
+    if (formattedPhone.length !== 10) {
+      throw new Error(`Invalid phone number format: ${phoneNumber}`);
+    }
+
+    // Using MSG91 v5 OTP API with template
+    const url = 'https://api.msg91.com/api/v5/otp';
+    
+    const headers = {
+      'Content-Type': 'application/json',
+      'authkey': process.env.MSG91_API_KEY
+    };
+
+    // Extract OTP code from message (format: "123456 is your OTP...")
+    const otpCode = otpMessage.split(' ')[0];
+
+    // MSG91 v5 OTP API with template
+    const data = {
+      mobile: formattedPhone,
+      otp: otpCode,
+      template_id: process.env.MSG91_TEMPLATE_ID || ''
+    };
+
+    logger.info('Sending OTP via MSG91 v5 API with template', {
+      url,
+      mobile: formattedPhone,
+      templateId: process.env.MSG91_TEMPLATE_ID,
+      otpLength: otpCode.length
+    });
+
+    const response = await axios.post(url, data, { headers });
+
+    logger.info('MSG91 v5 API response received', {
+      status: response.status,
+      responseData: JSON.stringify(response.data)
+    });
+
+    // MSG91 v5 API returns success with type: "success" or request_id
+    if (response.status === 200 && (response.data.type === 'success' || response.data.request_id)) {
+      logger.info('OTP sent successfully via MSG91 v5 API', {
+        requestId: response.data.request_id,
+        message: response.data.message,
+        templateId: process.env.MSG91_TEMPLATE_ID
+      });
+      return response;
+    } else {
+      const message = response.data.message || JSON.stringify(response.data);
+      const error = new Error(`MSG91 v5 API error: ${message}`);
+      error.response = { status: response.status, data: response.data };
+      throw error;
+    }
+  } catch (error) {
+    logger.error(`MSG91 v5 API failed: ${error.message}`, {
+      status: error.response?.status,
+      data: error.response?.data,
+      stack: error.stack
+    });
+    throw error;
+  }
+};
+
+const dispatchOtpToUser = async (user) => {
+  const otpCode = generateOtpCode();
+  user.otpCode = otpCode;
+  user.otpExpires = Date.now() + 10 * 60 * 1000; // 10 minutes
+  await user.save();
+
+  let emailSentTo;
+  let phoneSentTo;
+  const deliveryErrors = [];
+
+  // PRIORITY 1: Try SMS/Mobile OTP first (like Flipkart)
+  if (user.phone) {
+    try {
+      if (!process.env.MSG91_API_KEY) {
+        throw new Error("MSG91_API_KEY is not configured");
+      }
+      const phoneNumber = user.phone;
+      const otpMessage = `${otpCode} is your OTP. Valid for 10 minutes.`;
+      
+      logger.info(`[PRIORITY SMS] Sending registration OTP SMS to ${phoneNumber} with message: ${otpMessage}`);
+      
+      const response = await sendSmsViaMsg91(phoneNumber, otpMessage);
+      
+      logger.info(`OTP SMS sent successfully to ${user.phone}`, { 
+        response: JSON.stringify(response.data),
+        status: response.status
+      });
+      phoneSentTo = user.phone;
+    } catch (error) {
+      const smsErrorMessage = error.response?.data?.message || error.response?.data?.error || error.message || "Msg91 request failed";
+      logger.warn(`SMS delivery failed for registration, will try email fallback: ${smsErrorMessage}`);
+      deliveryErrors.push(`sms: ${smsErrorMessage}`);
+      // Continue to try email as fallback
+    }
+  }
+
+  // FALLBACK: Try email if SMS failed or no phone number
+  if (!phoneSentTo && user.email) {
+    try {
+      logger.info(`[FALLBACK EMAIL] Sending registration OTP email to ${user.email}`);
+      await sendEmail({
+        to: user.email,
+        subject: "Your Sweet Home verification OTP",
+        html: `
+          <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+            <h2 style="color: #2874f0;">Sweet Home Store</h2>
+            <p>Your registration OTP is <strong>${otpCode}</strong>.</p>
+            <p>This code is valid for 10 minutes.</p>
+            <p style="color: #666; font-size: 12px;">(Sent via email as SMS delivery failed)</p>
+          </div>`
+      });
+      emailSentTo = user.email;
+      logger.info(`OTP sent successfully via email to ${user.email}`);
+    } catch (error) {
+      logger.error(`Failed to send OTP email to ${user.email}: ${error.message}`, { stack: error.stack });
+      deliveryErrors.push(`email: ${error.message}`);
+    }
+  }
+
+  return {
+    emailSentTo,
+    phoneSentTo,
+    deliveryErrors
+  };
+};
+
+// Check if identifier (email or phone) already exists
+const checkIdentifierExists = async (req, res) => {
+  try {
+    const { identifier } = req.body;
+
+    if (!identifier) {
+      return res.status(400).json({
+        success: false,
+        message: "Please provide an email or mobile number"
+      });
+    }
+
+    const { email, phone } = normalizeIdentifier(identifier);
+
+    if (!email && !phone) {
+      return res.status(400).json({
+        success: false,
+        message: "Please enter a valid email address or 10-digit mobile number"
+      });
+    }
+
+    const userQuery = buildIdentifierQuery(email, phone);
+    const existingUser = await userModel.findOne(userQuery);
+
+    if (existingUser) {
+      return res.status(200).json({
+        success: true,
+        exists: true,
+        identifier: existingUser.email || existingUser.phone,
+        email: existingUser.email,
+        phone: existingUser.phone,
+        message: existingUser.email === email ? 
+          "Email already registered" : 
+          "Phone number already registered"
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      exists: false,
+      message: "Identifier is available"
+    });
+  } catch (error) {
+    logger.error(`checkIdentifierExists error: ${error.message}`);
+    res.status(500).json({
+      success: false,
+      message: "Error checking identifier"
+    });
+  }
+};
+
 // Register user
 const registerUser = async (req, res) => {
   try {
-    const { name, email, password, phone } = req.body;
+    const { name, identifier, password, email: bodyEmail, phone: bodyPhone } = req.body;
+
+    let email = null;
+    let phone = null;
+
+    if (identifier) {
+      const normalized = normalizeIdentifier(identifier);
+      email = normalized.email;
+      phone = normalized.phone;
+    }
+
+    if (bodyEmail) {
+      const emailCandidate = String(bodyEmail || "").trim().toLowerCase();
+      if (!validator.isEmail(emailCandidate)) {
+        return res.status(400).json({
+          success: false,
+          message: "Please enter a valid email address"
+        });
+      }
+      email = emailCandidate;
+    }
+
+    if (bodyPhone) {
+      const normalizedPhone = normalizePhoneDigits(bodyPhone);
+      if (!normalizedPhone) {
+        return res.status(400).json({
+          success: false,
+          message: "Please enter a valid 10-digit mobile number"
+        });
+      }
+      phone = normalizedPhone;
+    }
 
     // Validate input
-    if (!name || !email || !password || !phone) {
+    if (!identifier && !bodyEmail && !bodyPhone) {
       return res.status(400).json({
         success: false,
-        message: "Please provide all required fields"
+        message: "Please provide your email or mobile number"
       });
     }
 
-    // Validate email format
-    if (!validator.isEmail(email)) {
+    if (!email && !phone) {
       return res.status(400).json({
         success: false,
-        message: "Please enter a valid email address"
+        message: "Please enter a valid email address or 10-digit mobile number"
       });
     }
 
-    // Validate phone number (Indian format)
-    if (!validator.matches(phone, /^[6-9]\d{9}$/)) {
+    if (email && !phone) {
       return res.status(400).json({
         success: false,
-        message: "Please enter a valid Indian phone number"
+        message: "Please provide a mobile number to complete registration"
       });
     }
 
-    // Validate password strength
-    if (password.length < 8) {
+    if (password && password.length < 8) {
       return res.status(400).json({
         success: false,
         message: "Password must be at least 8 characters long"
@@ -58,38 +327,49 @@ const registerUser = async (req, res) => {
     }
 
     // Check if user already exists
-    const existingUser = await userModel.findOne({
-      $or: [{ email }, { phone }]
-    });
+    const existingUserQuery = buildIdentifierQuery(email, phone);
+    const existingUser = await userModel.findOne(existingUserQuery);
 
     if (existingUser) {
+      let conflictMessage = "User already registered";
+      if (email && existingUser.email === email) {
+        conflictMessage = "Email already registered";
+      } else if (phone && existingUser.phone === phone) {
+        conflictMessage = "Phone number already registered";
+      }
       return res.status(400).json({
         success: false,
-        message: existingUser.email === email ? 
-          "Email already registered" : 
-          "Phone number already registered"
+        message: conflictMessage
       });
     }
 
-    // Hash password
+    const userPassword = password || crypto.randomBytes(16).toString('hex');
     const salt = await bcrypt.genSalt(10);
-    const hashedPassword = await bcrypt.hash(password, salt);
+    const hashedPassword = await bcrypt.hash(userPassword, salt);
 
     // Create new user
-    const user = await userModel.create({
-      name,
-      email,
+    const userData = {
+      name: name || "User", // Default name if not provided
       password: hashedPassword,
-      phone,
       isEmailVerified: false,
       isPhoneVerified: false
-    });
+    };
+    if (email) userData.email = email;
+    if (phone) userData.phone = phone;
 
-    // Generate token
-    const token = createToken(user._id);
+    const user = await userModel.create(userData);
+
+    const otpTargets = await dispatchOtpToUser(user);
+
+    if (!otpTargets.emailSentTo && !otpTargets.phoneSentTo) {
+      return res.status(500).json({
+        success: false,
+        message: `Failed to send OTP. ${otpTargets.deliveryErrors.join(' | ')}`
+      });
+    }
 
     sendAdminNewCustomerNotification({
-      name: user.name,
+      name: user.name || "New User",
       email: user.email,
       phone: user.phone,
     }).catch((err) =>
@@ -98,14 +378,13 @@ const registerUser = async (req, res) => {
 
     res.status(201).json({
       success: true,
-      message: "Registration successful",
-      token,
-      user: {
-        id: user._id,
-        name: user.name,
-        email: user.email,
-        phone: user.phone
-      }
+      message: otpTargets.phoneSentTo 
+        ? "Registration successful. OTP sent to your mobile number." 
+        : "Registration successful. OTP sent to your email.",
+      identifier: user.email || user.phone,
+      emailSentTo: otpTargets.emailSentTo,
+      phoneSentTo: otpTargets.phoneSentTo,
+      otpSentVia: otpTargets.phoneSentTo ? 'sms' : 'email'
     });
 
   } catch (error) {
@@ -159,7 +438,7 @@ const loginUser = async (req, res) => {
     await user.save();
 
     // Generate token
-    const token = createToken(user._id);
+    const token = createToken({ id: user._id, email: user.email, role: user.role });
 
     res.json({
       success: true,
@@ -180,6 +459,186 @@ const loginUser = async (req, res) => {
     res.status(500).json({
       success: false,
       message: "Login failed. Please try again."
+    });
+  }
+};
+
+// Send OTP for login
+const sendOtp = async (req, res) => {
+  try {
+    const { identifier } = req.body;
+    const { email, phone } = normalizeIdentifier(identifier);
+
+    logger.info(`sendOtp - Normalized input: email=${email}, phone=${phone}`);
+
+    if (!email && !phone) {
+      return res.status(400).json({
+        success: false,
+        message: "Please enter a valid email or 10-digit mobile number"
+      });
+    }
+
+    const userQuery = buildIdentifierQuery(email, phone);
+    const user = await userModel.findOne(userQuery);
+
+    if (user) {
+      logger.info(`sendOtp - Found user: email=${user.email}, phone=${user.phone}`);
+    }
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "No account found for that email or mobile number. Please register first."
+      });
+    }
+
+    const otpCode = generateOtpCode();
+    user.otpCode = otpCode;
+    user.otpExpires = Date.now() + 10 * 60 * 1000; // 10 minutes
+    await user.save();
+
+    let delivered = false;
+    let deliveryError = null;
+    let sentVia = null;
+
+    // PRIORITY 1: Try SMS/Mobile OTP first (like Flipkart)
+    if (user.phone) {
+      try {
+        if (!process.env.MSG91_API_KEY) {
+          throw new Error("MSG91_API_KEY is not configured");
+        }
+        const phoneNumber = user.phone;
+        const otpMessage = `${otpCode} is your OTP. Valid for 10 minutes.`;
+        
+        logger.info(`[PRIORITY SMS] Sending OTP SMS to ${phoneNumber} with message: ${otpMessage}`);
+        
+        const response = await sendSmsViaMsg91(phoneNumber, otpMessage);
+        
+        logger.info(`OTP SMS sent successfully to ${user.phone}`, { 
+          response: JSON.stringify(response.data),
+          status: response.status
+        });
+        delivered = true;
+        sentVia = 'sms';
+      } catch (error) {
+        const smsErrorMessage = error.response?.data?.message || error.response?.data?.error || error.message || "SMS delivery failed";
+        logger.warn(`SMS delivery failed, will try email fallback: ${smsErrorMessage}`);
+        deliveryError = smsErrorMessage;
+        // Fall through to try email as fallback
+      }
+    }
+
+    // FALLBACK: Try email if SMS failed or no phone number
+    if (!delivered && user.email) {
+      try {
+        logger.info(`[FALLBACK EMAIL] Sending OTP email to ${user.email}`);
+        await sendEmail({
+          to: user.email,
+          subject: "Your Sweet Home OTP",
+          html: `
+            <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+              <h2 style="color: #2874f0;">Sweet Home Store</h2>
+              <p>Your login OTP is <strong>${otpCode}</strong>.</p>
+              <p>This code is valid for 10 minutes.</p>
+              <p style="color: #666; font-size: 12px;">(Sent via email as SMS delivery failed)</p>
+            </div>`
+        });
+        delivered = true;
+        sentVia = 'email';
+        logger.info(`OTP sent successfully via email to ${user.email}`);
+      } catch (error) {
+        logger.error(`Failed to send OTP email to ${user.email}: ${error.message}`, { stack: error.stack });
+        deliveryError = `Email: ${error.message}. SMS: ${deliveryError}`;
+      }
+    }
+
+    if (!delivered) {
+      return res.status(500).json({
+        success: false,
+        message: `Failed to send OTP. ${deliveryError || "Please check your email or mobile number and try again."}`
+      });
+    }
+
+    res.json({
+      success: true,
+      message: sentVia === 'sms' 
+        ? "OTP sent to your mobile number. Please enter it within 10 minutes." 
+        : "OTP sent to your email. Please enter it within 10 minutes.",
+      sentVia: sentVia,
+      emailSentTo: sentVia === 'email' ? user.email : undefined,
+      phoneSentTo: sentVia === 'sms' ? user.phone : undefined
+    });
+  } catch (error) {
+    logger.error(`Send OTP error: ${error.message}`, { stack: error.stack });
+    res.status(500).json({
+      success: false,
+      message: "Failed to send OTP. Please try again."
+    });
+  }
+};
+
+const verifyOtp = async (req, res) => {
+  try {
+    const { identifier, otp } = req.body;
+    const { email, phone } = normalizeIdentifier(identifier);
+
+    if (!email && !phone) {
+      return res.status(400).json({
+        success: false,
+        message: "Please enter a valid email or 10-digit mobile number"
+      });
+    }
+
+    if (!otp || !/^\d{6}$/.test(String(otp))) {
+      return res.status(400).json({
+        success: false,
+        message: "Please enter the 6-digit OTP"
+      });
+    }
+
+    const userQuery = buildIdentifierQuery(email, phone);
+    const user = await userModel.findOne(userQuery);
+
+    if (!user || !user.otpCode || !user.otpExpires) {
+      return res.status(401).json({
+        success: false,
+        message: "Invalid or expired OTP. Please request a new OTP."
+      });
+    }
+
+    if (user.otpCode !== String(otp).trim() || user.otpExpires < Date.now()) {
+      return res.status(401).json({
+        success: false,
+        message: "Invalid or expired OTP. Please request a new OTP."
+      });
+    }
+
+    user.otpCode = undefined;
+    user.otpExpires = undefined;
+    if (email) user.isEmailVerified = true;
+    if (phone) user.isPhoneVerified = true;
+    user.lastLogin = new Date();
+    await user.save();
+
+    const token = createToken({ id: user._id, email: user.email, role: user.role });
+    res.json({
+      success: true,
+      message: "Login successful",
+      token,
+      user: {
+        id: user._id,
+        name: user.name,
+        email: user.email,
+        phone: user.phone,
+        isEmailVerified: user.isEmailVerified,
+        isPhoneVerified: user.isPhoneVerified
+      }
+    });
+  } catch (error) {
+    logger.error(`Verify OTP error: ${error.message}`);
+    res.status(500).json({
+      success: false,
+      message: "OTP verification failed. Please try again."
     });
   }
 };
@@ -264,7 +723,7 @@ const refreshToken = async (req, res) => {
     }
 
     // Create new token
-    const token = createToken(user._id);
+    const token = createToken({ id: user._id, email: user.email, role: user.role });
 
     // Update last login time
     user.lastLogin = new Date();
@@ -344,7 +803,7 @@ const adminLogin = async (req, res) => {
     }
 
     // Create token with proper ObjectId
-    const token = createToken(adminUser._id);
+    const token = createToken({ id: adminUser._id, email: adminUser.email, role: adminUser.role });
     console.log('Login successful:', { 
       email, 
       userId: adminUser._id,
@@ -844,6 +1303,9 @@ const verifyAdmin = async (req, res) => {
 export {
   registerUser,
   loginUser,
+  checkIdentifierExists,
+  sendOtp,
+  verifyOtp,
   verifyToken,
   refreshToken,
   adminLogin,

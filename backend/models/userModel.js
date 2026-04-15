@@ -2,14 +2,17 @@ import mongoose from "mongoose";
 
 const userSchema = new mongoose.Schema({
     name: { type: String, required: true },
-    email: { type: String, required: true, unique: true },
+    email: { type: String, unique: true, sparse: true },
     password: { type: String, required: true },
-    phone: { type: String, default: '' },
+    phone: { type: String, unique: true, sparse: true },
     address: { type: String, default: '' },
     role: { type: String, enum: ['user', 'admin'], default: 'user' },
     createdAt: { type: Date, default: Date.now },
+    lastLogin: { type: Date },
     isEmailVerified: { type: Boolean, default: false },
     isPhoneVerified: { type: Boolean, default: false },
+    otpCode: String,
+    otpExpires: Date,
     notificationSettings: {
         orderUpdates: { type: Boolean, default: true },
         promotionalOffers: { type: Boolean, default: true },

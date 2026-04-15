@@ -81,15 +81,19 @@ const connectDB = async () => {
 
           // If SRV is blocked, fall back to DoH SRV resolution and retry using a seedlist URI.
           if (isSrv && isSrvDnsIssue) {
-            const u = new URL(process.env.MONGODB_URI);
-            const seedHosts = await resolveAtlasSrvViaDoh(u.hostname);
-            if (!seedHosts.length) throw error;
-
-            const seedUri = buildSeedlistUriFromSrv(process.env.MONGODB_URI, seedHosts);
-            logger.warn(`Atlas SRV DNS blocked; retrying MongoDB connection via seedlist (${seedHosts.length} hosts).`);
-            const conn2 = await mongoose.connect(seedUri);
-            logger.info(`MongoDB Connected: ${conn2.connection.host}`);
-            return conn2;
+            try {
+              const u = new URL(process.env.MONGODB_URI);
+              const seedHosts = await resolveAtlasSrvViaDoh(u.hostname);
+              if (seedHosts.length > 0) {
+                const seedUri = buildSeedlistUriFromSrv(process.env.MONGODB_URI, seedHosts);
+                logger.warn(`Atlas SRV DNS blocked; retrying MongoDB connection via seedlist (${seedHosts.length} hosts).`);
+                const conn2 = await mongoose.connect(seedUri);
+                logger.info(`MongoDB Connected: ${conn2.connection.host}`);
+                return conn2;
+              }
+            } catch (dohError) {
+              logger.warn(`DoH fallback also failed: ${dohError.message}. Throwing original error.`);
+            }
           }
 
           throw error;

@@ -22,7 +22,7 @@ const Home = () => {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 0.8 }}
-        className="w-screen relative left-1/2 right-1/2 -ml-[50vw] -mr-[50vw] -mt-6 sm:-mt-6 md:-mt-0"
+        className="relative w-full overflow-hidden"
       >
         <ImageCarousel />
       </motion.div>
@@ -122,74 +122,76 @@ const Home = () => {
         transition={{ duration: 0.6 }}
         className="container mx-auto sm:px-4 py-12 sm:py-16"
       >
-        <div className="relative overflow-hidden rounded-3xl border border-orange-100 bg-gradient-to-r from-orange-500 via-rose-500 to-pink-500 px-6 py-10 sm:px-8 sm:py-12 lg:px-12 lg:py-14 shadow-strong">
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_20%,rgba(255,255,255,0.22),transparent_35%),radial-gradient(circle_at_80%_80%,rgba(255,255,255,0.15),transparent_40%)]"></div>
+        <div className="relative overflow-hidden rounded-[32px] border border-orange-200 bg-gradient-to-r from-orange-500 via-orange-500 to-fuchsia-600 px-6 py-10 sm:px-10 sm:py-12 lg:px-14 lg:py-16 shadow-strong">
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(255,255,255,0.22),transparent_28%),radial-gradient(circle_at_bottom_right,rgba(255,255,255,0.15),transparent_36%)] pointer-events-none"></div>
 
-          <div className="relative z-10 grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-10 items-center">
+          <div className="relative z-10 grid grid-cols-1 lg:grid-cols-[1.4fr_1fr] gap-10 items-center">
             <div className="max-w-2xl">
-              <div className="inline-flex items-center gap-2 mb-4 px-4 py-1.5 rounded-full bg-white/20 border border-white/30 text-white text-sm font-semibold backdrop-blur-sm">
-                <FaGift className="text-xs" />
+              <div className="inline-flex items-center gap-2 rounded-full border border-white/25 bg-white/10 px-4 py-2 text-sm font-semibold text-white shadow-sm backdrop-blur-sm">
+                <FaGift className="text-xs text-yellow-100" />
                 Limited Time Festive Offers
               </div>
 
-              <h2 className="font-poppins text-3xl sm:text-4xl lg:text-5xl font-extrabold text-white leading-tight mb-4">
+              <h2 className="mt-6 text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight text-white">
                 Festival Special
                 <span className="block text-yellow-100">Sweet Boxes</span>
               </h2>
 
-              <p className="text-white/90 text-base sm:text-lg lg:text-xl mb-7 max-w-xl leading-relaxed">
+              <p className="mt-5 max-w-xl text-base sm:text-lg leading-8 text-white/90">
                 Make celebrations memorable with handcrafted gift packs made fresh every day. Ideal for family, friends, and corporate gifting.
               </p>
 
-              <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
+              <div className="mt-8 flex flex-col gap-4 sm:flex-row sm:items-center">
                 <Link
                   to="/collection?category=festive"
-                  className="inline-flex items-center justify-center px-7 py-3.5 bg-white text-pink-600 rounded-full font-semibold hover:bg-pink-50 transition-colors duration-300"
+                  className="inline-flex items-center justify-center rounded-full bg-white px-8 py-3 text-sm font-semibold text-pink-600 shadow-lg shadow-white/15 transition-all duration-300 hover:-translate-y-0.5 hover:bg-white/90"
                 >
                   Explore Festival Specials
                   <FaArrowRight className="ml-2" />
                 </Link>
                 <Link
                   to="/collection"
-                  className="inline-flex items-center justify-center px-7 py-3.5 border border-white/60 text-white rounded-full font-semibold hover:bg-white/15 transition-colors duration-300"
+                  className="inline-flex items-center justify-center rounded-full border border-white/50 bg-white/10 px-8 py-3 text-sm font-semibold text-white transition-all duration-300 hover:bg-white/20"
                 >
                   Browse All Products
                 </Link>
               </div>
             </div>
 
-            <div className="relative">
-              <div className="rounded-3xl border border-white/30 bg-white/15 backdrop-blur-md p-4 sm:p-5 shadow-medium">
-                <div className="rounded-2xl overflow-hidden border border-white/30 bg-white/20">
-                  <img
-                    src={assets.category_gift_boxes}
-                    alt="Festive sweet gift boxes"
-                    className="w-full h-52 sm:h-64 object-cover"
-                    loading="lazy"
-                  />
+            <div className="space-y-4">
+              <div className="overflow-hidden rounded-[32px] border border-white/20 bg-white/10 shadow-[0_30px_80px_rgba(15,23,42,0.12)] backdrop-blur-xl">
+                <img
+                  src={assets.festive}
+                  alt="Festive sweet gift boxes"
+                  className="w-full h-72 sm:h-80 object-cover"
+                  loading="lazy"
+                />
+                <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-slate-950/90 via-slate-950/20 to-transparent px-5 py-4">
+                  <p className="text-xs uppercase tracking-[0.28em] text-slate-200 opacity-90">Festive special</p>
+                  <h3 className="mt-2 text-lg sm:text-xl font-semibold text-white">Deluxe Festival Gift Box</h3>
                 </div>
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 mt-3">
-                  <div className="rounded-xl bg-white/85 text-gray-900 px-3 py-2 text-xs sm:text-sm font-semibold flex items-center justify-center gap-2">
-                    <FaStar className="text-amber-500" />
-                    Premium Quality
-                  </div>
-                  <div className="rounded-xl bg-white/85 text-gray-900 px-3 py-2 text-xs sm:text-sm font-semibold flex items-center justify-center gap-2">
-                    <FaGift className="text-pink-500" />
-                    Gift Ready Packs
-                  </div>
-                  <div className="rounded-xl bg-white/85 text-gray-900 px-3 py-2 text-xs sm:text-sm font-semibold flex items-center justify-center gap-2">
-                    <FaShippingFast className="text-emerald-500" />
-                    Fast Delivery
-                  </div>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                <div className="rounded-2xl bg-white/95 px-4 py-3 text-center text-sm font-semibold text-slate-900 shadow-sm">
+                  Premium Quality
+                </div>
+                <div className="rounded-2xl bg-white/95 px-4 py-3 text-center text-sm font-semibold text-slate-900 shadow-sm">
+                  Gift Ready Packs
+                </div>
+                <div className="rounded-2xl bg-white/95 px-4 py-3 text-center text-sm font-semibold text-slate-900 shadow-sm">
+                  Fast Delivery
                 </div>
               </div>
             </div>
           </div>
 
-          {/* Decorative circles */}
-          <div className="absolute top-0 right-0 w-96 h-96 bg-white rounded-full opacity-10 transform translate-x-1/3 -translate-y-1/3"></div>
-          <div className="absolute bottom-0 right-0 w-56 h-56 bg-white rounded-full opacity-10 transform translate-x-1/4 translate-y-1/4"></div>
-          <div className="absolute -bottom-8 left-16 w-28 h-28 bg-yellow-200 rounded-full opacity-20 blur-xl"></div>
+          <div className="pointer-events-none absolute -right-16 top-10 hidden xl:block">
+            <div className="h-48 w-48 rounded-full bg-white/10 blur-3xl" />
+          </div>
+          <div className="pointer-events-none absolute bottom-8 left-8 hidden xl:block">
+            <div className="h-24 w-24 rounded-full bg-yellow-200/30 blur-2xl" />
+          </div>
         </div>
       </motion.div>
 

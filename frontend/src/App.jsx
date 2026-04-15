@@ -6,7 +6,8 @@ import SearchBar from './components/SearchBar'
 import CookieConsent from './components/CookieConsent'
 import CookieDebug from './components/CookieDebug'
 import WhatsAppButton from './components/WhatsAppButton'
-import WelcomeBanner from './components/WelcomeBanner'
+import FirstVisitWelcomeModal from './components/FirstVisitWelcomeModal'
+import HelpChat from './components/HelpChat'
 import Loader from './components/Loader'
 import { ToastContainer } from 'react-toastify'
 import 'react-toastify/dist/ReactToastify.css'
@@ -21,8 +22,7 @@ const About = lazy(() => import('./pages/About'))
 const Contact = lazy(() => import('./pages/Contact'))
 const Product = lazy(() => import('./pages/Product'))
 const Cart = lazy(() => import('./pages/Cart'))
-const Login = lazy(() => import('./pages/Login'))
-const Register = lazy(() => import('./pages/Register'))
+const Auth = lazy(() => import('./pages/Auth'))
 const ForgotPassword = lazy(() => import('./pages/ForgotPassword'))
 const ResetPassword = lazy(() => import('./pages/ResetPassword'))
 const PlaceOrder = lazy(() => import('./pages/PlaceOrder'))
@@ -36,6 +36,7 @@ const SharedContent = lazy(() => import('./pages/SharedContent'))
 const CookiePolicy = lazy(() => import('./pages/CookiePolicy'))
 const CookieSettings = lazy(() => import('./pages/CookieSettings'))
 const Verify = lazy(() => import('./pages/Verify'))
+const VerifyAccount = lazy(() => import('./pages/VerifyAccount'))
 
 export { backendUrl } from './config'
 
@@ -118,10 +119,11 @@ const App = () => {
           pauseOnHover
           limit={2}
           theme="light"
+          style={{ zIndex: 11000 }}
         />
         <CookieConsent />
         <CookieDebug />
-        <WelcomeBanner />
+        <FirstVisitWelcomeModal />
         <Navbar />
         <div 
           className='transition-all duration-300 min-h-[calc(100vh-140px)] w-full'
@@ -142,10 +144,11 @@ const App = () => {
               <Route path='/contact' element={<Contact />} />
               <Route path='/product/:productId' element={<Product />} />
               <Route path='/cart' element={<Cart />} />
-              <Route path='/login' element={<Login />} />
-              <Route path='/register' element={<Register />} />
+              <Route path='/login' element={<Auth />} />
+              <Route path='/register' element={<Auth />} />
               <Route path='/forgot-password' element={<ForgotPassword />} />
               <Route path='/reset-password' element={<ResetPassword />} />
+              <Route path='/verify-account' element={<VerifyAccount />} />
               <Route path='/place-order' element={<ProtectedRoute element={<PlaceOrder />} />} />
               <Route path='/orders' element={<ProtectedRoute element={<Orders />} />} />
               <Route path='/track-order/:orderId' element={<ProtectedRoute element={<TrackOrder />} />} />
@@ -168,6 +171,7 @@ const App = () => {
         </div>
       </div>
       <WhatsAppButton />
+      <HelpChat />
     </ShopContextProvider>
   )
 }

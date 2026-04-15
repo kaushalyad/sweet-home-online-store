@@ -12,6 +12,7 @@ const ImageCarousel = () => {
     assets.hero3,
     assets.hero4,
     assets.hero5,
+    assets.hero6,
   ];
 
   // Auto-play carousel
@@ -41,13 +42,14 @@ const ImageCarousel = () => {
 
   return (
     <div 
-      className="relative w-full min-w-full h-[240px] sm:h-[340px] md:h-[460px] lg:h-[580px] xl:h-[640px] overflow-hidden bg-gradient-to-b from-orange-50 to-white"
+      className="relative w-full max-w-full overflow-hidden bg-gradient-to-b from-orange-50 to-white"
     >
-      {/* Images */}
-      <div 
-        className="flex transition-transform duration-700 ease-in-out h-full"
-        style={{ transform: `translateX(-${currentIndex * 100}%)` }}
-      >
+      <div className="h-[220px] sm:h-[280px] md:h-[380px] lg:h-[500px] xl:h-[600px]">
+        {/* Images */}
+        <div 
+          className="flex transition-transform duration-700 ease-in-out h-full"
+          style={{ transform: `translateX(-${currentIndex * 100}%)` }}
+        >
         {images.map((image, index) => (
           <div
             key={index}
@@ -56,7 +58,7 @@ const ImageCarousel = () => {
             <img
               src={image}
               alt={`Sweet Home Indian Sweets - Slide ${index + 1}`}
-              className="w-full h-full object-cover"
+              className="w-full h-full object-contain"
               loading={index === 0 ? "eager" : "lazy"}
               fetchpriority={index === 0 ? "high" : "low"}
               width="1920"
@@ -64,6 +66,7 @@ const ImageCarousel = () => {
             />
           </div>
         ))}
+      </div>
       </div>
 
       {/* Previous Button */}

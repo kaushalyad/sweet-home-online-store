@@ -54,18 +54,28 @@ function ownerEmailShell(innerBody) {
 }
 
 // Create transporter
-const transporter = nodemailer.createTransport({
-  service: 'gmail',
-  auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_APP_PASSWORD // App-specific password for Gmail
+const createTransporter = () => {
+  if (!process.env.EMAIL_USER || !process.env.EMAIL_APP_PASSWORD) {
+    logger.warn('Email credentials not configured. Email sending will fail.');
+    logger.info(`EMAIL_USER: ${process.env.EMAIL_USER ? 'SET' : 'NOT SET'}`);
+    logger.info(`EMAIL_APP_PASSWORD: ${process.env.EMAIL_APP_PASSWORD ? 'SET' : 'NOT SET'}`);
   }
-});
+  
+  return nodemailer.createTransport({
+    service: 'gmail',
+    auth: {
+      user: process.env.EMAIL_USER,
+      pass: process.env.EMAIL_APP_PASSWORD
+    }
+  });
+};
+
+const transporter = createTransporter();
 
 // Verify connection
 transporter.verify((error, success) => {
   if (error) {
-    logger.error('Email service error:', error);
+    logger.error('Email service verification error:', error.message);
   } else {
     logger.info('Email service is ready to send messages');
   }

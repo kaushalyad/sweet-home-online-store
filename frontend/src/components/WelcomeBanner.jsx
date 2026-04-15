@@ -1,79 +1,73 @@
 import { useState, useEffect, useContext } from 'react';
-import { Link } from 'react-router-dom';
-import { FaTimes, FaGift } from 'react-icons/fa';
+import { useLocation, useNavigate } from 'react-router-dom';
+import { FaTimes, FaUserAlt } from 'react-icons/fa';
 import { ShopContext } from '../context/ShopContext';
 
 const WelcomeBanner = () => {
   const [isVisible, setIsVisible] = useState(false);
+  const [isVibrating, setIsVibrating] = useState(false);
   const { token } = useContext(ShopContext);
+  const location = useLocation();
+  const navigate = useNavigate();
 
   useEffect(() => {
-    // Don't show if user is logged in
     if (token) return;
 
-    // Check if banner was dismissed
-    const dismissed = localStorage.getItem('welcomeBannerDismissed');
-    const dismissedTime = localStorage.getItem('welcomeBannerDismissedTime');
+    const authPaths = ['/login', '/register', '/verify', '/verify-account', '/forgot-password', '/reset-password'];
+    if (authPaths.includes(location.pathname)) return;
 
-    // Show banner again after 7 days
-    if (dismissed && dismissedTime) {
-      const daysSinceDismissed = (Date.now() - parseInt(dismissedTime)) / (1000 * 60 * 60 * 24);
-      if (daysSinceDismissed < 7) return;
-    }
+    const showTimer = setTimeout(() => setIsVisible(true), 5000);
+    const vibrateTimer = setTimeout(() => setIsVibrating(true), 7000);
+    const stopVibrateTimer = setTimeout(() => setIsVibrating(false), 14000);
+    const autoHideTimer = setTimeout(() => setIsVisible(false), 25000);
 
-    // Show banner immediately
-    const timer = setTimeout(() => {
-      setIsVisible(true);
-    }, 0);
+    return () => {
+      clearTimeout(showTimer);
+      clearTimeout(vibrateTimer);
+      clearTimeout(stopVibrateTimer);
+      clearTimeout(autoHideTimer);
+    };
+  }, [token, location.pathname]);
 
-    return () => clearTimeout(timer);
-  }, [token]);
+  const handleLoginClick = () => {
+    setIsVisible(false);
+    navigate('/login');
+  };
 
   const handleDismiss = () => {
     setIsVisible(false);
-    localStorage.setItem('welcomeBannerDismissed', 'true');
-    localStorage.setItem('welcomeBannerDismissedTime', Date.now().toString());
   };
 
   if (!isVisible || token) return null;
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 z-50 animate-slide-up">
-      <div className="bg-gradient-to-r from-orange-500 to-pink-500 text-white px-4 py-3 shadow-2xl">
-        <div className="container mx-auto flex items-center justify-between gap-4 flex-wrap">
-          <div className="flex items-center gap-3 flex-1">
-            <FaGift className="text-2xl hidden sm:block" />
-            <div className="flex-1">
-              <p className="font-semibold text-sm sm:text-base">
-                Welcome to Sweet Home! 🎉
-              </p>
-              <p className="text-xs sm:text-sm opacity-90">
-                Sign up now and get <span className="font-bold">10% OFF</span> on your first order!
-              </p>
+    <div className="fixed bottom-4 left-4 right-4 z-[10000]">
+      <div className="mx-auto max-w-4xl rounded-3xl bg-[#b91c1c] text-white shadow-2xl shadow-red-500/20 border border-red-600 overflow-hidden">
+        <div className="flex flex-col gap-3 px-4 py-4 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex items-center gap-3">
+            <span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-white/10 text-white text-lg">
+              <FaUserAlt />
+            </span>
+            <div>
+              <p className="font-semibold text-sm sm:text-base">Login now to unlock best prices</p>
+              <p className="text-xs sm:text-sm text-red-100 opacity-90">Quick login to access deals and order faster.</p>
             </div>
           </div>
-          
-          <div className="flex items-center gap-2">
-            <Link
-              to="/register"
-              className="bg-white text-orange-600 px-4 py-2 rounded-lg font-semibold text-sm hover:bg-gray-100 transition-colors whitespace-nowrap"
-              onClick={handleDismiss}
-            >
-              Sign Up
-            </Link>
-            <Link
-              to="/login"
-              className="border-2 border-white text-white px-4 py-2 rounded-lg font-semibold text-sm hover:bg-white hover:text-orange-600 transition-colors whitespace-nowrap"
-              onClick={handleDismiss}
+
+          <div className="flex flex-wrap items-center gap-3 justify-between sm:justify-end">
+            <button
+              type="button"
+              onClick={handleLoginClick}
+              className={`px-4 py-2 rounded-full bg-white text-red-700 font-semibold transition-colors ${isVibrating ? 'login-vibrate' : ''}`}
             >
               Login
-            </Link>
+            </button>
             <button
+              type="button"
               onClick={handleDismiss}
-              className="p-2 hover:bg-white/20 rounded-full transition-colors"
-              aria-label="Close banner"
+              className="text-xs font-semibold uppercase tracking-[0.12em] text-red-100 hover:text-white"
             >
-              <FaTimes />
+              dismiss
             </button>
           </div>
         </div>
