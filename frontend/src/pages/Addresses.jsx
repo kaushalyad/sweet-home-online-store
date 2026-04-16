@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import axios from 'axios';
 import { toast } from 'react-toastify';
 import { FaHome, FaBriefcase, FaMapMarkerAlt, FaEdit, FaTrash, FaStar } from 'react-icons/fa';
+import { Helmet } from "react-helmet-async";
 
 const Addresses = () => {
   const [addresses, setAddresses] = useState([]);
@@ -156,8 +157,14 @@ const Addresses = () => {
   }
 
   return (
-    <div className="container mx-auto sm:px-4 py-8">
-      <h1 className="text-3xl font-bold mb-8">My Addresses</h1>
+    <>
+      <Helmet>
+        <title>My Addresses - Sweet Home Online Store</title>
+        <meta name="robots" content="noindex, nofollow" />
+        <link rel="canonical" href="https://sweethome-store.com/addresses" />
+      </Helmet>
+      <div className="container mx-auto sm:px-4 py-8">
+        <h1 className="text-3xl font-bold mb-8">My Addresses</h1>
 
       {!showForm && (
         <motion.button
@@ -371,6 +378,7 @@ const Addresses = () => {
         </div>
       )}
     </div>
+    </>
   );
 };
 

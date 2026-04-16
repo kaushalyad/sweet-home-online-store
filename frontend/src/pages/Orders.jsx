@@ -7,6 +7,7 @@ import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { toast } from 'react-hot-toast';
 import { FaBox, FaTruck, FaCheck, FaSearch, FaShippingFast, FaMapMarkerAlt, FaClock, FaChevronDown, FaChevronUp, FaReceipt, FaPhone, FaExclamationCircle, FaTimes, FaBan, FaChevronLeft } from 'react-icons/fa';
+import { Helmet } from "react-helmet-async";
 
 // Base64 encoded placeholder image (1x1 transparent pixel)
 const PLACEHOLDER_IMAGE = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=';
@@ -281,14 +282,20 @@ const Orders = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-white to-orange-50/20 py-8 sm:py-12">
-      <div className="container mx-auto px-4">
-        {/* Header */}
-        <motion.div 
-          className="mb-8"
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-        >
+    <>
+      <Helmet>
+        <title>My Orders - Sweet Home Online Store</title>
+        <meta name="robots" content="noindex, nofollow" />
+        <link rel="canonical" href="https://sweethome-store.com/orders" />
+      </Helmet>
+      <div className="min-h-screen bg-gradient-to-b from-white to-orange-50/20 py-8 sm:py-12">
+        <div className="container mx-auto px-4">
+          {/* Header */}
+          <motion.div 
+            className="mb-8"
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+          >
           <h1 className="text-3xl sm:text-4xl font-bold bg-gradient-to-r from-orange-500 to-pink-500 bg-clip-text text-transparent mb-2">
             My Orders
           </h1>
@@ -811,6 +818,7 @@ const Orders = () => {
         </AnimatePresence>
       </div>
     </div>
+    </>
   );
 };
 

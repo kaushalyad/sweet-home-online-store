@@ -4,6 +4,7 @@ import { ShopContext } from "../context/ShopContext";
 import axios from "axios";
 import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
+import { Helmet } from "react-helmet-async";
 
 const PlaceOrder = () => {
   const navigate = useNavigate();
@@ -834,11 +835,17 @@ const PlaceOrder = () => {
   return (
     // When redirecting away, don't render the page (prevents flicker)
     (!token || (!hasItems && !showSuccess)) ? null : (
-    <div className="bg-gray-50 pt-10 sm:pt-12 pb-10">
-      <AnimatePresence>
-        {showSuccess && <SuccessAnimation />}
-      </AnimatePresence>
-      <div className="container mx-auto px-4 sm:px-4">
+    <>
+      <Helmet>
+        <title>Checkout - Sweet Home Online Store</title>
+        <meta name="robots" content="noindex, nofollow" />
+        <link rel="canonical" href="https://sweethome-store.com/place-order" />
+      </Helmet>
+      <div className="bg-gray-50 pt-10 sm:pt-12 pb-10">
+        <AnimatePresence>
+          {showSuccess && <SuccessAnimation />}
+        </AnimatePresence>
+        <div className="container mx-auto px-4 sm:px-4">
         {/* Order Progress */}
         <div className="max-w-3xl mx-auto mb-10 sm:mb-12">
           <div className="flex items-center justify-between">
@@ -1415,6 +1422,7 @@ const PlaceOrder = () => {
         </form>
       </div>
     </div>
+    </>
     )
   );
 };

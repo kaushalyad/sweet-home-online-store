@@ -25,6 +25,8 @@ const Cart = lazy(() => import('./pages/Cart'))
 const Auth = lazy(() => import('./pages/Auth'))
 const ForgotPassword = lazy(() => import('./pages/ForgotPassword'))
 const ResetPassword = lazy(() => import('./pages/ResetPassword'))
+const VerifyAccount = lazy(() => import('./pages/VerifyAccount'))
+const Verify = lazy(() => import('./pages/Verify'))
 const PlaceOrder = lazy(() => import('./pages/PlaceOrder'))
 const Orders = lazy(() => import('./pages/Orders'))
 const TrackOrder = lazy(() => import('./pages/TrackOrder'))
@@ -35,8 +37,8 @@ const OrderSuccess = lazy(() => import('./pages/OrderSuccess'))
 const SharedContent = lazy(() => import('./pages/SharedContent'))
 const CookiePolicy = lazy(() => import('./pages/CookiePolicy'))
 const CookieSettings = lazy(() => import('./pages/CookieSettings'))
-const Verify = lazy(() => import('./pages/Verify'))
-const VerifyAccount = lazy(() => import('./pages/VerifyAccount'))
+const Blog = lazy(() => import('./pages/Blog'))
+const BlogPost = lazy(() => import('./pages/BlogPost'))
 
 export { backendUrl } from './config'
 
@@ -56,10 +58,20 @@ ProtectedRoute.propTypes = {
   element: PropTypes.element.isRequired
 };
 
-// Dynamic redirect component for product routes
-const ProductRedirect = () => {
-  const { productId } = useParams();
-  return <Navigate to={`/collection/${productId}`} replace />;
+// 404 Not Found Page for invalid product URLs
+const ProductNotFound = () => {
+  return (
+    <div className="flex flex-col items-center justify-center min-h-[50vh] py-16">
+      <h1 className="text-6xl font-bold text-gray-800 mb-4">404</h1>
+      <p className="text-xl text-gray-600 mb-8">Product Not Found</p>
+      <p className="text-gray-500 mb-8 text-center max-w-md">
+        The product URL you're looking for is invalid. Please check the correct product link.
+      </p>
+      <Link to="/" className="px-6 py-3 bg-black text-white rounded-md hover:bg-gray-800 transition-colors duration-300">
+        Go Back Home
+      </Link>
+    </div>
+  );
 };
 
 // 404 Not Found Page
@@ -158,11 +170,13 @@ const App = () => {
               <Route path='/settings' element={<ProtectedRoute element={<Profile />} />} />
               <Route path='/verify' element={<Verify />} />
               <Route path='/products' element={<ProductListing />} />
-              <Route path='/products/:productId' element={<ProductRedirect />} />
+              <Route path='/products/:productId' element={<ProductNotFound />} />
               <Route path='/order-success' element={<ProtectedRoute element={<OrderSuccess />} />} />
               <Route path='/shared/:contentId' element={<SharedContent />} />
               <Route path='/cookie-policy' element={<CookiePolicy />} />
               <Route path='/cookie-settings' element={<CookieSettings />} />
+              <Route path='/blog' element={<Blog />} />
+              <Route path='/blog/:postId' element={<BlogPost />} />
               <Route path='*' element={<NotFound />} />
             </Routes>
             </Suspense>

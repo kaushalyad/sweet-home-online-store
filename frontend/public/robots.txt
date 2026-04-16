@@ -1,10 +1,12 @@
 User-agent: *
 Allow: /
 
-# Priority pages
+# Priority pages for crawling
 Allow: /collection
 Allow: /about
 Allow: /contact
+Allow: /blog
+Allow: /products
 
 # Disallow admin and user-specific pages
 Disallow: /profile
@@ -17,6 +19,22 @@ Disallow: /login
 Disallow: /register
 Disallow: /reset-password
 Disallow: /forgot-password
+Disallow: /admin
+Disallow: /api/
+
+# Disallow duplicate content and development files
+Disallow: /*?*
+Disallow: /*.json$
+Disallow: /*.js$
+Disallow: /*.css$
+Disallow: /src/
+Disallow: /node_modules/
+
+# Sitemap location
+Sitemap: https://sweethome-store.com/sitemap.xml
+
+# Crawl delay for respectful crawling
+Crawl-delay: 1
 
 # Disallow tracking and dynamic URLs
 Disallow: /*?*utm_

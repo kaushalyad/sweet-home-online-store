@@ -7,6 +7,7 @@ import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { FaUser, FaMapMarkerAlt, FaPhone, FaEnvelope, FaCalendarAlt, FaShoppingBag, FaHeart, FaCog, FaArrowRight, FaShoppingCart } from 'react-icons/fa';
 import axios from 'axios';
 import { toast } from 'react-toastify';
+import { Helmet } from "react-helmet-async";
 
 const Profile = () => {
   const { backendUrl, token, currency, products, wishlistItems, addToCart, removeFromWishlist } = useContext(ShopContext);
@@ -914,14 +915,20 @@ const Profile = () => {
   };
 
   return (
-    <div className="py-8 sm:py-12 px-4 sm:px-6 lg:px-8 border-t min-h-screen bg-gray-50">
-      <div className="max-w-7xl mx-auto">
-        <div className="text-center mb-8 sm:mb-10">
-          <motion.div
-            initial={{ opacity: 0, y: -10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
-          >
+    <>
+      <Helmet>
+        <title>My Profile - Sweet Home Online Store</title>
+        <meta name="robots" content="noindex, nofollow" />
+        <link rel="canonical" href="https://sweethome-store.com/profile" />
+      </Helmet>
+      <div className="py-8 sm:py-12 px-4 sm:px-6 lg:px-8 border-t min-h-screen bg-gray-50">
+        <div className="max-w-7xl mx-auto">
+          <div className="text-center mb-8 sm:mb-10">
+            <motion.div
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5 }}
+            >
             <Title text1={"MY"} text2={"ACCOUNT"} />
             <div className="w-20 h-1 bg-[#2874f0] mx-auto mt-4"></div>
           </motion.div>
@@ -976,6 +983,7 @@ const Profile = () => {
         </div>
       </div>
     </div>
+    </>
   );
 };
 

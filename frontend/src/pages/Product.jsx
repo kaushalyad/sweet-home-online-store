@@ -6,6 +6,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { FaHeart, FaShoppingCart, FaShippingFast, FaRegClock, FaCheck, FaArrowLeft, FaStar, FaShare, FaFacebook, FaTwitter, FaPinterest, FaWhatsapp } from "react-icons/fa";
 import { toast } from "react-toastify";
 import { trackPageView, trackProductView, trackAddToCart, trackBuyNow } from "../utils/analytics";
+import { Helmet } from "react-helmet-async";
 import axios from "axios";
 
 const Product = () => {
@@ -228,7 +229,71 @@ const Product = () => {
   };
 
   return productData ? (
-    <div className="w-full min-h-screen bg-gradient-to-br from-pink-50/30 via-orange-50/20 to-rose-50/30">
+    <>
+      <Helmet>
+        <title>{productData.name} - Buy Online | Sweet Home</title>
+        <meta name="description" content={`${productData.description.substring(0, 155)}... Buy authentic ${productData.category} online with fast delivery across India.`} />
+        <meta name="keywords" content={`${productData.name}, ${productData.category}, Indian sweets, mithai, online sweets, ${productData.tags?.join(', ') || ''}`} />
+        <meta property="og:title" content={`${productData.name} - Sweet Home Online Store`} />
+        <meta property="og:description" content={`${productData.description.substring(0, 200)}...`} />
+        <meta property="og:image" content={productData.image[0]} />
+        <meta property="og:url" content={`https://sweethome-store.com/collection/${productData._id}`} />
+        <meta property="og:type" content="product" />
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content={`${productData.name} - Sweet Home`} />
+        <meta name="twitter:description" content={`${productData.description.substring(0, 200)}...`} />
+        <meta name="twitter:image" content={productData.image[0]} />
+        <link rel="canonical" href={`https://sweethome-store.com/collection/${productData._id}`} />
+        <script type="application/ld+json">
+          {JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "Product",
+            "name": productData.name,
+            "image": productData.image,
+            "description": productData.description,
+            "sku": productData._id,
+            "brand": {
+              "@type": "Brand",
+              "name": "Sweet Home"
+            },
+            "category": productData.category,
+            "offers": {
+              "@type": "Offer",
+              "price": productData.discountPrice || productData.price,
+              "priceCurrency": "INR",
+              "availability": productData.stock > 0 ? "InStock" : "OutOfStock",
+              "seller": {
+                "@type": "Organization",
+                "name": "Sweet Home Online Store"
+              },
+              "priceValidUntil": new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]
+            },
+            "aggregateRating": reviewsStats.totalReviews > 0 ? {
+              "@type": "AggregateRating",
+              "ratingValue": reviewsStats.rating,
+              "reviewCount": reviewsStats.totalReviews,
+              "bestRating": 5,
+              "worstRating": 1
+            } : undefined,
+            "review": reviewsData.slice(0, 5).map(review => ({
+              "@type": "Review",
+              "author": {
+                "@type": "Person",
+                "name": "Verified Customer"
+              },
+              "reviewRating": {
+                "@type": "Rating",
+                "ratingValue": review.rating,
+                "bestRating": 5
+              },
+              "reviewBody": review.comment || "Great product!",
+              "datePublished": review.createdAt || new Date().toISOString()
+            })).filter(Boolean)
+          })}
+        </script>
+      </Helmet>
+
+      <div className="w-full min-h-screen bg-gradient-to-br from-pink-50/30 via-orange-50/20 to-rose-50/30">
       <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-6 py-4 sm:py-6 lg:py-8">
         {/* Breadcrumb Navigation */}
         <div className="mb-4 sm:mb-6">
@@ -1024,6 +1089,7 @@ const Product = () => {
       </AnimatePresence>
     </div>
   </div>
+      </>
   ) : (
     <div className="min-h-[60vh] flex items-center justify-center">
       <div className="flex flex-col items-center bg-white p-8 rounded-xl shadow-md">

@@ -1,10 +1,14 @@
 import ImageCarousel from "../components/ImageCarousel";
 import LatestCollection from "../components/LatestCollection";
 import OurPolicy from "../components/OurPolicy";
+import FAQSchema from "../components/FAQSchema";
+import LocalSEO from "../components/LocalSEO";
+import AdvancedSEO from "../components/AdvancedSEO";
 import { motion } from "framer-motion";
 import { FaArrowRight, FaGift, FaShippingFast, FaStar } from "react-icons/fa";
 import { Link } from "react-router-dom";
 import { assets } from "../assets/assets";
+import { Helmet } from "react-helmet-async";
 
 const Home = () => {
   // Animation variants
@@ -17,6 +21,52 @@ const Home = () => {
 
   return (
     <main className="bg-white">
+      <Helmet>
+        <title>Sweet Home Online Store - Buy Authentic Indian Sweets & Mithai Online | Fresh Daily</title>
+        <meta name="description" content="Order fresh, authentic Indian sweets and mithai online from Sweet Home. Daily fresh sweets delivery across India. Premium quality sweets, namkeen, cookies & festive packs. Free shipping over ₹500." />
+        <meta name="keywords" content="Indian sweets online, mithai delivery, fresh sweets, namkeen online, Indian sweets store, sweets delivery India, authentic mithai, festival sweets, sweet home online" />
+        <meta property="og:title" content="Sweet Home Online Store - Authentic Indian Sweets & Mithai" />
+        <meta property="og:description" content="Order fresh, authentic Indian sweets and mithai online. Daily fresh delivery across India. Premium quality sweets, namkeen & festive packs." />
+        <meta property="og:image" content="https://sweethome-store.com/sweet_home_logo.jpg" />
+        <meta property="og:url" content="https://sweethome-store.com/" />
+        <meta property="og:type" content="website" />
+        <meta property="og:site_name" content="Sweet Home Online Store" />
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content="Sweet Home Online Store - Authentic Indian Sweets" />
+        <meta name="twitter:description" content="Order fresh, authentic Indian sweets and mithai online. Daily fresh delivery across India." />
+        <meta name="twitter:image" content="https://sweethome-store.com/sweet_home_logo.jpg" />
+        <link rel="canonical" href="https://sweethome-store.com/" />
+        <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1" />
+        <meta name="language" content="English" />
+        <meta name="author" content="Sweet Home Online Store" />
+        <meta name="geo.region" content="IN" />
+        <meta name="geo.country" content="India" />
+        <script type="application/ld+json">
+          {JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "Organization",
+            "name": "Sweet Home Online Store",
+            "url": "https://sweethome-store.com",
+            "logo": "https://sweethome-store.com/sweet_home_logo.jpg",
+            "description": "Authentic Indian sweets and mithai online store with fresh daily delivery across India",
+            "address": {
+              "@type": "PostalAddress",
+              "addressCountry": "IN"
+            },
+            "sameAs": [
+              "https://www.facebook.com/sweethomeonline",
+              "https://www.instagram.com/sweethomeonline",
+              "https://twitter.com/sweethomeonline"
+            ],
+            "contactPoint": {
+              "@type": "ContactPoint",
+              "telephone": "+91-XXXXXXXXXX",
+              "contactType": "customer service",
+              "availableLanguage": "English"
+            }
+          })}
+        </script>
+      </Helmet>
       {/* Full Width Image Carousel */}
       <motion.div
         initial={{ opacity: 0 }}
@@ -249,6 +299,13 @@ const Home = () => {
           </div>
         </div>
       </motion.div>
+
+      {/* FAQ Schema for SEO */}
+      <FAQSchema />
+      {/* Local SEO for Google Business Profile */}
+      <LocalSEO />
+      {/* Advanced SEO features */}
+      <AdvancedSEO />
     </main>
   );
 };

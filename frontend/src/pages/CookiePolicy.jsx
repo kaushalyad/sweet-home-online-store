@@ -2,10 +2,17 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import { FaCookie, FaShieldAlt, FaInfoCircle } from 'react-icons/fa';
+import { Helmet } from "react-helmet-async";
 
 const CookiePolicy = () => {
   return (
-    <div className="min-h-screen bg-gray-50 py-12">
+    <>
+      <Helmet>
+        <title>Cookie Policy - Sweet Home Online Store</title>
+        <meta name="description" content="Learn about how Sweet Home Online Store uses cookies to improve your browsing experience and provide personalized services." />
+        <link rel="canonical" href="https://sweethome-store.com/cookie-policy" />
+      </Helmet>
+      <div className="min-h-screen bg-gray-50 py-12">
       <div className="container mx-auto sm:px-4 max-w-4xl">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -226,6 +233,7 @@ const CookiePolicy = () => {
         </motion.div>
       </div>
     </div>
+    </>
   );
 };
 

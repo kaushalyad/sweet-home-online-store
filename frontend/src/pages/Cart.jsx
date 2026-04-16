@@ -8,6 +8,7 @@ import Title from '../components/Title';
 import CartSkeleton from '../components/CartSkeleton';
 import { toast } from "react-toastify";
 import { trackPageView, trackPurchaseSuccess, trackPurchaseFailure } from "../utils/analytics";
+import { Helmet } from "react-helmet-async";
 
 const Cart = () => {
   const navigate = useNavigate();
@@ -286,12 +287,18 @@ const Cart = () => {
   }
 
   return (
-    <div className="container mx-auto sm:px-4 py-8">
-      <Title title="Your Sweet Collection" />
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        <div className="lg:col-span-2">
-          {/* Cart Items Table Header */}
-          <div className="hidden md:grid grid-cols-12 gap-4 mb-4 p-4 bg-gray-50 rounded-lg font-semibold text-gray-700">
+    <>
+      <Helmet>
+        <title>Shopping Cart - Sweet Home Online Store</title>
+        <meta name="robots" content="noindex, nofollow" />
+        <link rel="canonical" href="https://sweethome-store.com/cart" />
+      </Helmet>
+      <div className="container mx-auto sm:px-4 py-8">
+        <Title title="Your Sweet Collection" />
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          <div className="lg:col-span-2">
+            {/* Cart Items Table Header */}
+            <div className="hidden md:grid grid-cols-12 gap-4 mb-4 p-4 bg-gray-50 rounded-lg font-semibold text-gray-700">
             <div className="col-span-4">Sweet Treat</div>
             <div className="col-span-2 text-center">Price</div>
             <div className="col-span-3 text-center">Quantity</div>
@@ -387,6 +394,7 @@ const Cart = () => {
         </div>
       </div>
     </div>
+    </>
   );
 };
 

@@ -19,6 +19,7 @@ import {
 } from "react-icons/fa";
 import { assets } from "../assets/assets";
 import FlipkartAuthIllustration from "../components/FlipkartAuthIllustration";
+import { Helmet } from "react-helmet-async";
 
 const perks = [
   { icon: FaHeart, text: "Save favorites & wishlists for later" },
@@ -175,14 +176,23 @@ const Auth = () => {
 
   if (!mounted || typeof document === "undefined") return null;
 
+  const pageTitle = currentState === "Sign Up" ? "Register - Sweet Home Online Store" : "Login - Sweet Home Online Store";
+  const canonicalUrl = currentState === "Sign Up" ? "https://sweethome-store.com/register" : "https://sweethome-store.com/login";
+
   return createPortal(
-    <AnimatePresence>
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        exit={{ opacity: 0 }}
-        className="fixed inset-0 z-[10000] flex items-center justify-center bg-black/55 backdrop-blur-sm p-4 sm:p-6"
-      >
+    <>
+      <Helmet>
+        <title>{pageTitle}</title>
+        <meta name="robots" content="noindex, nofollow" />
+        <link rel="canonical" href={canonicalUrl} />
+      </Helmet>
+      <AnimatePresence>
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          className="fixed inset-0 z-[10000] flex items-center justify-center bg-black/55 backdrop-blur-sm p-2 sm:p-6"
+        >
         <button
           type="button"
           onClick={closeAuthModal}
@@ -200,36 +210,36 @@ const Auth = () => {
             damping: 24,
             stiffness: 320,
           }}
-          className="relative w-full max-w-[980px] overflow-hidden rounded-3xl bg-white shadow-2xl sm:flex sm:min-h-[520px]"
+          className="relative w-full max-w-sm small_mobile:max-w-xs md:max-w-[980px] max-h-[calc(100vh-2rem)] overflow-y-auto rounded-2xl small_mobile:rounded-xl bg-white shadow-2xl sm:flex sm:min-h-[520px] sm:max-h-[calc(100vh-3rem)]"
         >
           <button
             type="button"
             onClick={closeAuthModal}
-            className="absolute right-4 top-4 z-10 inline-flex h-11 w-11 items-center justify-center rounded-full border border-slate-200 bg-white/95 text-slate-700 shadow-sm transition hover:bg-white hover:text-slate-900 focus:outline-none focus:ring-2 focus:ring-sky-300"
+            className="absolute right-2 small_mobile:right-2 top-2 small_mobile:top-2 z-10 inline-flex h-9 small_mobile:h-8 w-9 small_mobile:w-8 items-center justify-center rounded-full border border-slate-200 bg-white/95 text-slate-700 shadow-sm transition hover:bg-white hover:text-slate-900 focus:outline-none focus:ring-2 focus:ring-sky-300"
             aria-label="Close"
           >
-            <FaTimes className="h-4 w-4" />
+            <FaTimes className="h-4 small_mobile:h-3 w-4 small_mobile:w-3" />
           </button>
 
           {/* Flipkart-style blue panel */}
-          <aside className="hidden sm:flex sm:w-[40%] md:w-[42%] relative overflow-hidden bg-[#2874f0] text-white p-10 lg:p-12 flex-col justify-between">
+          <aside className="hidden sm:flex sm:w-[40%] md:w-[42%] relative overflow-hidden bg-[#2874f0] text-white p-6 lg:p-12 flex-col justify-between">
             <div className="absolute inset-0 opacity-[0.12] bg-[radial-gradient(circle_at_20%_10%,white,transparent_45%)] pointer-events-none" />
             <div className="relative z-10">
               {currentState === "Login" ? (
                 <>
-                  <h1 className="mt-10 text-3xl lg:text-[32px] font-semibold leading-tight">
+                  <h1 className="mt-8 text-2xl sm:text-2xl md:text-[28px] lg:text-[32px] font-semibold leading-tight">
                     Login
                   </h1>
-                  <p className="mt-4 text-[15px] leading-relaxed text-blue-100 max-w-[280px]">
+                  <p className="mt-3 text-[13px] sm:text-sm md:text-[15px] leading-relaxed text-blue-100 max-w-[280px]">
                     Get access to your Orders, Wishlist and Recommendations.
                   </p>
                 </>
               ) : (
                 <>
-                  <h1 className="mt-10 text-3xl lg:text-[32px] font-semibold leading-tight">
+                  <h1 className="mt-8 text-2xl sm:text-2xl md:text-[28px] lg:text-[32px] font-semibold leading-tight">
                     Looks like you&apos;re new here!
                   </h1>
-                  <p className="mt-4 text-[15px] leading-relaxed text-blue-100 max-w-[300px]">
+                  <p className="mt-3 text-[13px] sm:text-sm md:text-[15px] leading-relaxed text-blue-100 max-w-[300px]">
                     Sign up with your email to get started — then shop fresh
                     sweets anytime.
                   </p>
@@ -237,11 +247,11 @@ const Auth = () => {
               )}
             </div>
             {currentState === "Login" ? (
-              <ul className="relative z-10 space-y-4 mb-4">
+              <ul className="relative z-10 space-y-3 mb-4">
                 {perks.map(({ icon: Icon, text }) => (
-                  <li key={text} className="flex items-start gap-3 text-sm text-blue-50">
-                    <span className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-white/15">
-                      <Icon className="h-3.5 w-3.5" aria-hidden />
+                  <li key={text} className="flex items-start gap-2 text-xs md:text-sm text-blue-50">
+                    <span className="mt-0.5 flex h-7 w-7 md:h-8 md:w-8 shrink-0 items-center justify-center rounded-lg bg-white/15">
+                      <Icon className="h-3 w-3 md:h-3.5 md:w-3.5" aria-hidden />
                     </span>
                     <span className="pt-0.5">{text}</span>
                   </li>
@@ -253,21 +263,21 @@ const Auth = () => {
             </div>
           </aside>
 
-          <main className="flex-1 px-6 py-8 sm:px-8 sm:py-10">
-            <div className="mb-6 sm:hidden bg-[#2874f0] text-white rounded-3xl p-5">
-              <div className="flex items-center gap-3">
+          <main className="flex-1 px-3 small_mobile:px-2.5 py-5 small_mobile:py-4 sm:px-8 sm:py-10">
+            <div className="mb-4 sm:hidden bg-[#2874f0] text-white rounded-2xl p-3.5 small_mobile:p-3">
+              <div className="flex items-center gap-2">
                 <div>
                   {currentState === "Login" ? (
                     <>
-                      <p className="font-semibold text-lg">Login</p>
-                      <p className="text-xs text-blue-100 mt-0.5 leading-snug">
+                      <p className="font-semibold text-base small_mobile:text-sm">Login</p>
+                      <p className="text-xs small_mobile:text-[11px] text-blue-100 mt-0.5 leading-snug">
                         Orders, wishlist & offers in one place.
                       </p>
                     </>
                   ) : (
                     <>
-                      <p className="font-semibold text-lg">Create account</p>
-                      <p className="text-xs text-blue-100 mt-0.5 leading-snug">
+                      <p className="font-semibold text-base small_mobile:text-sm">Create account</p>
+                      <p className="text-xs small_mobile:text-[11px] text-blue-100 mt-0.5 leading-snug">
                         You&apos;re new here — let&apos;s get you started.
                       </p>
                     </>
@@ -276,10 +286,10 @@ const Auth = () => {
               </div>
             </div>
 
-            <div className="rounded-3xl bg-white p-6 shadow-sm border border-gray-200">
+            <div className="rounded-2xl small_mobile:rounded-xl bg-white p-4 small_mobile:p-3 shadow-sm border border-gray-200">
               {/* Log in | Create account tab switcher */}
               <div
-                className="flex p-0.5 rounded-lg bg-gray-100 mb-8 border border-gray-200"
+                className="flex p-0.5 rounded-lg bg-gray-100 mb-6 small_mobile:mb-5 border border-gray-200"
                 role="tablist"
                 aria-label="Account"
               >
@@ -291,7 +301,7 @@ const Auth = () => {
                     setCurrentState("Login");
                     navigate("/login", { replace: true });
                   }}
-                  className={`flex-1 rounded-md py-2.5 text-sm font-semibold transition-all ${
+                  className={`flex-1 rounded-md py-2 small_mobile:py-1.5 text-xs small_mobile:text-[11px] md:text-sm font-semibold transition-all ${
                     currentState === "Login"
                       ? "bg-white text-[#2874f0] shadow-sm"
                       : "text-gray-600 hover:text-gray-900"
@@ -307,7 +317,7 @@ const Auth = () => {
                     setCurrentState("Sign Up");
                     navigate("/register", { replace: true });
                   }}
-                  className={`flex-1 rounded-md py-2.5 text-sm font-semibold transition-all ${
+                  className={`flex-1 rounded-md py-2 small_mobile:py-1.5 text-xs small_mobile:text-[11px] md:text-sm font-semibold transition-all ${
                     currentState === "Sign Up"
                       ? "bg-white text-[#2874f0] shadow-sm"
                       : "text-gray-600 hover:text-gray-900"
@@ -317,18 +327,18 @@ const Auth = () => {
                 </button>
               </div>
 
-              <form onSubmit={onSubmitHandler} className="space-y-5">
+              <form onSubmit={onSubmitHandler} className="space-y-4 small_mobile:space-y-3">
                 {currentState === "Sign Up" && (
                   <div>
                     <label
                       htmlFor="name"
-                      className="block text-sm font-medium text-gray-700 mb-1.5"
+                      className="block text-xs small_mobile:text-[11px] md:text-sm font-medium text-gray-700 mb-1"
                     >
                       Full Name
                     </label>
                     <div className="relative">
-                      <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                        <FaUser className="h-4 w-4 text-gray-400" />
+                      <div className="absolute inset-y-0 left-0 pl-2.5 small_mobile:pl-2 flex items-center pointer-events-none">
+                        <FaUser className="h-3.5 w-3.5 small_mobile:h-3 small_mobile:w-3 text-gray-400" />
                       </div>
                       <input
                         id="name"
@@ -336,7 +346,7 @@ const Auth = () => {
                         type="text"
                         autoComplete="name"
                         required={currentState === "Sign Up"}
-                        className="pl-10 block w-full rounded-sm border border-gray-300 px-3 py-3 text-[15px] focus:ring-2 focus:ring-[#2874f0]/30 focus:border-[#2874f0] outline-none transition-colors"
+                        className="pl-8 small_mobile:pl-7 block w-full rounded-sm border border-gray-300 px-2.5 py-2 small_mobile:py-1.5 text-xs small_mobile:text-[11px] md:text-sm focus:ring-2 focus:ring-[#2874f0]/30 focus:border-[#2874f0] outline-none transition-colors"
                         placeholder="John Doe"
                         value={name}
                         onChange={(e) => setName(e.target.value)}
@@ -348,13 +358,13 @@ const Auth = () => {
                 <div>
                   <label
                     htmlFor="identifier"
-                    className="block text-sm font-medium text-gray-700 mb-1.5"
+                    className="block text-xs small_mobile:text-[11px] md:text-sm font-medium text-gray-700 mb-1"
                   >
                     {currentState === "Login" ? "Email or Mobile Number" : "Email Address"}
                   </label>
                   <div className="relative">
-                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                      <FaEnvelope className="h-4 w-4 text-gray-400" />
+                    <div className="absolute inset-y-0 left-0 pl-2.5 small_mobile:pl-2 flex items-center pointer-events-none">
+                      <FaEnvelope className="h-3.5 w-3.5 small_mobile:h-3 small_mobile:w-3 text-gray-400" />
                     </div>
                     <input
                       id="identifier"
@@ -362,7 +372,7 @@ const Auth = () => {
                       type={currentState === "Login" ? "text" : "email"}
                       autoComplete={currentState === "Login" ? "username" : "email"}
                       required
-                      className="pl-10 block w-full rounded-sm border border-gray-300 px-3 py-3 text-[15px] focus:ring-2 focus:ring-[#2874f0]/30 focus:border-[#2874f0] outline-none transition-colors"
+                      className="pl-8 small_mobile:pl-7 block w-full rounded-sm border border-gray-300 px-2.5 py-2 small_mobile:py-1.5 text-xs small_mobile:text-[11px] md:text-sm focus:ring-2 focus:ring-[#2874f0]/30 focus:border-[#2874f0] outline-none transition-colors"
                       placeholder={currentState === "Login" ? "Email or mobile number" : "email@example.com"}
                       value={currentState === "Login" ? loginIdentifier : email}
                       onChange={(e) =>
@@ -378,25 +388,34 @@ const Auth = () => {
                   <div>
                     <label
                       htmlFor="mobile"
-                      className="block text-sm font-medium text-gray-700 mb-1.5"
+                      className="block text-xs small_mobile:text-[11px] md:text-sm font-medium text-gray-700 mb-1"
                     >
                       Mobile Number
                     </label>
                     <div className="relative">
-                      <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                        <FaPhone className="h-4 w-4 text-gray-400" />
+                      <div className="absolute inset-y-0 left-0 pl-2.5 small_mobile:pl-2 flex items-center pointer-events-none">
+                        <FaPhone className="h-3.5 w-3.5 small_mobile:h-3 small_mobile:w-3 text-gray-400" />
                       </div>
                       <input
                         id="mobile"
                         name="mobile"
                         type="tel"
-                        autoComplete="tel"
+                        autoComplete="tel-national"
                         required
-                        className="pl-10 block w-full rounded-sm border border-gray-300 px-3 py-3 text-[15px] focus:ring-2 focus:ring-[#2874f0]/30 focus:border-[#2874f0] outline-none transition-colors"
+                        className="pl-8 small_mobile:pl-7 block w-full rounded-sm border border-gray-300 px-2.5 py-2 small_mobile:py-1.5 text-xs small_mobile:text-[11px] md:text-sm focus:ring-2 focus:ring-[#2874f0]/30 focus:border-[#2874f0] outline-none transition-colors"
                         placeholder="10-digit mobile number"
                         value={mobile}
                         onChange={(e) => {
-                          const digits = e.target.value.replace(/\D/g, "").slice(0, 10);
+                          let digits = e.target.value.replace(/\D/g, "");
+                          if (digits.length > 10) {
+                            if (digits.startsWith("91")) {
+                              digits = digits.slice(-10);
+                            } else if (digits.startsWith("0")) {
+                              digits = digits.slice(-10);
+                            } else {
+                              digits = digits.slice(0, 10);
+                            }
+                          }
                           setMobile(digits);
                         }}
                       />
@@ -407,13 +426,13 @@ const Auth = () => {
                 <div>
                   <label
                     htmlFor="password"
-                    className="block text-sm font-medium text-gray-700 mb-1.5"
+                    className="block text-xs small_mobile:text-[11px] md:text-sm font-medium text-gray-700 mb-1"
                   >
                     Password
                   </label>
                   <div className="relative">
-                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                      <FaLock className="h-4 w-4 text-gray-400" />
+                    <div className="absolute inset-y-0 left-0 pl-2.5 small_mobile:pl-2 flex items-center pointer-events-none">
+                      <FaLock className="h-3.5 w-3.5 small_mobile:h-3 small_mobile:w-3 text-gray-400" />
                     </div>
                     <input
                       id="password"
@@ -425,7 +444,7 @@ const Auth = () => {
                           : "new-password"
                       }
                       required
-                      className="pl-10 pr-10 block w-full rounded-sm border border-gray-300 px-3 py-3 text-[15px] focus:ring-2 focus:ring-[#2874f0]/30 focus:border-[#2874f0] outline-none transition-colors"
+                      className="pl-8 small_mobile:pl-7 pr-9 small_mobile:pr-8 block w-full rounded-sm border border-gray-300 px-2.5 py-2 small_mobile:py-1.5 text-xs small_mobile:text-[11px] md:text-sm focus:ring-2 focus:ring-[#2874f0]/30 focus:border-[#2874f0] outline-none transition-colors"
                       placeholder={
                         currentState === "Login"
                           ? "Your password"
@@ -436,37 +455,37 @@ const Auth = () => {
                     />
                     <button
                       type="button"
-                      className="absolute inset-y-0 right-0 pr-3 flex items-center text-sm leading-5"
+                      className="absolute inset-y-0 right-0 pr-2.5 small_mobile:pr-2 flex items-center text-sm leading-5"
                       onClick={() => setPasswordVisible(!passwordVisible)}
                     >
                       {passwordVisible ? (
-                        <FaEyeSlash className="h-4 w-4 text-gray-400 hover:text-gray-600" />
+                        <FaEyeSlash className="h-3.5 w-3.5 small_mobile:h-3 small_mobile:w-3 text-gray-400 hover:text-gray-600" />
                       ) : (
-                        <FaEye className="h-4 w-4 text-gray-400 hover:text-gray-600" />
+                        <FaEye className="h-3.5 w-3.5 small_mobile:h-3 small_mobile:w-3 text-gray-400 hover:text-gray-600" />
                       )}
                     </button>
                   </div>
                 </div>
 
                 {currentState === "Login" && (
-                  <div className="flex items-center justify-between">
+                  <div className="flex items-center justify-between gap-2">
                     <div className="flex items-center">
                       <input
                         id="remember-me"
                         name="remember-me"
                         type="checkbox"
-                        className="h-4 w-4 text-[#2874f0] focus:ring-[#2874f0] border-gray-300 rounded cursor-pointer"
+                        className="h-3.5 w-3.5 small_mobile:h-3 small_mobile:w-3 text-[#2874f0] focus:ring-[#2874f0] border-gray-300 rounded cursor-pointer"
                         checked={rememberMe}
                         onChange={(e) => setRememberMe(e.target.checked)}
                       />
                       <label
                         htmlFor="remember-me"
-                        className="ml-2 block text-sm text-gray-600 cursor-pointer"
+                        className="ml-1.5 small_mobile:ml-1 block text-xs small_mobile:text-[10px] md:text-sm text-gray-600 cursor-pointer"
                       >
                         Remember me
                       </label>
                     </div>
-                    <div className="text-sm">
+                    <div className="text-xs small_mobile:text-[10px] md:text-sm">
                       <Link
                         to="/forgot-password"
                         className="font-medium text-[#2874f0] hover:text-[#1f5bb8] transition-colors"
@@ -480,14 +499,14 @@ const Auth = () => {
                 <button
                   type="submit"
                   disabled={loading}
-                  className={`w-full rounded-sm bg-[#fb641b] py-3 text-[15px] font-semibold uppercase tracking-wide text-white shadow-md hover:bg-[#fa5720] focus:outline-none focus:ring-2 focus:ring-[#fb641b] focus:ring-offset-2 transition-colors ${
+                  className={`w-full rounded-sm bg-[#fb641b] py-2 small_mobile:py-1.5 md:py-3 text-xs small_mobile:text-[11px] md:text-[15px] font-semibold uppercase tracking-wide text-white shadow-md hover:bg-[#fa5720] focus:outline-none focus:ring-2 focus:ring-[#fb641b] focus:ring-offset-2 transition-colors ${
                     loading ? "opacity-70 cursor-not-allowed" : ""
                   }`}
                 >
                   {loading ? (
-                    <span className="flex items-center justify-center gap-2">
+                    <span className="flex items-center justify-center gap-1.5 small_mobile:gap-1">
                       <svg
-                        className="animate-spin h-5 w-5"
+                        className="animate-spin h-4 w-4 small_mobile:h-3 small_mobile:w-3"
                         xmlns="http://www.w3.org/2000/svg"
                         fill="none"
                         viewBox="0 0 24 24"
@@ -506,7 +525,8 @@ const Auth = () => {
                           d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
                         ></path>
                       </svg>
-                      Please wait...
+                      <span className="hidden small_mobile:block">Wait...</span>
+                      <span className="small_mobile:hidden">Please wait...</span>
                     </span>
                   ) : currentState === "Login" ? (
                     "Sign in"
@@ -515,7 +535,7 @@ const Auth = () => {
                   )}
                 </button>
 
-                <p className="text-center pt-2 border-t border-gray-100 text-sm">
+                <p className="text-center pt-2 border-t border-gray-100 text-xs small_mobile:text-[11px] md:text-sm">
                   {currentState === "Login"
                     ? "New to Sweet Home? "
                     : "Already have an account? "}
@@ -530,7 +550,7 @@ const Auth = () => {
               </form>
             </div>
 
-            <p className="mt-6 text-center text-xs text-gray-500 leading-relaxed px-2">
+            <p className="mt-4 small_mobile:mt-3 text-center text-[10px] small_mobile:text-[9px] md:text-xs text-gray-500 leading-relaxed px-2">
               By continuing, you agree to our{" "}
               <Link
                 to="/terms"
@@ -550,7 +570,8 @@ const Auth = () => {
           </main>
         </motion.div>
       </motion.div>
-    </AnimatePresence>,
+    </AnimatePresence>
+    </>,
     document.body
   );
 };

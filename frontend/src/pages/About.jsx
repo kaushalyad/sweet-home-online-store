@@ -4,6 +4,7 @@ import { assets } from "../assets/assets";
 import { motion } from "framer-motion";
 import { FaCheckCircle, FaUsers, FaStar, FaShippingFast } from "react-icons/fa";
 import { Link } from "react-router-dom";
+import { Helmet } from "react-helmet-async";
 
 const About = () => {
   // Animation variants
@@ -66,6 +67,56 @@ const About = () => {
 
   return (
     <div className="bg-white">
+      <Helmet>
+        <title>About Sweet Home - Authentic Indian Sweets Since 2015 | Our Story</title>
+        <meta name="description" content="Learn about Sweet Home's journey since 2015. We deliver authentic Indian sweets and mithai across India with traditional recipes and premium quality ingredients." />
+        <meta name="keywords" content="about Sweet Home, Indian sweets company, authentic mithai, traditional sweets, Sweet Home story, Indian sweets brand" />
+        <meta property="og:title" content="About Sweet Home - Authentic Indian Sweets Since 2015" />
+        <meta property="og:description" content="Learn about Sweet Home's journey since 2015. We deliver authentic Indian sweets and mithai across India with traditional recipes." />
+        <meta property="og:image" content="https://sweethome-store.com/sweet_home_logo.jpg" />
+        <meta property="og:url" content="https://sweethome-store.com/about" />
+        <meta property="og:type" content="website" />
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content="About Sweet Home - Authentic Indian Sweets" />
+        <meta name="twitter:description" content="Learn about Sweet Home's journey since 2015. Authentic Indian sweets and mithai across India." />
+        <meta name="twitter:image" content="https://sweethome-store.com/sweet_home_logo.jpg" />
+        <link rel="canonical" href="https://sweethome-store.com/about" />
+        <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1" />
+        <script type="application/ld+json">
+          {JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "AboutPage",
+            "name": "About Sweet Home",
+            "description": "Learn about Sweet Home's journey since 2015 delivering authentic Indian sweets",
+            "url": "https://sweethome-store.com/about",
+            "mainEntity": {
+              "@type": "Organization",
+              "name": "Sweet Home Online Store",
+              "foundingDate": "2015",
+              "description": "Authentic Indian sweets and mithai online store",
+              "url": "https://sweethome-store.com",
+              "logo": "https://sweethome-store.com/sweet_home_logo.jpg"
+            },
+            "breadcrumb": {
+              "@type": "BreadcrumbList",
+              "itemListElement": [
+                {
+                  "@type": "ListItem",
+                  "position": 1,
+                  "name": "Home",
+                  "item": "https://sweethome-store.com/"
+                },
+                {
+                  "@type": "ListItem",
+                  "position": 2,
+                  "name": "About",
+                  "item": "https://sweethome-store.com/about"
+                }
+              ]
+            }
+          })}
+        </script>
+      </Helmet>
       {/* Hero Section */}
       <div className="relative overflow-hidden bg-gradient-to-r from-pink-50 to-orange-50 py-20">
         <div className="container mx-auto px-4 relative z-10">

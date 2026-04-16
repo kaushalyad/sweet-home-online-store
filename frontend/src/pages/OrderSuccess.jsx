@@ -6,6 +6,7 @@ import axios from 'axios';
 import { toast } from 'react-toastify';
 import { useContext } from 'react';
 import { ShopContext } from '../context/ShopContext';
+import { Helmet } from "react-helmet-async";
 
 const OrderSuccess = () => {
   const location = useLocation();
@@ -71,12 +72,18 @@ const OrderSuccess = () => {
   }
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="max-w-4xl mx-auto"
-      >
+    <>
+      <Helmet>
+        <title>Order Success - Sweet Home Online Store</title>
+        <meta name="robots" content="noindex, nofollow" />
+        <link rel="canonical" href="https://sweethome-store.com/order-success" />
+      </Helmet>
+      <div className="container mx-auto px-4 py-8">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="max-w-4xl mx-auto"
+        >
         {/* Success Header */}
         <div className="bg-white rounded-lg shadow-md p-6 mb-6">
           <div className="flex items-center justify-between">
@@ -233,6 +240,7 @@ const OrderSuccess = () => {
         </div>
       </motion.div>
     </div>
+    </>
   );
 };
 

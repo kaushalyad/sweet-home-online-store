@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import Title from "../components/Title";
 import { assets } from "../assets/assets";
 import { FaPhoneAlt, FaEnvelope, FaMapMarkerAlt, FaClock, FaCheck, FaDirections, FaGift, FaBoxOpen, FaSnowflake, FaTruck, FaQuestionCircle, FaPlus, FaMinus } from "react-icons/fa";
+import { Helmet } from "react-helmet-async";
 
 const Contact = () => {
   const [formData, setFormData] = useState({
@@ -79,6 +80,73 @@ const Contact = () => {
 
   return (
     <div className="pb-16">
+      <Helmet>
+        <title>Contact Sweet Home - Customer Support & Sweet Orders | Phone, Email, WhatsApp</title>
+        <meta name="description" content="Contact Sweet Home for sweet orders, customer support, and inquiries. Call +91-9931018857, WhatsApp +91-8797196867, or email. Get help with bulk orders and custom sweet boxes." />
+        <meta name="keywords" content="contact Sweet Home, sweet orders, customer support, bulk sweets order, custom sweet boxes, Sweet Home phone number, WhatsApp sweets" />
+        <meta property="og:title" content="Contact Sweet Home - Customer Support & Sweet Orders" />
+        <meta property="og:description" content="Contact Sweet Home for sweet orders and customer support. Call, WhatsApp, or email for bulk orders and custom sweet boxes." />
+        <meta property="og:image" content="https://sweethome-store.com/sweet_home_logo.jpg" />
+        <meta property="og:url" content="https://sweethome-store.com/contact" />
+        <meta property="og:type" content="website" />
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content="Contact Sweet Home - Customer Support" />
+        <meta name="twitter:description" content="Contact Sweet Home for sweet orders and customer support. Call, WhatsApp, or email for bulk orders." />
+        <meta name="twitter:image" content="https://sweethome-store.com/sweet_home_logo.jpg" />
+        <link rel="canonical" href="https://sweethome-store.com/contact" />
+        <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1" />
+        <script type="application/ld+json">
+          {JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "ContactPage",
+            "name": "Contact Sweet Home",
+            "description": "Contact Sweet Home for sweet orders and customer support",
+            "url": "https://sweethome-store.com/contact",
+            "mainEntity": {
+              "@type": "Organization",
+              "name": "Sweet Home Online Store",
+              "contactPoint": [
+                {
+                  "@type": "ContactPoint",
+                  "telephone": "+91-9931018857",
+                  "contactType": "customer service",
+                  "availableLanguage": "English"
+                },
+                {
+                  "@type": "ContactPoint",
+                  "url": "https://wa.me/918797196867",
+                  "contactType": "customer service",
+                  "availableLanguage": "English"
+                }
+              ],
+              "email": "sweethomeonlinestorehelp@gmail.com",
+              "address": {
+                "@type": "PostalAddress",
+                "streetAddress": "Nearby PNB BANK, Main Road JaiNagar",
+                "addressLocality": "Ladania",
+                "addressCountry": "IN"
+              }
+            },
+            "breadcrumb": {
+              "@type": "BreadcrumbList",
+              "itemListElement": [
+                {
+                  "@type": "ListItem",
+                  "position": 1,
+                  "name": "Home",
+                  "item": "https://sweethome-store.com/"
+                },
+                {
+                  "@type": "ListItem",
+                  "position": 2,
+                  "name": "Contact",
+                  "item": "https://sweethome-store.com/contact"
+                }
+              ]
+            }
+          })}
+        </script>
+      </Helmet>
       {/* Hero Section with Decorative Elements */}
       <div className="relative bg-gradient-to-r from-pink-50 to-orange-50 py-16 overflow-hidden">
         <div className="container mx-auto sm:px-4 relative z-10">

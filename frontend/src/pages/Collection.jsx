@@ -8,6 +8,7 @@ import { FaSort, FaSortAmountDown, FaSortAmountUp, FaChevronDown, FaFilter, FaCh
 import { motion, AnimatePresence } from "framer-motion";
 import PropTypes from "prop-types";
 import { Link, useLocation } from "react-router-dom";
+import { Helmet } from "react-helmet-async";
 
 const Collection = () => {
   const { products, search, setSearch, showSearch, buffer } = useContext(ShopContext);
@@ -324,6 +325,53 @@ const Collection = () => {
 
   return (
     <div className="bg-gradient-to-b from-gray-50 to-white min-h-screen">
+      <Helmet>
+        <title>Indian Sweets Collection - Buy Authentic Mithai & Namkeen Online | Sweet Home</title>
+        <meta name="description" content="Browse our complete collection of authentic Indian sweets, mithai, namkeen, and festive treats. Fresh daily delivery across India. Premium quality sweets at best prices." />
+        <meta name="keywords" content="Indian sweets collection, mithai online, namkeen collection, Indian sweets shop, authentic mithai, sweets delivery India, festival sweets, traditional sweets" />
+        <meta property="og:title" content="Indian Sweets Collection - Authentic Mithai & Namkeen Online" />
+        <meta property="og:description" content="Browse our complete collection of authentic Indian sweets, mithai, namkeen, and festive treats. Fresh daily delivery across India." />
+        <meta property="og:image" content="https://sweethome-store.com/sweet_home_logo.jpg" />
+        <meta property="og:url" content="https://sweethome-store.com/collection" />
+        <meta property="og:type" content="website" />
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content="Indian Sweets Collection - Authentic Mithai Online" />
+        <meta name="twitter:description" content="Browse our complete collection of authentic Indian sweets and mithai. Fresh daily delivery across India." />
+        <meta name="twitter:image" content="https://sweethome-store.com/sweet_home_logo.jpg" />
+        <link rel="canonical" href="https://sweethome-store.com/collection" />
+        <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1" />
+        <script type="application/ld+json">
+          {JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "CollectionPage",
+            "name": "Indian Sweets Collection",
+            "description": "Complete collection of authentic Indian sweets, mithai, namkeen, and festive treats",
+            "url": "https://sweethome-store.com/collection",
+            "mainEntity": {
+              "@type": "ItemList",
+              "name": "Sweet Home Product Collection",
+              "description": "Authentic Indian sweets and mithai collection"
+            },
+            "breadcrumb": {
+              "@type": "BreadcrumbList",
+              "itemListElement": [
+                {
+                  "@type": "ListItem",
+                  "position": 1,
+                  "name": "Home",
+                  "item": "https://sweethome-store.com/"
+                },
+                {
+                  "@type": "ListItem",
+                  "position": 2,
+                  "name": "Collection",
+                  "item": "https://sweethome-store.com/collection"
+                }
+              ]
+            }
+          })}
+        </script>
+      </Helmet>
       {/* Collection Page Header */}
       <div className="bg-gradient-to-br from-pink-500 via-orange-500 to-rose-500 py-16 mb-8 relative overflow-hidden">
         <div className="absolute inset-0 opacity-20" style={{ 

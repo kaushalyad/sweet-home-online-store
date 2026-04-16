@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { FaCookie, FaCheckCircle, FaTimesCircle } from 'react-icons/fa';
 import { toast } from 'react-toastify';
+import { Helmet } from "react-helmet-async";
 
 const CookieSettings = () => {
   const [preferences, setPreferences] = useState({
@@ -78,7 +79,13 @@ const CookieSettings = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-gray-50 py-12">
+    <>
+      <Helmet>
+        <title>Cookie Settings - Sweet Home Online Store</title>
+        <meta name="description" content="Manage your cookie preferences for Sweet Home Online Store. Control which cookies we use to improve your browsing experience." />
+        <link rel="canonical" href="https://sweethome-store.com/cookie-settings" />
+      </Helmet>
+      <div className="min-h-screen bg-gray-50 py-12">
       <div className="container mx-auto sm:px-4 max-w-4xl">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -199,6 +206,7 @@ const CookieSettings = () => {
         </motion.div>
       </div>
     </div>
+    </>
   );
 };
 

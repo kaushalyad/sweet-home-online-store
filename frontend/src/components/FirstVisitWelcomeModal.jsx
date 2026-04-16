@@ -17,7 +17,6 @@ export default function FirstVisitWelcomeModal() {
 
   useEffect(() => {
     if (token) {
-      setOpen(false);
       return;
     }
 
@@ -34,12 +33,14 @@ export default function FirstVisitWelcomeModal() {
 
     try {
       if (localStorage.getItem(STORAGE_KEY)) return;
+      
+      // Auto-navigate to login on first visit
+      localStorage.setItem(STORAGE_KEY, "1");
+      navigate("/login");
     } catch {
       /* ignore */
     }
-    const t = setTimeout(() => setOpen(true), 350);
-    return () => clearTimeout(t);
-  }, [token, location.pathname]);
+  }, [token, location.pathname, navigate]);
 
   useEffect(() => {
     if (!open) return;
