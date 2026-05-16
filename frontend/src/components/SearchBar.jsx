@@ -1,4 +1,4 @@
-import { useContext, useEffect, useState } from 'react'
+﻿import { useContext, useEffect, useState } from 'react'
 import { ShopContext } from '../context/ShopContext'
 import { useLocation, useNavigate } from 'react-router-dom';
 import { FaSearch, FaTimes, FaClock, FaTag, FaSadTear, FaArrowRight, FaHeart } from 'react-icons/fa';
@@ -113,14 +113,14 @@ const SearchBar = () => {
         <div className='relative mx-auto max-w-3xl mt-5 animate-fadeIn'>
             <div className='bg-white shadow-xl rounded-lg overflow-hidden'>
                 {/* Search header with pink gradient */}
-                <div className="bg-gradient-to-r from-pink-500 to-rose-500 py-3 px-4 flex items-center justify-between">
+                <div className="bg-gradient-to-r from-blue-500 to-blue-500 py-3 px-4 flex items-center justify-between">
                     <div className="flex items-center">
                         <FaSearch className="text-white mr-2" />
                         <h2 className="text-white font-medium">Search Products</h2>
                     </div>
                     <button 
                         onClick={() => setShowSearch(false)} 
-                        className="text-white hover:text-pink-100 transition-colors"
+                        className="text-white hover:text-blue-100 transition-colors"
                         aria-label="Close search"
                     >
                         <FaTimes />
@@ -139,7 +139,7 @@ const SearchBar = () => {
                             onKeyDown={handleSearch}
                             onFocus={() => setFocused(true)}
                             onBlur={() => setTimeout(() => setFocused(false), 200)}
-                            className="w-full pl-10 pr-14 py-3 border-2 border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-pink-500 transition-all duration-200 bg-white" 
+                            className="w-full pl-10 pr-14 py-3 border-2 border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 bg-white" 
                             type="text" 
                             placeholder="Search for sweets, desserts, and treats..."
                             autoFocus
@@ -156,7 +156,7 @@ const SearchBar = () => {
                             )}
                             <button 
                                 onClick={submitSearch}
-                                className={`bg-pink-500 hover:bg-pink-600 text-white rounded-lg p-2 transition-colors ${!search.trim() ? 'opacity-50 cursor-not-allowed' : ''}`}
+                                className={`bg-blue-500 hover:bg-blue-600 text-white rounded-lg p-2 transition-colors ${!search.trim() ? 'opacity-50 cursor-not-allowed' : ''}`}
                                 disabled={!search.trim()}
                             >
                                 <FaSearch />
@@ -170,14 +170,14 @@ const SearchBar = () => {
                             {/* Loading indicator */}
                             {isSearching && (
                                 <div className="flex justify-center items-center py-8">
-                                    <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-pink-500"></div>
+                                    <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-blue-500"></div>
                                 </div>
                             )}
                             
                             {/* Search results */}
                             {search.trim() && searchResults.length > 0 && !isSearching && (
                                 <div>
-                                    <div className="bg-pink-50 px-4 py-2 border-b border-gray-200">
+                                    <div className="bg-blue-50 px-4 py-2 border-b border-gray-200">
                                         <span className="text-sm font-medium text-gray-700">Search Results</span>
                                     </div>
                                     <ul>
@@ -223,7 +223,7 @@ const SearchBar = () => {
                                                 <button 
                                                     key={index}
                                                     onClick={() => viewProduct(product.id)}
-                                                    className="px-3 py-1 bg-pink-50 text-pink-600 border border-pink-200 rounded-full text-sm hover:bg-pink-100 transition-colors flex items-center"
+                                                    className="px-3 py-1 bg-blue-50 text-blue-600 border border-blue-200 rounded-full text-sm hover:bg-blue-100 transition-colors flex items-center"
                                                 >
                                                     <FaHeart className="mr-1 text-xs" /> {product.name}
                                                 </button>
@@ -245,7 +245,7 @@ const SearchBar = () => {
                                                 setRecentSearches([]);
                                                 localStorage.removeItem('recentSearches');
                                             }}
-                                            className="text-xs text-pink-600 hover:text-pink-800 font-medium"
+                                            className="text-xs text-blue-600 hover:text-blue-800 font-medium"
                                         >
                                             Clear All
                                         </button>
@@ -282,7 +282,7 @@ const SearchBar = () => {
                                     setSearch(tag);
                                     addToRecentSearches(tag);
                                 }}
-                                className="px-3 py-1 bg-white text-pink-600 border border-pink-200 rounded-full text-sm hover:bg-pink-50 transition-colors"
+                                className="px-3 py-1 bg-white text-blue-600 border border-blue-200 rounded-full text-sm hover:bg-blue-50 transition-colors"
                             >
                                 {tag}
                             </button>
@@ -311,3 +311,5 @@ const SearchBar = () => {
 // },
 
 export default SearchBar
+
+

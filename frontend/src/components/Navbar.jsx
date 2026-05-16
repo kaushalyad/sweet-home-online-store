@@ -1,4 +1,4 @@
-import { useContext, useState, useEffect, useRef } from "react";
+﻿import { useContext, useState, useEffect, useLayoutEffect, useRef } from "react";
 import { assets } from "../assets/assets";
 import { Link, NavLink, useLocation, useNavigate } from "react-router-dom";
 import { ShopContext } from "../context/ShopContext";
@@ -16,6 +16,7 @@ const Navbar = () => {
   const [scrollPosition, setScrollPosition] = useState(0);
   const [showLoginCTA, setShowLoginCTA] = useState(false);
   const bannerRef = useRef(null);
+  const navRef = useRef(null);
   const categoryRef = useRef(null);
   const navScrollRef = useRef(null);
   const loginCTARef = useRef(null);
@@ -136,6 +137,20 @@ const Navbar = () => {
     };
   }, []);
 
+  // Set CSS variable for navbar + banner height before paint
+  useLayoutEffect(() => {
+    const updateNavbarOffset = () => {
+      const bannerHeight = bannerRef.current?.getBoundingClientRect().height || 0;
+      const navHeight = navRef.current?.getBoundingClientRect().height || 0;
+      document.documentElement.style.setProperty('--banner-height', `${bannerHeight}px`);
+      document.documentElement.style.setProperty('--navbar-offset', `${bannerHeight + navHeight}px`);
+    };
+
+    updateNavbarOffset();
+    window.addEventListener('resize', updateNavbarOffset);
+    return () => window.removeEventListener('resize', updateNavbarOffset);
+  }, [showPromoBanner]);
+
   // Login CTA - Show after delay and hide after display duration
   useEffect(() => {
     // Only show CTA if user is not logged in
@@ -230,7 +245,7 @@ const Navbar = () => {
       {showPromoBanner && (
         <div 
           ref={bannerRef}
-          className="fixed top-0 left-0 right-0 z-[60] bg-gradient-to-r from-orange-300 via-yellow-300 to-orange-400 overflow-hidden shadow-md"
+          className="fixed top-0 left-0 right-0 z-[60] bg-gradient-to-r from-blue-300 via-yellow-300 to-blue-400 overflow-hidden shadow-md"
         >
           <div className="flex items-center justify-between py-1">
             <div className="flex overflow-hidden flex-1">
@@ -277,7 +292,7 @@ const Navbar = () => {
                   <path d="M20 4H4c-1.11 0-1.99.89-1.99 2L2 18c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V6c0-1.11-.89-2-2-2zm0 14H4v-6h16v6zm0-10H4V6h16v2z"/>
                 </svg>
                 E-Coupons
-                <span className="absolute -top-1 -right-1 bg-gradient-to-r from-red-500 to-orange-500 text-white text-[8px] px-1 py-0.5 rounded-full font-black shadow-sm">NEW</span>
+                <span className="absolute -top-1 -right-1 bg-gradient-to-r from-red-500 to-blue-500 text-white text-[8px] px-1 py-0.5 rounded-full font-black shadow-sm">NEW</span>
               </Link>
             </div>
           </div>
@@ -286,8 +301,9 @@ const Navbar = () => {
 
       {/* Main Navbar - Haldiram's Style */}
       <div 
+        ref={navRef}
         className={`fixed left-0 right-0 z-[57] bg-white shadow-md transition-all duration-300`}
-        style={{ top: showPromoBanner ? '32px' : '0' }}
+        style={{ top: showPromoBanner ? 'var(--banner-height, 32px)' : '0' }}
       >
         <div className="container mx-auto sm:px-4">
           {/* Top Row: Logo, Search, Icons */}
@@ -304,7 +320,7 @@ const Navbar = () => {
             {/* Left Search Bar */}
             <div className="flex-1 max-w-md ml-4 mr-auto hidden md:block">
               <div className="relative group">
-                <div className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-hover:text-orange-500 transition-colors pointer-events-none z-10">
+                <div className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-hover:text-blue-500 transition-colors pointer-events-none z-10">
                   <FaSearch className="w-4 h-4" />
                 </div>
                 <input 
@@ -312,7 +328,7 @@ const Navbar = () => {
                   placeholder="Search for sweets, snacks, ghee..."
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
-                  className="w-full pl-11 pr-5 py-2.5 bg-gray-50 border-2 border-gray-200 rounded-full focus:outline-none focus:bg-white focus:border-orange-500 focus:ring-2 focus:ring-orange-100 text-sm transition-all shadow-sm hover:shadow-md hover:border-orange-300 placeholder:text-gray-400 !rounded-full"
+                  className="w-full pl-11 pr-5 py-2.5 bg-gray-50 border-2 border-gray-200 rounded-full focus:outline-none focus:bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-100 text-sm transition-all shadow-sm hover:shadow-md hover:border-blue-300 placeholder:text-gray-400 !rounded-full"
                   onKeyDown={(e) => {
                     if (e.key === 'Enter' && search.trim()) {
                       navigate(`/collection?search=${encodeURIComponent(search.trim())}`);
@@ -328,7 +344,7 @@ const Navbar = () => {
                       navigate('/collection');
                     }
                   }}
-                  className="absolute right-2 top-1/2 -translate-y-1/2 px-3 py-1 bg-gradient-to-r from-orange-500 to-orange-600 text-white rounded-full hover:from-orange-600 hover:to-orange-700 transition-all shadow-md hover:shadow-lg text-xs font-semibold"
+                  className="absolute right-2 top-1/2 -translate-y-1/2 px-3 py-1 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-full hover:from-blue-600 hover:to-blue-700 transition-all shadow-md hover:shadow-lg text-xs font-semibold"
                 >
                   Search
                 </button>
@@ -338,8 +354,8 @@ const Navbar = () => {
             {/* Right Icons: Wishlist, Profile, Cart */}
             <div className="flex items-center gap-1 sm:gap-3">
               {/* Wishlist */}
-              <Link to="/wishlist" className="p-2 hover:bg-orange-50 rounded-full transition-all relative group hidden sm:flex items-center justify-center">
-                <FaHeart className="w-5 h-5 text-gray-700 group-hover:text-orange-600 group-hover:scale-110 transition-all" />
+              <Link to="/wishlist" className="p-2 hover:bg-red-50 rounded-full transition-all relative group hidden sm:flex items-center justify-center">
+                <FaHeart className="w-5 h-5 text-red-500 group-hover:text-red-600 group-hover:scale-110 transition-all" />
                 <span className="absolute -bottom-6 left-1/2 -translate-x-1/2 text-xs text-gray-600 opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">Wishlist</span>
               </Link>
 
@@ -349,9 +365,9 @@ const Navbar = () => {
                   <>
                     <button
                       onClick={toggleProfileMenu}
-                      className="p-2 hover:bg-orange-50 rounded-full transition-all group relative"
+                      className="p-2 hover:bg-blue-50 rounded-full transition-all group relative"
                     >
-                      <FaUserAlt className="w-5 h-5 text-gray-700 group-hover:text-orange-600 group-hover:scale-110 transition-all" />
+                      <FaUserAlt className="w-5 h-5 text-gray-700 group-hover:text-blue-600 group-hover:scale-110 transition-all" />
                       <span className="absolute -bottom-6 left-1/2 -translate-x-1/2 text-xs text-gray-600 opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">Profile</span>
                     </button>
                     
@@ -368,25 +384,25 @@ const Navbar = () => {
                           <div className="py-2">
                             <button 
                               onClick={() => handleNavigation('/profile')}
-                              className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-orange-50 hover:text-orange-600 transition-colors flex items-center gap-2"
+                              className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors flex items-center gap-2"
                             >
                               <span>Profile Information</span>
                             </button>
                             <button 
                               onClick={() => handleNavigation('/orders')}
-                              className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-orange-50 hover:text-orange-600 transition-colors flex items-center gap-2"
+                              className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors flex items-center gap-2"
                             >
                               <span>My Orders</span>
                             </button>
                             <button 
                               onClick={() => handleNavigation('/wishlist')}
-                              className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-orange-50 hover:text-orange-600 transition-colors flex items-center gap-2"
+                              className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors flex items-center gap-2"
                             >
                               <span>My Wishlist</span>
                             </button>
                             <button 
                               onClick={() => handleNavigation('/settings')}
-                              className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-orange-50 hover:text-orange-600 transition-colors flex items-center gap-2"
+                              className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors flex items-center gap-2"
                             >
                               <span>Account Settings</span>
                             </button>
@@ -444,9 +460,9 @@ const Navbar = () => {
               </div>
 
               {/* Cart */}
-              <Link to="/cart" className="relative p-2 hover:bg-orange-50 rounded-full transition-all group flex items-center justify-center">
-                <FaShoppingCart className="w-5 h-5 text-gray-700 group-hover:text-orange-600 group-hover:scale-110 transition-all" />
-                <span className="absolute -top-1 -right-1 w-5 h-5 bg-gradient-to-r from-orange-500 to-orange-600 text-white rounded-full text-[10px] flex items-center justify-center font-bold shadow-md animate-pulse">
+              <Link to="/cart" className="relative p-2 hover:bg-blue-50 rounded-full transition-all group flex items-center justify-center">
+                <FaShoppingCart className="w-5 h-5 text-gray-700 group-hover:text-blue-600 group-hover:scale-110 transition-all" />
+                <span className="absolute -top-1 -right-1 w-5 h-5 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-full text-[10px] flex items-center justify-center font-bold shadow-md animate-pulse">
                   {getCartCount()}
                 </span>
                 <span className="absolute -bottom-6 left-1/2 -translate-x-1/2 text-xs text-gray-600 opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">Cart</span>
@@ -455,9 +471,9 @@ const Navbar = () => {
               {/* Mobile Menu Toggle */}
               <button
                 onClick={() => setVisible(true)}
-                className="lg:hidden p-2 hover:bg-orange-50 rounded transition-all group"
+                className="lg:hidden p-2 hover:bg-blue-50 rounded transition-all group"
               >
-                <svg className="w-6 h-6 text-gray-700 group-hover:text-orange-600 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="w-6 h-6 text-gray-700 group-hover:text-blue-600 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h16"></path>
                 </svg>
               </button>
@@ -472,7 +488,7 @@ const Navbar = () => {
                     {value.type === "simple" ? (
                       <button
                         onClick={() => navigate(value.path)}
-                        className="relative text-gray-800 hover:text-orange-600 font-semibold text-sm transition-all py-2 px-6 hover:bg-white hover:shadow-sm rounded-lg group/item whitespace-nowrap"
+                        className="relative text-gray-800 hover:text-blue-600 font-semibold text-sm transition-all py-2 px-6 hover:bg-white hover:shadow-sm rounded-lg group/item whitespace-nowrap"
                       >
                         <span className="relative">
                           {key}
@@ -482,14 +498,14 @@ const Navbar = () => {
                             </span>
                           )}
                         </span>
-                        <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-0 group-hover/item:w-3/4 h-0.5 bg-orange-600 transition-all duration-300"></div>
+                        <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-0 group-hover/item:w-3/4 h-0.5 bg-blue-600 transition-all duration-300"></div>
                       </button>
                     ) : (
                       <>
                         <button
                           onClick={() => setActiveDropdown(activeDropdown === key ? null : key)}
                           onMouseEnter={() => setActiveDropdown(key)}
-                          className="flex items-center justify-center gap-1 text-gray-800 hover:text-orange-600 font-semibold text-sm transition-all py-2 px-6 hover:bg-white hover:shadow-sm rounded-lg group/item whitespace-nowrap"
+                          className="flex items-center justify-center gap-1 text-gray-800 hover:text-blue-600 font-semibold text-sm transition-all py-2 px-6 hover:bg-white hover:shadow-sm rounded-lg group/item whitespace-nowrap"
                         >
                           <span className="relative">{key}</span>
                           <svg 
@@ -500,7 +516,7 @@ const Navbar = () => {
                           >
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path>
                           </svg>
-                          <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-0 group-hover/item:w-3/4 h-0.5 bg-orange-600 transition-all duration-300"></div>
+                          <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-0 group-hover/item:w-3/4 h-0.5 bg-blue-600 transition-all duration-300"></div>
                         </button>
 
                       {/* Enhanced Dropdown Menu */}
@@ -519,7 +535,7 @@ const Navbar = () => {
                                 navigate(item.path);
                                 setActiveDropdown(null);
                               }}
-                              className="w-full text-left px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-gradient-to-r hover:from-orange-50 hover:to-yellow-50 hover:text-orange-600 transition-all flex items-center justify-between group/item relative"
+                              className="w-full text-left px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-gradient-to-r hover:from-blue-50 hover:to-yellow-50 hover:text-blue-600 transition-all flex items-center justify-between group/item relative"
                             >
                               <span>{item.name}</span>
                               <div className="flex items-center gap-2">
@@ -529,7 +545,7 @@ const Navbar = () => {
                                   </span>
                                 )}
                                 <svg 
-                                  className="w-4 h-4 opacity-0 group-hover/item:opacity-100 transition-opacity text-orange-600" 
+                                  className="w-4 h-4 opacity-0 group-hover/item:opacity-100 transition-opacity text-blue-600" 
                                   fill="none" 
                                   stroke="currentColor" 
                                   viewBox="0 0 24 24"
@@ -558,7 +574,7 @@ const Navbar = () => {
                 placeholder="Search here..."
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                className="flex-1 px-3 py-2 border-2 border-gray-200 rounded-full focus:outline-none focus:border-orange-500 text-sm"
+                className="flex-1 px-3 py-2 border-2 border-gray-200 rounded-full focus:outline-none focus:border-blue-500 text-sm"
                 onKeyDown={(e) => {
                   if (e.key === 'Enter' && search.trim()) {
                     setShowSearchBar(false);
@@ -575,7 +591,7 @@ const Navbar = () => {
                     navigate('/collection');
                   }
                 }}
-                className="px-3 py-2 bg-orange-600 text-white rounded-full hover:bg-orange-700 transition-colors"
+                className="px-3 py-2 bg-blue-600 text-white rounded-full hover:bg-blue-700 transition-colors"
               >
                 <FaSearch />
               </button>
@@ -592,11 +608,11 @@ const Navbar = () => {
       >
         <div className="flex flex-col h-full">
           {/* Header */}
-          <div className="flex items-center justify-between p-4 border-b border-gray-200 bg-orange-600 text-white">
+          <div className="flex items-center justify-between p-4 border-b border-gray-200 bg-blue-600 text-white">
             <h2 className="text-lg font-bold">Menu</h2>
             <button
               onClick={() => setVisible(false)}
-              className="p-2 hover:bg-orange-700 rounded-full transition-colors"
+              className="p-2 hover:bg-blue-700 rounded-full transition-colors"
             >
               <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path>
@@ -615,7 +631,7 @@ const Navbar = () => {
                         navigate(value.path);
                         setVisible(false);
                       }}
-                      className="w-full text-left px-4 py-3 text-gray-800 hover:bg-orange-50 hover:text-orange-600 transition-colors font-medium"
+                      className="w-full text-left px-4 py-3 text-gray-800 hover:bg-blue-50 hover:text-blue-600 transition-colors font-medium"
                     >
                       {key}
                     </button>
@@ -623,7 +639,7 @@ const Navbar = () => {
                     <div>
                       <button
                         onClick={() => setActiveDropdown(activeDropdown === key ? null : key)}
-                        className="w-full text-left px-4 py-3 text-gray-800 hover:bg-orange-50 transition-colors font-medium flex items-center justify-between"
+                        className="w-full text-left px-4 py-3 text-gray-800 hover:bg-blue-50 transition-colors font-medium flex items-center justify-between"
                       >
                         {key}
                         <svg 
@@ -646,7 +662,7 @@ const Navbar = () => {
                                 setVisible(false);
                                 setActiveDropdown(null);
                               }}
-                              className="w-full text-left px-8 py-2 text-sm text-gray-700 hover:text-orange-600 transition-colors"
+                              className="w-full text-left px-8 py-2 text-sm text-gray-700 hover:text-blue-600 transition-colors"
                             >
                               {item.name}
                             </button>
@@ -666,7 +682,7 @@ const Navbar = () => {
                     navigate('/about');
                     setVisible(false);
                   }}
-                  className="w-full text-left py-2 text-gray-700 hover:text-orange-600 transition-colors"
+                  className="w-full text-left py-2 text-gray-700 hover:text-blue-600 transition-colors"
                 >
                   About Us
                 </button>
@@ -675,7 +691,7 @@ const Navbar = () => {
                     navigate('/contact');
                     setVisible(false);
                   }}
-                  className="w-full text-left py-2 text-gray-700 hover:text-orange-600 transition-colors"
+                  className="w-full text-left py-2 text-gray-700 hover:text-blue-600 transition-colors"
                 >
                   Contact
                 </button>
@@ -687,19 +703,19 @@ const Navbar = () => {
                   <p className="text-xs text-gray-500 font-semibold mb-2">MY ACCOUNT</p>
                   <button 
                     onClick={() => handleNavigation("/profile")}
-                    className="w-full text-left py-2 text-gray-700 hover:text-orange-600 transition-colors"
+                    className="w-full text-left py-2 text-gray-700 hover:text-blue-600 transition-colors"
                   >
                     My Profile
                   </button>
                   <button 
                     onClick={() => handleNavigation("/orders")}
-                    className="w-full text-left py-2 text-gray-700 hover:text-orange-600 transition-colors"
+                    className="w-full text-left py-2 text-gray-700 hover:text-blue-600 transition-colors"
                   >
                     My Orders
                   </button>
                   <button 
                     onClick={() => handleNavigation("/wishlist")}
-                    className="w-full text-left py-2 text-gray-700 hover:text-orange-600 transition-colors"
+                    className="w-full text-left py-2 text-gray-700 hover:text-blue-600 transition-colors"
                   >
                     Wishlist
                   </button>
@@ -720,7 +736,7 @@ const Navbar = () => {
                       navigate("/login");
                       setVisible(false);
                     }}
-                    className="w-full bg-orange-600 text-white py-3 rounded-lg hover:bg-orange-700 transition-colors font-medium"
+                    className="w-full bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 transition-colors font-medium"
                   >
                     Login / Sign Up
                   </button>
@@ -736,3 +752,5 @@ const Navbar = () => {
 
 // Export the component
 export default Navbar;
+
+

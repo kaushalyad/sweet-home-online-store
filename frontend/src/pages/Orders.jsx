@@ -1,4 +1,4 @@
-import { useContext, useEffect, useState } from 'react'
+﻿import { useContext, useEffect, useState } from 'react'
 import { ShopContext } from '../context/ShopContext'
 import Title from '../components/Title';
 import OrdersSkeleton from '../components/OrdersSkeleton';
@@ -244,7 +244,7 @@ const Orders = () => {
   if (error) {
     return (
       <motion.div 
-        className="min-h-screen bg-gradient-to-b from-white to-orange-50/20 py-8"
+        className="min-h-screen bg-gradient-to-b from-white to-blue-50/20 py-8"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
       >
@@ -288,7 +288,7 @@ const Orders = () => {
         <meta name="robots" content="noindex, nofollow" />
         <link rel="canonical" href="https://sweethome-store.com/orders" />
       </Helmet>
-      <div className="min-h-screen bg-gradient-to-b from-white to-orange-50/20 py-8 sm:py-12">
+      <div className="min-h-screen bg-gradient-to-b from-white to-blue-50/20 py-8 sm:py-12">
         <div className="container mx-auto px-4">
           {/* Header */}
           <motion.div 
@@ -296,7 +296,7 @@ const Orders = () => {
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
           >
-          <h1 className="text-3xl sm:text-4xl font-bold bg-gradient-to-r from-orange-500 to-pink-500 bg-clip-text text-transparent mb-2">
+          <h1 className="text-3xl sm:text-4xl font-bold bg-gradient-to-r from-blue-500 to-blue-500 bg-clip-text text-transparent mb-2">
             My Orders
           </h1>
           <p className="text-gray-600">Track and manage your sweet deliveries</p>
@@ -316,7 +316,7 @@ const Orders = () => {
                 onClick={() => setFilterStatus(status)}
                 className={`px-6 py-3 rounded-xl font-semibold transition-all duration-300 capitalize ${
                   filterStatus === status
-                    ? 'bg-gradient-to-r from-orange-500 to-pink-500 text-white shadow-lg scale-105'
+                    ? 'bg-gradient-to-r from-blue-500 to-blue-500 text-white shadow-lg scale-105'
                     : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                 }`}
               >
@@ -343,8 +343,8 @@ const Orders = () => {
             animate={{ opacity: 1, scale: 1 }}
             transition={{ delay: 0.2 }}
           >
-            <div className="w-24 h-24 bg-gradient-to-br from-orange-100 to-pink-100 rounded-full flex items-center justify-center mx-auto mb-6">
-              <FaBox className="w-12 h-12 text-orange-500" />
+            <div className="w-24 h-24 bg-gradient-to-br from-blue-100 to-blue-100 rounded-full flex items-center justify-center mx-auto mb-6">
+              <FaBox className="w-12 h-12 text-blue-500" />
             </div>
             <h3 className="text-2xl font-bold text-gray-800 mb-2">No Orders Found</h3>
             <p className="text-gray-600 mb-6">
@@ -354,7 +354,7 @@ const Orders = () => {
             </p>
             <Link 
               to="/collection" 
-              className="inline-flex items-center gap-2 px-8 py-4 bg-gradient-to-r from-orange-500 to-pink-500 text-white rounded-xl hover:from-orange-600 hover:to-pink-600 transition-all shadow-lg hover:shadow-xl font-semibold"
+              className="inline-flex items-center gap-2 px-8 py-4 bg-gradient-to-r from-blue-500 to-blue-500 text-white rounded-xl hover:from-blue-600 hover:to-blue-600 transition-all shadow-lg hover:shadow-xl font-semibold"
             >
               <FaBox /> Start Shopping
             </Link>
@@ -404,7 +404,7 @@ const Orders = () => {
                           </div>
                           <div className="flex flex-wrap gap-4 text-sm text-gray-600">
                             <span className="flex items-center gap-1">
-                              <FaClock className="text-orange-500" />
+                              <FaClock className="text-blue-500" />
                               {new Date(order.date).toLocaleDateString('en-US', { 
                                 month: 'short', 
                                 day: 'numeric', 
@@ -412,11 +412,11 @@ const Orders = () => {
                               })}
                             </span>
                             <span className="flex items-center gap-1">
-                              <FaBox className="text-pink-500" />
+                              <FaBox className="text-blue-500" />
                               {order.items.length} {order.items.length === 1 ? 'item' : 'items'}
                             </span>
-                            <span className="flex items-center gap-1 font-bold text-orange-600">
-                              <FaReceipt className="text-orange-500" />
+                            <span className="flex items-center gap-1 font-bold text-blue-600">
+                              <FaReceipt className="text-blue-500" />
                               {currency}{order.totalAmount || order.amount}
                             </span>
                           </div>
@@ -429,7 +429,7 @@ const Orders = () => {
                             className={`flex items-center justify-center gap-1.5 px-3 sm:px-4 py-2 sm:py-2.5 rounded-lg sm:rounded-xl transition-all font-semibold text-xs sm:text-sm whitespace-nowrap ${
                               isCancelled 
                                 ? 'bg-gray-300 text-gray-600 cursor-not-allowed shadow-sm' 
-                                : 'bg-gradient-to-r from-orange-500 to-pink-500 text-white hover:from-orange-600 hover:to-pink-600 shadow-lg hover:shadow-xl'
+                                : 'bg-gradient-to-r from-blue-500 to-blue-500 text-white hover:from-blue-600 hover:to-blue-600 shadow-lg hover:shadow-xl'
                             }`}
                             onClick={(e) => isCancelled && e.preventDefault()}
                           >
@@ -456,7 +456,7 @@ const Orders = () => {
                       </div>
 
                       {/* Quick Preview - Always Visible */}
-                      <div className="mt-4 flex items-center gap-4 p-4 bg-gradient-to-r from-orange-50 to-pink-50 rounded-xl">
+                      <div className="mt-4 flex items-center gap-4 p-4 bg-gradient-to-r from-blue-50 to-blue-50 rounded-xl">
                         <div className="flex -space-x-4">
                           {order.items.slice(0, 3).map((item, idx) => (
                             <div 
@@ -475,7 +475,7 @@ const Orders = () => {
                             </div>
                           ))}
                           {order.items.length > 3 && (
-                            <div className="w-16 h-16 bg-gradient-to-br from-orange-400 to-pink-500 border-4 border-white rounded-xl flex items-center justify-center shadow-md">
+                            <div className="w-16 h-16 bg-gradient-to-br from-blue-400 to-blue-500 border-4 border-white rounded-xl flex items-center justify-center shadow-md">
                               <span className="text-white font-bold text-sm">
                                 +{order.items.length - 3}
                               </span>
@@ -508,7 +508,7 @@ const Orders = () => {
                             {/* All Items */}
                             <div>
                               <h4 className="font-bold text-gray-800 mb-4 flex items-center gap-2">
-                                <FaBox className="text-orange-500" />
+                                <FaBox className="text-blue-500" />
                                 Order Items
                               </h4>
                               <div className="space-y-3">
@@ -544,7 +544,7 @@ const Orders = () => {
                                       }`}>
                                         <span>Size: <span className="font-semibold">{item.size || 'Regular'}</span></span>
                                         <span>Qty: <span className="font-semibold">{item.quantity}</span></span>
-                                        <span className="font-bold text-orange-600">{currency}{item.price}</span>
+                                        <span className="font-bold text-blue-600">{currency}{item.price}</span>
                                       </div>
                                     </div>
                                   </motion.div>
@@ -556,7 +556,7 @@ const Orders = () => {
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                               <div className="p-4 bg-white rounded-xl shadow-sm">
                                 <h4 className="font-bold text-gray-800 mb-3 flex items-center gap-2">
-                                  <FaMapMarkerAlt className="text-pink-500" />
+                                  <FaMapMarkerAlt className="text-blue-500" />
                                   Delivery Address
                                 </h4>
                                 {order.shippingAddress || order.address ? (
@@ -568,7 +568,7 @@ const Orders = () => {
                                     <p>
                                       {order.shippingAddress?.city || order.address?.city}, {order.shippingAddress?.state || order.address?.state} {order.shippingAddress?.zipcode || order.address?.zipcode}
                                     </p>
-                                    <p className="flex items-center gap-2 text-orange-600 font-semibold mt-2">
+                                    <p className="flex items-center gap-2 text-blue-600 font-semibold mt-2">
                                       <FaPhone className="text-xs" />
                                       {order.shippingAddress?.phone || order.address?.phone}
                                     </p>
@@ -587,13 +587,13 @@ const Orders = () => {
                                   </div>
                                   <div className="flex justify-between">
                                     <span className="text-gray-600">Status</span>
-                                    <span className={`font-semibold ${order.payment ? 'text-green-600' : 'text-orange-600'}`}>
+                                    <span className={`font-semibold ${order.payment ? 'text-green-600' : 'text-blue-600'}`}>
                                       {order.payment ? 'Paid' : 'Pending'}
                                     </span>
                                   </div>
                                   <div className="pt-2 border-t flex justify-between text-base">
                                     <span className="font-bold text-gray-800">Total</span>
-                                    <span className="font-bold text-orange-600">{currency}{order.totalAmount || order.amount}</span>
+                                    <span className="font-bold text-blue-600">{currency}{order.totalAmount || order.amount}</span>
                                   </div>
                                 </div>
                               </div>
@@ -763,7 +763,7 @@ const Orders = () => {
                 {/* Message Section */}
                 <div className="px-4 sm:px-6 pb-4 sm:pb-6">
                   <motion.div 
-                    className="bg-gradient-to-br from-orange-50 to-red-50 rounded-lg sm:rounded-xl p-3 sm:p-4 mb-4 sm:mb-5 border border-red-100"
+                    className="bg-gradient-to-br from-blue-50 to-red-50 rounded-lg sm:rounded-xl p-3 sm:p-4 mb-4 sm:mb-5 border border-red-100"
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.4 }}
@@ -808,7 +808,7 @@ const Orders = () => {
                     animate={{ opacity: 1 }}
                     transition={{ delay: 0.6 }}
                   >
-                    <FaPhone className="text-orange-500 text-[10px] sm:text-xs" />
+                    <FaPhone className="text-blue-500 text-[10px] sm:text-xs" />
                     Questions? Call 9931018857
                   </motion.p>
                 </div>
@@ -823,3 +823,5 @@ const Orders = () => {
 };
 
 export default Orders;
+
+

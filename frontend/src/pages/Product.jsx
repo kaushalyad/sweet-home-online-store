@@ -1,4 +1,4 @@
-import { useContext, useEffect, useMemo, useState } from "react";
+﻿import { useContext, useEffect, useMemo, useState } from "react";
 import { Link, useParams, useNavigate } from "react-router-dom";
 import { ShopContext } from "../context/ShopContext";
 import RelatedProducts from "../components/RelatedProducts";
@@ -261,7 +261,8 @@ const Product = () => {
               "@type": "Offer",
               "price": productData.discountPrice || productData.price,
               "priceCurrency": "INR",
-              "availability": productData.stock > 0 ? "InStock" : "OutOfStock",
+              "availability": productData.stock > 0 ? "https://schema.org/InStock" : "https://schema.org/OutOfStock",
+              "itemCondition": "https://schema.org/NewCondition",
               "seller": {
                 "@type": "Organization",
                 "name": "Sweet Home Online Store"
@@ -293,26 +294,26 @@ const Product = () => {
         </script>
       </Helmet>
 
-      <div className="w-full min-h-screen bg-gradient-to-br from-pink-50/30 via-orange-50/20 to-rose-50/30">
+      <div className="w-full min-h-screen bg-gradient-to-br from-blue-50/30 via-blue-50/20 to-blue-50/30">
       <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-6 py-4 sm:py-6 lg:py-8">
         {/* Breadcrumb Navigation */}
         <div className="mb-4 sm:mb-6">
           <nav className="flex items-center text-xs sm:text-sm bg-white/80 backdrop-blur-sm px-3 sm:px-4 py-2.5 sm:py-3 rounded-xl shadow-soft overflow-x-auto">
             <button 
               onClick={() => navigate(-1)} 
-              className="flex items-center text-gray-600 hover:text-orange-500 transition-colors font-medium whitespace-nowrap"
+              className="flex items-center text-gray-600 hover:text-blue-500 transition-colors font-medium whitespace-nowrap"
             >
               <FaArrowLeft className="mr-1.5 sm:mr-2 text-xs sm:text-sm" />
               <span className="hidden sm:inline">Back</span>
             </button>
             <span className="mx-1.5 sm:mx-2 text-gray-300">/</span>
-            <Link to="/" className="text-gray-600 hover:text-orange-500 transition-colors font-medium whitespace-nowrap">Home</Link>
+            <Link to="/" className="text-gray-600 hover:text-blue-500 transition-colors font-medium whitespace-nowrap">Home</Link>
             <span className="mx-1.5 sm:mx-2 text-gray-300">/</span>
-            <Link to="/collection" className="text-gray-600 hover:text-orange-500 transition-colors font-medium whitespace-nowrap">Collection</Link>
+            <Link to="/collection" className="text-gray-600 hover:text-blue-500 transition-colors font-medium whitespace-nowrap">Collection</Link>
             <span className="mx-1.5 sm:mx-2 text-gray-300">/</span>
             <Link 
               to={`/collection?category=${productData.category}`}
-              className="text-gray-600 hover:text-orange-500 transition-colors font-medium capitalize whitespace-nowrap"
+              className="text-gray-600 hover:text-blue-500 transition-colors font-medium capitalize whitespace-nowrap"
             >
               {productData.category}
             </Link>
@@ -338,7 +339,7 @@ const Product = () => {
                     className={`relative cursor-pointer rounded-xl overflow-hidden min-w-16 sm:min-w-16 h-16 sm:h-16 flex-shrink-0 shadow-sm ${
                       image === img 
                         ? 'ring-2 ring-pink-500 ring-offset-2 shadow-md' 
-                        : 'border border-gray-200 hover:border-pink-300 hover:shadow'
+                        : 'border border-gray-200 hover:border-blue-300 hover:shadow'
                     }`}
                   >
                     <div className="w-full h-full bg-white">
@@ -398,7 +399,7 @@ const Product = () => {
                 {/* Product Badges */}
                 <div className="absolute top-2 sm:top-4 left-2 sm:left-4 flex flex-wrap gap-1 sm:gap-2 z-10">
                   {productData.bestseller && (
-                    <div className="bg-gradient-to-r from-pink-500 to-pink-600 text-white text-[10px] sm:text-xs px-2 sm:px-3 py-1 sm:py-1.5 rounded-full flex items-center shadow-md">
+                    <div className="bg-gradient-to-r from-blue-500 to-blue-600 text-white text-[10px] sm:text-xs px-2 sm:px-3 py-1 sm:py-1.5 rounded-full flex items-center shadow-md">
                       <FaStar className="mr-1 sm:mr-1.5 text-[8px] sm:text-xs" /> Bestseller
                     </div>
                   )}
@@ -408,7 +409,7 @@ const Product = () => {
                     </div>
                   )}
                   {productData.discountPrice && (
-                    <div className="bg-gradient-to-r from-amber-500 to-orange-500 text-white text-[10px] sm:text-xs px-2 sm:px-3 py-1 sm:py-1.5 rounded-full shadow-md">
+                    <div className="bg-gradient-to-r from-blue-500 to-blue-500 text-white text-[10px] sm:text-xs px-2 sm:px-3 py-1 sm:py-1.5 rounded-full shadow-md">
                       Sale
                     </div>
                   )}
@@ -487,7 +488,7 @@ const Product = () => {
               <div className="mb-4">
                 <Link 
                   to={`/collection?category=${productData.category}`}
-                  className="inline-block bg-pink-50 text-pink-600 text-xs font-medium px-3 py-1.5 rounded-full capitalize hover:bg-pink-100 transition-colors shadow-sm"
+                  className="inline-block bg-blue-50 text-blue-600 text-xs font-medium px-3 py-1.5 rounded-full capitalize hover:bg-blue-100 transition-colors shadow-sm"
                 >
                   {productData.category}
                 </Link>
@@ -497,7 +498,7 @@ const Product = () => {
               <h1 className="font-poppins text-2xl sm:text-3xl lg:text-4xl font-extrabold text-gray-900 mb-2 leading-tight tracking-tight">
                 {productData.name}
               </h1>
-              <div className="w-16 h-1 bg-gradient-to-r from-pink-500 to-orange-500 rounded-full mb-4" />
+              <div className="w-16 h-1 bg-gradient-to-r from-blue-500 to-blue-500 rounded-full mb-4" />
               
               {/* Ratings */}
               <div className="flex flex-wrap items-center gap-3 mb-6">
@@ -521,7 +522,7 @@ const Product = () => {
                 <button
                   type="button"
                   onClick={() => setActiveTab("reviews")}
-                  className="text-sm font-semibold text-gray-700 hover:text-orange-600 underline underline-offset-4"
+                  className="text-sm font-semibold text-gray-700 hover:text-blue-600 underline underline-offset-4"
                 >
                   {reviewsStats.totalReviews || productData.totalReviews || 0} reviews
                 </button>
@@ -566,7 +567,7 @@ const Product = () => {
                 <div className="flex items-center">
                   <button 
                     onClick={decreaseQuantity}
-                    className="w-11 h-11 sm:w-12 sm:h-12 rounded-l-xl border-2 border-gray-300 flex items-center justify-center hover:bg-gradient-to-r hover:from-pink-500 hover:to-orange-500 hover:text-white hover:border-transparent focus:outline-none transition-all duration-200 font-bold text-lg"
+                    className="w-11 h-11 sm:w-12 sm:h-12 rounded-l-xl border-2 border-gray-300 flex items-center justify-center hover:bg-gradient-to-r hover:from-blue-500 hover:to-blue-500 hover:text-white hover:border-transparent focus:outline-none transition-all duration-200 font-bold text-lg"
                   >
                     -
                   </button>
@@ -574,11 +575,11 @@ const Product = () => {
                     type="number" 
                     value={quantity}
                     onChange={(e) => setQuantity(Math.max(1, parseInt(e.target.value) || 1))}
-                    className="w-16 sm:w-20 h-11 sm:h-12 border-t-2 border-b-2 border-gray-300 text-center font-poppins font-bold text-base sm:text-lg focus:outline-none focus:border-orange-400"
+                    className="w-16 sm:w-20 h-11 sm:h-12 border-t-2 border-b-2 border-gray-300 text-center font-poppins font-bold text-base sm:text-lg focus:outline-none focus:border-blue-400"
                   />
                   <button 
                     onClick={increaseQuantity}
-                    className="w-11 h-11 sm:w-12 sm:h-12 rounded-r-xl border-2 border-gray-300 flex items-center justify-center hover:bg-gradient-to-r hover:from-pink-500 hover:to-orange-500 hover:text-white hover:border-transparent focus:outline-none transition-all duration-200 font-bold text-lg"
+                    className="w-11 h-11 sm:w-12 sm:h-12 rounded-r-xl border-2 border-gray-300 flex items-center justify-center hover:bg-gradient-to-r hover:from-blue-500 hover:to-blue-500 hover:text-white hover:border-transparent focus:outline-none transition-all duration-200 font-bold text-lg"
                   >
                     +
                   </button>
@@ -591,7 +592,7 @@ const Product = () => {
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
                   onClick={handleAddToCart}
-                  className="btn-interactive flex-1 bg-gradient-to-r from-pink-500 to-orange-500 text-white px-6 sm:px-8 py-4 rounded-xl font-poppins font-semibold flex items-center justify-center gap-2.5 transition-all shadow-medium hover:shadow-strong text-base"
+                  className="btn-interactive flex-1 bg-gradient-to-r from-blue-500 to-blue-500 text-white px-6 sm:px-8 py-4 rounded-xl font-poppins font-semibold flex items-center justify-center gap-2.5 transition-all shadow-medium hover:shadow-strong text-base"
                 >
                   <FaShoppingCart className="text-lg" /> Add to Cart
                 </motion.button>
@@ -623,13 +624,13 @@ const Product = () => {
                     <span>Free shipping over ₹500</span>
                   </div>
                   <div className="flex items-center gap-2.5 text-sm text-gray-700 font-inter">
-                    <div className="w-8 h-8 rounded-full bg-gradient-to-br from-orange-400 to-rose-500 flex items-center justify-center flex-shrink-0">
+                    <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-400 to-blue-500 flex items-center justify-center flex-shrink-0">
                       <FaRegClock className="text-white text-xs" />
                     </div>
                     <span>Easy returns within 7 days</span>
                   </div>
                   <div className="flex items-center gap-2.5 text-sm text-gray-700 font-inter">
-                    <div className="w-8 h-8 rounded-full bg-gradient-to-br from-purple-400 to-pink-500 flex items-center justify-center flex-shrink-0">
+                    <div className="w-8 h-8 rounded-full bg-gradient-to-br from-purple-400 to-blue-500 flex items-center justify-center flex-shrink-0">
                       <FaCheck className="text-white text-xs" />
                     </div>
                     <span>Secure payment</span>
@@ -681,7 +682,7 @@ const Product = () => {
             onClick={() => setActiveTab("description")}
             className={`px-4 sm:px-6 py-3 sm:py-4 text-xs sm:text-sm font-poppins font-semibold transition-all whitespace-nowrap ${
               activeTab === "description"
-                ? "text-white bg-gradient-to-r from-pink-500 to-orange-500 rounded-t-xl shadow-sm"
+                ? "text-white bg-gradient-to-r from-blue-500 to-blue-500 rounded-t-xl shadow-sm"
                 : "text-gray-600 hover:text-gray-900 hover:bg-gray-50"
             }`}
           >
@@ -691,7 +692,7 @@ const Product = () => {
             onClick={() => setActiveTab("nutrition")}
             className={`px-4 sm:px-6 py-3 sm:py-4 text-xs sm:text-sm font-poppins font-semibold transition-all whitespace-nowrap ${
               activeTab === "nutrition"
-                ? "text-white bg-gradient-to-r from-pink-500 to-orange-500 rounded-t-xl shadow-sm"
+                ? "text-white bg-gradient-to-r from-blue-500 to-blue-500 rounded-t-xl shadow-sm"
                 : "text-gray-600 hover:text-gray-900 hover:bg-gray-50"
             }`}
           >
@@ -701,7 +702,7 @@ const Product = () => {
             onClick={() => setActiveTab("reviews")}
             className={`px-4 sm:px-6 py-3 sm:py-4 text-xs sm:text-sm font-poppins font-semibold transition-all whitespace-nowrap ${
               activeTab === "reviews"
-                ? "text-white bg-gradient-to-r from-pink-500 to-orange-500 rounded-t-xl shadow-sm"
+                ? "text-white bg-gradient-to-r from-blue-500 to-blue-500 rounded-t-xl shadow-sm"
                 : "text-gray-600 hover:text-gray-900 hover:bg-gray-50"
             }`}
           >
@@ -819,7 +820,7 @@ const Product = () => {
                               value={reviewComment}
                               onChange={(e) => setReviewComment(e.target.value)}
                               rows={4}
-                              className="w-full border border-gray-200 rounded-xl p-3 focus:outline-none focus:ring-2 focus:ring-pink-300"
+                              className="w-full border border-gray-200 rounded-xl p-3 focus:outline-none focus:ring-2 focus:ring-blue-300"
                               placeholder="Share your experience..."
                             />
                           </div>
@@ -845,7 +846,7 @@ const Product = () => {
                             </button>
                             <button
                               onClick={handleSubmitReview}
-                              className="px-5 py-2 rounded-xl bg-gradient-to-r from-pink-500 to-orange-500 text-white font-semibold shadow-medium hover:shadow-strong"
+                              className="px-5 py-2 rounded-xl bg-gradient-to-r from-blue-500 to-blue-500 text-white font-semibold shadow-medium hover:shadow-strong"
                             >
                               Submit
                             </button>
@@ -911,7 +912,7 @@ const Product = () => {
                 
                 <button
                   onClick={() => setShowReviewModal(true)}
-                  className="bg-gradient-to-r from-pink-500 to-orange-500 hover:from-pink-600 hover:to-orange-600 text-white px-5 sm:px-6 py-2.5 sm:py-3 rounded-xl text-sm font-poppins font-semibold transition-all shadow-medium hover:shadow-strong"
+                  className="bg-gradient-to-r from-blue-500 to-blue-500 hover:from-blue-600 hover:to-blue-600 text-white px-5 sm:px-6 py-2.5 sm:py-3 rounded-xl text-sm font-poppins font-semibold transition-all shadow-medium hover:shadow-strong"
                 >
                   Write a Review
                 </button>
@@ -975,8 +976,8 @@ const Product = () => {
       {/* Related Products Section */}
       <div className="mt-12 sm:mt-16">
         <div className="text-center mb-8 sm:mb-10">
-          <h2 className="font-poppins text-2xl sm:text-3xl font-bold bg-gradient-to-r from-pink-600 to-orange-600 bg-clip-text text-transparent mb-3">You May Also Like</h2>
-          <div className="w-20 sm:w-24 h-1 bg-gradient-to-r from-pink-500 to-orange-500 mx-auto rounded-full"></div>
+          <h2 className="font-poppins text-2xl sm:text-3xl font-bold bg-gradient-to-r from-blue-600 to-blue-600 bg-clip-text text-transparent mb-3">You May Also Like</h2>
+          <div className="w-20 sm:w-24 h-1 bg-gradient-to-r from-blue-500 to-blue-500 mx-auto rounded-full"></div>
         </div>
         <RelatedProducts
           category={productData.category}
@@ -1093,7 +1094,7 @@ const Product = () => {
   ) : (
     <div className="min-h-[60vh] flex items-center justify-center">
       <div className="flex flex-col items-center bg-white p-8 rounded-xl shadow-md">
-        <div className="w-16 h-16 border-4 border-pink-200 border-t-pink-500 rounded-full animate-spin mb-4"></div>
+        <div className="w-16 h-16 border-4 border-blue-200 border-t-pink-500 rounded-full animate-spin mb-4"></div>
         <p className="text-gray-700 font-medium">Loading product details...</p>
         <p className="text-gray-500 text-sm mt-2">Please wait while we fetch the sweet details</p>
       </div>
@@ -1102,3 +1103,5 @@ const Product = () => {
 };
 
 export default Product;
+
+

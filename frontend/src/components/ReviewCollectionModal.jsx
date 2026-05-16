@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+﻿import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { FaStar, FaTimes, FaCamera, FaVideo, FaUpload } from "react-icons/fa";
 import { toast } from "react-toastify";
@@ -50,7 +50,7 @@ const ReviewCollectionModal = ({ isOpen, onClose, orderId, productId, productNam
       });
 
       if (response.data.success) {
-        toast.success("Thank you for your review! 🎉");
+        toast.success("Thank you for your review! ðŸŽ‰");
         onClose();
       } else {
         toast.error(response.data.message || "Failed to submit review");
@@ -175,7 +175,7 @@ const ReviewCollectionModal = ({ isOpen, onClose, orderId, productId, productNam
               onChange={(e) => setComment(e.target.value)}
               placeholder="What did you like or dislike about this product?"
               rows={4}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent resize-none"
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
               maxLength={500}
             />
             <div className="flex justify-between items-center mt-2">
@@ -183,7 +183,7 @@ const ReviewCollectionModal = ({ isOpen, onClose, orderId, productId, productNam
                 {comment.length}/500 characters
               </span>
               {comment.length < 10 && (
-                <span className="text-xs text-orange-600">
+                <span className="text-xs text-blue-600">
                   Please write at least 10 characters
                 </span>
               )}
@@ -207,7 +207,7 @@ const ReviewCollectionModal = ({ isOpen, onClose, orderId, productId, productNam
               />
               <label
                 htmlFor="review-media"
-                className="flex items-center justify-center w-full p-4 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:border-orange-400 transition-colors"
+                className="flex items-center justify-center w-full p-4 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:border-blue-400 transition-colors"
               >
                 <div className="text-center">
                   <FaUpload className="mx-auto text-gray-400 text-2xl mb-2" />
@@ -261,7 +261,7 @@ const ReviewCollectionModal = ({ isOpen, onClose, orderId, productId, productNam
             <button
               onClick={handleSubmit}
               disabled={loading || !rating || comment.length < 10}
-              className="flex-1 px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center"
+              className="flex-1 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center"
             >
               {loading ? (
                 <>

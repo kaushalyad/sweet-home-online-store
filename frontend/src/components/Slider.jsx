@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FaChevronLeft, FaChevronRight, FaShoppingCart, FaCrown, FaGift, FaStar, FaLeaf, FaMedal } from 'react-icons/fa';
 import { Link } from 'react-router-dom';
@@ -13,7 +13,7 @@ const slides = [
     image: assets.slider1,
     buttonText: "Explore Collection",
     buttonLink: "/products",
-    bgColor: "from-amber-600 to-orange-500",
+    bgColor: "from-blue-600 to-blue-500",
     badge: "Premium",
     price: "₹999",
     rating: 4.9,
@@ -27,7 +27,7 @@ const slides = [
     image: assets.slider2,
     buttonText: "View Collection",
     buttonLink: "/collection/diwali",
-    bgColor: "from-purple-600 to-pink-500",
+    bgColor: "from-purple-600 to-blue-500",
     badge: "Limited Edition",
     price: "₹1,499",
     rating: 4.8,
@@ -252,10 +252,11 @@ const Slider = () => {
         onClick={() => setIsAutoPlaying(!isAutoPlaying)}
         className="absolute top-8 right-8 bg-white/10 text-white p-4 rounded-full border border-white/20 transition-all duration-300"
       >
-        {isAutoPlaying ? '⏸' : '▶'}
+        {isAutoPlaying ? '⏸' : '▪'}
       </motion.button>
     </div>
   );
 };
 
 export default Slider;
+

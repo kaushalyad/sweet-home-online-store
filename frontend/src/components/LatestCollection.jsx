@@ -38,7 +38,7 @@ const LatestCollection = () => {
           <h2 className="font-poppins text-4xl sm:text-5xl font-extrabold text-gray-900 mb-4">
             Latest <span className="gradient-text">Arrivals</span>
           </h2>
-          <div className="w-24 h-1 bg-gradient-to-r from-pink-500 to-orange-500 mx-auto mb-6 rounded-full"></div>
+          <div className="w-24 h-1 bg-gradient-to-r from-blue-500 to-blue-500 mx-auto mb-6 rounded-full"></div>
           <p className="font-inter text-gray-600 text-lg max-w-2xl mx-auto mb-8 px-4">
             Discover our newest creations - freshly made sweets and savory snacks
           </p>
@@ -81,7 +81,7 @@ const LatestCollection = () => {
           >
             <Link 
               to="/collection" 
-              className="btn-interactive group inline-flex items-center px-8 py-4 bg-gradient-to-r from-pink-500 to-orange-500 text-white rounded-full hover:shadow-strong transition-all duration-300 font-semibold text-lg hover:scale-105 relative z-10"
+              className="btn-interactive group inline-flex items-center px-8 py-4 bg-gradient-to-r from-blue-500 to-blue-500 text-white rounded-full hover:shadow-strong transition-all duration-300 font-semibold text-lg hover:scale-105 relative z-10"
             >
               <span className="relative z-10">View All Products</span>
               <FaArrowRight className="ml-2 relative z-10 transform group-hover:translate-x-1 transition-transform" />
@@ -94,4 +94,5 @@ const LatestCollection = () => {
 };
 
 export default LatestCollection;
+
 

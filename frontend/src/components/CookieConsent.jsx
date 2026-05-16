@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FaCookie, FaShieldAlt, FaCog, FaChartBar, FaBullhorn, FaTimes, FaCheckCircle } from 'react-icons/fa';
 import { Link } from 'react-router-dom';
@@ -100,7 +100,7 @@ const CookieConsent = () => {
       description: 'Show you relevant ads based on your interests.',
       icon: FaBullhorn,
       locked: false,
-      gradient: 'from-orange-500 to-orange-600'
+      gradient: 'from-blue-500 to-blue-600'
     }
   ];
 
@@ -132,15 +132,15 @@ const CookieConsent = () => {
                 <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
                   {/* Left: Content */}
                   <div className="flex items-start sm:items-center gap-3 text-center sm:text-left flex-1">
-                    <div className="hidden sm:flex items-center justify-center bg-orange-100 rounded-full p-2.5 flex-shrink-0">
-                      <FaCookie className="text-orange-600 text-xl" />
+                    <div className="hidden sm:flex items-center justify-center bg-blue-100 rounded-full p-2.5 flex-shrink-0">
+                      <FaCookie className="text-blue-600 text-xl" />
                     </div>
                     <div className="flex-1">
                       <p className="text-sm text-gray-700 leading-relaxed">
                         We use cookies to improve your experience. By continuing, you accept our 
                         <Link 
                           to="/cookie-policy" 
-                          className="text-orange-600 hover:text-orange-700 font-semibold mx-1 underline"
+                          className="text-blue-600 hover:text-blue-700 font-semibold mx-1 underline"
                         >
                           Cookie Policy
                         </Link>
@@ -164,7 +164,7 @@ const CookieConsent = () => {
                     </button>
                     <button
                       onClick={handleAcceptAll}
-                      className="flex-1 sm:flex-none px-4 sm:px-6 py-2.5 sm:py-3 text-xs sm:text-sm font-bold text-white bg-orange-600 hover:bg-orange-700 rounded-lg transition-all duration-200 shadow-md hover:shadow-lg active:scale-95"
+                      className="flex-1 sm:flex-none px-4 sm:px-6 py-2.5 sm:py-3 text-xs sm:text-sm font-bold text-white bg-blue-600 hover:bg-blue-700 rounded-lg transition-all duration-200 shadow-md hover:shadow-lg active:scale-95"
                     >
                       Accept
                     </button>
@@ -184,7 +184,7 @@ const CookieConsent = () => {
               className="fixed inset-4 sm:inset-auto sm:left-1/2 sm:top-1/2 sm:-translate-x-1/2 sm:-translate-y-1/2 sm:w-full sm:max-w-2xl bg-white rounded-2xl shadow-2xl z-[9998] max-h-[90vh] overflow-hidden flex flex-col"
             >
               {/* Gradient Header */}
-              <div className="relative bg-gradient-to-br from-orange-500 via-pink-500 to-purple-600 px-6 py-6">
+              <div className="relative bg-gradient-to-br from-blue-500 via-blue-500 to-purple-600 px-6 py-6">
                 {/* Background Pattern */}
                 <div className="absolute inset-0 opacity-10">
                   <div className="absolute top-0 left-0 w-32 h-32 bg-white rounded-full blur-3xl"></div>
@@ -230,7 +230,7 @@ const CookieConsent = () => {
                         transition={{ delay: index * 0.1 }}
                         className={`relative border-2 rounded-xl p-4 transition-all duration-300 ${
                           isEnabled 
-                            ? 'border-orange-300 bg-gradient-to-br from-orange-50 to-pink-50 shadow-md' 
+                            ? 'border-blue-300 bg-gradient-to-br from-blue-50 to-blue-50 shadow-md' 
                             : 'border-gray-200 bg-white hover:border-gray-300'
                         }`}
                       >
@@ -272,7 +272,7 @@ const CookieConsent = () => {
                             onClick={() => togglePreference(category.key)}
                             disabled={category.locked}
                             className={`relative inline-flex h-7 w-12 items-center rounded-full transition-all flex-shrink-0 ${
-                              isEnabled ? 'bg-gradient-to-r from-orange-500 to-pink-500' : 'bg-gray-300'
+                              isEnabled ? 'bg-gradient-to-r from-blue-500 to-blue-500' : 'bg-gray-300'
                             } ${category.locked ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer hover:shadow-lg transform hover:scale-105'}`}
                           >
                             <motion.span
@@ -292,10 +292,10 @@ const CookieConsent = () => {
                   initial={{ y: 20, opacity: 0 }}
                   animate={{ y: 0, opacity: 1 }}
                   transition={{ delay: 0.4 }}
-                  className="mt-5 bg-gradient-to-br from-amber-50 to-yellow-50 border-2 border-amber-200 rounded-xl p-4"
+                  className="mt-5 bg-gradient-to-br from-blue-50 to-yellow-50 border-2 border-amber-200 rounded-xl p-4"
                 >
                   <div className="flex gap-3">
-                    <div className="text-2xl">💡</div>
+                    <div className="text-2xl">ðŸ’¡</div>
                     <p className="text-xs text-amber-900 leading-relaxed">
                       <strong className="font-bold">Tip:</strong> Disabling certain cookies may affect your 
                       experience and limit some features. We recommend accepting all cookies for the best experience.
@@ -309,10 +309,10 @@ const CookieConsent = () => {
                 <div className="flex flex-col sm:flex-row items-center justify-between gap-3">
                   <Link
                     to="/cookie-policy"
-                    className="text-xs text-gray-600 hover:text-orange-600 font-semibold underline decoration-2 underline-offset-2 flex items-center gap-1"
+                    className="text-xs text-gray-600 hover:text-blue-600 font-semibold underline decoration-2 underline-offset-2 flex items-center gap-1"
                     onClick={() => setShowPreferences(false)}
                   >
-                    📋 View Full Cookie Policy →
+                    ðŸ“‹ View Full Cookie Policy →
                   </Link>
                   <div className="flex gap-2 w-full sm:w-auto">
                     <button
@@ -323,7 +323,7 @@ const CookieConsent = () => {
                     </button>
                     <button
                       onClick={handleAcceptSelected}
-                      className="flex-1 sm:flex-none px-6 py-2.5 text-sm font-bold text-white bg-gradient-to-r from-orange-600 to-pink-600 hover:from-orange-700 hover:to-pink-700 rounded-xl transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 flex items-center justify-center gap-2"
+                      className="flex-1 sm:flex-none px-6 py-2.5 text-sm font-bold text-white bg-gradient-to-r from-blue-600 to-blue-600 hover:from-blue-700 hover:to-blue-700 rounded-xl transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 flex items-center justify-center gap-2"
                     >
                       <FaCheckCircle />
                       Confirm Choices
@@ -340,3 +340,5 @@ const CookieConsent = () => {
 };
 
 export default CookieConsent;
+
+

@@ -1,10 +1,9 @@
-import { useContext, useState, useEffect, useCallback, useMemo } from "react";
+﻿import { useContext, useState, useEffect, useCallback, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ShopContext } from "../context/ShopContext";
 import axios from "axios";
 import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
-import { Helmet } from "react-helmet-async";
 
 const PlaceOrder = () => {
   const navigate = useNavigate();
@@ -835,209 +834,203 @@ const PlaceOrder = () => {
   return (
     // When redirecting away, don't render the page (prevents flicker)
     (!token || (!hasItems && !showSuccess)) ? null : (
-    <>
-      <Helmet>
-        <title>Checkout - Sweet Home Online Store</title>
-        <meta name="robots" content="noindex, nofollow" />
-        <link rel="canonical" href="https://sweethome-store.com/place-order" />
-      </Helmet>
-      <div className="bg-gray-50 pt-10 sm:pt-12 pb-10">
-        <AnimatePresence>
-          {showSuccess && <SuccessAnimation />}
-        </AnimatePresence>
-        <div className="container mx-auto px-4 sm:px-4">
+    <div className="bg-gray-50 pt-10 sm:pt-12 pb-10">
+      <AnimatePresence>
+        {showSuccess && <SuccessAnimation />}
+      </AnimatePresence>
+      <div className="container mx-auto px-4 sm:px-4">
         {/* Order Progress */}
-        <div className="max-w-3xl mx-auto mb-10 sm:mb-12">
+        <div className="max-w-3xl mx-auto mb-6 sm:mb-12">
           <div className="flex items-center justify-between">
             <div className="flex flex-col items-center">
-              <div className="w-10 h-10 bg-pink-500 text-white rounded-full flex items-center justify-center font-medium">1</div>
-              <p className="text-sm font-medium text-gray-900 mt-2">Cart</p>
+              <div className="w-7 h-7 sm:w-10 sm:h-10 bg-blue-500 text-white rounded-full flex items-center justify-center font-medium text-xs sm:text-base">1</div>
+              <p className="text-xs sm:text-sm font-medium text-gray-900 mt-1 sm:mt-2">Cart</p>
             </div>
-            <div className="flex-1 h-1 bg-pink-200 mx-2"></div>
+            <div className="flex-1 h-0.5 sm:h-1 bg-blue-200 mx-1 sm:mx-2"></div>
             <div className="flex flex-col items-center">
-              <div className="w-10 h-10 bg-pink-500 text-white rounded-full flex items-center justify-center font-medium">2</div>
-              <p className="text-sm font-medium text-gray-900 mt-2">Checkout</p>
+              <div className="w-7 h-7 sm:w-10 sm:h-10 bg-blue-500 text-white rounded-full flex items-center justify-center font-medium text-xs sm:text-base">2</div>
+              <p className="text-xs sm:text-sm font-medium text-gray-900 mt-1 sm:mt-2">Checkout</p>
             </div>
-            <div className="flex-1 h-1 bg-gray-200 mx-2"></div>
+            <div className="flex-1 h-0.5 sm:h-1 bg-gray-200 mx-1 sm:mx-2"></div>
             <div className="flex flex-col items-center">
-              <div className="w-10 h-10 bg-gray-200 text-gray-500 rounded-full flex items-center justify-center font-medium">3</div>
-              <p className="text-sm font-medium text-gray-500 mt-2">Complete</p>
+              <div className="w-7 h-7 sm:w-10 sm:h-10 bg-gray-200 text-gray-500 rounded-full flex items-center justify-center font-medium text-xs sm:text-base">3</div>
+              <p className="text-xs sm:text-sm font-medium text-gray-500 mt-1 sm:mt-2">Complete</p>
             </div>
           </div>
         </div>
         
-        <div className="text-center mb-10 sm:mb-12">
-          <h1 className="text-2xl sm:text-3xl font-bold text-gray-800">Checkout</h1>
-          <p className="text-sm sm:text-base text-gray-600 mt-2">Complete your order with just a few more steps</p>
+        <div className="text-center mb-6 sm:mb-10">
+          <h1 className="text-xl sm:text-3xl font-bold text-gray-800">Checkout</h1>
+          <p className="text-xs sm:text-base text-gray-600 mt-1 sm:mt-2">Complete your order with just a few steps</p>
         </div>
         
         <form
           onSubmit={onSubmitHandler}
-          className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-8"
+          className="grid grid-cols-1 lg:grid-cols-3 gap-3 sm:gap-6 lg:gap-8"
         >
           {/* Left Column - Shipping Information */}
-          <div className="lg:col-span-2 space-y-6 sm:space-y-8">
+          <div className="lg:col-span-2 space-y-4 sm:space-y-6 lg:space-y-8">
             {/* Shipping Information */}
             <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
-              <div className="bg-gradient-to-r from-pink-500 to-rose-500 py-3 sm:py-4 px-4 sm:px-6">
-                <h2 className="text-white text-lg sm:text-xl font-semibold flex items-center">
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+              <div className="bg-gradient-to-r from-blue-500 to-blue-500 py-2.5 sm:py-4 px-3 sm:px-6">
+                <h2 className="text-white text-sm sm:text-xl font-semibold flex items-center">
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 sm:h-5 sm:w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
                     <path fillRule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clipRule="evenodd" />
                   </svg>
                   Shipping Information
                 </h2>
               </div>
               
-              <div className="p-4 sm:p-6 lg:p-8">
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="p-3 sm:p-4 lg:p-6">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3">
                   <div>
-                    <label htmlFor="firstName" className="block text-sm font-medium text-gray-700 mb-1">First Name</label>
+                    <label htmlFor="firstName" className="block text-xs sm:text-sm font-medium text-gray-700 mb-1">First Name</label>
                     <input
                       required
                       id="firstName"
                       onChange={onChangeHandler}
                       name="firstName"
                       value={formData.firstName}
-                      className={`border ${formErrors.firstName ? 'border-red-500 focus:ring-red-500 focus:border-red-500' : 'border-gray-300 focus:ring-pink-500 focus:border-pink-500'} rounded-md py-2 px-3 w-full transition-colors text-sm sm:text-base`}
+                      className={`border ${formErrors.firstName ? 'border-red-500 focus:ring-red-500 focus:border-red-500' : 'border-gray-300 focus:ring-blue-500 focus:border-blue-500'} rounded-md py-2 px-2 sm:px-3 w-full transition-colors text-xs sm:text-base`}
                       type="text"
-                      placeholder="Enter your first name"
+                      placeholder="First name"
                     />
                     {formErrors.firstName && (
-                      <p className="mt-1 text-sm text-red-600">{formErrors.firstName}</p>
+                      <p className="mt-0.5 text-xs sm:text-sm text-red-600">{formErrors.firstName}</p>
                     )}
                   </div>
                   
                   <div>
-                    <label htmlFor="lastName" className="block text-sm font-medium text-gray-700 mb-1">Last Name</label>
+                    <label htmlFor="lastName" className="block text-xs sm:text-sm font-medium text-gray-700 mb-1">Last Name</label>
                     <input
                       required
                       id="lastName"
                       onChange={onChangeHandler}
                       name="lastName"
                       value={formData.lastName}
-                      className={`border ${formErrors.lastName ? 'border-red-500 focus:ring-red-500 focus:border-red-500' : 'border-gray-300 focus:ring-pink-500 focus:border-pink-500'} rounded-md py-2 px-3 w-full transition-colors text-sm sm:text-base`}
+                      className={`border ${formErrors.lastName ? 'border-red-500 focus:ring-red-500 focus:border-red-500' : 'border-gray-300 focus:ring-blue-500 focus:border-blue-500'} rounded-md py-2 px-2 sm:px-3 w-full transition-colors text-xs sm:text-base`}
                       type="text"
-                      placeholder="Enter your last name"
+                      placeholder="Last name"
                     />
                     {formErrors.lastName && (
-                      <p className="mt-1 text-sm text-red-600">{formErrors.lastName}</p>
+                      <p className="mt-0.5 text-xs sm:text-sm text-red-600">{formErrors.lastName}</p>
                     )}
                   </div>
                 </div>
 
-                <div className="mt-4">
-                  <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">Email Address</label>
+                <div className="mt-2 sm:mt-3">
+                  <label htmlFor="email" className="block text-xs sm:text-sm font-medium text-gray-700 mb-1">Email Address</label>
                   <input
                     required
                     id="email"
                     onChange={onChangeHandler}
                     name="email"
                     value={formData.email}
-                    className={`border ${formErrors.email ? 'border-red-500 focus:ring-red-500 focus:border-red-500' : 'border-gray-300 focus:ring-pink-500 focus:border-pink-500'} rounded-md py-2 px-3 w-full transition-colors text-sm sm:text-base`}
+                    className={`border ${formErrors.email ? 'border-red-500 focus:ring-red-500 focus:border-red-500' : 'border-gray-300 focus:ring-blue-500 focus:border-blue-500'} rounded-md py-2 px-2 sm:px-3 w-full transition-colors text-xs sm:text-base`}
                     type="email"
-                    placeholder="Enter your email"
+                    placeholder="your@email.com"
                   />
                   {formErrors.email && (
-                    <p className="mt-1 text-sm text-red-600">{formErrors.email}</p>
+                    <p className="mt-0.5 text-xs sm:text-sm text-red-600">{formErrors.email}</p>
                   )}
                 </div>
 
-                <div className="mt-4">
-                  <label htmlFor="phone" className="block text-sm font-medium text-gray-700 mb-1">Phone Number</label>
+                <div className="mt-2 sm:mt-3">
+                  <label htmlFor="phone" className="block text-xs sm:text-sm font-medium text-gray-700 mb-1">Phone Number</label>
                   <input
                     required
                     id="phone"
                     onChange={onChangeHandler}
                     name="phone"
                     value={formData.phone}
-                    className={`border ${formErrors.phone ? 'border-red-500 focus:ring-red-500 focus:border-red-500' : 'border-gray-300 focus:ring-pink-500 focus:border-pink-500'} rounded-md py-2 px-3 w-full transition-colors text-sm sm:text-base`}
+                    className={`border ${formErrors.phone ? 'border-red-500 focus:ring-red-500 focus:border-red-500' : 'border-gray-300 focus:ring-blue-500 focus:border-blue-500'} rounded-md py-2 px-2 sm:px-3 w-full transition-colors text-xs sm:text-base`}
                     type="tel"
-                    placeholder="Enter your phone number"
+                    placeholder="10-digit number"
                   />
                   {formErrors.phone && (
-                    <p className="mt-1 text-sm text-red-600">{formErrors.phone}</p>
+                    <p className="mt-0.5 text-xs sm:text-sm text-red-600">{formErrors.phone}</p>
                   )}
                 </div>
 
-                <div className="mt-4">
-                  <label htmlFor="street" className="block text-sm font-medium text-gray-700 mb-1">Street Address</label>
+                <div className="mt-2 sm:mt-3">
+                  <label htmlFor="street" className="block text-xs sm:text-sm font-medium text-gray-700 mb-1">Street Address</label>
                   <input
                     required
                     id="street"
                     onChange={onChangeHandler}
                     name="street"
                     value={formData.street}
-                    className={`border ${formErrors.street ? 'border-red-500 focus:ring-red-500 focus:border-red-500' : 'border-gray-300 focus:ring-pink-500 focus:border-pink-500'} rounded-md py-2.5 px-4 w-full transition-colors`}
+                    className={`border ${formErrors.street ? 'border-red-500 focus:ring-red-500 focus:border-red-500' : 'border-gray-300 focus:ring-blue-500 focus:border-blue-500'} rounded-md py-2 px-2 sm:px-3 w-full transition-colors text-xs sm:text-base`}
                     type="text"
-                    placeholder="Enter your street address"
+                    placeholder="Street address"
                   />
                   {formErrors.street && (
-                    <p className="mt-1 text-sm text-red-600">{formErrors.street}</p>
+                    <p className="mt-0.5 text-xs sm:text-sm text-red-600">{formErrors.street}</p>
                   )}
                 </div>
                 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4 mt-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3 mb-2 sm:mb-3 mt-2 sm:mt-3">
                   <div>
-                    <label htmlFor="city" className="block text-sm font-medium text-gray-700 mb-1">City</label>
+                    <label htmlFor="city" className="block text-xs sm:text-sm font-medium text-gray-700 mb-1">City</label>
                     <input
                       required
                       id="city"
                       onChange={onChangeHandler}
                       name="city"
                       value={formData.city}
-                      className={`border ${formErrors.city ? 'border-red-500 focus:ring-red-500 focus:border-red-500' : 'border-gray-300 focus:ring-pink-500 focus:border-pink-500'} rounded-md py-2.5 px-4 w-full transition-colors`}
+                      className={`border ${formErrors.city ? 'border-red-500 focus:ring-red-500 focus:border-red-500' : 'border-gray-300 focus:ring-blue-500 focus:border-blue-500'} rounded-md py-2 px-2 sm:px-3 w-full transition-colors text-xs sm:text-base`}
                       type="text"
-                      placeholder="Enter your city"
+                      placeholder="City"
                     />
                     {formErrors.city && (
-                      <p className="mt-1 text-sm text-red-600">{formErrors.city}</p>
+                      <p className="mt-0.5 text-xs sm:text-sm text-red-600">{formErrors.city}</p>
                     )}
                   </div>
                   <div>
-                    <label htmlFor="state" className="block text-sm font-medium text-gray-700 mb-1">State</label>
+                    <label htmlFor="state" className="block text-xs sm:text-sm font-medium text-gray-700 mb-1">State</label>
                     <input
                       id="state"
                       onChange={onChangeHandler}
                       name="state"
                       value={formData.state}
-                      className="border border-gray-300 rounded-md py-2.5 px-4 w-full focus:ring-pink-500 focus:border-pink-500 transition-colors"
+                      className="border border-gray-300 rounded-md py-2 px-2 sm:px-3 w-full focus:ring-blue-500 focus:border-blue-500 transition-colors text-xs sm:text-base"
                       type="text"
-                      placeholder="Enter your state"
+                      placeholder="State"
                     />
                   </div>
                 </div>
                 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-2">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3">
                   <div>
-                    <label htmlFor="zipcode" className="block text-sm font-medium text-gray-700 mb-1">Zipcode</label>
+                    <label htmlFor="zipcode" className="block text-xs sm:text-sm font-medium text-gray-700 mb-1">Zipcode</label>
                     <input
                       required
                       id="zipcode"
                       onChange={onChangeHandler}
                       name="zipcode"
                       value={formData.zipcode}
-                      className={`border ${formErrors.zipcode ? 'border-red-500 focus:ring-red-500 focus:border-red-500' : 'border-gray-300 focus:ring-pink-500 focus:border-pink-500'} rounded-md py-2.5 px-4 w-full transition-colors`}
+                      className={`border ${formErrors.zipcode ? 'border-red-500 focus:ring-red-500 focus:border-red-500' : 'border-gray-300 focus:ring-blue-500 focus:border-blue-500'} rounded-md py-2 px-2 sm:px-3 w-full transition-colors text-xs sm:text-base`}
                       type="text"
-                      placeholder="Enter your zipcode"
+                      placeholder="Zipcode"
                     />
                     {formErrors.zipcode && (
-                      <p className="mt-1 text-sm text-red-600">{formErrors.zipcode}</p>
+                      <p className="mt-0.5 text-xs sm:text-sm text-red-600">{formErrors.zipcode}</p>
                     )}
                   </div>
                   <div>
-                    <label htmlFor="country" className="block text-sm font-medium text-gray-700 mb-1">Country</label>
+                    <label htmlFor="country" className="block text-xs sm:text-sm font-medium text-gray-700 mb-1">Country</label>
                     <input
                       required
                       id="country"
                       onChange={onChangeHandler}
                       name="country"
                       value={formData.country}
-                      className={`border ${formErrors.country ? 'border-red-500 focus:ring-red-500 focus:border-red-500' : 'border-gray-300 focus:ring-pink-500 focus:border-pink-500'} rounded-md py-2.5 px-4 w-full transition-colors`}
+                      className={`border ${formErrors.country ? 'border-red-500 focus:ring-red-500 focus:border-red-500' : 'border-gray-300 focus:ring-blue-500 focus:border-blue-500'} rounded-md py-2 px-2 sm:px-3 w-full transition-colors text-xs sm:text-base`}
                       type="text"
-                      placeholder="Enter your country"
+                      placeholder="Country"
                     />
                     {formErrors.country && (
-                      <p className="mt-1 text-sm text-red-600">{formErrors.country}</p>
+                      <p className="mt-0.5 text-xs sm:text-sm text-red-600">{formErrors.country}</p>
                     )}
                   </div>
                 </div>
@@ -1045,10 +1038,10 @@ const PlaceOrder = () => {
             </div>
             
             {/* Delivery Instructions */}
-            <div className="bg-white rounded-lg shadow-sm border border-gray-200 mt-6 overflow-hidden">
-              <div className="bg-gradient-to-r from-indigo-500 to-blue-500 py-4 px-6">
-                <h2 className="text-white text-xl font-semibold flex items-center">
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+            <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+              <div className="bg-gradient-to-r from-indigo-500 to-blue-500 py-2.5 sm:py-4 px-3 sm:px-6">
+                <h2 className="text-white text-sm sm:text-xl font-semibold flex items-center">
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 sm:h-5 sm:w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
                     <path d="M8 16.5a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0zM15 16.5a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0z" />
                     <path d="M3 4a1 1 0 00-1 1v10a1 1 0 001 1h1.05a2.5 2.5 0 014.9 0H14a1 1 0 001-1v-3h2a1 1 0 001-1V8a5 5 0 00-5-5H5.414A2 2 0 004 3.414V4zm7 0a3 3 0 013 3v5H9V7a3 3 0 01-3-3h4z" />
                   </svg>
@@ -1056,82 +1049,82 @@ const PlaceOrder = () => {
                 </h2>
               </div>
               
-              <div className="p-6">
-                <div className="mb-6">
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+              <div className="p-3 sm:p-4 lg:p-6">
+                <div className="mb-4 sm:mb-6">
+                  <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1.5 sm:mb-2">
                     Special Delivery Instructions
                   </label>
                   <textarea
                     value={deliveryInstructions}
                     onChange={(e) => setDeliveryInstructions(e.target.value)}
-                    className="w-full border border-gray-300 rounded-md py-2.5 px-4 min-h-[80px] focus:ring-indigo-500 focus:border-indigo-500 transition-colors"
-                    placeholder="Any specific instructions for delivery? (e.g., leave at door, call upon arrival)"
+                    className="w-full border border-gray-300 rounded-md py-2 px-2 sm:px-3 min-h-[60px] sm:min-h-[80px] focus:ring-indigo-500 focus:border-indigo-500 transition-colors text-xs sm:text-base"
+                    placeholder="Delivery instructions (optional)"
                   ></textarea>
                 </div>
                 
-                <div className="space-y-3">
-                  <p className="text-sm font-medium text-gray-700 mb-2">Sweet Handling Options</p>
+                <div className="space-y-2 sm:space-y-3">
+                  <p className="text-xs sm:text-sm font-medium text-gray-700 mb-1.5 sm:mb-2">Sweet Handling Options</p>
                   
-                  <div className="flex items-center p-3 rounded-md hover:bg-gray-50 transition-colors">
+                  <div className="flex items-start p-2 sm:p-3 rounded-md hover:bg-gray-50 transition-colors">
                     <input
                       type="checkbox"
                       id="coldPacking"
                       checked={specialRequirements.coldPacking}
                       onChange={() => handleSpecialRequirementsChange('coldPacking')}
-                      className="h-4 w-4 text-pink-500 focus:ring-pink-400 rounded"
+                      className="h-4 w-4 text-blue-500 focus:ring-blue-400 rounded mt-0.5"
                     />
-                    <label htmlFor="coldPacking" className="ml-3 cursor-pointer flex items-start">
+                    <label htmlFor="coldPacking" className="ml-2 sm:ml-3 cursor-pointer flex items-start w-full">
                       <div>
-                        <p className="text-sm font-medium text-gray-700">Include cold packing</p>
-                        <p className="text-xs text-gray-500">Recommended for milk-based sweets</p>
+                        <p className="text-xs sm:text-sm font-medium text-gray-700">Cold packing</p>
+                        <p className="text-xs text-gray-500">For milk-based sweets</p>
                       </div>
                     </label>
                   </div>
                   
-                  <div className="flex items-center p-3 rounded-md hover:bg-gray-50 transition-colors">
+                  <div className="flex items-start p-2 sm:p-3 rounded-md hover:bg-gray-50 transition-colors">
                     <input
                       type="checkbox"
                       id="giftWrapping"
                       checked={specialRequirements.giftWrapping}
                       onChange={() => handleSpecialRequirementsChange('giftWrapping')}
-                      className="h-4 w-4 text-pink-500 focus:ring-pink-400 rounded"
+                      className="h-4 w-4 text-blue-500 focus:ring-blue-400 rounded mt-0.5"
                     />
-                    <label htmlFor="giftWrapping" className="ml-3 cursor-pointer flex items-start">
+                    <label htmlFor="giftWrapping" className="ml-2 sm:ml-3 cursor-pointer flex items-start w-full">
                       <div>
-                        <p className="text-sm font-medium text-gray-700">Gift wrap my order</p>
-                        <p className="text-xs text-gray-500">We&apos;ll wrap it in beautiful packaging with a personalized note</p>
+                        <p className="text-xs sm:text-sm font-medium text-gray-700">Gift wrap</p>
+                        <p className="text-xs text-gray-500">Beautiful packaging with note</p>
                       </div>
                     </label>
                   </div>
                   
-                  <div className="flex items-center p-3 rounded-md hover:bg-gray-50 transition-colors">
+                  <div className="flex items-start p-2 sm:p-3 rounded-md hover:bg-gray-50 transition-colors">
                     <input
                       type="checkbox"
                       id="fragileHandling"
                       checked={specialRequirements.fragileHandling}
                       onChange={() => handleSpecialRequirementsChange('fragileHandling')}
-                      className="h-4 w-4 text-pink-500 focus:ring-pink-400 rounded"
+                      className="h-4 w-4 text-blue-500 focus:ring-blue-400 rounded mt-0.5"
                     />
-                    <label htmlFor="fragileHandling" className="ml-3 cursor-pointer flex items-start">
+                    <label htmlFor="fragileHandling" className="ml-2 sm:ml-3 cursor-pointer flex items-start w-full">
                       <div>
-                        <p className="text-sm font-medium text-gray-700">Handle as fragile</p>
-                        <p className="text-xs text-gray-500">Pre-selected for sweets to ensure safe delivery</p>
+                        <p className="text-xs sm:text-sm font-medium text-gray-700">Fragile handling</p>
+                        <p className="text-xs text-gray-500">Safe delivery ensured</p>
                       </div>
                     </label>
                   </div>
                   
-                  <div className="flex items-center p-3 rounded-md hover:bg-gray-50 transition-colors">
+                  <div className="flex items-start p-2 sm:p-3 rounded-md hover:bg-gray-50 transition-colors">
                     <input
                       type="checkbox"
                       id="noContact"
                       checked={specialRequirements.noContact}
                       onChange={() => handleSpecialRequirementsChange('noContact')}
-                      className="h-4 w-4 text-pink-500 focus:ring-pink-400 rounded"
+                      className="h-4 w-4 text-blue-500 focus:ring-blue-400 rounded mt-0.5"
                     />
-                    <label htmlFor="noContact" className="ml-3 cursor-pointer flex items-start">
+                    <label htmlFor="noContact" className="ml-2 sm:ml-3 cursor-pointer flex items-start w-full">
                       <div>
-                        <p className="text-sm font-medium text-gray-700">No-contact delivery</p>
-                        <p className="text-xs text-gray-500">Delivery person will leave the package at your door</p>
+                        <p className="text-xs sm:text-sm font-medium text-gray-700">No-contact delivery</p>
+                        <p className="text-xs text-gray-500">Leave at door</p>
                       </div>
                     </label>
                   </div>
@@ -1139,24 +1132,24 @@ const PlaceOrder = () => {
               </div>
               
               {/* Alert for Perishable Items */}
-              <div className="bg-amber-50 border-t border-amber-200 p-4">
-                <div className="flex items-start">
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-amber-600 mt-0.5 mr-3 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <div className="bg-amber-50 border-t border-amber-200 p-2 sm:p-3 lg:p-4">
+                <div className="flex items-start gap-2 sm:gap-3">
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 sm:h-5 sm:w-5 text-amber-600 mt-0.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                   </svg>
                   <div>
-                    <p className="font-medium text-amber-800 text-sm">Important Note About Sweets</p>
-                    <p className="text-amber-700 text-xs mt-1">Milk-based sweets are perishable and should be refrigerated upon delivery. Our sweets are prepared fresh and have a limited shelf life of 2-3 days.</p>
+                    <p className="font-medium text-amber-800 text-xs sm:text-sm">About Our Sweets</p>
+                    <p className="text-amber-700 text-xs mt-0.5 sm:mt-1">Perishable items should be refrigerated. Shelf life: 2-3 days.</p>
                   </div>
                 </div>
               </div>
             </div>
             
             {/* Payment Method Section */}
-            <div className="bg-white rounded-lg shadow-sm border border-gray-200 mt-6 overflow-hidden">
-              <div className="bg-gradient-to-r from-green-500 to-emerald-500 py-4 px-6">
-                <h2 className="text-white text-xl font-semibold flex items-center">
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+            <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+              <div className="bg-gradient-to-r from-green-500 to-emerald-500 py-2.5 sm:py-4 px-3 sm:px-6">
+                <h2 className="text-white text-sm sm:text-xl font-semibold flex items-center">
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 sm:h-5 sm:w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
                     <path d="M4 4a2 2 0 00-2 2v1h16V6a2 2 0 00-2-2H4z" />
                     <path fillRule="evenodd" d="M18 9H2v5a2 2 0 002 2h12a2 2 0 002-2V9zM4 13a1 1 0 011-1h1a1 1 0 110 2H5a1 1 0 01-1-1zm5-1a1 1 0 100 2h1a1 1 0 100-2H9z" clipRule="evenodd" />
                   </svg>
@@ -1164,8 +1157,8 @@ const PlaceOrder = () => {
                 </h2>
               </div>
               
-              <div className="p-6">
-                <div className="grid grid-cols-1 gap-4">
+              <div className="p-3 sm:p-4 lg:p-6">
+                <div className="grid grid-cols-1 gap-2 sm:gap-3">
                   <div
                     onClick={() => {
                       setMethod("razorpay");
@@ -1269,7 +1262,7 @@ const PlaceOrder = () => {
           {/* Right Side - Order Summary */}
           <div className="lg:col-span-1">
             <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
-              <div className="bg-gradient-to-r from-pink-500 to-rose-500 py-4 px-6">
+              <div className="bg-gradient-to-r from-blue-500 to-blue-500 py-4 px-6">
                 <h2 className="text-white text-xl font-semibold flex items-center">
                   <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
                     <path d="M4 4a2 2 0 00-2 2v1h16V6a2 2 0 00-2-2H4z" />
@@ -1287,7 +1280,7 @@ const PlaceOrder = () => {
                     <div className="flex flex-col sm:flex-row gap-2 sm:gap-0">
                       <div className="relative flex-1">
                         <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
-                          <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-pink-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
                           </svg>
                         </div>
@@ -1296,7 +1289,7 @@ const PlaceOrder = () => {
                           placeholder="Enter coupon code"
                           value={couponCode}
                           onChange={handleCouponChange}
-                          className="w-full border border-gray-300 rounded-md sm:rounded-r-none pl-10 pr-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-pink-300 text-sm font-medium uppercase placeholder-gray-400 shadow-sm transition-all hover:border-pink-300"
+                          className="w-full border border-gray-300 rounded-md sm:rounded-r-none pl-10 pr-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-blue-300 text-sm font-medium uppercase placeholder-gray-400 shadow-sm transition-all hover:border-blue-300"
                           aria-label="Coupon code"
                         />
                       </div>
@@ -1308,7 +1301,7 @@ const PlaceOrder = () => {
                           isApplyingCoupon
                             ? "bg-gray-100 text-gray-400 border border-gray-300"
                             : couponCode
-                              ? "bg-gradient-to-r from-pink-500 to-rose-500 text-white hover:from-pink-600 hover:to-rose-600 shadow-md"
+                              ? "bg-gradient-to-r from-blue-500 to-blue-500 text-white hover:from-blue-600 hover:to-blue-600 shadow-md"
                               : "bg-gray-100 text-gray-500 hover:bg-gray-200 border border-gray-300"
                         }`}
                       >
@@ -1324,7 +1317,7 @@ const PlaceOrder = () => {
                     </div>
                     <div className="text-xs text-gray-500 mt-3 bg-gray-50 p-3 rounded-md border border-gray-100">
                       <p className="font-medium mb-2 text-gray-700 flex items-center">
-                        <svg xmlns="http://www.w3.org/2000/svg" className="h-3.5 w-3.5 mr-1.5 text-pink-500" viewBox="0 0 20 20" fill="currentColor">
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-3.5 w-3.5 mr-1.5 text-blue-500" viewBox="0 0 20 20" fill="currentColor">
                           <path fillRule="evenodd" d="M5 2a1 1 0 011 1v1h1a1 1 0 010 2H6v1a1 1 0 01-2 0V6H3a1 1 0 010-2h1V3a1 1 0 011-1zm0 10a1 1 0 011 1v1h1a1 1 0 110 2H6v1a1 1 0 11-2 0v-1H3a1 1 0 110-2h1v-1a1 1 0 011-1zM12 2a1 1 0 01.967.744L14.146 7.2 17.5 9.134a1 1 0 010 1.732l-3.354 1.935-1.18 4.455a1 1 0 01-1.933 0L9.854 12.8 6.5 10.866a1 1 0 010-1.732l3.354-1.935 1.18-4.455A1 1 0 0112 2z" clipRule="evenodd" />
                         </svg>
                         Available coupons:
@@ -1335,7 +1328,7 @@ const PlaceOrder = () => {
                             <button
                               type="button"
                               onClick={() => setCouponCode(coupon.code)}
-                              className="font-medium text-pink-600 hover:text-pink-700 bg-white px-2 py-0.5 text-xs rounded border border-pink-100 shadow-sm hover:shadow group-hover:border-pink-200 transition-all w-fit"
+                              className="font-medium text-blue-600 hover:text-blue-700 bg-white px-2 py-0.5 text-xs rounded border border-blue-100 shadow-sm hover:shadow group-hover:border-blue-200 transition-all w-fit"
                             >
                               {coupon.code}
                             </button>
@@ -1402,7 +1395,7 @@ const PlaceOrder = () => {
                 <button
                   type="submit"
                   disabled={isSubmitting}
-                  className="w-full mt-6 bg-pink-600 hover:bg-pink-700 text-white py-3 px-4 rounded-md font-medium flex items-center justify-center transition-colors"
+                  className="w-full mt-6 bg-blue-600 hover:bg-blue-700 text-white py-3 px-4 rounded-md font-medium flex items-center justify-center transition-colors"
                 >
                   {isSubmitting ? (
                     <>
@@ -1422,9 +1415,10 @@ const PlaceOrder = () => {
         </form>
       </div>
     </div>
-    </>
     )
   );
 };
 
 export default PlaceOrder;
+
+

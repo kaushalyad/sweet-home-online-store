@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef } from 'react';
+﻿import { useEffect, useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ShopContext } from '../context/ShopContext';
 import { useContext } from 'react';
@@ -164,11 +164,11 @@ const Cart = () => {
 
   if (isCartEmpty) {
     return (
-      <div className="w-full min-h-screen bg-gradient-to-br from-orange-50 via-white to-pink-50 py-6 sm:py-10">
+      <div className="w-full min-h-screen bg-gradient-to-br from-blue-50 via-white to-blue-50 py-6 sm:py-10">
         <div className="max-w-4xl mx-auto px-4 sm:px-6">
           {/* Compact Header */}
           <div className="text-center mb-6">
-            <h1 className="font-poppins text-2xl sm:text-3xl font-bold bg-gradient-to-r from-pink-600 via-orange-500 to-rose-600 bg-clip-text text-transparent">
+            <h1 className="font-poppins text-2xl sm:text-3xl font-bold bg-gradient-to-r from-blue-600 via-blue-500 to-blue-600 bg-clip-text text-transparent">
               Your Sweet Cart
             </h1>
           </div>
@@ -176,16 +176,16 @@ const Cart = () => {
           {/* Main Empty Cart Card - Compact & Attractive */}
           <div className="bg-white rounded-3xl shadow-xl overflow-hidden">
             {/* Decorative Header */}
-            <div className="h-2 bg-gradient-to-r from-pink-500 via-orange-400 to-rose-500"></div>
+            <div className="h-2 bg-gradient-to-r from-blue-500 via-blue-400 to-blue-500"></div>
             
             <div className="p-6 sm:p-10 text-center">
               {/* Animated Icon - Smaller */}
               <div className="relative inline-block mb-5">
-                <div className="absolute inset-0 bg-gradient-to-br from-pink-400 to-orange-400 rounded-full blur-xl opacity-30 animate-pulse"></div>
-                <div className="relative w-24 h-24 sm:w-28 sm:h-28 bg-gradient-to-br from-pink-100 to-orange-100 rounded-full flex items-center justify-center shadow-lg">
-                  <FaShoppingCart className="text-4xl sm:text-5xl text-transparent bg-gradient-to-br from-pink-500 to-orange-500 bg-clip-text" style={{ WebkitTextFillColor: 'transparent', WebkitBackgroundClip: 'text' }} />
+                <div className="absolute inset-0 bg-gradient-to-br from-blue-400 to-blue-400 rounded-full blur-xl opacity-30 animate-pulse"></div>
+                <div className="relative w-24 h-24 sm:w-28 sm:h-28 bg-gradient-to-br from-blue-100 to-blue-100 rounded-full flex items-center justify-center shadow-lg">
+                  <FaShoppingCart className="text-4xl sm:text-5xl text-transparent bg-gradient-to-br from-blue-500 to-blue-500 bg-clip-text" style={{ WebkitTextFillColor: 'transparent', WebkitBackgroundClip: 'text' }} />
                   <div className="absolute inset-0 flex items-center justify-center">
-                    <FaShoppingCart className="text-4xl sm:text-5xl text-pink-500 opacity-50" />
+                    <FaShoppingCart className="text-4xl sm:text-5xl text-blue-500 opacity-50" />
                   </div>
                 </div>
               </div>
@@ -202,18 +202,18 @@ const Cart = () => {
 
               {/* Features Grid - Compact */}
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4 mb-8 max-w-2xl mx-auto">
-                <div className="bg-gradient-to-br from-pink-50 to-orange-50 rounded-xl p-3 sm:p-4 transform hover:scale-105 transition-transform">
-                  <div className="w-8 h-8 mb-2 rounded-lg bg-gradient-to-br from-pink-500 to-orange-500 shadow-soft mx-auto"></div>
+                <div className="bg-gradient-to-br from-blue-50 to-blue-50 rounded-xl p-3 sm:p-4 transform hover:scale-105 transition-transform">
+                  <div className="w-8 h-8 mb-2 rounded-lg bg-gradient-to-br from-blue-500 to-blue-500 shadow-soft mx-auto"></div>
                   <h3 className="font-semibold text-gray-800 text-sm mb-1">Fresh & Pure</h3>
                   <p className="text-xs text-gray-600">Handcrafted daily</p>
                 </div>
-                <div className="bg-gradient-to-br from-orange-50 to-rose-50 rounded-xl p-3 sm:p-4 transform hover:scale-105 transition-transform">
-                  <div className="text-2xl mb-2">🚚</div>
+                <div className="bg-gradient-to-br from-blue-50 to-blue-50 rounded-xl p-3 sm:p-4 transform hover:scale-105 transition-transform">
+                  <div className="text-2xl mb-2">ðŸšš</div>
                   <h3 className="font-semibold text-gray-800 text-sm mb-1">Free Delivery</h3>
                   <p className="text-xs text-gray-600">On orders above ₹500</p>
                 </div>
-                <div className="bg-gradient-to-br from-rose-50 to-pink-50 rounded-xl p-3 sm:p-4 transform hover:scale-105 transition-transform">
-                  <div className="text-2xl mb-2">🎁</div>
+                <div className="bg-gradient-to-br from-blue-50 to-blue-50 rounded-xl p-3 sm:p-4 transform hover:scale-105 transition-transform">
+                  <div className="text-2xl mb-2">ðŸŽ</div>
                   <h3 className="font-semibold text-gray-800 text-sm mb-1">Gift Options</h3>
                   <p className="text-xs text-gray-600">Perfect packaging</p>
                 </div>
@@ -223,14 +223,14 @@ const Cart = () => {
               <div className="flex flex-col sm:flex-row gap-3 justify-center max-w-md mx-auto">
                 <button
                   onClick={() => navigate('/collection')}
-                  className="group px-6 py-3 bg-gradient-to-r from-pink-500 to-orange-500 text-white rounded-xl font-semibold hover:shadow-lg hover:scale-105 transition-all duration-300 flex items-center justify-center gap-2 text-sm"
+                  className="group px-6 py-3 bg-gradient-to-r from-blue-500 to-blue-500 text-white rounded-xl font-semibold hover:shadow-lg hover:scale-105 transition-all duration-300 flex items-center justify-center gap-2 text-sm"
                 >
                   <FaShoppingCart className="group-hover:rotate-12 transition-transform" />
                   <span>Browse Sweets</span>
                 </button>
                 <button
                   onClick={() => navigate('/')}
-                  className="px-6 py-3 border-2 border-gray-300 text-gray-700 rounded-xl font-semibold hover:border-orange-400 hover:bg-orange-50 transition-all duration-300 text-sm"
+                  className="px-6 py-3 border-2 border-gray-300 text-gray-700 rounded-xl font-semibold hover:border-blue-400 hover:bg-blue-50 transition-all duration-300 text-sm"
                 >
                   Go Home
                 </button>
@@ -238,19 +238,19 @@ const Cart = () => {
             </div>
 
             {/* Popular Products Suggestion - Compact */}
-            <div className="bg-gradient-to-r from-pink-50 to-orange-50 px-6 py-4 border-t border-gray-100">
+            <div className="bg-gradient-to-r from-blue-50 to-blue-50 px-6 py-4 border-t border-gray-100">
               <p className="text-center text-sm text-gray-700">
-                <span className="font-semibold">💡 Tip:</span> Check out our{' '}
+                <span className="font-semibold">ðŸ’¡ Tip:</span> Check out our{' '}
                 <button 
                   onClick={() => navigate('/collection')}
-                  className="text-orange-600 font-semibold hover:underline"
+                  className="text-blue-600 font-semibold hover:underline"
                 >
                   bestsellers
                 </button>
                 {' '}and{' '}
                 <button 
                   onClick={() => navigate('/collection')}
-                  className="text-pink-600 font-semibold hover:underline"
+                  className="text-blue-600 font-semibold hover:underline"
                 >
                   new arrivals
                 </button>
@@ -264,8 +264,8 @@ const Cart = () => {
               onClick={() => navigate('/orders')}
               className="bg-white rounded-2xl p-4 shadow-md hover:shadow-lg transition-all group"
             >
-              <div className="text-3xl mb-2">📦</div>
-              <h3 className="font-semibold text-gray-800 text-sm group-hover:text-orange-600 transition-colors">
+              <div className="text-3xl mb-2">ðŸ“¦</div>
+              <h3 className="font-semibold text-gray-800 text-sm group-hover:text-blue-600 transition-colors">
                 My Orders
               </h3>
               <p className="text-xs text-gray-500 mt-1">Track your purchases</p>
@@ -274,8 +274,8 @@ const Cart = () => {
               onClick={() => navigate('/wishlist')}
               className="bg-white rounded-2xl p-4 shadow-md hover:shadow-lg transition-all group"
             >
-              <div className="text-3xl mb-2">❤️</div>
-              <h3 className="font-semibold text-gray-800 text-sm group-hover:text-pink-600 transition-colors">
+              <div className="text-3xl mb-2">â¤ï¸</div>
+              <h3 className="font-semibold text-gray-800 text-sm group-hover:text-blue-600 transition-colors">
                 Wishlist
               </h3>
               <p className="text-xs text-gray-500 mt-1">Save your favorites</p>
@@ -322,7 +322,7 @@ const Cart = () => {
                   />
                 </div>
                 <div>
-                  <h3 className="font-semibold text-gray-800 group-hover:text-pink-600 transition-colors duration-300">{product.name}</h3>
+                  <h3 className="font-semibold text-gray-800 group-hover:text-blue-600 transition-colors duration-300">{product.name}</h3>
                   <p className="text-sm text-gray-500">{product.category}</p>
                 </div>
               </div>
@@ -385,7 +385,7 @@ const Cart = () => {
             <div className="mt-6">
               <button 
                 onClick={handleCheckout} 
-                className="w-full bg-pink-600 hover:bg-pink-700 text-white py-3 rounded-md transition-colors"
+                className="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-md transition-colors"
               >
                 PROCEED TO CHECKOUT
               </button>
@@ -399,3 +399,5 @@ const Cart = () => {
 };
 
 export default Cart;
+
+

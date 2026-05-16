@@ -85,7 +85,7 @@ const Collection = () => {
   // Custom checkbox component
   const Checkbox = ({ value, checked, onChange, label }) => (
     <label className="flex items-center gap-3 cursor-pointer py-1.5 hover:text-gray-900 transition-colors duration-200 group">
-      <div className={`w-5 h-5 flex items-center justify-center rounded-md border transition-all duration-200 ${checked ? 'bg-pink-500 border-pink-500' : 'border-gray-300 bg-white group-hover:border-pink-300'}`}>
+      <div className={`w-5 h-5 flex items-center justify-center rounded-md border transition-all duration-200 ${checked ? 'bg-blue-500 border-blue-500' : 'border-gray-300 bg-white group-hover:border-blue-300'}`}>
         {checked && <FaCheck className="text-white text-[10px]" />}
       </div>
       <span className="text-sm font-normal text-gray-700 group-hover:text-gray-900">{label}</span>
@@ -161,7 +161,7 @@ const Collection = () => {
         </div>
         <div className="relative h-2 bg-gray-200 rounded-full">
           <div 
-            className="absolute h-2 bg-gradient-to-r from-pink-300 to-pink-500 rounded-full" 
+            className="absolute h-2 bg-gradient-to-r from-blue-300 to-blue-500 rounded-full" 
             style={{ 
               left: `${((range[0] - min) / (max - min)) * 100}%`, 
               width: `${((range[1] - range[0]) / (max - min)) * 100}%` 
@@ -188,7 +188,7 @@ const Collection = () => {
           <div className="relative flex-1">
             <input
               type="number"
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-pink-500 focus:border-pink-500 text-sm"
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500 text-sm"
               placeholder="Min"
               value={range[0]}
               onChange={handleMinChange}
@@ -199,7 +199,7 @@ const Collection = () => {
           <div className="relative flex-1">
             <input
               type="number"
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-pink-500 focus:border-pink-500 text-sm"
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500 text-sm"
               placeholder="Max"
               value={range[1]}
               onChange={handleMaxChange}
@@ -373,7 +373,7 @@ const Collection = () => {
         </script>
       </Helmet>
       {/* Collection Page Header */}
-      <div className="bg-gradient-to-br from-pink-500 via-orange-500 to-rose-500 py-16 mb-8 relative overflow-hidden">
+      <div className="bg-gradient-to-br from-blue-500 via-blue-500 to-blue-500 py-16 mb-8 relative overflow-hidden">
         <div className="absolute inset-0 opacity-20" style={{ 
           backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.4'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
         }}></div>
@@ -403,7 +403,7 @@ const Collection = () => {
               className="inline-flex items-center px-6 py-3 bg-white/95 backdrop-blur-sm rounded-full shadow-strong"
             >
               <span className="font-inter text-gray-700 text-sm sm:text-base">Showing</span>
-              <span className="font-poppins font-bold text-orange-600 mx-2 text-lg sm:text-xl">{filteredCount}</span>
+              <span className="font-poppins font-bold text-blue-600 mx-2 text-lg sm:text-xl">{filteredCount}</span>
               <span className="font-inter text-gray-700 text-sm sm:text-base">delicious treats</span>
             </motion.div>
           </div>
@@ -417,7 +417,7 @@ const Collection = () => {
           <div className="w-full lg:min-w-60 lg:max-w-72 lg:sticky lg:top-28 self-start">
             <button
               onClick={() => setShowFilter(!showFilter)}
-              className="flex items-center gap-2 px-6 py-3 mb-4 rounded-xl bg-gradient-to-r from-pink-500 to-orange-500 text-white hover:shadow-medium transition-all duration-200 lg:hidden w-full justify-center font-semibold"
+              className="flex items-center gap-2 px-6 py-3 mb-4 rounded-xl bg-gradient-to-r from-blue-500 to-blue-500 text-white hover:shadow-medium transition-all duration-200 lg:hidden w-full justify-center font-semibold"
             >
               <FaFilter />
               <span>FILTERS</span>
@@ -520,7 +520,7 @@ const Collection = () => {
                           key={rating}
                           onClick={() => setRatingFilter(rating === ratingFilter ? 0 : rating)}
                           className={`flex items-center justify-between p-2 my-1 rounded-md cursor-pointer hover:bg-gray-50 transition-colors ${
-                            ratingFilter === rating ? 'bg-pink-50 border border-pink-100' : ''
+                            ratingFilter === rating ? 'bg-blue-50 border border-blue-100' : ''
                           }`}
                         >
                           <div className="flex items-center">
@@ -540,7 +540,7 @@ const Collection = () => {
                             <span className="ml-2 text-sm text-gray-700">& Up</span>
                           </div>
                           {ratingFilter === rating && (
-                            <FaCheck className="text-pink-500 text-sm" />
+                            <FaCheck className="text-blue-500 text-sm" />
                           )}
                         </div>
                       ))}
@@ -556,44 +556,44 @@ const Collection = () => {
                       <div className="p-4">
                         <div className="flex flex-wrap gap-2">
                           {category.map(cat => (
-                            <span key={cat} className="inline-flex items-center gap-1 px-3 py-1 bg-pink-50 text-pink-600 rounded-full text-xs">
+                            <span key={cat} className="inline-flex items-center gap-1 px-3 py-1 bg-blue-50 text-blue-600 rounded-full text-xs">
                               {cat}
                               <button 
                                 onClick={() => setCategory(prev => prev.filter(c => c !== cat))}
-                                className="text-pink-400 hover:text-pink-600"
+                                className="text-blue-400 hover:text-blue-600"
                               >
                                 ×
                               </button>
                             </span>
                           ))}
                           {subCategory.map(subCat => (
-                            <span key={subCat} className="inline-flex items-center gap-1 px-3 py-1 bg-pink-50 text-pink-600 rounded-full text-xs">
+                            <span key={subCat} className="inline-flex items-center gap-1 px-3 py-1 bg-blue-50 text-blue-600 rounded-full text-xs">
                               {subCat}
                               <button 
                                 onClick={() => setSubCategory(prev => prev.filter(sc => sc !== subCat))}
-                                className="text-pink-400 hover:text-pink-600"
+                                className="text-blue-400 hover:text-blue-600"
                               >
                                 ×
                               </button>
                             </span>
                           ))}
                           {(priceRange[0] > 0 || priceRange[1] < 1000) && (
-                            <span className="inline-flex items-center gap-1 px-3 py-1 bg-pink-50 text-pink-600 rounded-full text-xs">
+                            <span className="inline-flex items-center gap-1 px-3 py-1 bg-blue-50 text-blue-600 rounded-full text-xs">
                               Price: ₹{priceRange[0]} - ₹{priceRange[1]}
                               <button 
                                 onClick={() => setPriceRange([0, 1000])}
-                                className="text-pink-400 hover:text-pink-600"
+                                className="text-blue-400 hover:text-blue-600"
                               >
                                 ×
                               </button>
                             </span>
                           )}
                           {ratingFilter > 0 && (
-                            <span className="inline-flex items-center gap-1 px-3 py-1 bg-pink-50 text-pink-600 rounded-full text-xs">
+                            <span className="inline-flex items-center gap-1 px-3 py-1 bg-blue-50 text-blue-600 rounded-full text-xs">
                               {ratingFilter}+ Stars
                               <button 
                                 onClick={() => setRatingFilter(0)}
-                                className="text-pink-400 hover:text-pink-600"
+                                className="text-blue-400 hover:text-blue-600"
                               >
                                 ×
                               </button>
@@ -608,7 +608,7 @@ const Collection = () => {
                               setPriceRange([0, 1000]);
                               setRatingFilter(0);
                             }}
-                            className="mt-3 text-sm font-semibold text-gray-600 hover:text-pink-600 transition-colors duration-200"
+                            className="mt-3 text-sm font-semibold text-gray-600 hover:text-blue-600 transition-colors duration-200"
                           >
                             Clear all filters
                           </button>
@@ -636,7 +636,7 @@ const Collection = () => {
                 {/* Grid/List View Toggle */}
                 <div className="border-2 border-gray-200 rounded-xl overflow-hidden flex shadow-sm">
                   <button 
-                    className="p-2 md:p-2.5 bg-gradient-to-r from-pink-500 to-orange-500 text-white transition-all"
+                    className="p-2 md:p-2.5 bg-gradient-to-r from-blue-500 to-blue-500 text-white transition-all"
                     aria-label="Grid view"
                   >
                     <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 md:h-5 md:w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
@@ -660,7 +660,7 @@ const Collection = () => {
                 <div className="relative sort-dropdown">
                   <button 
                     onClick={() => setShowSortDropdown(!showSortDropdown)}
-                    className="flex items-center gap-2 md:gap-3 px-4 md:px-5 py-2 md:py-2.5 border-2 border-gray-200 rounded-xl bg-white hover:border-orange-300 hover:shadow-soft transition-all duration-200 text-sm md:text-base font-medium"
+                    className="flex items-center gap-2 md:gap-3 px-4 md:px-5 py-2 md:py-2.5 border-2 border-gray-200 rounded-xl bg-white hover:border-blue-300 hover:shadow-soft transition-all duration-200 text-sm md:text-base font-medium"
                   >
                     <span className="text-gray-600 hidden md:inline text-lg">{selectedSortOption.icon}</span>
                     <span className="truncate font-semibold text-gray-800">{selectedSortOption.label}</span>
@@ -675,13 +675,13 @@ const Collection = () => {
                             key={option.value}
                             onClick={() => handleSortChange(option.value)}
                             className={`flex items-center gap-3 px-4 py-2.5 w-full text-left text-sm hover:bg-gray-50 transition-colors duration-200
-                              ${option.value === sortType ? 'bg-gray-50 text-pink-600 font-medium' : 'text-gray-700'}`}
+                              ${option.value === sortType ? 'bg-gray-50 text-blue-600 font-medium' : 'text-gray-700'}`}
                           >
-                            <span className={option.value === sortType ? 'text-pink-600' : 'text-gray-500'}>
+                            <span className={option.value === sortType ? 'text-blue-600' : 'text-gray-500'}>
                               {option.icon}
                             </span>
                             {option.label}
-                            {option.value === sortType && <FaCheck className="ml-auto text-pink-500 text-xs" />}
+                            {option.value === sortType && <FaCheck className="ml-auto text-blue-500 text-xs" />}
                           </button>
                         ))}
                       </div>
@@ -742,7 +742,7 @@ const Collection = () => {
                     setPriceRange([0, 1000]);
                     setRatingFilter(0);
                   }}
-                  className="ml-auto text-sm font-semibold text-gray-600 hover:text-pink-600 transition-colors"
+                  className="ml-auto text-sm font-semibold text-gray-600 hover:text-blue-600 transition-colors"
                 >
                   Clear all
                 </button>
@@ -798,7 +798,7 @@ const Collection = () => {
                             setPriceRange([0, 1000]);
                             setRatingFilter(0);
                           }}
-                          className="inline-flex items-center justify-center px-5 py-2.5 text-sm font-semibold text-gray-600 hover:text-pink-600 transition-colors"
+                          className="inline-flex items-center justify-center px-5 py-2.5 text-sm font-semibold text-gray-600 hover:text-blue-600 transition-colors"
                         >
                           Go to all collections
                         </Link>
@@ -814,7 +814,7 @@ const Collection = () => {
       
       {/* Recommended Products Section - Only show when there are products */}
       {filterProducts.length > 0 && (
-        <div className="mt-20 py-20 bg-gradient-to-br from-orange-50 via-pink-50 to-rose-50">
+        <div className="mt-20 py-20 bg-gradient-to-br from-blue-50 via-blue-50 to-blue-50">
           <div className="container mx-auto px-4 sm:px-6 lg:px-8">
             <div className="text-center mb-12">
               <motion.h2 
@@ -825,7 +825,7 @@ const Collection = () => {
               >
                 Recommended <span className="gradient-text">For You</span>
               </motion.h2>
-              <div className="w-24 h-1 bg-gradient-to-r from-pink-500 to-orange-500 mx-auto rounded-full mb-6"></div>
+              <div className="w-24 h-1 bg-gradient-to-r from-blue-500 to-blue-500 mx-auto rounded-full mb-6"></div>
               <motion.p 
                 initial={{ opacity: 0 }}
                 whileInView={{ opacity: 1 }}
@@ -868,7 +868,7 @@ const Collection = () => {
             <div className="text-center mt-12">
               <Link 
                 to="/collection"
-                className="btn-interactive inline-flex items-center gap-3 px-8 py-4 bg-white border-2 border-orange-200 rounded-full text-orange-600 hover:bg-orange-50 hover:border-orange-300 transition-all duration-300 shadow-soft hover:shadow-medium font-semibold text-base relative z-10"
+                className="btn-interactive inline-flex items-center gap-3 px-8 py-4 bg-white border-2 border-blue-200 rounded-full text-blue-600 hover:bg-blue-50 hover:border-blue-300 transition-all duration-300 shadow-soft hover:shadow-medium font-semibold text-base relative z-10"
               >
                 <span className="relative z-10">View All Recommendations</span>
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 relative z-10" viewBox="0 0 20 20" fill="currentColor">
@@ -884,4 +884,6 @@ const Collection = () => {
 };
 
 export default Collection;
+
+
 

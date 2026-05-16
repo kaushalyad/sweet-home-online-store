@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+﻿import React, { useState } from 'react'
 import { motion } from 'framer-motion'
 import { FaPaperPlane, FaCheckCircle } from 'react-icons/fa'
 import axios from 'axios'
@@ -43,11 +43,11 @@ const NewsletterBox = () => {
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true }}
         transition={{ duration: 0.6 }}
-        className="bg-gradient-to-r from-pink-50 to-orange-50 rounded-2xl p-8 md:p-12 text-center relative overflow-hidden shadow-sm"
+        className="bg-gradient-to-r from-blue-50 to-blue-50 rounded-2xl p-8 md:p-12 text-center relative overflow-hidden shadow-sm"
       >
         {/* Decorative elements */}
-        <div className="absolute top-0 right-0 w-40 h-40 bg-pink-200 rounded-full opacity-10 transform translate-x-1/3 -translate-y-1/3"></div>
-        <div className="absolute bottom-0 left-0 w-32 h-32 bg-orange-200 rounded-full opacity-20 transform -translate-x-1/3 translate-y-1/3"></div>
+        <div className="absolute top-0 right-0 w-40 h-40 bg-blue-200 rounded-full opacity-10 transform translate-x-1/3 -translate-y-1/3"></div>
+        <div className="absolute bottom-0 left-0 w-32 h-32 bg-blue-200 rounded-full opacity-20 transform -translate-x-1/3 translate-y-1/3"></div>
         
         <motion.h2 
           initial={{ opacity: 0, y: -10 }}
@@ -94,7 +94,7 @@ const NewsletterBox = () => {
           >
             <div className="flex flex-col sm:flex-row gap-3">
               <input 
-                className="w-full px-5 py-4 rounded-full shadow-sm border border-gray-200 outline-none focus:ring-2 focus:ring-pink-300 focus:border-transparent focus:shadow-md transition-all bg-white text-gray-800 font-medium placeholder-gray-400 appearance-none min-h-[48px]" 
+                className="w-full px-5 py-4 rounded-full shadow-sm border border-gray-200 outline-none focus:ring-2 focus:ring-blue-300 focus:border-transparent focus:shadow-md transition-all bg-white text-gray-800 font-medium placeholder-gray-400 appearance-none min-h-[48px]" 
                 type="email" 
                 placeholder="Enter your email address" 
                 required
@@ -128,3 +128,5 @@ const NewsletterBox = () => {
 }
 
 export default NewsletterBox
+
+

@@ -1,12 +1,18 @@
 import nodemailer from 'nodemailer';
 import fs from 'fs';
 import path from 'path';
+import dotenv from 'dotenv';
 import { fileURLToPath } from 'url';
 import logger from './logger.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const LOCAL_OWNER_LOGO = path.join(__dirname, '../public/email-assets/company-logo.png');
 const OWNER_LOGO_CID = 'sweet-home-store-logo';
+
+dotenv.config({ path: path.join(__dirname, '../.env') });
+
+const normalizedEmailUser = process.env.EMAIL_USER?.trim();
+const normalizedEmailAppPassword = process.env.EMAIL_APP_PASSWORD?.replace(/\s+/g, '').trim();
 
 /** Header for owner alerts: STORE_LOGO_URL, or local company-logo.png (CID), or text */
 function buildOwnerBranding() {
@@ -55,17 +61,18 @@ function ownerEmailShell(innerBody) {
 
 // Create transporter
 const createTransporter = () => {
-  if (!process.env.EMAIL_USER || !process.env.EMAIL_APP_PASSWORD) {
-    logger.warn('Email credentials not configured. Email sending will fail.');
-    logger.info(`EMAIL_USER: ${process.env.EMAIL_USER ? 'SET' : 'NOT SET'}`);
-    logger.info(`EMAIL_APP_PASSWORD: ${process.env.EMAIL_APP_PASSWORD ? 'SET' : 'NOT SET'}`);
+  if (!normalizedEmailUser || !normalizedEmailAppPassword) {
+    logger.warn('Email credentials not configured correctly. Email sending will likely fail.');
+    logger.info(`EMAIL_USER: ${normalizedEmailUser ? 'SET' : 'NOT SET'}`);
+    logger.info(`EMAIL_APP_PASSWORD: ${normalizedEmailAppPassword ? 'SET' : 'NOT SET'}`);
+    logger.info(`EMAIL_APP_PASSWORD length: ${normalizedEmailAppPassword?.length || 0}`);
   }
   
   return nodemailer.createTransport({
     service: 'gmail',
     auth: {
-      user: process.env.EMAIL_USER,
-      pass: process.env.EMAIL_APP_PASSWORD
+      user: normalizedEmailUser,
+      pass: normalizedEmailAppPassword
     }
   });
 };
@@ -85,7 +92,7 @@ transporter.verify((error, success) => {
 export const sendEmail = async ({ to, subject, html, text }) => {
   try {
     const mailOptions = {
-      from: `"Sweet Home Store" <${process.env.EMAIL_USER}>`,
+      from: `"Sweet Home Store" <${normalizedEmailUser}>`,
       to,
       subject,
       html: html || text,
@@ -410,7 +417,7 @@ export const sendPasswordResetEmail = async (userData) => {
     const { email, name, resetUrl } = userData;
 
     const mailOptions = {
-      from: `"Sweet Home Store" <${process.env.EMAIL_USER}>`,
+      from: `"Sweet Home Store" <${normalizedEmailUser}>`,
       to: email,
       subject: 'Password Reset Request',
       html: `
@@ -463,7 +470,7 @@ export const sendPasswordResetEmail = async (userData) => {
 
   } catch (error) {
     logger.error('Error sending password reset email:', error);
-    return { success: false, error: error.message };
+    throw error;
   }
 };
 

@@ -1,4 +1,4 @@
-import React from 'react';
+﻿import React from 'react';
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import { FaCookie, FaShieldAlt, FaInfoCircle } from 'react-icons/fa';
@@ -22,8 +22,8 @@ const CookiePolicy = () => {
         >
           {/* Header */}
           <div className="flex items-center gap-4 mb-8">
-            <div className="bg-orange-100 p-4 rounded-full">
-              <FaCookie className="text-orange-500 text-4xl" />
+            <div className="bg-blue-100 p-4 rounded-full">
+              <FaCookie className="text-blue-500 text-4xl" />
             </div>
             <div>
               <h1 className="text-3xl md:text-4xl font-bold text-gray-800">Cookie Policy</h1>
@@ -43,7 +43,7 @@ const CookiePolicy = () => {
           {/* What are cookies */}
           <section className="mb-8">
             <h2 className="text-2xl font-bold text-gray-800 mb-4 flex items-center gap-2">
-              <FaInfoCircle className="text-orange-500" />
+              <FaInfoCircle className="text-blue-500" />
               What are cookies?
             </h2>
             <p className="text-gray-700 leading-relaxed mb-4">
@@ -59,7 +59,7 @@ const CookiePolicy = () => {
             <div className="space-y-6">
               <div className="bg-gray-50 p-6 rounded-lg">
                 <h3 className="text-xl font-semibold text-gray-800 mb-2 flex items-center gap-2">
-                  🔒 Necessary Cookies
+                  ðŸ”’ Necessary Cookies
                 </h3>
                 <p className="text-gray-700 mb-3">
                   These cookies are essential for the website to function properly. They enable basic functions 
@@ -72,7 +72,7 @@ const CookiePolicy = () => {
 
               <div className="bg-gray-50 p-6 rounded-lg">
                 <h3 className="text-xl font-semibold text-gray-800 mb-2 flex items-center gap-2">
-                  ⚙️ Functional Cookies
+                  ★ Functional Cookies
                 </h3>
                 <p className="text-gray-700 mb-3">
                   These cookies enable enhanced functionality and personalization. They may be set by us or 
@@ -85,7 +85,7 @@ const CookiePolicy = () => {
 
               <div className="bg-gray-50 p-6 rounded-lg">
                 <h3 className="text-xl font-semibold text-gray-800 mb-2 flex items-center gap-2">
-                  📊 Analytics Cookies
+                  ðŸ“Š Analytics Cookies
                 </h3>
                 <p className="text-gray-700 mb-3">
                   These cookies help us understand how visitors interact with our website by collecting 
@@ -98,7 +98,7 @@ const CookiePolicy = () => {
 
               <div className="bg-gray-50 p-6 rounded-lg">
                 <h3 className="text-xl font-semibold text-gray-800 mb-2 flex items-center gap-2">
-                  🎯 Marketing Cookies
+                  ðŸŽ¯ Marketing Cookies
                 </h3>
                 <p className="text-gray-700 mb-3">
                   These cookies are used to track visitors across websites. They are used to display 
@@ -116,23 +116,23 @@ const CookiePolicy = () => {
             <h2 className="text-2xl font-bold text-gray-800 mb-4">How We Use Cookies</h2>
             <ul className="space-y-3 text-gray-700">
               <li className="flex gap-3">
-                <span className="text-orange-500 font-bold">•</span>
+                <span className="text-blue-500 font-bold">•</span>
                 <span>To remember your login information and preferences</span>
               </li>
               <li className="flex gap-3">
-                <span className="text-orange-500 font-bold">•</span>
+                <span className="text-blue-500 font-bold">•</span>
                 <span>To understand and analyze how you use our website</span>
               </li>
               <li className="flex gap-3">
-                <span className="text-orange-500 font-bold">•</span>
+                <span className="text-blue-500 font-bold">•</span>
                 <span>To improve our website performance and user experience</span>
               </li>
               <li className="flex gap-3">
-                <span className="text-orange-500 font-bold">•</span>
+                <span className="text-blue-500 font-bold">•</span>
                 <span>To provide personalized content and advertisements</span>
               </li>
               <li className="flex gap-3">
-                <span className="text-orange-500 font-bold">•</span>
+                <span className="text-blue-500 font-bold">•</span>
                 <span>To maintain the security and integrity of our website</span>
               </li>
             </ul>
@@ -141,7 +141,7 @@ const CookiePolicy = () => {
           {/* Your choices */}
           <section className="mb-8">
             <h2 className="text-2xl font-bold text-gray-800 mb-4 flex items-center gap-2">
-              <FaShieldAlt className="text-orange-500" />
+              <FaShieldAlt className="text-blue-500" />
               Your Choices Regarding Cookies
             </h2>
             <p className="text-gray-700 leading-relaxed mb-4">
@@ -150,21 +150,21 @@ const CookiePolicy = () => {
             </p>
             <ul className="space-y-3 text-gray-700 mb-6">
               <li className="flex gap-3">
-                <span className="text-orange-500 font-bold">•</span>
+                <span className="text-blue-500 font-bold">•</span>
                 <span>Using our cookie consent banner when you first visit our website</span>
               </li>
               <li className="flex gap-3">
-                <span className="text-orange-500 font-bold">•</span>
+                <span className="text-blue-500 font-bold">•</span>
                 <span>Managing your preferences through our Cookie Settings page</span>
               </li>
               <li className="flex gap-3">
-                <span className="text-orange-500 font-bold">•</span>
+                <span className="text-blue-500 font-bold">•</span>
                 <span>Adjusting your browser settings to refuse or delete cookies</span>
               </li>
             </ul>
             <Link
               to="/cookie-settings"
-              className="inline-block bg-orange-500 hover:bg-orange-600 text-white px-6 py-3 rounded-lg font-semibold transition-colors duration-300"
+              className="inline-block bg-blue-500 hover:bg-blue-600 text-white px-6 py-3 rounded-lg font-semibold transition-colors duration-300"
             >
               Manage Cookie Preferences
             </Link>
@@ -194,7 +194,7 @@ const CookiePolicy = () => {
             <div className="bg-gray-50 p-6 rounded-lg">
               <p className="text-gray-700 mb-2">
                 <strong>Email:</strong> {' '}
-                <a href="mailto:support@sweethome-store.com" className="text-orange-500 hover:text-orange-600">
+                <a href="mailto:support@sweethome-store.com" className="text-blue-500 hover:text-blue-600">
                   support@sweethome-store.com
                 </a>
               </p>
@@ -217,15 +217,15 @@ const CookiePolicy = () => {
           {/* Footer Links */}
           <div className="mt-12 pt-8 border-t border-gray-200">
             <div className="flex flex-wrap gap-4 justify-center text-sm">
-              <Link to="/privacy-policy" className="text-orange-500 hover:text-orange-600">
+              <Link to="/privacy-policy" className="text-blue-500 hover:text-blue-600">
                 Privacy Policy
               </Link>
               <span className="text-gray-300">|</span>
-              <Link to="/terms" className="text-orange-500 hover:text-orange-600">
+              <Link to="/terms" className="text-blue-500 hover:text-blue-600">
                 Terms of Service
               </Link>
               <span className="text-gray-300">|</span>
-              <Link to="/cookie-settings" className="text-orange-500 hover:text-orange-600">
+              <Link to="/cookie-settings" className="text-blue-500 hover:text-blue-600">
                 Cookie Settings
               </Link>
             </div>
@@ -238,3 +238,4 @@ const CookiePolicy = () => {
 };
 
 export default CookiePolicy;
+

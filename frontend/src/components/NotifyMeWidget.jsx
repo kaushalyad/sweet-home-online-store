@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+﻿import React, { useState } from 'react'
 import axios from 'axios'
 import { backendUrl } from '../App'
 import { FaBell, FaTimes, FaCheckCircle, FaEnvelope, FaUser } from 'react-icons/fa'
@@ -80,7 +80,7 @@ const NotifyMeWidget = ({ productId = null, productName = '', onClose }) => {
             onClick={(e) => e.stopPropagation()}
           >
             {/* Header */}
-            <div className="bg-gradient-to-r from-pink-500 to-rose-500 p-4 sm:p-6 relative">
+            <div className="bg-gradient-to-r from-blue-500 to-blue-500 p-4 sm:p-6 relative">
               <button 
                 onClick={handleClose}
                 className="absolute top-3 right-3 sm:top-4 sm:right-4 text-white hover:bg-white hover:bg-opacity-20 rounded-full p-2 transition-all active:scale-90"
@@ -99,7 +99,7 @@ const NotifyMeWidget = ({ productId = null, productName = '', onClose }) => {
                 </motion.div>
                 <div>
                   <h3 className="text-xl sm:text-2xl font-bold text-white">Get Notified</h3>
-                  <p className="text-pink-100 text-xs sm:text-sm">Stay in the loop</p>
+                  <p className="text-blue-100 text-xs sm:text-sm">Stay in the loop</p>
                 </div>
               </div>
             </div>
@@ -124,7 +124,7 @@ const NotifyMeWidget = ({ productId = null, productName = '', onClose }) => {
                   </div>
                 </motion.div>
                 <h4 className="text-lg sm:text-xl font-bold text-gray-800 mb-2">You're all set!</h4>
-                <p className="text-sm sm:text-base text-gray-600 px-2">We'll notify you as soon as <span className="font-semibold text-pink-600">{productName}</span> becomes available.</p>
+                <p className="text-sm sm:text-base text-gray-600 px-2">We'll notify you as soon as <span className="font-semibold text-blue-600">{productName}</span> becomes available.</p>
               </motion.div>
             ) : (
               <>
@@ -146,7 +146,7 @@ const NotifyMeWidget = ({ productId = null, productName = '', onClose }) => {
                         <FaUser size={14} className="sm:w-4 sm:h-4" />
                       </div>
                       <input 
-                        className={`w-full pl-9 sm:pl-10 pr-4 py-2.5 sm:py-3 text-sm sm:text-base border ${errors.name ? 'border-red-300 focus:ring-red-500 focus:border-red-500' : 'border-gray-300 focus:ring-pink-500 focus:border-pink-500'} rounded-lg focus:outline-none focus:ring-2 transition-all`}
+                        className={`w-full pl-9 sm:pl-10 pr-4 py-2.5 sm:py-3 text-sm sm:text-base border ${errors.name ? 'border-red-300 focus:ring-red-500 focus:border-red-500' : 'border-gray-300 focus:ring-blue-500 focus:border-blue-500'} rounded-lg focus:outline-none focus:ring-2 transition-all`}
                         placeholder="Enter your name" 
                         value={name} 
                         onChange={(e) => {
@@ -180,7 +180,7 @@ const NotifyMeWidget = ({ productId = null, productName = '', onClose }) => {
                         <FaEnvelope size={14} className="sm:w-4 sm:h-4" />
                       </div>
                       <input 
-                        className={`w-full pl-9 sm:pl-10 pr-4 py-2.5 sm:py-3 text-sm sm:text-base border ${errors.email ? 'border-red-300 focus:ring-red-500 focus:border-red-500' : 'border-gray-300 focus:ring-pink-500 focus:border-pink-500'} rounded-lg focus:outline-none focus:ring-2 transition-all`}
+                        className={`w-full pl-9 sm:pl-10 pr-4 py-2.5 sm:py-3 text-sm sm:text-base border ${errors.email ? 'border-red-300 focus:ring-red-500 focus:border-red-500' : 'border-gray-300 focus:ring-blue-500 focus:border-blue-500'} rounded-lg focus:outline-none focus:ring-2 transition-all`}
                         placeholder="your.email@example.com" 
                         type="email"
                         value={email} 
@@ -211,7 +211,7 @@ const NotifyMeWidget = ({ productId = null, productName = '', onClose }) => {
                     <button 
                       type="submit" 
                       disabled={loading}
-                      className="w-full sm:flex-1 bg-gradient-to-r from-pink-500 to-rose-500 text-white py-2.5 sm:py-3 rounded-lg text-sm sm:text-base font-semibold hover:from-pink-600 hover:to-rose-600 active:scale-95 transition-all duration-300 shadow-md hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                      className="w-full sm:flex-1 bg-gradient-to-r from-blue-500 to-blue-500 text-white py-2.5 sm:py-3 rounded-lg text-sm sm:text-base font-semibold hover:from-blue-600 hover:to-blue-600 active:scale-95 transition-all duration-300 shadow-md hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                     >
                       {loading ? (
                         <>
@@ -242,7 +242,7 @@ const NotifyMeWidget = ({ productId = null, productName = '', onClose }) => {
                   transition={{ delay: 0.4 }}
                   className="text-xs text-gray-500 text-center mt-3 sm:mt-4"
                 >
-                  🔒 We respect your privacy. Your email will only be used for product notifications.
+                  ðŸ”’ We respect your privacy. Your email will only be used for product notifications.
                 </motion.p>
               </>
             )}
@@ -254,3 +254,5 @@ const NotifyMeWidget = ({ productId = null, productName = '', onClose }) => {
 }
 
 export default NotifyMeWidget
+
+

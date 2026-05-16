@@ -1,4 +1,4 @@
-import React from "react";
+﻿import React from "react";
 import PropTypes from "prop-types";
 import { motion } from "framer-motion";
 
@@ -13,7 +13,7 @@ const NoProductsFound = ({
   return (
     <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-8 sm:p-10 text-center">
       <div className="mx-auto mb-6 w-28 h-28 sm:w-32 sm:h-32 flex items-center justify-center">
-        {/* Friendly “no data found” style illustration (document + magnifier) */}
+        {/* Friendly “no data found” style illustration (document + magnifier) */}
         <svg
           viewBox="0 0 160 160"
           className="w-20 h-20 sm:w-24 sm:h-24"
@@ -102,7 +102,7 @@ const NoProductsFound = ({
         {primaryActionLabel && onPrimaryAction && (
           <button
             onClick={onPrimaryAction}
-            className="btn-interactive inline-flex items-center justify-center w-full sm:w-auto px-7 py-3.5 bg-pink-500 text-white rounded-full hover:bg-pink-600 hover:shadow-strong transition-all duration-200 font-semibold"
+            className="btn-interactive inline-flex items-center justify-center w-full sm:w-auto px-7 py-3.5 bg-blue-500 text-white rounded-full hover:bg-blue-600 hover:shadow-strong transition-all duration-200 font-semibold"
           >
             {primaryActionLabel}
           </button>
@@ -131,4 +131,5 @@ NoProductsFound.propTypes = {
 };
 
 export default NoProductsFound;
+
 

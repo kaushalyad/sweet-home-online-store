@@ -22,6 +22,13 @@ import hero3 from "./hero-3.png";
 import hero4 from "./hero-4.png";
 import hero5 from "./hero-5.png";
 import hero6 from "./hero-6.png";
+import hero1_mobile from "./hero-1-mobile.png";
+import hero2_mobile from "./hero-2-mobile.png";
+import hero3_mobile from "./hero-3-mobile.png";
+import hero4_mobile from "./hero-4-mobile.png";
+import hero5_mobile from "./hero-5-mobile.png";
+import hero6_mobile from "./hero-6-mobile.png";
+import about from "./about.png";
 import milk_sweets from "./milk-sweets.jpg";
 import namkeens from "./namkeens.jpg";
 import dry_fruits from "./dry_fruits.jpg";
@@ -47,6 +54,12 @@ export const assets = {
   hero4,
   hero5,
   hero6,
+  hero1_mobile,
+  hero2_mobile,
+  hero3_mobile,
+  hero4_mobile,
+  hero5_mobile,
+  hero6_mobile,
   milk_sweets,
   namkeens,
   dry_fruits,
@@ -71,8 +84,7 @@ export const assets = {
   support_img:
     "https://img.freepik.com/free-photo/indian-sweets-soan-papdi-ladoo_23-2148661956.jpg",
   menu_icon,
-  about_img:
-    "https://img.freepik.com/free-photo/indian-sweets-rasgulla-gulab-jamun_23-2148661955.jpg",
+  about_img: about,
   contact_img:
     "https://img.freepik.com/free-photo/indian-sweets-soan-papdi-ladoo_23-2148661956.jpg",
   razorpay_logo,

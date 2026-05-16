@@ -35,53 +35,63 @@ const ForgotPassword = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-md w-full space-y-8">
-        <div>
-          <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
-            Forgot Your Password?
-          </h2>
-          <p className="mt-2 text-center text-sm text-gray-600">
-            Enter your email address and we'll send you a link to reset your password.
-          </p>
-        </div>
-        <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
-          <div className="rounded-md shadow-sm -space-y-px">
-            <div>
-              <label htmlFor="email" className="sr-only">Email address</label>
+    <div className="min-h-screen bg-[#e8f4ff] py-12 px-4 sm:px-6 lg:px-8">
+      <div className="relative mx-auto max-w-3xl">
+        <div className="pointer-events-none absolute left-1/2 top-0 h-64 w-64 -translate-x-1/2 rounded-full bg-blue-200/70 blur-3xl" />
+        <div className="pointer-events-none absolute right-10 top-24 h-40 w-40 rounded-full bg-blue-100/70 blur-2xl" />
+
+        <div className="relative overflow-hidden rounded-[32px] border border-white/70 bg-white/95 px-6 py-10 shadow-[0_30px_90px_rgba(45,108,255,0.12)] backdrop-blur-xl sm:px-10 sm:py-12">
+          <div className="mx-auto max-w-xl text-center">
+            <span className="inline-flex rounded-full bg-blue-100 px-3 py-1 text-xs font-semibold uppercase tracking-[0.25em] text-blue-700">
+              Account Help
+            </span>
+            <h1 className="mt-6 text-3xl font-semibold tracking-tight text-slate-900 sm:text-4xl">
+              Forgot Your Password?
+            </h1>
+            <p className="mx-auto mt-4 max-w-2xl text-sm leading-7 text-slate-600 sm:text-base">
+              Enter your email and we'll send a secure link so you can reset your password and continue shopping.
+            </p>
+          </div>
+
+          <form className="mt-10 space-y-6" onSubmit={handleSubmit}>
+            <div className="rounded-[22px] border border-slate-200 bg-slate-50 p-5 shadow-sm">
+              <label htmlFor="email" className="block text-sm font-medium text-slate-700">
+                Email address
+              </label>
               <input
                 id="email"
                 name="email"
                 type="email"
                 required
-                className="appearance-none rounded-md relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-pink-500 focus:border-pink-500 focus:z-10 sm:text-sm"
-                placeholder="Email address"
+                className="mt-3 block w-full rounded-2xl border border-slate-300 bg-white px-4 py-3 text-sm text-slate-900 shadow-sm placeholder-slate-400 focus:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-400/30"
+                placeholder="Enter your email address"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
               />
             </div>
-          </div>
 
-          <div>
-            <button
-              type="submit"
-              disabled={loading}
-              className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-pink-600 hover:bg-pink-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-pink-500"
-            >
-              {loading ? 'Sending Reset Link...' : 'Send Reset Link'}
-            </button>
-          </div>
+            <div className="grid gap-4">
+              <button
+                type="submit"
+                disabled={loading}
+                className="inline-flex h-12 w-full items-center justify-center rounded-2xl bg-blue-600 px-5 text-sm font-semibold text-white shadow-lg shadow-blue-200/50 transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-70"
+              >
+                {loading ? 'Sending Reset Link...' : 'Send Reset Link'}
+              </button>
+              <button
+                type="button"
+                onClick={() => navigate('/login')}
+                className="text-sm font-medium text-slate-600 hover:text-blue-700"
+              >
+                Back to Login
+              </button>
+            </div>
+          </form>
 
-          <div className="text-center">
-            <button
-              type="button"
-              onClick={() => navigate('/login')}
-              className="text-sm text-gray-600 hover:text-pink-600"
-            >
-              Back to Login
-            </button>
-          </div>
-        </form>
+          <p className="mt-8 text-center text-sm text-slate-500">
+            Tip: use the same email you registered with so the reset link reaches you instantly.
+          </p>
+        </div>
       </div>
     </div>
   );

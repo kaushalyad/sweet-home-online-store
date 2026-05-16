@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { FaCookie, FaCheckCircle, FaTimesCircle } from 'react-icons/fa';
 import { toast } from 'react-toastify';
@@ -51,28 +51,28 @@ const CookieSettings = () => {
     {
       type: 'necessary',
       title: 'Necessary Cookies',
-      icon: '🔒',
+      icon: 'ðŸ”’',
       description: 'These cookies are essential for the website to function properly. They enable basic functions like page navigation and access to secure areas. The website cannot function properly without these cookies.',
       examples: 'Authentication, security, session management'
     },
     {
       type: 'functional',
       title: 'Functional Cookies',
-      icon: '⚙️',
+      icon: '★',
       description: 'These cookies enable enhanced functionality and personalization, such as remembering your preferences and settings.',
       examples: 'Language preferences, theme settings, region selection'
     },
     {
       type: 'analytics',
       title: 'Analytics Cookies',
-      icon: '📊',
+      icon: 'ðŸ“Š',
       description: 'These cookies help us understand how visitors interact with our website by collecting and reporting information anonymously.',
       examples: 'Google Analytics, page views, user behavior'
     },
     {
       type: 'marketing',
       title: 'Marketing Cookies',
-      icon: '🎯',
+      icon: 'ðŸŽ¯',
       description: 'These cookies are used to track visitors across websites and display ads that are relevant and engaging for the individual user.',
       examples: 'Ad targeting, retargeting, social media integration'
     }
@@ -95,8 +95,8 @@ const CookieSettings = () => {
           {/* Header */}
           <div className="bg-white rounded-lg shadow-md p-6 mb-6">
             <div className="flex items-center gap-4 mb-4">
-              <div className="bg-orange-100 p-4 rounded-full">
-                <FaCookie className="text-orange-500 text-3xl" />
+              <div className="bg-blue-100 p-4 rounded-full">
+                <FaCookie className="text-blue-500 text-3xl" />
               </div>
               <div>
                 <h1 className="text-3xl font-bold text-gray-800">Cookie Settings</h1>
@@ -186,7 +186,7 @@ const CookieSettings = () => {
               </p>
               <button
                 onClick={handleSave}
-                className="bg-orange-500 hover:bg-orange-600 text-white px-8 py-3 rounded-lg font-semibold transition-colors duration-300 whitespace-nowrap"
+                className="bg-blue-500 hover:bg-blue-600 text-white px-8 py-3 rounded-lg font-semibold transition-colors duration-300 whitespace-nowrap"
               >
                 Save Preferences
               </button>
@@ -195,7 +195,7 @@ const CookieSettings = () => {
 
           {/* Additional Info */}
           <div className="mt-6 bg-blue-50 border border-blue-200 rounded-lg p-6">
-            <h3 className="font-semibold text-blue-900 mb-2">ℹ️ Important Information</h3>
+            <h3 className="font-semibold text-blue-900 mb-2">₹ Important Information</h3>
             <ul className="text-sm text-blue-800 space-y-2">
               <li>• Necessary cookies cannot be disabled as they are required for the website to function.</li>
               <li>• Disabling certain cookies may affect your user experience on our website.</li>
@@ -211,3 +211,4 @@ const CookieSettings = () => {
 };
 
 export default CookieSettings;
+

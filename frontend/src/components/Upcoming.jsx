@@ -1,4 +1,4 @@
-import React from "react";
+﻿import React from "react";
 import Title from "./Title";
 import { motion } from "framer-motion";
 import { useState } from "react";
@@ -39,7 +39,7 @@ const Upcoming = () => {
     return (
       <button
         onClick={() => setActiveProduct(product)}
-        className="w-full sm:w-auto px-4 py-2 bg-pink-500 text-white rounded-full"
+        className="w-full sm:w-auto px-4 py-2 bg-blue-500 text-white rounded-full"
       >
         Notify Me
       </button>
@@ -51,7 +51,7 @@ const Upcoming = () => {
       <div className="text-center py-4">
         <motion.div initial={{ opacity: 0, y: 16 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.5 }}>
           <Title text1={"Coming"} text2={"Soon"} />
-          <div className="w-20 h-1 bg-pink-500 mx-auto mt-4 mb-6" />
+          <div className="w-20 h-1 bg-blue-500 mx-auto mt-4 mb-6" />
           <p className="text-gray-600 max-w-2xl mx-auto mb-8 px-4">Exciting new products launching soon — stay tuned or sign up for notifications.</p>
         </motion.div>
       </div>
@@ -87,3 +87,4 @@ const Upcoming = () => {
 };
 
 export default Upcoming;
+

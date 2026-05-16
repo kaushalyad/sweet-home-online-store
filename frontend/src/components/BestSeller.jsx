@@ -37,7 +37,7 @@ const BestSeller = () => {
           transition={{ duration: 0.5 }}
         >
           <Title text1={"Trending"} text2={"Sweets And Namkeens"} />
-          <div className="w-20 h-1 bg-pink-500 mx-auto mt-4 mb-6"></div>
+          <div className="w-20 h-1 bg-blue-500 mx-auto mt-4 mb-6"></div>
           <p className="text-gray-600 max-w-2xl mx-auto mb-8 px-4">
             Our most popular treats loved by customers - hand-picked for exceptional taste and quality
           </p>
@@ -94,4 +94,5 @@ const BestSeller = () => {
 };
 
 export default BestSeller;
+
 

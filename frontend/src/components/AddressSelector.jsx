@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { toast } from 'react-toastify';
 import { FaPlus, FaEdit, FaTrash, FaCheck } from 'react-icons/fa';
@@ -103,8 +103,8 @@ const AddressSelector = ({ onAddressSelect, selectedAddress, backendUrl, token }
             key={address._id}
             className={`p-4 border rounded-lg cursor-pointer transition-all ${
               selectedAddress?._id === address._id
-                ? 'border-pink-500 bg-pink-50'
-                : 'border-gray-200 hover:border-pink-300'
+                ? 'border-blue-500 bg-blue-50'
+                : 'border-gray-200 hover:border-blue-300'
             }`}
             onClick={() => onAddressSelect(address)}
           >
@@ -113,7 +113,7 @@ const AddressSelector = ({ onAddressSelect, selectedAddress, backendUrl, token }
                 <div className="flex items-center gap-2">
                   <h3 className="font-medium">{address.name}</h3>
                   {address.isDefault && (
-                    <span className="text-xs bg-pink-100 text-pink-600 px-2 py-1 rounded-full">
+                    <span className="text-xs bg-blue-100 text-blue-600 px-2 py-1 rounded-full">
                       Default
                     </span>
                   )}
@@ -132,7 +132,7 @@ const AddressSelector = ({ onAddressSelect, selectedAddress, backendUrl, token }
                       e.stopPropagation();
                       handleSetDefault(address._id);
                     }}
-                    className="text-gray-600 hover:text-pink-500"
+                    className="text-gray-600 hover:text-blue-500"
                   >
                     <FaCheck />
                   </button>
@@ -156,7 +156,7 @@ const AddressSelector = ({ onAddressSelect, selectedAddress, backendUrl, token }
       {!showForm && (
         <button
           onClick={() => setShowForm(true)}
-          className="flex items-center gap-2 text-pink-600 hover:text-pink-700"
+          className="flex items-center gap-2 text-blue-600 hover:text-blue-700"
         >
           <FaPlus /> Add New Address
         </button>
@@ -173,7 +173,7 @@ const AddressSelector = ({ onAddressSelect, selectedAddress, backendUrl, token }
                 name="name"
                 value={formData.name}
                 onChange={handleInputChange}
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-pink-500 focus:ring-pink-500"
+                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
                 required
               />
             </div>
@@ -184,7 +184,7 @@ const AddressSelector = ({ onAddressSelect, selectedAddress, backendUrl, token }
                 name="phone"
                 value={formData.phone}
                 onChange={handleInputChange}
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-pink-500 focus:ring-pink-500"
+                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
                 required
               />
             </div>
@@ -195,7 +195,7 @@ const AddressSelector = ({ onAddressSelect, selectedAddress, backendUrl, token }
                 name="street"
                 value={formData.street}
                 onChange={handleInputChange}
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-pink-500 focus:ring-pink-500"
+                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
                 required
               />
             </div>
@@ -206,7 +206,7 @@ const AddressSelector = ({ onAddressSelect, selectedAddress, backendUrl, token }
                 name="city"
                 value={formData.city}
                 onChange={handleInputChange}
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-pink-500 focus:ring-pink-500"
+                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
                 required
               />
             </div>
@@ -217,7 +217,7 @@ const AddressSelector = ({ onAddressSelect, selectedAddress, backendUrl, token }
                 name="state"
                 value={formData.state}
                 onChange={handleInputChange}
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-pink-500 focus:ring-pink-500"
+                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
                 required
               />
             </div>
@@ -228,7 +228,7 @@ const AddressSelector = ({ onAddressSelect, selectedAddress, backendUrl, token }
                 name="zipcode"
                 value={formData.zipcode}
                 onChange={handleInputChange}
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-pink-500 focus:ring-pink-500"
+                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
                 required
               />
             </div>
@@ -239,7 +239,7 @@ const AddressSelector = ({ onAddressSelect, selectedAddress, backendUrl, token }
                 name="country"
                 value={formData.country}
                 onChange={handleInputChange}
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-pink-500 focus:ring-pink-500"
+                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
                 required
               />
             </div>
@@ -249,7 +249,7 @@ const AddressSelector = ({ onAddressSelect, selectedAddress, backendUrl, token }
                 name="label"
                 value={formData.label}
                 onChange={handleInputChange}
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-pink-500 focus:ring-pink-500"
+                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
               >
                 <option value="Home">Home</option>
                 <option value="Work">Work</option>
@@ -262,7 +262,7 @@ const AddressSelector = ({ onAddressSelect, selectedAddress, backendUrl, token }
                 name="isDefault"
                 checked={formData.isDefault}
                 onChange={handleInputChange}
-                className="h-4 w-4 text-pink-600 focus:ring-pink-500 border-gray-300 rounded"
+                className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
               />
               <label className="ml-2 block text-sm text-gray-700">Set as default address</label>
             </div>
@@ -277,7 +277,7 @@ const AddressSelector = ({ onAddressSelect, selectedAddress, backendUrl, token }
             </button>
             <button
               type="submit"
-              className="px-4 py-2 text-sm font-medium text-white bg-pink-600 border border-transparent rounded-md hover:bg-pink-700"
+              className="px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md hover:bg-blue-700"
             >
               Save Address
             </button>

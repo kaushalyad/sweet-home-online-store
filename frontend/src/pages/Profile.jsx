@@ -1,4 +1,4 @@
-import React, { useContext, useState, useEffect } from 'react';
+﻿import React, { useContext, useState, useEffect } from 'react';
 import { ShopContext } from '../context/ShopContext';
 import Title from '../components/Title';
 import ProfileSkeleton from '../components/ProfileSkeleton';
@@ -416,8 +416,8 @@ const Profile = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8">
               <div className="flex flex-col space-y-4 sm:space-y-6">
                 <div className="flex items-start">
-                  <div className="bg-pink-50 p-2 rounded-full mr-3 sm:mr-4 flex-shrink-0">
-                    <FaUser className="text-pink-500 text-sm sm:text-base" />
+                  <div className="bg-blue-50 p-2 rounded-full mr-3 sm:mr-4 flex-shrink-0">
+                    <FaUser className="text-blue-500 text-sm sm:text-base" />
                   </div>
                   <div className="min-w-0 flex-1">
                     <p className="text-xs sm:text-sm text-gray-500">Full Name</p>
@@ -462,8 +462,8 @@ const Profile = () => {
                 </div>
                 
                 <div className="flex items-start">
-                  <div className="bg-orange-50 p-2 rounded-full mr-3 sm:mr-4 flex-shrink-0">
-                    <FaCalendarAlt className="text-orange-500 text-sm sm:text-base" />
+                  <div className="bg-blue-50 p-2 rounded-full mr-3 sm:mr-4 flex-shrink-0">
+                    <FaCalendarAlt className="text-blue-500 text-sm sm:text-base" />
                   </div>
                   <div className="min-w-0 flex-1">
                     <p className="text-xs sm:text-sm text-gray-500">Customer Since</p>
@@ -541,7 +541,7 @@ const Profile = () => {
                       </div>
                       <Link 
                         to={`/track-order/${order.id}`} 
-                        className="px-4 py-2 bg-[#2874f0] text-white rounded-md hover:bg-[#1a5dc8] transition-colors duration-300 text-sm"
+                        className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-[#1a5dc8] transition-colors duration-300 text-sm"
                       >
                         Track Order
                       </Link>
@@ -555,7 +555,7 @@ const Profile = () => {
                 <p className="text-[#212121] mb-2">You haven&apos;t placed any orders yet</p>
                 <Link 
                   to="/collection" 
-                  className="inline-block mt-3 px-6 py-2 bg-[#2874f0] text-white rounded-sm hover:bg-[#1a5dc8] transition-colors duration-300"
+                  className="inline-block mt-3 px-6 py-2 bg-blue-600 text-white rounded-sm hover:bg-[#1a5dc8] transition-colors duration-300"
                 >
                   Start Shopping
                 </Link>
@@ -581,7 +581,7 @@ const Profile = () => {
               </div>
               <Link 
                 to="/collection" 
-                className="text-pink-600 hover:text-pink-700 flex items-center transition-colors duration-300 font-semibold"
+                className="text-blue-600 hover:text-blue-700 flex items-center transition-colors duration-300 font-semibold"
               >
                 Browse More <FaArrowRight className="ml-2" />
               </Link>
@@ -615,17 +615,17 @@ const Profile = () => {
                               removeFromWishlist(product._id);
                             }
                           }}
-                          className="absolute top-3 right-3 bg-white/95 backdrop-blur p-2.5 rounded-full shadow-md hover:shadow-lg transition-all duration-300 hover:bg-pink-50 border border-gray-200/60"
+                          className="absolute top-3 right-3 bg-white/95 backdrop-blur p-2.5 rounded-full shadow-md hover:shadow-lg transition-all duration-300 hover:bg-red-50 border border-gray-200/60"
                           aria-label="Remove from wishlist"
                         >
-                          <FaHeart className="text-pink-500" />
+                          <FaHeart className="text-red-500" />
                         </button>
                       </div>
                       
                       <div className="p-4 sm:p-5">
                         <Link 
                           to={`/collection/${product._id}`}
-                          className="hover:text-pink-600 transition-colors duration-300"
+                          className="hover:text-blue-600 transition-colors duration-300"
                         >
                           <h4 className="font-semibold text-gray-900 line-clamp-2 min-h-[2.75rem] leading-snug">
                             {product.name}
@@ -649,7 +649,7 @@ const Profile = () => {
                               addToCart(product._id, 1);
                               toast.success("Added to cart!");
                             }}
-                            className="w-full bg-gradient-to-r from-pink-500 to-orange-500 text-white px-4 py-3 rounded-xl font-semibold flex items-center justify-center gap-2 hover:from-pink-600 hover:to-orange-600 transition-all duration-300 shadow-sm hover:shadow-md"
+                            className="w-full bg-gradient-to-r from-blue-500 to-blue-500 text-white px-4 py-3 rounded-xl font-semibold flex items-center justify-center gap-2 hover:from-blue-600 hover:to-blue-600 transition-all duration-300 shadow-sm hover:shadow-md"
                           >
                             <FaShoppingCart className="text-sm" />
                             Add to Cart
@@ -672,7 +672,7 @@ const Profile = () => {
               </div>
             ) : (
               <div className="text-center py-14 bg-gradient-to-br from-gray-50 to-white rounded-2xl border border-gray-100">
-                <div className="mx-auto w-14 h-14 rounded-2xl bg-gradient-to-br from-pink-500 to-orange-500 shadow-md mb-5 flex items-center justify-center">
+                <div className="mx-auto w-14 h-14 rounded-2xl bg-gradient-to-br from-blue-500 to-blue-500 shadow-md mb-5 flex items-center justify-center">
                   <FaHeart className="text-white text-xl" />
                 </div>
                 <h3 className="text-xl sm:text-2xl font-extrabold text-gray-900 mb-2">Your Wishlist is Empty</h3>
@@ -681,7 +681,7 @@ const Profile = () => {
                 </p>
                 <Link 
                   to="/collection" 
-                  className="inline-flex items-center gap-2 px-7 py-3 bg-gradient-to-r from-pink-500 to-orange-500 text-white rounded-full hover:from-pink-600 hover:to-orange-600 transition-all duration-300 font-semibold shadow-sm hover:shadow-md"
+                  className="inline-flex items-center gap-2 px-7 py-3 bg-gradient-to-r from-blue-500 to-blue-500 text-white rounded-full hover:from-blue-600 hover:to-blue-600 transition-all duration-300 font-semibold shadow-sm hover:shadow-md"
                 >
                   Browse Collection <FaArrowRight />
                 </Link>
@@ -712,7 +712,7 @@ const Profile = () => {
                       name="name"
                       value={userData.name}
                       onChange={handlePersonalInfoChange}
-                      className="w-full px-4 py-2 border border-[#dbdbdb] rounded-md focus:outline-none focus:ring-2 focus:ring-[#2874f0] focus:border-transparent"
+                      className="w-full px-4 py-2 border border-[#dbdbdb] rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                       placeholder="Enter your full name"
                     />
                   </div>
@@ -723,7 +723,7 @@ const Profile = () => {
                       name="email"
                       value={userData.email}
                       onChange={handlePersonalInfoChange}
-                      className="w-full px-4 py-2 border border-[#dbdbdb] rounded-md focus:outline-none focus:ring-2 focus:ring-[#2874f0] focus:border-transparent"
+                      className="w-full px-4 py-2 border border-[#dbdbdb] rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                       placeholder="Enter your email"
                     />
                   </div>
@@ -734,7 +734,7 @@ const Profile = () => {
                       name="phone"
                       value={userData.phone}
                       onChange={handlePersonalInfoChange}
-                      className="w-full px-4 py-2 border border-[#dbdbdb] rounded-md focus:outline-none focus:ring-2 focus:ring-[#2874f0] focus:border-transparent"
+                      className="w-full px-4 py-2 border border-[#dbdbdb] rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                       placeholder="Enter your phone number"
                     />
                   </div>
@@ -744,7 +744,7 @@ const Profile = () => {
                       name="address"
                       value={userData.address}
                       onChange={handlePersonalInfoChange}
-                      className="w-full px-4 py-2 border border-[#dbdbdb] rounded-md focus:outline-none focus:ring-2 focus:ring-[#2874f0] focus:border-transparent"
+                      className="w-full px-4 py-2 border border-[#dbdbdb] rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                       placeholder="Enter your delivery address"
                       rows="3"
                     />
@@ -754,7 +754,7 @@ const Profile = () => {
                   <button 
                     onClick={handleUpdatePersonalInfo}
                     disabled={isUpdating}
-                    className="px-6 py-2 bg-[#2874f0] text-white rounded-md hover:bg-[#1a5dc8] transition-colors disabled:opacity-50"
+                    className="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-[#1a5dc8] transition-colors disabled:opacity-50"
                   >
                     {isUpdating ? 'Saving...' : 'Save Changes'}
                   </button>
@@ -772,7 +772,7 @@ const Profile = () => {
                       name="currentPassword"
                       value={passwordData.currentPassword}
                       onChange={handlePasswordChange}
-                      className="w-full px-4 py-2 border border-[#dbdbdb] rounded-md focus:outline-none focus:ring-2 focus:ring-[#2874f0] focus:border-transparent"
+                      className="w-full px-4 py-2 border border-[#dbdbdb] rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                       placeholder="Enter current password"
                     />
                   </div>
@@ -783,7 +783,7 @@ const Profile = () => {
                       name="newPassword"
                       value={passwordData.newPassword}
                       onChange={handlePasswordChange}
-                      className="w-full px-4 py-2 border border-[#dbdbdb] rounded-md focus:outline-none focus:ring-2 focus:ring-[#2874f0] focus:border-transparent"
+                      className="w-full px-4 py-2 border border-[#dbdbdb] rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                       placeholder="Enter new password"
                     />
                     {passwordData.newPassword && (
@@ -829,7 +829,7 @@ const Profile = () => {
                       name="confirmPassword"
                       value={passwordData.confirmPassword}
                       onChange={handlePasswordChange}
-                      className="w-full px-4 py-2 border border-[#dbdbdb] rounded-md focus:outline-none focus:ring-2 focus:ring-[#2874f0] focus:border-transparent"
+                      className="w-full px-4 py-2 border border-[#dbdbdb] rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                       placeholder="Confirm new password"
                     />
                   </div>
@@ -838,7 +838,7 @@ const Profile = () => {
                   <button 
                     onClick={handleUpdatePassword}
                     disabled={isUpdating}
-                    className="px-6 py-2 bg-[#2874f0] text-white rounded-md hover:bg-[#1a5dc8] transition-colors disabled:opacity-50"
+                    className="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-[#1a5dc8] transition-colors disabled:opacity-50"
                   >
                     {isUpdating ? 'Updating...' : 'Update Password'}
                   </button>
@@ -861,7 +861,7 @@ const Profile = () => {
                         checked={notificationSettings.orderUpdates}
                         onChange={() => handleNotificationToggle('orderUpdates')}
                       />
-                      <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-[#2874f0] rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#2874f0]"></div>
+                      <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-500 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
                     </label>
                   </div>
                   <div className="flex items-center justify-between">
@@ -876,7 +876,7 @@ const Profile = () => {
                         checked={notificationSettings.promotionalOffers}
                         onChange={() => handleNotificationToggle('promotionalOffers')}
                       />
-                      <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-[#2874f0] rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#2874f0]"></div>
+                      <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-500 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
                     </label>
                   </div>
                   <div className="flex items-center justify-between">
@@ -891,7 +891,7 @@ const Profile = () => {
                         checked={notificationSettings.newArrivals}
                         onChange={() => handleNotificationToggle('newArrivals')}
                       />
-                      <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-[#2874f0] rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#2874f0]"></div>
+                      <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-500 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
                     </label>
                   </div>
                 </div>
@@ -899,7 +899,7 @@ const Profile = () => {
                   <button 
                     onClick={handleUpdateNotifications}
                     disabled={isUpdating}
-                    className="px-6 py-2 bg-[#2874f0] text-white rounded-md hover:bg-[#1a5dc8] transition-colors disabled:opacity-50"
+                    className="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-[#1a5dc8] transition-colors disabled:opacity-50"
                   >
                     {isUpdating ? 'Saving...' : 'Save Preferences'}
                   </button>
@@ -930,7 +930,7 @@ const Profile = () => {
               transition={{ duration: 0.5 }}
             >
             <Title text1={"MY"} text2={"ACCOUNT"} />
-            <div className="w-20 h-1 bg-[#2874f0] mx-auto mt-4"></div>
+            <div className="w-20 h-1 bg-blue-600 mx-auto mt-4"></div>
           </motion.div>
         </div>
         
@@ -946,7 +946,7 @@ const Profile = () => {
               {!isLoading && (
                 <>
                   <div className="flex items-center gap-3 sm:gap-4 mb-6 pb-6 border-b">
-                    <div className="w-12 h-12 sm:w-14 sm:h-14 bg-[#2874f0] bg-opacity-10 rounded-full flex items-center justify-center text-[#2874f0] font-bold text-lg sm:text-xl flex-shrink-0">
+                    <div className="w-12 h-12 sm:w-14 sm:h-14 bg-blue-600 bg-opacity-10 rounded-full flex items-center justify-center text-blue-600 font-bold text-lg sm:text-xl flex-shrink-0">
                       {userData.name.charAt(0).toUpperCase()}
                     </div>
                     <div className="min-w-0 flex-1">
@@ -962,7 +962,7 @@ const Profile = () => {
                         onClick={() => handleTabChange(item.id)}
                         className={`w-full flex items-center gap-3 px-3 sm:px-4 py-2.5 sm:py-3 rounded-md text-left transition-colors duration-300 text-sm sm:text-base ${
                           activeTab === item.id 
-                            ? 'bg-[#2874f0] bg-opacity-10 text-[#2874f0] font-medium'
+                            ? 'bg-blue-600 bg-opacity-10 text-blue-600 font-medium'
                             : 'text-[#212121] hover:bg-gray-50'
                         }`}
                       >
@@ -988,3 +988,4 @@ const Profile = () => {
 };
 
 export default Profile; 
+

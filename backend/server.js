@@ -129,6 +129,9 @@ const startServer = async () => {
       express.static(path.join(__dirname, 'public/email-assets'))
     );
 
+    // Serve static files from frontend dist
+    app.use(express.static(path.join(__dirname, '../frontend/dist')));
+
     // API endpoints
     app.use("/api/user", userRouter);
     app.use("/api/product", productRouter);
@@ -147,6 +150,11 @@ const startServer = async () => {
     // Root endpoint
     app.get("/", (req, res) => {
       res.send("API Working");
+    });
+
+    // Catch-all handler: send back index.html for client-side routing
+    app.get('*', (req, res) => {
+      res.sendFile(path.join(__dirname, '../frontend/dist/index.html'));
     });
 
     // 404 handler

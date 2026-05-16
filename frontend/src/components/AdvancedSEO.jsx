@@ -121,8 +121,8 @@ const AdvancedSEO = () => {
       </script>
 
       {/* Advanced SEO meta tags */}
-      <meta name="theme-color" content="#fb641b" />
-      <meta name="msapplication-TileColor" content="#fb641b" />
+      <meta name="theme-color" content="#2563eb" />
+      <meta name="msapplication-TileColor" content="#2563eb" />
       <meta name="apple-mobile-web-app-capable" content="yes" />
       <meta name="apple-mobile-web-app-status-bar-style" content="default" />
       <meta name="apple-mobile-web-app-title" content="Sweet Home" />

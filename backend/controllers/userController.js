@@ -1081,16 +1081,22 @@ const forgotPassword = async (req, res) => {
     user.resetPasswordExpires = Date.now() + 3600000; // 1 hour
     await user.save();
 
-    // Create reset URL
-    const resetUrl = `${process.env.FRONTEND_URL || 'http://localhost:3000'}/reset-password/${resetToken}`;
+    // Create reset URL using configured frontend URL or request origin
+    const frontendBaseUrl =
+      process.env.FRONTEND_URL || req.headers.origin || 'https://sweethome-store.com';
+    const resetUrl = `${frontendBaseUrl.replace(/\/$/, '')}/reset-password/${resetToken}`;
 
     // Send email with reset link
     const { sendPasswordResetEmail } = await import('../utils/emailService.js');
-    await sendPasswordResetEmail({
+    const sendResult = await sendPasswordResetEmail({
       email: user.email,
       name: user.name,
       resetUrl
     });
+
+    if (sendResult && sendResult.success === false) {
+      throw new Error(sendResult.error || 'Failed to send password reset email');
+    }
 
     res.json({
       success: true,
@@ -1099,9 +1105,10 @@ const forgotPassword = async (req, res) => {
 
   } catch (error) {
     logger.error(`Forgot password error: ${error.message}`);
+    const errorMessage = process.env.NODE_ENV === 'development' ? error.message : 'Failed to process request';
     res.status(500).json({
       success: false,
-      message: "Failed to process request"
+      message: errorMessage
     });
   }
 };

@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState } from "react";
+﻿import React, { useContext, useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import axios from "axios";
@@ -145,7 +145,7 @@ const VerifyAccount = () => {
           </button>
 
           <div className="md:flex">
-            <aside className="hidden md:flex md:w-[42%] lg:w-[40%] relative overflow-hidden bg-[#2874f0] text-white p-10 lg:p-12 flex-col justify-between">
+            <aside className="hidden md:flex md:w-[42%] lg:w-[40%] relative overflow-hidden bg-blue-600 text-white p-10 lg:p-12 flex-col justify-between">
               <div className="absolute inset-0 opacity-[0.12] bg-[radial-gradient(circle_at_20%_10%,white,transparent_45%)] pointer-events-none" />
               <div className="relative z-10">
                 <h1 className="text-3xl lg:text-[32px] font-semibold leading-tight">Verify your account</h1>
@@ -165,7 +165,7 @@ const VerifyAccount = () => {
                 <button
                   type="button"
                   onClick={closeVerifyModal}
-                  className="inline-flex items-center gap-2 mb-6 text-sm text-[#2874f0] hover:text-[#1f5ec8]"
+                  className="inline-flex items-center gap-2 mb-6 text-sm text-blue-600 hover:text-[#1f5ec8]"
                 >
                   <FaArrowLeft className="h-4 w-4" /> Back
                 </button>
@@ -186,7 +186,7 @@ const VerifyAccount = () => {
                       value={identifier}
                       onChange={(e) => setIdentifier(e.target.value)}
                       autoComplete="username"
-                      className="block w-full rounded-sm border border-gray-300 px-3 py-3 text-[15px] focus:ring-2 focus:ring-[#2874f0]/30 focus:border-[#2874f0] outline-none"
+                      className="block w-full rounded-sm border border-gray-300 px-3 py-3 text-[15px] focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500 outline-none"
                       placeholder="you@example.com or 9876543210"
                     />
                   </div>
@@ -200,7 +200,7 @@ const VerifyAccount = () => {
                         type="button"
                         onClick={handleSendOtp}
                         disabled={loading}
-                        className="text-xs font-semibold text-[#2874f0] hover:underline"
+                        className="text-xs font-semibold text-blue-600 hover:underline"
                       >
                         {otpSent ? "Resend OTP" : "Send OTP"}
                       </button>
@@ -216,7 +216,7 @@ const VerifyAccount = () => {
                         maxLength={6}
                         value={otp}
                         onChange={(e) => setOtp(e.target.value.replace(/\D/g, ""))}
-                        className="pl-10 block w-full rounded-sm border border-gray-300 px-3 py-3 text-[15px] focus:ring-2 focus:ring-[#2874f0]/30 focus:border-[#2874f0] outline-none"
+                        className="pl-10 block w-full rounded-sm border border-gray-300 px-3 py-3 text-[15px] focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500 outline-none"
                         placeholder="6-digit OTP"
                       />
                     </div>
@@ -230,14 +230,14 @@ const VerifyAccount = () => {
                   <button
                     type="submit"
                     disabled={loading}
-                    className="w-full rounded-sm bg-[#fb641b] py-3 text-[15px] font-semibold uppercase tracking-wide text-white shadow-md hover:bg-[#fa5720] focus:outline-none focus:ring-2 focus:ring-[#fb641b] focus:ring-offset-2 disabled:opacity-60 transition-colors"
+                    className="w-full rounded-sm bg-blue-600 py-3 text-[15px] font-semibold uppercase tracking-wide text-white shadow-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-60 transition-colors"
                   >
                     {loading ? "Verifying…" : "Verify and continue"}
                   </button>
                 </form>
 
                 <p className="mt-5 text-center text-sm text-gray-500">
-                  Already verified? <Link to="/login" className="text-[#2874f0] hover:underline">Log in</Link>
+                  Already verified? <Link to="/login" className="text-blue-600 hover:underline">Log in</Link>
                 </p>
               </div>
             </main>
@@ -250,3 +250,4 @@ const VerifyAccount = () => {
 };
 
 export default VerifyAccount;
+

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+﻿import React, { useState } from "react";
 import Title from "../components/Title";
 import { assets } from "../assets/assets";
 import { FaPhoneAlt, FaEnvelope, FaMapMarkerAlt, FaClock, FaCheck, FaDirections, FaGift, FaBoxOpen, FaSnowflake, FaTruck, FaQuestionCircle, FaPlus, FaMinus } from "react-icons/fa";
@@ -148,7 +148,7 @@ const Contact = () => {
         </script>
       </Helmet>
       {/* Hero Section with Decorative Elements */}
-      <div className="relative bg-gradient-to-r from-pink-50 to-orange-50 py-16 overflow-hidden">
+      <div className="relative bg-gradient-to-r from-blue-50 to-blue-50 py-16 overflow-hidden">
         <div className="container mx-auto sm:px-4 relative z-10">
           <div className="text-center max-w-2xl mx-auto">
             <h1 className="text-4xl font-bold text-gray-800 mb-4">Get In Touch With Us</h1>
@@ -160,7 +160,7 @@ const Contact = () => {
             {/* Quick Contact Options */}
             <div className="flex flex-wrap justify-center gap-4 mt-8">
               <a href="tel:+919931018857" className="flex items-center px-6 py-3 bg-white rounded-full shadow-sm hover:shadow-md transition-all duration-300">
-                <FaPhoneAlt className="text-pink-500 mr-2" /> Call Us
+                <FaPhoneAlt className="text-blue-500 mr-2" /> Call Us
               </a>
               <a href="https://wa.me/918797196867" className="flex items-center px-6 py-3 bg-green-500 text-white rounded-full shadow-sm hover:shadow-md transition-all duration-300">
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" fill="currentColor" viewBox="0 0 24 24">
@@ -169,15 +169,15 @@ const Contact = () => {
                 WhatsApp
               </a>
               <a href="mailto:sweethomeonlinestorehelp@gmail.com" className="flex items-center px-6 py-3 bg-white rounded-full shadow-sm hover:shadow-md transition-all duration-300">
-                <FaEnvelope className="text-pink-500 mr-2" /> Email Us
+                <FaEnvelope className="text-blue-500 mr-2" /> Email Us
               </a>
             </div>
           </div>
         </div>
         
         {/* Decorative elements */}
-        <div className="absolute top-0 right-0 w-64 h-64 bg-pink-100 rounded-full opacity-20 transform translate-x-1/3 -translate-y-1/3"></div>
-        <div className="absolute bottom-0 left-0 w-40 h-40 bg-orange-200 rounded-full opacity-30 transform -translate-x-1/3 translate-y-1/3"></div>
+        <div className="absolute top-0 right-0 w-64 h-64 bg-blue-100 rounded-full opacity-20 transform translate-x-1/3 -translate-y-1/3"></div>
+        <div className="absolute bottom-0 left-0 w-40 h-40 bg-blue-200 rounded-full opacity-30 transform -translate-x-1/3 translate-y-1/3"></div>
       </div>
 
       {/* Contact Information and Form Section */}
@@ -190,8 +190,8 @@ const Contact = () => {
               
               <div className="space-y-6">
                 <div className="flex items-start">
-                  <div className="bg-pink-50 p-3 rounded-full mr-4">
-                    <FaMapMarkerAlt className="text-pink-500" />
+                  <div className="bg-blue-50 p-3 rounded-full mr-4">
+                    <FaMapMarkerAlt className="text-blue-500" />
                   </div>
                   <div>
                     <h4 className="font-medium text-gray-800">Our Location</h4>
@@ -203,7 +203,7 @@ const Contact = () => {
                       href="https://maps.app.goo.gl/Go8m7rehmm26THhX9" 
                       target="_blank" 
                       rel="noopener noreferrer"
-                      className="inline-flex items-center text-pink-500 hover:text-pink-700 mt-2 transition-colors"
+                      className="inline-flex items-center text-blue-500 hover:text-blue-700 mt-2 transition-colors"
                     >
                       <FaDirections className="mr-1" /> Get Directions
                     </a>
@@ -211,13 +211,13 @@ const Contact = () => {
                 </div>
                 
                 <div className="flex items-start">
-                  <div className="bg-pink-50 p-3 rounded-full mr-4">
-                    <FaPhoneAlt className="text-pink-500" />
+                  <div className="bg-blue-50 p-3 rounded-full mr-4">
+                    <FaPhoneAlt className="text-blue-500" />
                   </div>
                   <div>
                     <h4 className="font-medium text-gray-800">Phone Number</h4>
                     <p className="text-gray-600 mt-1">
-                      <a href="tel:+919931018857" className="hover:text-pink-500 transition-colors">
+                      <a href="tel:+919931018857" className="hover:text-blue-500 transition-colors">
                         (+91) 9931018857
                       </a>
                     </p>
@@ -225,13 +225,13 @@ const Contact = () => {
                 </div>
                 
                 <div className="flex items-start">
-                  <div className="bg-pink-50 p-3 rounded-full mr-4">
-                    <FaEnvelope className="text-pink-500" />
+                  <div className="bg-blue-50 p-3 rounded-full mr-4">
+                    <FaEnvelope className="text-blue-500" />
                   </div>
                   <div>
                     <h4 className="font-medium text-gray-800">Email Address</h4>
                     <p className="text-gray-600 mt-1">
-                      <a href="mailto:sweethomeonlinestorehelp@gmail.com" className="hover:text-pink-500 transition-colors">
+                      <a href="mailto:sweethomeonlinestorehelp@gmail.com" className="hover:text-blue-500 transition-colors">
                         sweethomeonlinestorehelp@gmail.com
                       </a>
                     </p>
@@ -239,8 +239,8 @@ const Contact = () => {
                 </div>
                 
                 <div className="flex items-start">
-                  <div className="bg-pink-50 p-3 rounded-full mr-4">
-                    <FaClock className="text-pink-500" />
+                  <div className="bg-blue-50 p-3 rounded-full mr-4">
+                    <FaClock className="text-blue-500" />
                   </div>
                   <div>
                     <h4 className="font-medium text-gray-800">Working Hours</h4>
@@ -257,32 +257,32 @@ const Contact = () => {
                 <h4 className="font-medium text-gray-800 mb-4">Bulk Sweet Orders</h4>
                 <div className="space-y-4">
                   <div className="flex items-start">
-                    <div className="bg-orange-50 p-2 rounded-full mr-3">
-                      <FaGift className="text-orange-500 text-sm" />
+                    <div className="bg-blue-50 p-2 rounded-full mr-3">
+                      <FaGift className="text-blue-500 text-sm" />
                     </div>
                     <p className="text-gray-600 text-sm">Special discounts for orders over 5kg</p>
                   </div>
                   <div className="flex items-start">
-                    <div className="bg-orange-50 p-2 rounded-full mr-3">
-                      <FaBoxOpen className="text-orange-500 text-sm" />
+                    <div className="bg-blue-50 p-2 rounded-full mr-3">
+                      <FaBoxOpen className="text-blue-500 text-sm" />
                     </div>
                     <p className="text-gray-600 text-sm">Custom gift packaging available</p>
                   </div>
                   <div className="flex items-start">
-                    <div className="bg-orange-50 p-2 rounded-full mr-3">
-                      <FaSnowflake className="text-orange-500 text-sm" />
+                    <div className="bg-blue-50 p-2 rounded-full mr-3">
+                      <FaSnowflake className="text-blue-500 text-sm" />
                     </div>
                     <p className="text-gray-600 text-sm">Temperature-controlled delivery</p>
                   </div>
                   <div className="flex items-start">
-                    <div className="bg-orange-50 p-2 rounded-full mr-3">
-                      <FaTruck className="text-orange-500 text-sm" />
+                    <div className="bg-blue-50 p-2 rounded-full mr-3">
+                      <FaTruck className="text-blue-500 text-sm" />
                     </div>
                     <p className="text-gray-600 text-sm">Free delivery for corporate orders</p>
                   </div>
                 </div>
                 <div className="mt-5">
-                  <a href="tel:+919931018857" className="inline-flex items-center px-6 py-3 bg-pink-500 text-white rounded hover:bg-pink-600 transition-colors duration-300">
+                  <a href="tel:+919931018857" className="inline-flex items-center px-6 py-3 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors duration-300">
                     Call for Bulk Orders
                   </a>
                 </div>
@@ -320,7 +320,7 @@ const Contact = () => {
                         name="name"
                         value={formData.name}
                         onChange={handleChange}
-                        className="w-full px-4 py-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-pink-300 focus:border-transparent transition-all"
+                        className="w-full px-4 py-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-300 focus:border-transparent transition-all"
                         placeholder="John Doe"
                         required
                       />
@@ -336,7 +336,7 @@ const Contact = () => {
                         name="email"
                         value={formData.email}
                         onChange={handleChange}
-                        className="w-full px-4 py-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-pink-300 focus:border-transparent transition-all"
+                        className="w-full px-4 py-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-300 focus:border-transparent transition-all"
                         placeholder="your.email@example.com"
                         required
                       />
@@ -354,7 +354,7 @@ const Contact = () => {
                         name="phone"
                         value={formData.phone}
                         onChange={handleChange}
-                        className="w-full px-4 py-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-pink-300 focus:border-transparent transition-all"
+                        className="w-full px-4 py-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-300 focus:border-transparent transition-all"
                         placeholder="+91 9876543210"
                       />
                     </div>
@@ -368,7 +368,7 @@ const Contact = () => {
                         name="inquiryType"
                         value={formData.inquiryType}
                         onChange={handleChange}
-                        className="w-full px-4 py-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-pink-300 focus:border-transparent transition-all"
+                        className="w-full px-4 py-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-300 focus:border-transparent transition-all"
                         required
                       >
                         <option value="general">General Inquiry</option>
@@ -391,7 +391,7 @@ const Contact = () => {
                       name="subject"
                       value={formData.subject}
                       onChange={handleChange}
-                      className="w-full px-4 py-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-pink-300 focus:border-transparent transition-all"
+                      className="w-full px-4 py-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-300 focus:border-transparent transition-all"
                       placeholder="How can we help you?"
                       required
                     />
@@ -407,7 +407,7 @@ const Contact = () => {
                       value={formData.message}
                       onChange={handleChange}
                       rows="5"
-                      className="w-full px-4 py-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-pink-300 focus:border-transparent transition-all"
+                      className="w-full px-4 py-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-300 focus:border-transparent transition-all"
                       placeholder="Please describe your query or message in detail..."
                       required
                     ></textarea>
@@ -417,7 +417,7 @@ const Contact = () => {
                     <button
                       type="submit"
                       disabled={isLoading}
-                      className={`w-full py-3 px-6 bg-pink-500 text-white rounded-md hover:bg-pink-600 focus:outline-none focus:ring-2 focus:ring-pink-300 focus:ring-opacity-50 transition-colors ${
+                      className={`w-full py-3 px-6 bg-blue-500 text-white rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-300 focus:ring-opacity-50 transition-colors ${
                         isLoading ? "opacity-70 cursor-not-allowed" : ""
                       }`}
                     >
@@ -448,12 +448,12 @@ const Contact = () => {
                     onClick={() => toggleAccordion(index)}
                   >
                     <div className="flex items-center">
-                      <FaQuestionCircle className="text-pink-500 mr-3 flex-shrink-0" />
+                      <FaQuestionCircle className="text-blue-500 mr-3 flex-shrink-0" />
                       <span className="font-medium text-gray-800">{faq.question}</span>
                     </div>
                     {activeAccordion === index ? 
-                      <FaMinus className="text-pink-500 flex-shrink-0" /> : 
-                      <FaPlus className="text-pink-500 flex-shrink-0" />
+                      <FaMinus className="text-blue-500 flex-shrink-0" /> : 
+                      <FaPlus className="text-blue-500 flex-shrink-0" />
                     }
                   </button>
                   
@@ -497,7 +497,7 @@ const Contact = () => {
                 href="https://maps.app.goo.gl/Go8m7rehmm26THhX9" 
                 target="_blank" 
                 rel="noopener noreferrer"
-                className="inline-flex items-center px-6 py-3 bg-pink-500 text-white rounded-md hover:bg-pink-600 transition-colors"
+                className="inline-flex items-center px-6 py-3 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors"
               >
                 <FaDirections className="mr-2" /> Get Directions to Our Sweet Shop
               </a>
@@ -510,3 +510,5 @@ const Contact = () => {
 };
 
 export default Contact;
+
+

@@ -1,4 +1,4 @@
-import React from 'react'
+﻿import React from 'react'
 import { assets } from '../assets/assets'
 import { Link } from 'react-router-dom'
 
@@ -13,7 +13,7 @@ const Hero = () => {
                     <p className=' font-medium text-sm md:text-base'>OUR BESTSELLERS</p>
                 </div>
                 <h1 className='prata-regular text-3xl sm:py-3 lg:text-5xl leading-relaxed'>Latest Arrivals</h1>
-                <Link to="/collection" className='flex items-center gap-2 hover:text-pink-600 transition-colors duration-300'>
+                <Link to="/collection" className='flex items-center gap-2 hover:text-blue-600 transition-colors duration-300'>
                     <p className='font-semibold text-sm md:text-base'>SHOP NOW</p>
                     <p className='w-8 md:w-11 h-[1px] bg-[#414141]'></p>
                 </Link>
@@ -26,3 +26,4 @@ const Hero = () => {
 }
 
 export default Hero
+

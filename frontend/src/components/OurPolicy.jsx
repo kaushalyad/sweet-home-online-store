@@ -1,4 +1,4 @@
-import React from 'react'
+﻿import React from 'react'
 import { assets } from '../assets/assets'
 import { motion } from 'framer-motion'
 import { FaExchangeAlt, FaUndoAlt, FaHeadset } from 'react-icons/fa'
@@ -6,18 +6,18 @@ import { FaExchangeAlt, FaUndoAlt, FaHeadset } from 'react-icons/fa'
 const OurPolicy = () => {
   const policyItems = [
     {
-      icon: <FaExchangeAlt className="text-pink-500 text-3xl" />,
+      icon: <FaExchangeAlt className="text-blue-500 text-3xl" />,
       image: assets.exchange_icon,
       title: "Easy Exchange Policy",
       description: "We offer hassle free exchange policy",
-      gradient: "from-pink-50 to-white"
+      gradient: "from-blue-50 to-white"
     },
     {
-      icon: <FaUndoAlt className="text-orange-500 text-3xl" />,
+      icon: <FaUndoAlt className="text-blue-500 text-3xl" />,
       image: assets.quality_icon,
       title: "7 Days Return Policy",
       description: "We provide 7 days free return policy",
-      gradient: "from-orange-50 to-white"
+      gradient: "from-blue-50 to-white"
     },
     {
       icon: <FaHeadset className="text-purple-500 text-3xl" />,
@@ -52,3 +52,5 @@ const OurPolicy = () => {
 }
 
 export default OurPolicy
+
+

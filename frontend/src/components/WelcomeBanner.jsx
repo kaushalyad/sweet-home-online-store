@@ -1,4 +1,4 @@
-import { useState, useEffect, useContext } from 'react';
+﻿import { useState, useEffect, useContext } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { FaTimes, FaUserAlt } from 'react-icons/fa';
 import { ShopContext } from '../context/ShopContext';
@@ -42,7 +42,7 @@ const WelcomeBanner = () => {
 
   return (
     <div className="fixed bottom-4 left-4 right-4 z-[10000]">
-      <div className="mx-auto max-w-4xl rounded-3xl bg-[#b91c1c] text-white shadow-2xl shadow-red-500/20 border border-red-600 overflow-hidden">
+      <div className="mx-auto max-w-4xl rounded-3xl bg-[#1d4ed8] text-white shadow-2xl shadow-red-500/20 border border-red-600 overflow-hidden">
         <div className="flex flex-col gap-3 px-4 py-4 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex items-center gap-3">
             <span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-white/10 text-white text-lg">
@@ -77,3 +77,4 @@ const WelcomeBanner = () => {
 };
 
 export default WelcomeBanner;
+

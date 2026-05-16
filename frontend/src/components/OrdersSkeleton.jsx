@@ -1,4 +1,4 @@
-import Skeleton, { SkeletonTheme } from 'react-loading-skeleton';
+﻿import Skeleton, { SkeletonTheme } from 'react-loading-skeleton';
 import 'react-loading-skeleton/dist/skeleton.css';
 
 const OrdersSkeleton = () => {
@@ -25,7 +25,7 @@ const OrdersSkeleton = () => {
                 className="bg-white rounded-lg shadow-sm border border-gray-100 overflow-hidden animate-pulse"
               >
                 {/* Order Header */}
-                <div className="bg-gradient-to-r from-pink-50 to-rose-50 px-6 py-4 border-b border-gray-200">
+                <div className="bg-gradient-to-r from-blue-50 to-blue-50 px-6 py-4 border-b border-gray-200">
                   <div className="flex flex-wrap items-center justify-between gap-4">
                     <div className="flex items-center gap-4">
                       <div>
@@ -104,3 +104,4 @@ const OrdersSkeleton = () => {
 };
 
 export default OrdersSkeleton;
+

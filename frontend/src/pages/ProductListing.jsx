@@ -196,7 +196,7 @@ const ProductListing = () => {
   // Custom checkbox component
   const Checkbox = ({ value, checked, onChange, label }) => (
     <label className="flex items-center gap-3 cursor-pointer py-1.5 hover:text-gray-900 transition-colors duration-200 group">
-      <div className={`w-5 h-5 flex items-center justify-center rounded-md border transition-all duration-200 ${checked ? 'bg-pink-500 border-pink-500' : 'border-gray-300 bg-white group-hover:border-pink-300'}`}>
+      <div className={`w-5 h-5 flex items-center justify-center rounded-md border transition-all duration-200 ${checked ? 'bg-blue-500 border-blue-500' : 'border-gray-300 bg-white group-hover:border-blue-300'}`}>
         {checked && <FaCheck className="text-white text-[10px]" />}
       </div>
       <span className="text-sm font-normal text-gray-700 group-hover:text-gray-900">{label}</span>
@@ -242,12 +242,12 @@ const ProductListing = () => {
               placeholder="Search sweets..."
               value={searchQuery}
               onChange={handleSearchChange}
-              className="pl-10 pr-16 py-3 sm:py-2.5 border border-gray-300 rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-pink-400 text-sm sm:text-base"
+              className="pl-10 pr-16 py-3 sm:py-2.5 border border-gray-300 rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-blue-400 text-sm sm:text-base"
             />
             <FaSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 text-sm sm:text-base" />
             <button 
               onClick={applyFilters}
-              className="absolute right-3 top-1/2 transform -translate-y-1/2 text-pink-500 hover:text-pink-600 font-medium text-sm"
+              className="absolute right-3 top-1/2 transform -translate-y-1/2 text-blue-500 hover:text-blue-600 font-medium text-sm"
             >
               Go
             </button>
@@ -276,7 +276,7 @@ const ProductListing = () => {
                   key={option.value}
                   onClick={() => handleSortChange(option.value)}
                   className={`w-full text-left px-4 py-2 flex items-center gap-2 hover:bg-gray-50 transition-colors ${
-                    sortType === option.value ? 'bg-pink-50 text-pink-600' : ''
+                    sortType === option.value ? 'bg-blue-50 text-blue-600' : ''
                   }`}
                 >
                   {option.icon}
@@ -292,7 +292,7 @@ const ProductListing = () => {
       {/* Filter Button for Mobile */}
       <button
         onClick={() => setShowFilter(!showFilter)}
-        className="flex items-center gap-2 px-4 py-3 mb-4 rounded-lg bg-gradient-to-r from-pink-500 to-pink-600 text-white hover:from-pink-600 hover:to-pink-700 shadow-md hover:shadow-lg transition-all duration-200 md:hidden w-full justify-center font-medium"
+        className="flex items-center gap-2 px-4 py-3 mb-4 rounded-lg bg-gradient-to-r from-blue-500 to-blue-600 text-white hover:from-blue-600 hover:to-blue-700 shadow-md hover:shadow-lg transition-all duration-200 md:hidden w-full justify-center font-medium"
       >
         <FaFilter className="text-sm" />
         <span className="text-sm tracking-wide">FILTERS</span>
@@ -326,7 +326,7 @@ const ProductListing = () => {
                         setSelectedCategory(e.target.value);
                         setSelectedSubCategory('all'); // Reset subcategory when category changes
                       }}
-                      className="w-full px-3 py-2 bg-white border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-pink-400"
+                      className="w-full px-3 py-2 bg-white border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
                     >
                       <option value="all">All Categories</option>
                       {categories.map(cat => (
@@ -345,7 +345,7 @@ const ProductListing = () => {
                       <select
                         value={selectedSubCategory}
                         onChange={(e) => setSelectedSubCategory(e.target.value)}
-                        className="w-full px-3 py-2 bg-white border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-pink-400"
+                        className="w-full px-3 py-2 bg-white border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
                       >
                         <option value="all">All Sub-Categories</option>
                         {subcategories.map(subCat => (
@@ -374,7 +374,7 @@ const ProductListing = () => {
                         placeholder="Min"
                         value={priceRange.min}
                         onChange={(e) => setPriceRange(prev => ({ ...prev, min: e.target.value }))}
-                        className="w-full pl-8 pr-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-pink-400"
+                        className="w-full pl-8 pr-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
                       />
                     </div>
                     <span className="text-gray-500">to</span>
@@ -385,7 +385,7 @@ const ProductListing = () => {
                         placeholder="Max"
                         value={priceRange.max}
                         onChange={(e) => setPriceRange(prev => ({ ...prev, max: e.target.value }))}
-                        className="w-full pl-8 pr-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-pink-400"
+                        className="w-full pl-8 pr-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
                       />
                     </div>
                   </div>
@@ -434,7 +434,7 @@ const ProductListing = () => {
                           onClick={() => toggleTag(tag)}
                           className={`px-3 py-1 rounded-full text-xs font-medium transition-colors ${
                             selectedTags.includes(tag) 
-                              ? 'bg-pink-500 text-white' 
+                              ? 'bg-blue-500 text-white' 
                               : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                           }`}
                         >
@@ -449,7 +449,7 @@ const ProductListing = () => {
               {/* Apply Filters Button */}
               <button
                 onClick={applyFilters}
-                className="w-full bg-pink-500 text-white py-3 rounded-md font-medium hover:bg-pink-600 transition-colors"
+                className="w-full bg-blue-500 text-white py-3 rounded-md font-medium hover:bg-blue-600 transition-colors"
               >
                 Apply Filters
               </button>
@@ -482,11 +482,11 @@ const ProductListing = () => {
                   <div className="flex flex-wrap gap-2 items-center">
                     <span className="text-gray-600 text-sm">Active Tags:</span>
                     {selectedTags.map(tag => (
-                      <span key={tag} className="inline-flex items-center gap-1 px-3 py-1 bg-pink-50 text-pink-600 rounded-full text-xs">
+                      <span key={tag} className="inline-flex items-center gap-1 px-3 py-1 bg-blue-50 text-blue-600 rounded-full text-xs">
                         {tag}
                         <button 
                           onClick={() => toggleTag(tag)}
-                          className="text-pink-400 hover:text-pink-600"
+                          className="text-blue-400 hover:text-blue-600"
                         >
                           ×
                         </button>
@@ -525,7 +525,7 @@ const ProductListing = () => {
                       className={`flex items-center justify-center w-9 h-9 sm:w-10 sm:h-10 rounded-md border ${
                         currentPage === 1
                           ? 'border-gray-200 text-gray-400 cursor-not-allowed'
-                          : 'border-gray-300 hover:border-pink-500 text-gray-700 hover:text-pink-500'
+                          : 'border-gray-300 hover:border-blue-500 text-gray-700 hover:text-blue-500'
                       }`}
                     >
                       <FaArrowLeft size={14} />
@@ -551,8 +551,8 @@ const ProductListing = () => {
                           onClick={() => handlePageChange(pageNum)}
                           className={`flex items-center justify-center w-9 h-9 sm:w-10 sm:h-10 rounded-md text-sm sm:text-base ${
                             currentPage === pageNum
-                              ? 'bg-pink-500 text-white font-medium'
-                              : 'border border-gray-300 hover:border-pink-500 text-gray-700 hover:text-pink-500'
+                              ? 'bg-blue-500 text-white font-medium'
+                              : 'border border-gray-300 hover:border-blue-500 text-gray-700 hover:text-blue-500'
                           }`}
                         >
                           {pageNum}
@@ -566,7 +566,7 @@ const ProductListing = () => {
                       className={`flex items-center justify-center w-9 h-9 sm:w-10 sm:h-10 rounded-md border ${
                         currentPage === totalPages
                           ? 'border-gray-200 text-gray-400 cursor-not-allowed'
-                          : 'border-gray-300 hover:border-pink-500 text-gray-700 hover:text-pink-500'
+                          : 'border-gray-300 hover:border-blue-500 text-gray-700 hover:text-blue-500'
                       }`}
                     >
                       <FaArrowRight size={14} />
@@ -583,3 +583,5 @@ const ProductListing = () => {
 };
 
 export default ProductListing; 
+
+

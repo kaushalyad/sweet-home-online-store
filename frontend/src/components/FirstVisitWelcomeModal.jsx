@@ -1,4 +1,4 @@
-import { useContext, useEffect, useState, useCallback } from "react";
+﻿import { useContext, useEffect, useState, useCallback } from "react";
 import { createPortal } from "react-dom";
 import { useNavigate, useLocation, Link } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
@@ -114,7 +114,7 @@ export default function FirstVisitWelcomeModal() {
             className="relative z-10 flex w-full max-w-lg md:max-w-3xl flex-col overflow-hidden rounded-xl bg-white shadow-2xl md:flex-row md:max-h-[min(90vh,520px)]"
           >
             {/* Flipkart-style left panel */}
-            <div className="relative flex shrink-0 flex-col justify-between bg-[#2874f0] px-8 pb-8 pt-10 text-white md:w-[42%] md:min-h-[320px]">
+            <div className="relative flex shrink-0 flex-col justify-between bg-blue-600 px-8 pb-8 pt-10 text-white md:w-[42%] md:min-h-[320px]">
               <div>
                 <h2
                   id="first-visit-login-title"
@@ -152,7 +152,7 @@ export default function FirstVisitWelcomeModal() {
                   type="text"
                   autoComplete="username"
                   inputMode="email"
-                  className="w-full rounded-sm border border-gray-300 px-3 py-3 text-[15px] outline-none transition-shadow focus:border-[#2874f0] focus:ring-2 focus:ring-[#2874f0]/25"
+                  className="w-full rounded-sm border border-gray-300 px-3 py-3 text-[15px] outline-none transition-shadow focus:border-blue-500 focus:ring-2 focus:ring-blue-500/25"
                   placeholder="Enter Email or Mobile number"
                   value={identifier}
                   onChange={(e) => setIdentifier(e.target.value)}
@@ -162,7 +162,7 @@ export default function FirstVisitWelcomeModal() {
                   <Link
                     to="/terms"
                     onClick={dismiss}
-                    className="text-[#2874f0] hover:underline"
+                    className="text-blue-600 hover:underline"
                   >
                     Terms of Use
                   </Link>{" "}
@@ -170,7 +170,7 @@ export default function FirstVisitWelcomeModal() {
                   <Link
                     to="/privacy"
                     onClick={dismiss}
-                    className="text-[#2874f0] hover:underline"
+                    className="text-blue-600 hover:underline"
                   >
                     Privacy Policy
                   </Link>
@@ -181,7 +181,7 @@ export default function FirstVisitWelcomeModal() {
                 </p>
                 <button
                   type="submit"
-                  className="mt-6 w-full rounded-sm bg-[#fb641b] py-3 text-[15px] font-semibold text-white shadow-md transition-transform hover:bg-[#fa5720] active:scale-[0.99]"
+                  className="mt-6 w-full rounded-sm bg-blue-600 py-3 text-[15px] font-semibold text-white shadow-md transition-transform hover:bg-blue-700 active:scale-[0.99]"
                 >
                   Continue
                 </button>
@@ -190,7 +190,7 @@ export default function FirstVisitWelcomeModal() {
               <button
                 type="button"
                 onClick={goRegister}
-                className="mt-6 text-center text-sm font-medium text-[#2874f0] hover:underline"
+                className="mt-6 text-center text-sm font-medium text-blue-600 hover:underline"
               >
                 New to Sweet Home? Create an account
               </button>
@@ -202,3 +202,4 @@ export default function FirstVisitWelcomeModal() {
     document.body
   );
 }
+

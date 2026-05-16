@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+﻿import { useState, useEffect } from 'react';
+import { useNavigate, useSearchParams, useParams } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import axios from 'axios';
 import { backendUrl } from '../config';
@@ -7,21 +7,22 @@ import { backendUrl } from '../config';
 const ResetPassword = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
+  const { token: tokenParam } = useParams();
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [resetToken, setResetToken] = useState('');
 
   useEffect(() => {
-    // Get the reset token from URL parameters
-    const token = searchParams.get('token');
+    // Get the reset token from URL path or query parameter
+    const token = tokenParam || searchParams.get('token');
     if (!token) {
       toast.error('Invalid reset link');
       navigate('/forgot-password');
       return;
     }
     setResetToken(token);
-  }, [navigate, searchParams]);
+  }, [navigate, searchParams, tokenParam]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -80,7 +81,7 @@ const ResetPassword = () => {
                 name="password"
                 type="password"
                 required
-                className="appearance-none rounded-md relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-pink-500 focus:border-pink-500 focus:z-10 sm:text-sm"
+                className="appearance-none rounded-md relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
                 placeholder="New Password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
@@ -93,7 +94,7 @@ const ResetPassword = () => {
                 name="confirmPassword"
                 type="password"
                 required
-                className="appearance-none rounded-md relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-pink-500 focus:border-pink-500 focus:z-10 sm:text-sm"
+                className="appearance-none rounded-md relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
                 placeholder="Confirm Password"
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
@@ -105,7 +106,7 @@ const ResetPassword = () => {
             <button
               type="submit"
               disabled={loading}
-              className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-pink-600 hover:bg-pink-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-pink-500"
+              className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
             >
               {loading ? 'Resetting Password...' : 'Reset Password'}
             </button>
@@ -115,7 +116,7 @@ const ResetPassword = () => {
             <button
               type="button"
               onClick={() => navigate('/login')}
-              className="text-sm text-gray-600 hover:text-pink-600"
+              className="text-sm text-gray-600 hover:text-blue-600"
             >
               Back to Login
             </button>
@@ -127,3 +128,4 @@ const ResetPassword = () => {
 };
 
 export default ResetPassword;
+

@@ -18,7 +18,7 @@ export default function FlipkartAuthIllustration({ className = "" }) {
         strokeWidth="2"
       />
       <rect x="52" y="40" width="96" height="48" rx="4" fill="rgba(255,255,255,0.85)" />
-      <circle cx="100" cy="64" r="14" fill="#2874f0" />
+      <circle cx="100" cy="64" r="14" fill="#2563eb" />
       <path
         d="M100 56c-4 0-7 3-7 7s3 7 7 7 7-3 7-7-3-7-7-7z"
         fill="#fff"

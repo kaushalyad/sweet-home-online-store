@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+﻿import { useState, useEffect } from "react";
 import { Helmet } from "react-helmet-async";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
@@ -15,6 +15,17 @@ const Blog = () => {
   const categories = ["All", "Recipes", "Festivals", "Health", "Storage", "Culture"];
 
   const blogPosts = [
+    {
+      id: "best-sweets-in-india",
+      title: "Best Sweets in India - A Complete Guide to Authentic Mithai & Regional Delicacies",
+      excerpt: "Discover the best sweets in India with our comprehensive guide. From North Indian mithai to South Indian delicacies, explore the most popular and authentic Indian sweets that define our culinary heritage.",
+      image: "/blog/best-sweets-india.jpg",
+      category: "Recipes",
+      author: "Sweet Home Team",
+      date: "December 28, 2025",
+      readTime: "12 min read",
+      tags: ["Best Sweets", "India", "Mithai", "Regional", "Traditional"]
+    },
     {
       id: "top-indian-sweets-diwali-2025",
       title: "Top 10 Indian Sweets for Diwali 2025 - Traditional Mithai Guide",
@@ -141,7 +152,7 @@ const Blog = () => {
         className="min-h-screen bg-gray-50"
       >
         {/* Hero Section */}
-        <div className="bg-gradient-to-r from-orange-500 to-red-500 text-white py-16">
+        <div className="bg-gradient-to-r from-blue-500 to-red-500 text-white py-16">
           <div className="max-w-6xl mx-auto px-4 text-center">
             <h1 className="text-4xl md:text-5xl font-bold mb-4">
               Indian Sweets & Mithai Blog
@@ -171,7 +182,7 @@ const Blog = () => {
                 onClick={() => setSelectedCategory(category)}
                 className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
                   selectedCategory === category
-                    ? "bg-orange-500 text-white"
+                    ? "bg-blue-500 text-white"
                     : "bg-white text-gray-700 hover:bg-gray-100"
                 }`}
               >
@@ -200,14 +211,14 @@ const Blog = () => {
 
                 <div className="p-6">
                   <div className="flex items-center justify-between mb-3">
-                    <span className="bg-orange-100 text-orange-800 px-2 py-1 rounded-full text-xs font-medium">
+                    <span className="bg-blue-100 text-blue-800 px-2 py-1 rounded-full text-xs font-medium">
                       {post.category}
                     </span>
                     <span className="text-gray-500 text-sm">{post.readTime}</span>
                   </div>
 
                   <Link to={`/blog/${post.id}`}>
-                    <h2 className="text-xl font-bold text-gray-900 mb-3 hover:text-orange-600 transition-colors line-clamp-2">
+                    <h2 className="text-xl font-bold text-gray-900 mb-3 hover:text-blue-600 transition-colors line-clamp-2">
                       {post.title}
                     </h2>
                   </Link>
@@ -237,7 +248,7 @@ const Blog = () => {
 
                   <Link
                     to={`/blog/${post.id}`}
-                    className="inline-flex items-center mt-4 text-orange-600 hover:text-orange-700 font-medium transition-colors"
+                    className="inline-flex items-center mt-4 text-blue-600 hover:text-blue-700 font-medium transition-colors"
                   >
                     Read More
                     <FaArrowRight className="ml-2" />
@@ -255,33 +266,12 @@ const Blog = () => {
                   setSearchTerm("");
                   setSelectedCategory("All");
                 }}
-                className="mt-4 text-orange-600 hover:text-orange-700 font-medium"
+                className="mt-4 text-blue-600 hover:text-blue-700 font-medium"
               >
                 Clear filters
               </button>
             </div>
           )}
-
-          {/* Newsletter Signup */}
-          <div className="bg-orange-50 rounded-lg p-8 mt-16 text-center">
-            <h3 className="text-2xl font-bold text-gray-900 mb-4">
-              Stay Updated with Sweet Recipes
-            </h3>
-            <p className="text-gray-600 mb-6 max-w-2xl mx-auto">
-              Subscribe to our newsletter and get weekly sweet recipes, festival specials,
-              and expert tips delivered to your inbox.
-            </p>
-            <div className="max-w-md mx-auto flex gap-2">
-              <input
-                type="email"
-                placeholder="Enter your email"
-                className="flex-1 px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-orange-500"
-              />
-              <button className="bg-orange-500 text-white px-6 py-3 rounded-lg hover:bg-orange-600 transition-colors font-medium">
-                Subscribe
-              </button>
-            </div>
-          </div>
         </div>
       </motion.div>
     </>
@@ -289,3 +279,4 @@ const Blog = () => {
 };
 
 export default Blog;
+

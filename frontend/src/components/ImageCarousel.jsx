@@ -1,12 +1,31 @@
-import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect } from 'react';
 import { FaArrowLeft, FaArrowRight } from 'react-icons/fa';
 import { assets } from '../assets/assets';
 
 const ImageCarousel = () => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isAutoPlaying, setIsAutoPlaying] = useState(true);
+  const [isMobile, setIsMobile] = useState(false);
 
-  const images = [
+  // Check if device is mobile
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 640); // sm breakpoint
+    };
+    
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+
+  const images = isMobile ? [
+    assets.hero1_mobile,
+    assets.hero2_mobile,
+    assets.hero3_mobile,
+    assets.hero4_mobile,
+    assets.hero5_mobile,
+    assets.hero6_mobile,
+  ] : [
     assets.hero1,
     assets.hero2,
     assets.hero3,
@@ -42,7 +61,7 @@ const ImageCarousel = () => {
 
   return (
     <div 
-      className="relative w-full max-w-full overflow-hidden bg-gradient-to-b from-orange-50 to-white"
+      className="relative w-full max-w-full overflow-hidden"
     >
       <div className="h-[220px] sm:h-[280px] md:h-[380px] lg:h-[500px] xl:h-[600px]">
         {/* Images */}
@@ -58,7 +77,7 @@ const ImageCarousel = () => {
             <img
               src={image}
               alt={`Sweet Home Indian Sweets - Slide ${index + 1}`}
-              className="w-full h-full object-contain"
+              className="w-full h-full object-cover object-top"
               loading={index === 0 ? "eager" : "lazy"}
               fetchpriority={index === 0 ? "high" : "low"}
               width="1920"
@@ -107,3 +126,4 @@ const ImageCarousel = () => {
 };
 
 export default ImageCarousel;
+

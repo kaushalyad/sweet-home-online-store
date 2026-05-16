@@ -1,5 +1,5 @@
 import { useContext, useState, useEffect, lazy, Suspense } from 'react'
-import { Routes, Route, Navigate, useParams, Link } from 'react-router-dom'
+import { Routes, Route, Navigate, useParams, Link, useNavigate } from 'react-router-dom'
 import Navbar from './components/Navbar'
 import Footer from './components/Footer'
 import SearchBar from './components/SearchBar'
@@ -37,6 +37,8 @@ const OrderSuccess = lazy(() => import('./pages/OrderSuccess'))
 const SharedContent = lazy(() => import('./pages/SharedContent'))
 const CookiePolicy = lazy(() => import('./pages/CookiePolicy'))
 const CookieSettings = lazy(() => import('./pages/CookieSettings'))
+const Privacy = lazy(() => import('./pages/Privacy'))
+const Terms = lazy(() => import('./pages/Terms'))
 const Blog = lazy(() => import('./pages/Blog'))
 const BlogPost = lazy(() => import('./pages/BlogPost'))
 
@@ -58,20 +60,17 @@ ProtectedRoute.propTypes = {
   element: PropTypes.element.isRequired
 };
 
-// 404 Not Found Page for invalid product URLs
-const ProductNotFound = () => {
-  return (
-    <div className="flex flex-col items-center justify-center min-h-[50vh] py-16">
-      <h1 className="text-6xl font-bold text-gray-800 mb-4">404</h1>
-      <p className="text-xl text-gray-600 mb-8">Product Not Found</p>
-      <p className="text-gray-500 mb-8 text-center max-w-md">
-        The product URL you're looking for is invalid. Please check the correct product link.
-      </p>
-      <Link to="/" className="px-6 py-3 bg-black text-white rounded-md hover:bg-gray-800 transition-colors duration-300">
-        Go Back Home
-      </Link>
-    </div>
-  );
+// Product Redirect Component for old URLs
+const ProductRedirect = () => {
+  const { productId } = useParams();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    // Redirect old product URLs to canonical collection URLs
+    navigate(`/collection/${productId}`, { replace: true });
+  }, [productId, navigate]);
+
+  return null; // This component doesn't render anything
 };
 
 // 404 Not Found Page
@@ -139,9 +138,7 @@ const App = () => {
         <Navbar />
         <div 
           className='transition-all duration-300 min-h-[calc(100vh-140px)] w-full'
-          style={{ 
-            paddingTop: showPromoBanner ? 'clamp(100px, 15vh, 148px)' : 'clamp(70px, 12vh, 108px)'
-          }}
+          style={{ paddingTop: 'var(--navbar-offset, 70px)' }}
         > 
           <div className="flex justify-center mb-6 px-4 sm:px-[5vw] md:px-[7vw] lg:px-[9vw]">
             <SearchBar />
@@ -152,14 +149,15 @@ const App = () => {
               <Route path='/' element={<Home />} />
               <Route path='/collection' element={<Collection />} />
               <Route path='/collection/:productId' element={<Product />} />
+              <Route path='/product/:productId' element={<ProductRedirect />} />
               <Route path='/about' element={<About />} />
               <Route path='/contact' element={<Contact />} />
-              <Route path='/product/:productId' element={<Product />} />
               <Route path='/cart' element={<Cart />} />
               <Route path='/login' element={<Auth />} />
               <Route path='/register' element={<Auth />} />
               <Route path='/forgot-password' element={<ForgotPassword />} />
               <Route path='/reset-password' element={<ResetPassword />} />
+              <Route path='/reset-password/:token' element={<ResetPassword />} />
               <Route path='/verify-account' element={<VerifyAccount />} />
               <Route path='/place-order' element={<ProtectedRoute element={<PlaceOrder />} />} />
               <Route path='/orders' element={<ProtectedRoute element={<Orders />} />} />
@@ -170,11 +168,14 @@ const App = () => {
               <Route path='/settings' element={<ProtectedRoute element={<Profile />} />} />
               <Route path='/verify' element={<Verify />} />
               <Route path='/products' element={<ProductListing />} />
-              <Route path='/products/:productId' element={<ProductNotFound />} />
+              <Route path='/products/:productId' element={<Product />} />
               <Route path='/order-success' element={<ProtectedRoute element={<OrderSuccess />} />} />
               <Route path='/shared/:contentId' element={<SharedContent />} />
               <Route path='/cookie-policy' element={<CookiePolicy />} />
               <Route path='/cookie-settings' element={<CookieSettings />} />
+              <Route path='/privacy' element={<Privacy />} />
+              <Route path='/privacy-policy' element={<Privacy />} />
+              <Route path='/terms' element={<Terms />} />
               <Route path='/blog' element={<Blog />} />
               <Route path='/blog/:postId' element={<BlogPost />} />
               <Route path='*' element={<NotFound />} />
