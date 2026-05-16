@@ -367,13 +367,17 @@
     
     <!-- Load Razorpay script synchronously to ensure it's available when needed -->
     <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
-      <!-- Google Analytics -->
-      <script async src="https://www.googletagmanager.com/gtag/js?id=G-XXXXXXX"></script>
+      <!-- Google Analytics / Google Ads -->
+      <script async src="https://www.googletagmanager.com/gtag/js?id=%VITE_GA4_MEASUREMENT_ID%"></script>
       <script>
         window.dataLayer = window.dataLayer || [];
         function gtag(){dataLayer.push(arguments);}
         gtag('js', new Date());
-        gtag('config', 'G-XXXXXXX');
+        gtag('config', '%VITE_GA4_MEASUREMENT_ID%');
+        const googleAdsId = '%VITE_GA_CONVERSION_ID%';
+        if (googleAdsId) {
+          gtag('config', googleAdsId);
+        }
       </script>
       <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3543127715059918" crossorigin="anonymous"></script>
   </head>
