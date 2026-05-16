@@ -1,3 +1,4 @@
+import axios from 'axios';
 import nodemailer from 'nodemailer';
 import fs from 'fs';
 import path from 'path';
@@ -13,10 +14,15 @@ dotenv.config({ path: path.join(__dirname, '../.env') });
 
 const normalizedEmailUser = process.env.EMAIL_USER?.trim();
 const normalizedEmailAppPassword = process.env.EMAIL_APP_PASSWORD?.replace(/\s+/g, '').trim();
+const sendgridApiKey = process.env.SENDGRID_API_KEY?.trim();
 
 function ensureEmailCredentials() {
+  if (sendgridApiKey) {
+    return;
+  }
+
   if (!normalizedEmailUser || !normalizedEmailAppPassword) {
-    const error = new Error('Email credentials are not configured. Set EMAIL_USER and EMAIL_APP_PASSWORD.');
+    const error = new Error('Email credentials are not configured. Set EMAIL_USER and EMAIL_APP_PASSWORD, or configure SENDGRID_API_KEY for SendGrid.');
     logger.error(error.message);
     throw error;
   }
@@ -72,6 +78,43 @@ const normalizedEmailService = process.env.EMAIL_SERVICE?.trim();
 const normalizedEmailPort = process.env.EMAIL_PORT ? Number(process.env.EMAIL_PORT) : undefined;
 const normalizedEmailSecure = process.env.EMAIL_SECURE === 'true';
 const normalizedEmailTlsRejectUnauthorized = process.env.EMAIL_TLS_REJECT_UNAUTHORIZED !== 'false';
+const sendgridApiKey = process.env.SENDGRID_API_KEY?.trim();
+const sendgridFromEmail = process.env.SENDGRID_FROM_EMAIL?.trim() || normalizedEmailUser;
+
+async function sendViaSendGrid({ to, subject, html, text }) {
+  if (!sendgridApiKey) {
+    throw new Error('SENDGRID_API_KEY not configured.');
+  }
+
+  const body = {
+    personalizations: [
+      {
+        to: [{ email: to }],
+        subject,
+      },
+    ],
+    from: {
+      email: sendgridFromEmail,
+      name: 'Sweet Home Store'
+    },
+    content: [
+      {
+        type: 'text/html',
+        value: html || text || ''
+      }
+    ]
+  };
+
+  const response = await axios.post('https://api.sendgrid.com/v3/mail/send', body, {
+    headers: {
+      Authorization: `Bearer ${sendgridApiKey}`,
+      'Content-Type': 'application/json'
+    },
+    timeout: 30000
+  });
+
+  return { success: true, messageId: response.headers['x-message-id'] || 'sendgrid' };
+}
 
 // Create transporter
 const createTransporter = () => {
@@ -117,19 +160,30 @@ const createTransporter = () => {
 
 const transporter = createTransporter();
 
-// Verify connection
-transporter.verify((error, success) => {
-  if (error) {
-    logger.error('Email service verification error:', error);
-  } else {
-    logger.info('Email service is ready to send messages');
-  }
-});
+if (!sendgridApiKey) {
+  transporter.verify((error, success) => {
+    if (error) {
+      logger.error('Email service verification error:', error);
+    } else {
+      logger.info('Email service is ready to send messages');
+    }
+  });
+} else {
+  logger.info('SendGrid email service enabled via SENDGRID_API_KEY');
+}
 
 // Generic send email function
 export const sendEmail = async ({ to, subject, html, text }) => {
   try {
-    ensureEmailCredentials();
+    if (!sendgridApiKey) {
+      ensureEmailCredentials();
+    }
+
+    if (sendgridApiKey) {
+      const result = await sendViaSendGrid({ to, subject, html, text });
+      logger.info(`SendGrid email sent successfully to ${to}: ${result.messageId}`);
+      return result;
+    }
 
     const mailOptions = {
       from: `"Sweet Home Store" <${normalizedEmailUser}>`,
@@ -505,9 +559,54 @@ export const sendPasswordResetEmail = async (userData) => {
       `
     };
 
-    const info = await transporter.sendMail(mailOptions);
-    logger.info(`Password reset email sent to ${email}: ${info.messageId}`);
-    return { success: true, messageId: info.messageId };
+    const result = await sendEmail({
+      to: email,
+      subject: 'Password Reset Request',
+      html: `
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+          <div style="background-color: #FF6B35; color: white; padding: 20px; text-align: center;">
+            <h1>Sweet Home Store</h1>
+            <h2>Password Reset</h2>
+          </div>
+
+          <div style="padding: 20px;">
+            <p>Hi ${name},</p>
+
+            <p>You requested a password reset for your Sweet Home Store account.</p>
+
+            <p>Please click the button below to reset your password. This link will expire in 1 hour for security reasons.</p>
+
+            <div style="text-align: center; margin: 30px 0;">
+              <a href="${resetUrl}"
+                 style="background-color: #FF6B35; color: white; padding: 12px 24px; text-decoration: none; border-radius: 5px; display: inline-block;">
+                Reset Password
+              </a>
+            </div>
+
+            <p>If you didn't request this password reset, please ignore this email. Your password will remain unchanged.</p>
+
+            <div style="background-color: #f8f9fa; padding: 15px; margin: 20px 0; border-radius: 5px;">
+              <p style="margin: 0; font-size: 14px; color: #6c757d;">
+                If the button doesn't work, copy and paste this link into your browser:<br>
+                <a href="${resetUrl}" style="color: #FF6B35;">${resetUrl}</a>
+              </p>
+            </div>
+
+            <p>For security reasons, this link will expire in 1 hour.</p>
+
+            <p>Best regards,<br>
+            <strong>Sweet Home Store Team</strong></p>
+          </div>
+
+          <div style="background-color: #f8f9fa; padding: 20px; text-align: center; color: #6c757d;">
+            <p>This is an automated email. Please do not reply to this message.</p>
+            <p>&copy; 2025 Sweet Home Store. All rights reserved.</p>
+          </div>
+        </div>
+      `
+    });
+    logger.info(`Password reset email sent to ${email}: ${result.messageId}`);
+    return { success: true, messageId: result.messageId };
 
   } catch (error) {
     logger.error('Error sending password reset email:', error);
