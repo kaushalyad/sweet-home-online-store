@@ -78,7 +78,6 @@ const normalizedEmailService = process.env.EMAIL_SERVICE?.trim();
 const normalizedEmailPort = process.env.EMAIL_PORT ? Number(process.env.EMAIL_PORT) : undefined;
 const normalizedEmailSecure = process.env.EMAIL_SECURE === 'true';
 const normalizedEmailTlsRejectUnauthorized = process.env.EMAIL_TLS_REJECT_UNAUTHORIZED !== 'false';
-const sendgridApiKey = process.env.SENDGRID_API_KEY?.trim();
 const sendgridFromEmail = process.env.SENDGRID_FROM_EMAIL?.trim() || normalizedEmailUser;
 
 async function sendViaSendGrid({ to, subject, html, text }) {
