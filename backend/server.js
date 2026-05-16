@@ -32,6 +32,7 @@ import { Server } from 'socket.io';
 // App Config
 const app = express();
 const port = process.env.PORT || 4000;
+let dbConnected = false;
 
 /** Merge defaults with ALLOWED_ORIGINS (comma-separated) for Render / staging URLs */
 function getAllowedOrigins() {
@@ -71,8 +72,15 @@ const io = new Server(server, {
 const startServer = async () => {
   try {
     // Connect to MongoDB
-    await connectDB();
-    logger.info('Connected to MongoDB');
+    try {
+      await connectDB();
+      dbConnected = true;
+      logger.info('Connected to MongoDB');
+    } catch (dbError) {
+      dbConnected = false;
+      logger.error('MongoDB connection failed:', dbError);
+      logger.error('Continuing startup so the service can respond with errors instead of returning 502.');
+    }
 
     // Connect to Cloudinary (optional)
     try {
@@ -131,6 +139,27 @@ const startServer = async () => {
 
     // Serve static files from frontend dist
     app.use(express.static(path.join(__dirname, '../frontend/dist')));
+
+    // Health endpoint
+    app.get('/api/health', (req, res) => {
+      return res.json({
+        success: true,
+        message: 'Backend running',
+        dbConnected,
+        env: process.env.NODE_ENV || 'development',
+      });
+    });
+
+    // If database is not connected, respond with 503 on API routes
+    app.use('/api', (req, res, next) => {
+      if (!dbConnected && req.method !== 'OPTIONS' && req.path !== '/health') {
+        return res.status(503).json({
+          success: false,
+          message: 'Service unavailable: database connection required',
+        });
+      }
+      next();
+    });
 
     // API endpoints
     app.use("/api/user", userRouter);

@@ -1086,7 +1086,7 @@ const forgotPassword = async (req, res) => {
       process.env.FRONTEND_URL || req.headers.origin || 'https://sweethome-store.com';
     const resetUrl = `${frontendBaseUrl.replace(/\/$/, '')}/reset-password/${resetToken}`;
 
-    // Send email with reset link. Don't fail the request if email delivery fails.
+    // Send email with reset link. If email delivery fails, return an error so it can be fixed.
     try {
       const { sendPasswordResetEmail } = await import('../utils/emailService.js');
       const sendResult = await sendPasswordResetEmail({
@@ -1097,9 +1097,17 @@ const forgotPassword = async (req, res) => {
 
       if (sendResult && sendResult.success === false) {
         logger.error(`Password reset email failed for ${user.email}: ${sendResult.error || 'Unknown error'}`);
+        return res.status(500).json({
+          success: false,
+          message: 'Unable to send password reset email at this time. Please try again later.'
+        });
       }
     } catch (emailError) {
       logger.error(`Password reset email exception for ${user.email}: ${emailError.message}`);
+      return res.status(500).json({
+        success: false,
+        message: 'Unable to send password reset email at this time. Please try again later.'
+      });
     }
 
     res.json({

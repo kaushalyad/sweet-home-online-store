@@ -14,6 +14,14 @@ dotenv.config({ path: path.join(__dirname, '../.env') });
 const normalizedEmailUser = process.env.EMAIL_USER?.trim();
 const normalizedEmailAppPassword = process.env.EMAIL_APP_PASSWORD?.replace(/\s+/g, '').trim();
 
+function ensureEmailCredentials() {
+  if (!normalizedEmailUser || !normalizedEmailAppPassword) {
+    const error = new Error('Email credentials are not configured. Set EMAIL_USER and EMAIL_APP_PASSWORD.');
+    logger.error(error.message);
+    throw error;
+  }
+}
+
 /** Header for owner alerts: STORE_LOGO_URL, or local company-logo.png (CID), or text */
 function buildOwnerBranding() {
   const storeLogoUrl = process.env.STORE_LOGO_URL?.trim();
@@ -91,6 +99,8 @@ transporter.verify((error, success) => {
 // Generic send email function
 export const sendEmail = async ({ to, subject, html, text }) => {
   try {
+    ensureEmailCredentials();
+
     const mailOptions = {
       from: `"Sweet Home Store" <${normalizedEmailUser}>`,
       to,
@@ -414,6 +424,7 @@ export const sendOrderStatusUpdateEmail = async (orderData) => {
 // Password reset email
 export const sendPasswordResetEmail = async (userData) => {
   try {
+    ensureEmailCredentials();
     const { email, name, resetUrl } = userData;
 
     const mailOptions = {
