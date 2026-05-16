@@ -67,6 +67,12 @@ function ownerEmailShell(innerBody) {
   return { html, attachments };
 }
 
+const normalizedEmailHost = process.env.EMAIL_HOST?.trim();
+const normalizedEmailService = process.env.EMAIL_SERVICE?.trim();
+const normalizedEmailPort = process.env.EMAIL_PORT ? Number(process.env.EMAIL_PORT) : undefined;
+const normalizedEmailSecure = process.env.EMAIL_SECURE === 'true';
+const normalizedEmailTlsRejectUnauthorized = process.env.EMAIL_TLS_REJECT_UNAUTHORIZED !== 'false';
+
 // Create transporter
 const createTransporter = () => {
   if (!normalizedEmailUser || !normalizedEmailAppPassword) {
@@ -75,14 +81,38 @@ const createTransporter = () => {
     logger.info(`EMAIL_APP_PASSWORD: ${normalizedEmailAppPassword ? 'SET' : 'NOT SET'}`);
     logger.info(`EMAIL_APP_PASSWORD length: ${normalizedEmailAppPassword?.length || 0}`);
   }
-  
-  return nodemailer.createTransport({
-    service: 'gmail',
+
+  const transportOptions = {
     auth: {
       user: normalizedEmailUser,
       pass: normalizedEmailAppPassword
+    },
+    connectionTimeout: 30000,
+    greetingTimeout: 30000,
+    socketTimeout: 30000,
+  };
+
+  if (normalizedEmailHost) {
+    transportOptions.host = normalizedEmailHost;
+    transportOptions.port = normalizedEmailPort || 465;
+    transportOptions.secure = process.env.EMAIL_SECURE ? normalizedEmailSecure : transportOptions.port === 465;
+    transportOptions.tls = { rejectUnauthorized: normalizedEmailTlsRejectUnauthorized };
+  } else if (normalizedEmailService) {
+    transportOptions.service = normalizedEmailService;
+    if (normalizedEmailPort) {
+      transportOptions.port = normalizedEmailPort;
+      transportOptions.secure = process.env.EMAIL_SECURE ? normalizedEmailSecure : transportOptions.port === 465;
     }
-  });
+  } else {
+    transportOptions.service = 'gmail';
+    transportOptions.port = normalizedEmailPort || 465;
+    transportOptions.secure = process.env.EMAIL_SECURE ? normalizedEmailSecure : transportOptions.port === 465;
+    transportOptions.tls = { rejectUnauthorized: normalizedEmailTlsRejectUnauthorized };
+  }
+
+  logger.info(`Email transporter configured: service=${transportOptions.service || 'custom'}, host=${transportOptions.host || 'smtp.gmail.com'}, port=${transportOptions.port}`);
+
+  return nodemailer.createTransport(transportOptions);
 };
 
 const transporter = createTransporter();
