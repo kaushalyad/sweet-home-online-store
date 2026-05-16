@@ -1104,9 +1104,12 @@ const forgotPassword = async (req, res) => {
       }
     } catch (emailError) {
       logger.error(`Password reset email exception for ${user.email}: ${emailError.message}`);
+      const isDebug = process.env.EMAIL_DEBUG === 'true' || process.env.NODE_ENV === 'development';
       return res.status(500).json({
         success: false,
-        message: 'Unable to send password reset email at this time. Please try again later.'
+        message: isDebug
+          ? `Unable to send password reset email: ${emailError.message}`
+          : 'Unable to send password reset email at this time. Please try again later.'
       });
     }
 
@@ -1117,7 +1120,8 @@ const forgotPassword = async (req, res) => {
 
   } catch (error) {
     logger.error(`Forgot password error: ${error.message}`);
-    const errorMessage = process.env.NODE_ENV === 'development' ? error.message : 'Failed to process request';
+    logger.error(error.stack);
+    const errorMessage = error.message || 'Failed to process request';
     res.status(500).json({
       success: false,
       message: errorMessage

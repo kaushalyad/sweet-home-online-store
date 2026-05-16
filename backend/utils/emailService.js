@@ -90,7 +90,7 @@ const transporter = createTransporter();
 // Verify connection
 transporter.verify((error, success) => {
   if (error) {
-    logger.error('Email service verification error:', error.message);
+    logger.error('Email service verification error:', error);
   } else {
     logger.info('Email service is ready to send messages');
   }
